@@ -54,9 +54,34 @@ export default function App() {
   const [isRefreshingHotDeals, setIsRefreshingHotDeals] = useState<boolean>(false);
 
   // Desktop Admin Panel State
-  const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      return path === '/admin' || path.startsWith('/admin');
+    }
+    return false;
+  });
   const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>('main_admin');
   const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(INITIAL_ADMIN_STAFF);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname.toLowerCase();
+        setIsAdminMode(path === '/admin' || path.startsWith('/admin'));
+      }
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  const handleExitAdmin = () => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/');
+    }
+    setIsAdminMode(false);
+  };
 
   const fetchLiveHotDeals = async () => {
     setIsRefreshingHotDeals(true);
@@ -528,7 +553,7 @@ export default function App() {
           setCurrentAdminRole(role);
           showToast(`Rol o'zgartirildi: ${role === 'main_admin' ? '👑 Bosh Admin' : '🧳 Tur Admin'}`, 'info');
         }}
-        onExitToApp={() => setIsAdminMode(false)}
+        onExitToApp={handleExitAdmin}
         tours={tours}
         onAddTour={handleAddTour}
         onUpdateTour={handleUpdateTour}
