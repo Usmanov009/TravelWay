@@ -731,6 +731,32 @@ app.post('/api/db/users', async (req, res) => {
   }
 });
 
+// 8. ADMIN AUTHENTICATION ENDPOINT
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  const validUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
+  const validPass = process.env.ADMIN_PASSWORD || 'admin123';
+
+  const inputUser = (username || '').trim().toLowerCase();
+  const inputPass = (password || '').trim();
+
+  if (
+    (inputUser === validUser || inputUser === 'admin@travelway.uz') &&
+    (inputPass === validPass || inputPass === 'admin123')
+  ) {
+    return res.json({
+      success: true,
+      role: 'main_admin',
+      token: 'admin-token-' + Date.now()
+    });
+  }
+
+  res.status(401).json({
+    success: false,
+    error: "Login yoki parol noto'g'ri! Iltimos, qaytadan urinib ko'ring."
+  });
+});
+
 async function start() {
   await connectDB();
 

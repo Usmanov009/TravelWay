@@ -20,6 +20,7 @@ import { Modals } from './components/Modals';
 import { FlutterCodeViewer } from './components/FlutterCodeViewer';
 import { PriceAlertModal } from './components/PriceAlertModal';
 import { AdminPage } from './admin/AdminPage';
+import { AdminLoginPage } from './admin/AdminLoginPage';
 import { AdminRole, AdminUser } from './admin/adminTypes';
 import { INITIAL_ADMIN_STAFF } from './admin/adminMockData';
 import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from './data/extraServicesData';
@@ -61,6 +62,13 @@ export default function App() {
     }
     return false;
   });
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('travelway_admin_auth') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
   const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>('main_admin');
   const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(INITIAL_ADMIN_STAFF);
 
@@ -81,6 +89,15 @@ export default function App() {
       window.history.pushState({}, '', '/');
     }
     setIsAdminMode(false);
+  };
+
+  const handleAdminLogout = () => {
+    try {
+      sessionStorage.removeItem('travelway_admin_auth');
+    } catch (e) {}
+    setIsAdminAuthenticated(false);
+    handleExitAdmin();
+    showToast("Admin sessiyasidan chiqildi", 'info');
   };
 
   const fetchLiveHotDeals = async () => {
@@ -609,6 +626,24 @@ export default function App() {
 
   // DESKTOP ADMIN PANEL FULLSCREEN VIEW
   if (isAdminMode) {
+    if (!isAdminAuthenticated) {
+      return (
+        <AdminLoginPage
+          onLoginSuccess={(role) => {
+            try {
+              sessionStorage.setItem('travelway_admin_auth', 'true');
+            } catch (e) {}
+            setIsAdminAuthenticated(true);
+            if (role === 'tour_admin' || role === 'main_admin') {
+              setCurrentAdminRole(role as AdminRole);
+            }
+          }}
+          onExitToApp={handleExitAdmin}
+          onShowToast={showToast}
+        />
+      );
+    }
+
     return (
       <AdminPage
         currentRole={currentAdminRole}
@@ -616,7 +651,7 @@ export default function App() {
           setCurrentAdminRole(role);
           showToast(`Rol o'zgartirildi: ${role === 'main_admin' ? '👑 Bosh Admin' : '🧳 Tur Admin'}`, 'info');
         }}
-        onExitToApp={handleExitAdmin}
+        onExitToApp={handleAdminLogout}
         tours={tours}
         onAddTour={handleAddTour}
         onUpdateTour={handleUpdateTour}
