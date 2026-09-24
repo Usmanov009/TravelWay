@@ -70,7 +70,35 @@ export default function App() {
     }
   });
   const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>('main_admin');
-  const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(INITIAL_ADMIN_STAFF);
+  const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('travelway_active_admin_user');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return null;
+  });
+  const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(() => {
+    try {
+      const saved = localStorage.getItem('travelway_admin_staff');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_ADMIN_STAFF;
+  });
+
+  // Sync staff list from backend / MongoDB
+  useEffect(() => {
+    fetch('/api/admin/staff')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.staff)) {
+          setAdminStaffList(data.staff);
+          try {
+            localStorage.setItem('travelway_admin_staff', JSON.stringify(data.staff));
+          } catch (e) {}
+        }
+      })
+      .catch((err) => console.warn('Sync admin staff error:', err));
+  }, []);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -94,8 +122,10 @@ export default function App() {
   const handleAdminLogout = () => {
     try {
       sessionStorage.removeItem('travelway_admin_auth');
+      sessionStorage.removeItem('travelway_active_admin_user');
     } catch (e) {}
     setIsAdminAuthenticated(false);
+    setCurrentAdminUser(null);
     handleExitAdmin();
     showToast("Admin sessiyasidan chiqildi", 'info');
   };
@@ -575,13 +605,49 @@ export default function App() {
   };
 
   const handleAddStaff = (staff: AdminUser) => {
-    setAdminStaffList((prev) => [staff, ...prev]);
+    setAdminStaffList((prev) => {
+      const updated = [staff, ...prev];
+      try {
+        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    fetch('/api/admin/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(staff)
+    }).catch((e) => console.warn('Sync staff to backend error:', e));
   };
+
   const handleUpdateStaff = (staff: AdminUser) => {
-    setAdminStaffList((prev) => prev.map((s) => s.id === staff.id ? staff : s));
+    setAdminStaffList((prev) => {
+      const updated = prev.map((s) => s.id === staff.id ? staff : s);
+      try {
+        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    fetch('/api/admin/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(staff)
+    }).catch((e) => console.warn('Sync staff update to backend error:', e));
   };
+
   const handleRemoveStaff = (staffId: string) => {
-    setAdminStaffList((prev) => prev.filter((s) => s.id !== staffId));
+    setAdminStaffList((prev) => {
+      const updated = prev.filter((s) => s.id !== staffId);
+      try {
+        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    fetch(`/api/admin/staff/${staffId}`, {
+      method: 'DELETE'
+    }).catch((e) => console.warn('Delete staff on backend error:', e));
   };
 
   const handleSavePassport = (passportNumber: string, passportExpiry: string) => {
@@ -629,9 +695,13 @@ export default function App() {
     if (!isAdminAuthenticated) {
       return (
         <AdminLoginPage
-          onLoginSuccess={(role) => {
+          onLoginSuccess={(role, adminData) => {
             try {
               sessionStorage.setItem('travelway_admin_auth', 'true');
+              if (adminData) {
+                sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(adminData));
+                setCurrentAdminUser(adminData);
+              }
             } catch (e) {}
             setIsAdminAuthenticated(true);
             if (role === 'tour_admin' || role === 'main_admin') {
@@ -647,6 +717,7 @@ export default function App() {
     return (
       <AdminPage
         currentRole={currentAdminRole}
+        currentAdminUser={currentAdminUser}
         onSwitchRole={(role) => {
           setCurrentAdminRole(role);
           showToast(`Rol o'zgartirildi: ${role === 'main_admin' ? '👑 Bosh Admin' : '🧳 Tur Admin'}`, 'info');

@@ -17,6 +17,7 @@ import { INITIAL_REGISTERED_USERS } from './adminMockData';
 
 interface AdminPageProps {
   currentRole: AdminRole;
+  currentAdminUser?: AdminUser | null;
   onSwitchRole: (role: AdminRole) => void;
   onExitToApp: () => void;
   // Live linked data
@@ -51,6 +52,7 @@ interface AdminPageProps {
 
 export const AdminPage: React.FC<AdminPageProps> = ({
   currentRole,
+  currentAdminUser,
   onSwitchRole,
   onExitToApp,
   tours,
@@ -104,7 +106,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     lastActive: 'Hozir online',
     status: 'active'
   };
-  const currentAdmin = staffList.find(s => s.role === currentRole) || staffList[0] || fallbackAdmin;
+  const currentAdmin = currentAdminUser || staffList.find(s => s.role === currentRole) || staffList[0] || fallbackAdmin;
   const activeBookingsCount = bookings.filter(b => b.status === 'Jarayonda' || b.type === 'active').length;
 
   const handleQuickAddTour = () => {

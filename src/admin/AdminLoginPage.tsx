@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface AdminLoginPageProps {
-  onLoginSuccess: (adminRole?: string) => void;
+  onLoginSuccess: (adminRole?: string, adminUser?: any) => void;
   onExitToApp: () => void;
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -41,11 +41,35 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       const data = await res.json();
 
       if (data.success) {
-        onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
-        onLoginSuccess(data.role || 'main_admin');
+        const isSuper = (data.role || 'main_admin') === 'main_admin';
+        onShowToast(
+          isSuper
+            ? "Boshqaruv paneliga xush kelibsiz! 👑"
+            : `Tur Admin paneli: ${data.adminUser?.name || 'Xush kelibsiz'}! 🧳`,
+          'success'
+        );
+        onLoginSuccess(data.role || 'main_admin', data.adminUser);
         return;
       } else {
         // Fallback local check in case offline/static
+        try {
+          const rawStaff = localStorage.getItem('travelway_admin_staff');
+          if (rawStaff) {
+            const parsedStaff: any[] = JSON.parse(rawStaff);
+            const matched = parsedStaff.find(
+              (s) =>
+                ((s.username && s.username.toLowerCase() === cleanUser) ||
+                 (s.email && s.email.toLowerCase() === cleanUser)) &&
+                (s.password === cleanPass)
+            );
+            if (matched) {
+              onShowToast(`Tur Admin paneli: ${matched.name}! 🧳`, 'success');
+              onLoginSuccess(matched.role || 'tour_admin', matched);
+              return;
+            }
+          }
+        } catch (e) {}
+
         if ((cleanUser === 'admin' || cleanUser === 'admin@travelway.uz') && (cleanPass === 'admin123' || cleanPass === 'admin')) {
           onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
           onLoginSuccess('main_admin');
@@ -55,6 +79,24 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       }
     } catch (err) {
       // Client-side fallback check
+      try {
+        const rawStaff = localStorage.getItem('travelway_admin_staff');
+        if (rawStaff) {
+          const parsedStaff: any[] = JSON.parse(rawStaff);
+          const matched = parsedStaff.find(
+            (s) =>
+              ((s.username && s.username.toLowerCase() === cleanUser) ||
+               (s.email && s.email.toLowerCase() === cleanUser)) &&
+              (s.password === cleanPass)
+          );
+          if (matched) {
+            onShowToast(`Tur Admin paneli: ${matched.name}! 🧳`, 'success');
+            onLoginSuccess(matched.role || 'tour_admin', matched);
+            return;
+          }
+        }
+      } catch (e) {}
+
       if ((cleanUser === 'admin' || cleanUser === 'admin@travelway.uz') && (cleanPass === 'admin123' || cleanPass === 'admin')) {
         onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
         onLoginSuccess('main_admin');
@@ -165,14 +207,18 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         </form>
 
         {/* Credentials Hint Box */}
-        <div className="mt-6 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400">
-          <div className="flex items-center justify-between text-slate-300 font-bold mb-1">
-            <span>Standart kirish ma'lumotlari:</span>
-            <span className="text-cyan-400 text-[10px] uppercase font-mono">Bosh Admin</span>
+        <div className="mt-6 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1.5">
+          <div className="flex items-center justify-between text-slate-300 font-bold">
+            <span>Standart kirish (Super Admin):</span>
+            <span className="text-amber-400 text-[10px] uppercase font-mono">👑 Bosh Admin</span>
           </div>
           <div className="flex justify-between font-mono text-[11px] pt-0.5">
             <span>Login: <strong className="text-white">admin</strong></span>
             <span>Parol: <strong className="text-white">admin123</strong></span>
+          </div>
+          <div className="pt-1.5 border-t border-slate-800/60 text-[10px] text-slate-400 flex items-center gap-1.5">
+            <span>🧳</span>
+            <span>Tur Adminlar o'zlariga tayinlangan shaxsiy login va parol orqali kiradilar.</span>
           </div>
         </div>
 

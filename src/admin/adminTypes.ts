@@ -5,6 +5,8 @@ export type AdminRole = 'main_admin' | 'tour_admin';
 export interface AdminUser {
   id: string;
   name: string;
+  username?: string;
+  password?: string;
   email: string;
   role: AdminRole;
   roleTitle: string; // 'Bosh Admin (Super)' | 'Tur Admin (Operatsion)'

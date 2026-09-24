@@ -87,10 +87,34 @@ const UserSchema = new mongoose.Schema({
   cashbackBalance: { type: Number, default: 0 },
 }, { timestamps: true });
 
+// Admin Staff Schema
+const AdminStaffSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  email: String,
+  phone: String,
+  role: { type: String, default: 'tour_admin' },
+  roleTitle: { type: String, default: 'Tur Admin (Operatsion)' },
+  avatar: String,
+  assignedDestinations: [String],
+  canManageUsers: { type: Boolean, default: false },
+  canManageStaff: { type: Boolean, default: false },
+  canDeleteTours: { type: Boolean, default: false },
+  canEditFinancials: { type: Boolean, default: false },
+  canManageBookings: { type: Boolean, default: true },
+  canManageCatalog: { type: Boolean, default: true },
+  createdAt: String,
+  lastActive: String,
+  status: { type: String, default: 'active' },
+}, { timestamps: true });
+
 export const TourModel = mongoose.models.Tour || mongoose.model('Tour', TourSchema);
 export const BookingModel = mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
 export const PriceAlertModel = mongoose.models.PriceAlert || mongoose.model('PriceAlert', PriceAlertSchema);
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
+export const AdminStaffModel = mongoose.models.AdminStaff || mongoose.model('AdminStaff', AdminStaffSchema);
 
 let isConnected = false;
 

@@ -3,7 +3,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { connectDB, getDBStatus, TourModel, BookingModel, PriceAlertModel, UserModel } from './db.js';
+import { connectDB, getDBStatus, TourModel, BookingModel, PriceAlertModel, UserModel, AdminStaffModel } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -731,8 +731,57 @@ app.post('/api/db/users', async (req, res) => {
   }
 });
 
-// 8. ADMIN AUTHENTICATION ENDPOINT
-app.post('/api/admin/login', (req, res) => {
+// 8. ADMIN STAFF MANAGEMENT ENDPOINTS
+app.get('/api/admin/staff', async (req, res) => {
+  try {
+    const staff = await AdminStaffModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, staff });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/admin/staff', async (req, res) => {
+  try {
+    const { id, username } = req.body;
+    const cleanUsername = (username || '').trim().toLowerCase();
+
+    // Check if username already used by another staff
+    if (cleanUsername) {
+      const existing = await AdminStaffModel.findOne({
+        username: cleanUsername,
+        id: { $ne: id }
+      });
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          error: "Bu login bilan boshqa admin mavjud! Iltimos, boshqa login tanlang."
+        });
+      }
+    }
+
+    const staff = await AdminStaffModel.findOneAndUpdate(
+      { id: req.body.id },
+      { ...req.body, username: cleanUsername },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, staff });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/admin/staff/:id', async (req, res) => {
+  try {
+    await AdminStaffModel.findOneAndDelete({ id: req.params.id });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 9. ADMIN AUTHENTICATION ENDPOINT
+app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
   const validUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
   const validPass = process.env.ADMIN_PASSWORD || 'admin123';
@@ -740,6 +789,7 @@ app.post('/api/admin/login', (req, res) => {
   const inputUser = (username || '').trim().toLowerCase();
   const inputPass = (password || '').trim();
 
+  // 1. Super / Main Admin check
   if (
     (inputUser === validUser || inputUser === 'admin@travelway.uz') &&
     (inputPass === validPass || inputPass === 'admin123')
@@ -747,8 +797,44 @@ app.post('/api/admin/login', (req, res) => {
     return res.json({
       success: true,
       role: 'main_admin',
+      adminUser: {
+        id: 'adm-root',
+        name: 'Bosh Admin',
+        username: 'admin',
+        role: 'main_admin',
+        roleTitle: 'Bosh Admin (Super)',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      },
       token: 'admin-token-' + Date.now()
     });
+  }
+
+  // 2. Check Tour Admins in MongoDB
+  try {
+    const staff = await AdminStaffModel.findOne({
+      $or: [
+        { username: inputUser },
+        { email: inputUser }
+      ]
+    });
+
+    if (staff && staff.password === inputPass) {
+      if (staff.status === 'suspended') {
+        return res.status(403).json({
+          success: false,
+          error: "Bu admin hisobi to'xtatilgan (faol emas)!"
+        });
+      }
+
+      return res.json({
+        success: true,
+        role: staff.role || 'tour_admin',
+        adminUser: staff,
+        token: 'staff-token-' + Date.now()
+      });
+    }
+  } catch (dbErr: any) {
+    console.warn('DB check for admin staff login error:', dbErr?.message);
   }
 
   res.status(401).json({
