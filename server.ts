@@ -1,7 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { connectDB, getDBStatus, TourModel, BookingModel, PriceAlertModel, UserModel } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -591,7 +593,147 @@ app.get('/api/hotels/search', async (req, res) => {
   }
 });
 
+// 7. MONGODB DATABASE ENDPOINTS
+// DB Health / Connection Status
+app.get('/api/db/status', (req, res) => {
+  res.json({ success: true, ...getDBStatus() });
+});
+
+// Bookings
+app.get('/api/db/bookings', async (req, res) => {
+  try {
+    const bookings = await BookingModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: bookings.length, bookings });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, bookings: [] });
+  }
+});
+
+app.post('/api/db/bookings', async (req, res) => {
+  try {
+    const booking = await BookingModel.findOneAndUpdate(
+      { id: req.body.id },
+      req.body,
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, booking });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/db/bookings/:id', async (req, res) => {
+  try {
+    const booking = await BookingModel.findOneAndUpdate(
+      { id: req.params.id },
+      { $set: req.body },
+      { new: true }
+    );
+    res.json({ success: true, booking });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/db/bookings/:id', async (req, res) => {
+  try {
+    await BookingModel.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Tours
+app.get('/api/db/tours', async (req, res) => {
+  try {
+    const tours = await TourModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: tours.length, tours });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, tours: [] });
+  }
+});
+
+app.post('/api/db/tours', async (req, res) => {
+  try {
+    const tour = await TourModel.findOneAndUpdate(
+      { id: req.body.id },
+      req.body,
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, tour });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/db/tours/:id', async (req, res) => {
+  try {
+    await TourModel.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Price Alerts
+app.get('/api/db/price-alerts', async (req, res) => {
+  try {
+    const alerts = await PriceAlertModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: alerts.length, alerts });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, alerts: [] });
+  }
+});
+
+app.post('/api/db/price-alerts', async (req, res) => {
+  try {
+    const alert = await PriceAlertModel.findOneAndUpdate(
+      { id: req.body.id },
+      req.body,
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, alert });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/db/price-alerts/:id', async (req, res) => {
+  try {
+    await PriceAlertModel.deleteOne({ id: req.params.id });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Users
+app.get('/api/db/users', async (req, res) => {
+  try {
+    const users = await UserModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, count: users.length, users });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, users: [] });
+  }
+});
+
+app.post('/api/db/users', async (req, res) => {
+  try {
+    const user = await UserModel.findOneAndUpdate(
+      { tcId: req.body.tcId },
+      req.body,
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, user });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 async function start() {
+  await connectDB();
+
   if (!isProd) {
     process.env.DISABLE_HMR = 'true';
     const vite = await createViteServer({

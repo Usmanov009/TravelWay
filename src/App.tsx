@@ -100,6 +100,36 @@ export default function App() {
 
   useEffect(() => {
     fetchLiveHotDeals();
+
+    // 1. Fetch live Tours from MongoDB
+    fetch('/api/db/tours')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
+          setTours(data.tours);
+        }
+      })
+      .catch((e) => console.warn('MongoDB tours fetch:', e));
+
+    // 2. Fetch live Bookings from MongoDB
+    fetch('/api/db/bookings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.bookings) && data.bookings.length > 0) {
+          setBookings(data.bookings);
+        }
+      })
+      .catch((e) => console.warn('MongoDB bookings fetch:', e));
+
+    // 3. Fetch Price Alerts from MongoDB
+    fetch('/api/db/price-alerts')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.alerts) && data.alerts.length > 0) {
+          setPriceAlerts(data.alerts);
+        }
+      })
+      .catch((e) => console.warn('MongoDB alerts fetch:', e));
   }, []);
 
   // Price Alerts State
@@ -160,6 +190,14 @@ export default function App() {
         notifyViaTelegram: alertData.notifyViaTelegram,
         userEmail: alertData.userEmail
       };
+
+      // Save to MongoDB
+      fetch('/api/db/price-alerts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAlert)
+      }).catch((e) => console.warn('MongoDB alert save error:', e));
+
       return [...filtered, newAlert];
     });
 
@@ -171,6 +209,7 @@ export default function App() {
 
   const handleDeletePriceAlert = (alertId: string) => {
     setPriceAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    fetch(`/api/db/price-alerts/${alertId}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB alert delete error:', e));
     showToast("Narx signali o'chirildi", 'info');
   };
 
@@ -290,6 +329,19 @@ export default function App() {
     }, 600);
   };
 
+  // MongoDB Booking helpers
+  const saveBookingToDB = (booking: Booking) => {
+    fetch('/api/db/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(booking)
+    }).catch((e) => console.warn('MongoDB booking save error:', e));
+  };
+
+  const deleteBookingFromDB = (id: string) => {
+    fetch(`/api/db/bookings/${id}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB delete booking error:', e));
+  };
+
   // Booking handlers
   const handleConfirmBooking = (bookingData: {
     tour: TourPackage;
@@ -336,6 +388,7 @@ export default function App() {
     };
 
     setBookings((prev) => [newBooking, ...prev]);
+    saveBookingToDB(newBooking);
     setCheckoutTour(null);
     setSuccessBooking(newBooking);
     showToast(`Tur muvaffaqiyatli saqlandi! Vaucher tayyorlandi.`, 'success');
@@ -357,6 +410,7 @@ export default function App() {
     };
 
     setBookings((prev) => [newBooking, ...prev]);
+    saveBookingToDB(newBooking);
     showToast(`🔥 Qaynoq tur "${deal.title}" muvaffaqiyatli band qilindi!`, 'success');
     setCurrentTab('trips');
   };
@@ -382,6 +436,7 @@ export default function App() {
       nightsCount: combo.nightsTotal
     };
     setBookings((prev) => [newBooking, ...prev]);
+    saveBookingToDB(newBooking);
     showToast(`"${combo.title}" combo turi muvaffaqiyatli band qilindi!`, 'success');
   };
 
@@ -406,6 +461,7 @@ export default function App() {
       nightsCount: 0
     };
     setBookings((prev) => [newBooking, ...prev]);
+    saveBookingToDB(newBooking);
     showToast(`"${flight.flightNumber}" reysiga aviachipta band qilindi!`, 'success');
   };
 
@@ -430,6 +486,7 @@ export default function App() {
       nightsCount: hotel.nightsCount
     };
     setBookings((prev) => [newBooking, ...prev]);
+    saveBookingToDB(newBooking);
     showToast(`"${hotel.name}" mehmonxonasi muvaffaqiyatli band qilindi!`, 'success');
   };
 
@@ -442,7 +499,9 @@ export default function App() {
 
   const handleConfirmCancelBooking = () => {
     if (cancelBookingTarget) {
-      setBookings((prev) => prev.filter((b) => b.id !== cancelBookingTarget.id));
+      const targetId = cancelBookingTarget.id;
+      setBookings((prev) => prev.filter((b) => b.id !== targetId));
+      deleteBookingFromDB(targetId);
       showToast(`"${cancelBookingTarget.tourTitle}" buyurtmasi bekor qilindi. Mablag' to'liq qaytarildi.`, 'info');
       setCancelBookingTarget(null);
     }
@@ -451,12 +510,23 @@ export default function App() {
   // ADMIN OPERATIONS (CRUD FOR TOURS, COMBOS, FLIGHTS, HOTELS, BOOKINGS, STAFF)
   const handleAddTour = (tour: TourPackage) => {
     setTours((prev) => [tour, ...prev]);
+    fetch('/api/db/tours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tour)
+    }).catch((e) => console.warn('MongoDB tour save error:', e));
   };
   const handleUpdateTour = (tour: TourPackage) => {
     setTours((prev) => prev.map((t) => t.id === tour.id ? tour : t));
+    fetch('/api/db/tours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tour)
+    }).catch((e) => console.warn('MongoDB tour update error:', e));
   };
   const handleDeleteTour = (tourId: string) => {
     setTours((prev) => prev.filter((t) => t.id !== tourId));
+    fetch(`/api/db/tours/${tourId}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB tour delete error:', e));
   };
 
   const handleAddComboTour = (combo: ComboTour) => {
@@ -491,9 +561,15 @@ export default function App() {
 
   const handleUpdateBookingStatus = (bookingId: string, status: Booking['status']) => {
     setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status } : b));
+    fetch(`/api/db/bookings/${bookingId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    }).catch((e) => console.warn('MongoDB update booking status error:', e));
   };
   const handleAdminCancelBooking = (bookingId: string) => {
     setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+    deleteBookingFromDB(bookingId);
   };
 
   const handleAddStaff = (staff: AdminUser) => {
