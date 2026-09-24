@@ -138,22 +138,7 @@ export default function App() {
       const saved = localStorage.getItem('travelway_price_alerts') || localStorage.getItem('tripcraft_price_alerts');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return [
-      {
-        id: 'alert-sample-1',
-        tourId: 't1',
-        tourTitle: 'Rixos Premium Belek',
-        tourLocation: 'Antalya, Turkiya',
-        tourImg: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80',
-        currentPrice: 890,
-        targetPrice: 790,
-        createdAt: '22-may',
-        status: 'active',
-        notifyViaPush: true,
-        notifyViaTelegram: true,
-        userEmail: 'jasur.travel@gmail.com'
-      }
-    ];
+    return [];
   });
   const [activePriceAlertTour, setActivePriceAlertTour] = useState<TourPackage | null>(null);
 
@@ -611,12 +596,14 @@ export default function App() {
     showToast("Yangi to'lov kartasi muvaffaqiyatli saqlandi! 💳", 'success');
   };
 
-  const userInitials = user.name
+  const userInitials = (user.name || 'TW')
+    .trim()
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .join('')
     .substring(0, 2)
-    .toUpperCase();
+    .toUpperCase() || 'TW';
 
   const savedToursList = tours.filter((t) => t.saved);
 

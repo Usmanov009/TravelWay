@@ -107,14 +107,10 @@ export async function connectDB() {
     const tourCount = await TourModel.countDocuments();
     if (tourCount === 0) {
       try {
-        const { INITIAL_TOURS, INITIAL_BOOKINGS } = await import('./src/data/mockData.js');
+        const { INITIAL_TOURS } = await import('./src/data/mockData.js');
         if (Array.isArray(INITIAL_TOURS) && INITIAL_TOURS.length > 0) {
           await TourModel.insertMany(INITIAL_TOURS);
           console.log(` Seeded ${INITIAL_TOURS.length} initial tours into MongoDB`);
-        }
-        if (Array.isArray(INITIAL_BOOKINGS) && INITIAL_BOOKINGS.length > 0) {
-          await BookingModel.insertMany(INITIAL_BOOKINGS);
-          console.log(` Seeded ${INITIAL_BOOKINGS.length} initial bookings into MongoDB`);
         }
       } catch (seedErr: any) {
         console.warn(' Auto-seed warning:', seedErr.message);

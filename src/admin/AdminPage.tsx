@@ -84,8 +84,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Find active admin profile
-  const currentAdmin = staffList.find(s => s.role === currentRole) || staffList[0];
+  // Find active admin profile with safe fallback
+  const fallbackAdmin: AdminUser = {
+    id: 'adm-root',
+    name: 'Admin',
+    email: 'admin@travelway.uz',
+    role: currentRole,
+    roleTitle: currentRole === 'main_admin' ? 'Bosh Admin' : 'Tur Admin',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    phone: '',
+    assignedDestinations: ['Barcha yo\'nalishlar'],
+    canManageUsers: true,
+    canManageStaff: true,
+    canDeleteTours: true,
+    canEditFinancials: true,
+    canManageBookings: true,
+    canManageCatalog: true,
+    createdAt: new Date().toISOString().split('T')[0],
+    lastActive: 'Hozir online',
+    status: 'active'
+  };
+  const currentAdmin = staffList.find(s => s.role === currentRole) || staffList[0] || fallbackAdmin;
   const activeBookingsCount = bookings.filter(b => b.status === 'Jarayonda' || b.type === 'active').length;
 
   const handleQuickAddTour = () => {

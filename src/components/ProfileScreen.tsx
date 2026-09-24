@@ -686,7 +686,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </div>
             </div>
             <span className="text-[10px] font-mono text-emerald-500 font-bold">
-              ID: #TW-884291
+              {user.tcId ? `ID: ${user.tcId}` : 'Mehmon'}
             </span>
           </div>
 

@@ -33,11 +33,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
-  const [phoneNumber, setPhoneNumber] = useState('90 123-45-67');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('jasur@travelway.uz');
-  const [regFullName, setRegFullName] = useState('Jasur Rahimov');
-  const [promoCode, setPromoCode] = useState('TRAVELBONUS');
+  const [email, setEmail] = useState('');
+  const [regFullName, setRegFullName] = useState('');
+  const [promoCode, setPromoCode] = useState('');
 
   // Phone formatting
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +89,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           onRequestOtp(`+998 ${phoneNumber}`);
         }
       } else {
-        onAuthSuccess("Jasur Rahimov (#TC-884291) hisobiga kirildi!");
+        onAuthSuccess(`${email || 'Foydalanuvchi'} hisobiga muvaffaqiyatli kirildi!`);
       }
     }, 650);
   };

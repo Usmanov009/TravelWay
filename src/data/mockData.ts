@@ -1,33 +1,18 @@
 import { TourPackage, Booking, ExploreVibe, HotSale, PaymentCard, UserProfile } from '../types';
 
 export const INITIAL_USER: UserProfile = {
-  name: 'Jasur Rahimov',
-  phone: '+998 90 123-45-67',
-  email: 'jasur@travelway.uz',
-  tcId: '#TW-884291',
-  cashback: 45,
-  passportNumber: 'FA 9842104',
-  passportExpiry: '14.10.2029',
-  dob: '1994-08-15',
-  isVerified: true
+  name: '',
+  phone: '',
+  email: '',
+  tcId: '',
+  cashback: 0,
+  passportNumber: '',
+  passportExpiry: '',
+  dob: '',
+  isVerified: false
 };
 
-export const INITIAL_CARDS: PaymentCard[] = [
-  {
-    id: 'c1',
-    type: 'HUMO',
-    last4: '4892',
-    bank: "O'zbekiston banki (UZS)",
-    isPrimary: true
-  },
-  {
-    id: 'c2',
-    type: 'VISA',
-    last4: '7710',
-    bank: 'Xalqaro turpaketlar uchun (USD)',
-    isPrimary: false
-  }
-];
+export const INITIAL_CARDS: PaymentCard[] = [];
 
 export const INITIAL_TOURS: TourPackage[] = [
   // --- TURKIYA (ANTALYA, BELEK, KEMER, ALANYA, BODRUM, ISTANBUL) ---
@@ -762,62 +747,8 @@ export const INITIAL_TOURS: TourPackage[] = [
   }
 ];
 
-export const INITIAL_BOOKINGS: Booking[] = [
-  {
-    id: 'b1',
-    tourTitle: 'Rixos Premium Belek 5* Deluxe',
-    dest: 'Belek, Antalya, Turkiya 🇹🇷',
-    dates: '05 Okt — 12 Okt, 2026',
-    startDate: '2026-10-05',
-    endDate: '2026-10-12',
-    status: 'Tasdiqlangan',
-    voucherId: 'KMP-VOUCHER-TR88210',
-    price: '$1,480 (2 kishi)',
-    totalNumeric: 1480,
-    travelerName: 'JASUR RAHIMOV',
-    type: 'active',
-    hotelImg: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80',
-    flight: 'Charter HY 3501 (Toshkent — Antalya)',
-    airline: 'Uzbekistan Airways',
-    nightsCount: 7
-  },
-  {
-    id: 'b2',
-    tourTitle: 'Atlantis The Palm 5* VIP',
-    dest: 'Palm Jumeirah, Dubay, BAA 🇦🇪',
-    dates: '20 Okt — 27 Okt, 2026',
-    startDate: '2026-10-20',
-    endDate: '2026-10-27',
-    status: 'Vaucher tayyor',
-    voucherId: 'KMP-VOUCHER-DXB4412',
-    price: '$2,380 (2 kishi)',
-    totalNumeric: 2380,
-    travelerName: 'JASUR RAHIMOV',
-    type: 'active',
-    hotelImg: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop&q=80',
-    flight: 'Centrum Air C6 501 (Toshkent — Dubay)',
-    airline: 'Centrum Air',
-    nightsCount: 7
-  },
-  {
-    id: 'b3',
-    tourTitle: 'Vinpearl Resort & Spa Phu Quoc 5*',
-    dest: 'Phu Quoc oroli, Vetnam 🇻🇳',
-    dates: '10 Noy — 18 Noy, 2026',
-    startDate: '2026-11-10',
-    endDate: '2026-11-18',
-    status: 'Tasdiqlangan',
-    voucherId: 'KMP-VOUCHER-VN9920',
-    price: '$1,580 (2 kishi)',
-    totalNumeric: 1580,
-    travelerName: 'JASUR RAHIMOV',
-    type: 'active',
-    hotelImg: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&auto=format&fit=crop&q=80',
-    flight: 'Charter Centrum Air C6 771 (Toshkent — Phu Quoc)',
-    airline: 'Centrum Air',
-    nightsCount: 8
-  }
-];
+export const INITIAL_BOOKINGS: Booking[] = [];
+
 
 export const INITIAL_EXPLORE_VIBES: ExploreVibe[] = [
   {
