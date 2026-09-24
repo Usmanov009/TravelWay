@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* TravelWay Theme Tokens */
+:root, [data-theme="light"] {
+  /* Kungi rejim (Light Mode) */
+  --tw-canvas: #F8FAFC;        /* Asosiy fon (Background): Juda och kulrang-ko'k */
+  --tw-surface: #FFFFFF;       /* Kardlar va Menyular (Surface): Sof oq */
+  --tw-subtle: #F1F5F9;        /* Oraliq fonlar va yordamchi bloklar */
+  --tw-border: #E2E8F0;        /* Nozik ajratuvchi chiziqlar */
+  --tw-border-hover: #CBD5E1;
+  --tw-text-main: #334155;     /* Asosiy matn (Text): To'q kulrang */
+  --tw-text-sub: #64748B;      /* Ikkilamchi matn */
+  --tw-text-muted: #94A3B8;    /* Yordamchi matn */
+  --tw-accent: #0EA5E9;        /* Tugmalar va Faol ikonkalar (Accent): Yumshoq havorang */
+  --tw-accent-hover: #0284C7;
+  --tw-accent-light: #E0F2FE;
+  --tw-accent-border: #BAE6FD;
+  --tw-accent-contrast: #FFFFFF;
+  --tw-chip-bg: #F1F5F9;
+  --tw-chip-text: #334155;
+  --tw-card-shadow: 0 4px 20px -2px rgba(51, 65, 85, 0.06), 0 1px 3px rgba(51, 65, 85, 0.04);
+}
+
+.dark, [data-theme="dark"] {
+  /* Tungi rejim (Dark Mode) */
+  --tw-canvas: #0F172A;        /* Asosiy fon (Background): To'q ko'k-kulrang */
+  --tw-surface: #1E293B;       /* Kardlar va Menyular (Surface): Asosiy fondan biroz yorug'roq */
+  --tw-subtle: #253349;        /* Oraliq fonlar va yordamchi bloklar */
+  --tw-border: #334155;        /* Vizual ajratuvchi nozik chiziqlar */
+  --tw-border-hover: #475569;
+  --tw-text-main: #F1F5F9;     /* Asosiy matn (Text): Och kulrang-oq */
+  --tw-text-sub: #94A3B8;      /* Ikkilamchi matn */
+  --tw-text-muted: #64748B;    /* Yordamchi matn */
+  --tw-accent: #38BDF8;        /* Tugmalar va Faol ikonkalar (Accent): Yorqinroq havorang */
+  --tw-accent-hover: #7DD3FC;
+  --tw-accent-light: rgba(56, 189, 248, 0.16);
+  --tw-accent-border: rgba(56, 189, 248, 0.35);
+  --tw-accent-contrast: #0F172A;
+  --tw-chip-bg: #253349;
+  --tw-chip-text: #F1F5F9;
+  --tw-card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.theme-canvas {
+  background-color: var(--tw-canvas);
+  color: var(--tw-text-main);
+}
+
+.theme-surface, .app-surface {
+  background-color: var(--tw-surface);
+  border-color: var(--tw-border);
+  color: var(--tw-text-main);
+}
+
+.theme-subtle, .app-subtle {
+  background-color: var(--tw-subtle);
+  border-color: var(--tw-border);
+}
+
+.theme-border, .app-border {
+  border-color: var(--tw-border);
+}
+
+.theme-text-main, .app-text-main {
+  color: var(--tw-text-main);
+}
+
+.theme-text-sub, .app-text-sub {
+  color: var(--tw-text-sub);
+}
+
+.theme-text-muted, .app-text-muted {
+  color: var(--tw-text-muted);
+}
+
+.theme-accent-btn, .app-accent-bg {
+  background-color: var(--tw-accent);
+  color: var(--tw-accent-contrast);
+}
+
+.theme-accent-btn:hover {
+  background-color: var(--tw-accent-hover);
+}
+
+.theme-accent-light {
+  background-color: var(--tw-accent-light);
+  color: var(--tw-accent);
+  border-color: var(--tw-accent-border);
+}
+
+.theme-accent-text, .app-accent-text {
+  color: var(--tw-accent);
+}
+
+.app-accent-border {
+  border-color: var(--tw-accent);
+}
+
+.app-card-shadow {
+  box-shadow: var(--tw-card-shadow);
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .phone-shadow {
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), 0 0 40px 2px rgba(0, 0, 0, 0.08);
+  }
+  .tap-bounce:active {
+    transform: scale(0.96);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.04); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 1.8s infinite ease-in-out;
+}
+
+@keyframes scan-beam {
+  0% { top: 8%; opacity: 0.8; }
+  50% { top: 86%; opacity: 1; }
+  100% { top: 8%; opacity: 0.8; }
+}
+
+.scanner-beam {
+  animation: scan-beam 2.2s infinite ease-in-out;
+}
