@@ -47,7 +47,7 @@ interface AdminPageProps {
   onAddStaff: (staff: AdminUser) => void;
   onUpdateStaff: (staff: AdminUser) => void;
   onRemoveStaff: (staffId: string) => void;
-  onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = ({

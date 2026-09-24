@@ -109,6 +109,8 @@ export interface UserProfile {
   passportExpiry: string;
   dob: string;
   isVerified: boolean;
+  telegramId?: string;
+  telegramUsername?: string;
 }
 
 export interface ToastMessage {

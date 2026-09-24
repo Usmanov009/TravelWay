@@ -294,6 +294,28 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         </button>
       </div>
 
+      {/* Featured Telegram Registration */}
+      {mode === 'register' && (
+        <button
+          type="button"
+          onClick={onTelegramAuth}
+          className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white flex items-center justify-between shadow-lg shadow-[#2AABEE]/25 tap-bounce active:scale-98 transition cursor-pointer"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
+              </svg>
+            </div>
+            <div className="text-left">
+              <span className="font-black text-xs block">Telegram orqali ro'yxatdan o'tish</span>
+              <span className="text-[10px] text-white/80">@mytravelwaybot orqali 1 soniyada</span>
+            </div>
+          </div>
+          <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-lg">+$30 bonus</span>
+        </button>
+      )}
+
       {/* Main Auth Form Card */}
       <form onSubmit={handleSubmit} className="bg-[#111c30] border border-[#1b2b46] rounded-3xl p-4 shadow-xl space-y-3.5">
         {/* REGISTRATION-ONLY FIELDS */}
@@ -559,7 +581,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         {/* Telegram 1-Tap Login */}
         <button
           id="btn-login-telegram"
-          className="w-full py-2.5 px-3 rounded-2xl bg-[#2AABEE]/15 hover:bg-[#2AABEE]/25 border border-[#2AABEE]/30 active:scale-98 transition-all text-[#2AABEE] text-xs font-bold flex items-center justify-between shadow-sm"
+          className="w-full py-2.5 px-3 rounded-2xl bg-[#2AABEE]/15 hover:bg-[#2AABEE]/25 border border-[#2AABEE]/40 active:scale-98 transition-all text-[#2AABEE] text-xs font-bold flex items-center justify-between shadow-sm cursor-pointer"
           onClick={onTelegramAuth}
           type="button"
         >
@@ -569,7 +591,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
               </svg>
             </div>
-            <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>Telegram orqali tezkor kirish</span>
+            <div className="text-left">
+              <span className="font-bold text-xs block" style={{ color: 'var(--tw-text-main)' }}>
+                {mode === 'register' ? "Telegram orqali ro'yxatdan o'tish" : "Telegram orqali tezkor kirish"}
+              </span>
+              <span className="text-[10px] text-[#2AABEE]">@mytravelwaybot</span>
+            </div>
           </div>
           <span className="text-[10px] bg-[#2AABEE]/20 px-2 py-0.5 rounded-md font-bold text-[#2AABEE]">1 soniya</span>
         </button>

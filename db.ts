@@ -81,6 +81,8 @@ const UserSchema = new mongoose.Schema({
   name: String,
   phone: String,
   email: String,
+  telegramId: String,
+  telegramUsername: String,
   passportNumber: String,
   passportExpiry: String,
   citizenship: String,

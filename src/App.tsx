@@ -17,6 +17,7 @@ import { HotDealsScreen } from './components/HotDealsScreen';
 import { TripsScreen } from './components/TripsScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { Modals } from './components/Modals';
+import { TelegramAuthModal } from './components/TelegramAuthModal';
 import { FlutterCodeViewer } from './components/FlutterCodeViewer';
 import { PriceAlertModal } from './components/PriceAlertModal';
 import { AdminPage } from './admin/AdminPage';
@@ -273,6 +274,7 @@ export default function App() {
   // Modals state
   const [isOtpOpen, setIsOtpOpen] = useState(false);
   const [otpPhone, setOtpPhone] = useState('');
+  const [isTelegramAuthOpen, setIsTelegramAuthOpen] = useState(false);
   const [socialProvider, setSocialProvider] = useState<'google' | null>(null);
   const [tourDetails, setTourDetails] = useState<TourPackage | null>(null);
   const [checkoutTour, setCheckoutTour] = useState<TourPackage | null>(null);
@@ -354,11 +356,35 @@ export default function App() {
   };
 
   const handleTelegramAuth = () => {
-    showToast('Telegram sessiyasi tekshirilmoqda...', 'info');
-    setTimeout(() => {
-      showToast('Telegram orqali (@jasur_traveler) muvaffaqiyatli ulandi! ✓', 'success');
-      setCurrentTab('search');
-    }, 600);
+    setIsTelegramAuthOpen(true);
+  };
+
+  const handleTelegramAuthSuccess = (tgUser: any) => {
+    if (tgUser) {
+      const updatedUser: UserProfile = {
+        ...user,
+        name: tgUser.name || user.name,
+        phone: tgUser.phone || user.phone,
+        email: tgUser.email || user.email,
+        telegramId: tgUser.telegramId || '',
+        telegramUsername: tgUser.telegramUsername || '',
+        cashback: Math.max(user.cashback, tgUser.cashbackBalance || 30),
+        isVerified: true
+      };
+      setUser(updatedUser);
+      try {
+        localStorage.setItem('travelway_user_profile', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      fetch('/api/db/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      }).catch((e) => console.warn('MongoDB save user error:', e));
+    }
+
+    showToast(`Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi 🎉`, 'success');
+    setCurrentTab('search');
   };
 
   // MongoDB Booking helpers
@@ -1000,6 +1026,14 @@ export default function App() {
             onSaveAlert={handleSavePriceAlert}
             onDeleteAlert={handleDeletePriceAlert}
             onSimulatePriceDrop={handleSimulatePriceDrop}
+          />
+
+          {/* Telegram Auth & Registration Modal */}
+          <TelegramAuthModal
+            isOpen={isTelegramAuthOpen}
+            onClose={() => setIsTelegramAuthOpen(false)}
+            onSuccess={handleTelegramAuthSuccess}
+            onShowToast={showToast}
           />
 
           {/* In-app Toast Messages Overlay */}

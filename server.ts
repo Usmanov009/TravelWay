@@ -4,12 +4,20 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectDB, getDBStatus, TourModel, BookingModel, PriceAlertModel, UserModel, AdminStaffModel } from './db.js';
+import {
+  startTelegramPolling,
+  createTelegramAuthSession,
+  checkTelegramAuthSession,
+  verifyTelegramCode,
+  processTelegramUpdate,
+  TELEGRAM_BOT_USERNAME
+} from './telegramBot.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
 app.use(express.json());
@@ -843,8 +851,48 @@ app.post('/api/admin/login', async (req, res) => {
   });
 });
 
+// 10. TELEGRAM AUTHENTICATION & REGISTRATION ENDPOINTS
+app.post('/api/auth/telegram/create-session', (req, res) => {
+  try {
+    const session = createTelegramAuthSession();
+    res.json({ success: true, ...session });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/auth/telegram/check-session', (req, res) => {
+  try {
+    const sessionToken = (req.query.sessionToken as string) || '';
+    const result = checkTelegramAuthSession(sessionToken);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/auth/telegram/verify-code', (req, res) => {
+  try {
+    const { code, sessionToken } = req.body;
+    const result = verifyTelegramCode(code, sessionToken);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/telegram/webhook', async (req, res) => {
+  try {
+    await processTelegramUpdate(req.body);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 async function start() {
   await connectDB();
+  startTelegramPolling();
 
   if (!isProd) {
     process.env.DISABLE_HMR = 'true';
