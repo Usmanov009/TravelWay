@@ -889,19 +889,29 @@ export const Modals: React.FC<ModalsProps> = ({
                     </div>
                   </div>
 
-                  {/* Direct Actions (NO BOOKING FLOW / TELEGRAM & ESTIMATE) */}
+                  {/* Direct Actions: Turni Bron Qilish */}
                   <div className="space-y-2 pt-1">
-                    <a
-                      href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway.uz`)}&text=${encodeURIComponent(
-                        `Assalomu alaykum! TravelWay orqali ushbu turpaket bo'yicha ma'lumot olmoqchiman:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${currentTravelersCount} kishi\n💵 Kompas Tour 1:1 Narxi: $${finalPackagePrice} (~$${perPersonEstimate} / kishi)\n🆔 Kod: ${checkoutTour.kompasTourCode || 'TW-TR'}`
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-3 bg-[#24A1DE] hover:bg-[#208fbf] text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl shadow-md flex items-center justify-center gap-2 tap-bounce transition"
+                    <button
+                      type="button"
+                      id="btn-confirm-tour-booking"
+                      onClick={() => {
+                        onConfirmBooking({
+                          tour: checkoutTour,
+                          travelerName: currentName || 'TravelWay Sayohatchi',
+                          passport: currentPassport || 'N/A',
+                          dob: '',
+                          payType: 'online_booking',
+                          discount: 0,
+                          travelersCount: currentTravelersCount
+                        });
+                        onShowToast(`"${checkoutTour.title}" turi muvaffaqiyatli bron qilindi! 🎉`, 'success');
+                      }}
+                      className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 tap-bounce transition cursor-pointer active:scale-98"
                     >
-                      <span className="text-base">💬</span>
-                      <span>Telegram Orqali Operatorga Yuborish</span>
-                    </a>
+                      <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                      <span>Turni Bron Qilish</span>
+                      <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-bold ml-1">${finalPackagePrice}</span>
+                    </button>
 
                     <div className="grid grid-cols-2 gap-2">
                       <button
@@ -922,51 +932,44 @@ export const Modals: React.FC<ModalsProps> = ({
                         <span>Smetani Nusxalash</span>
                       </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    onConfirmBooking({
-                      tour: checkoutTour,
-                      travelerName: 'TravelWay Sayohatchi',
-                      passport: 'N/A',
-                      dob: '',
-                      payType: 'saved_estimate',
-                      discount: 0,
-                      travelersCount: currentTravelersCount
-                    });
-                  }}
-                  className="py-2.5 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 tap-bounce transition shadow-xs"
-                  style={{
-                    backgroundColor: 'var(--tw-accent)',
-                    color: 'var(--tw-accent-contrast)'
-                  }}
-                >
-                  <span>📌</span>
-                  <span>Mening Turlarimga Saqlash</span>
-                </button>
-              </div>
+                      <a
+                        href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway-9x8l.onrender.com`)}&text=${encodeURIComponent(
+                          `Assalomu alaykum! TravelWay orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${currentTravelersCount} kishi\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'TW-TR'}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 tap-bounce transition text-[#24A1DE]"
+                        style={{
+                          backgroundColor: 'var(--tw-surface)',
+                          borderColor: 'var(--tw-border)'
+                        }}
+                      >
+                        <span>💬</span>
+                        <span>Operatorga Yozish</span>
+                      </a>
+                    </div>
 
-              {onOpenPriceAlert && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onOpenPriceAlert(checkoutTour);
-                    onCloseCheckout();
-                  }}
-                  className="w-full py-2 border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 tap-bounce transition"
-                  style={{
-                    backgroundColor: 'var(--tw-subtle)',
-                    borderColor: 'var(--tw-border)',
-                    color: 'var(--tw-accent)'
-                  }}
-                >
-                  <span>🔔</span>
-                  <span>Ushbu tur narxi tushganda xabar berish (Signal)</span>
-                </button>
-              )}
-            </div>
-          </>
-        );
+                    {onOpenPriceAlert && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenPriceAlert(checkoutTour);
+                          onCloseCheckout();
+                        }}
+                        className="w-full py-2 border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 tap-bounce transition"
+                        style={{
+                          backgroundColor: 'var(--tw-subtle)',
+                          borderColor: 'var(--tw-border)',
+                          color: 'var(--tw-accent)'
+                        }}
+                      >
+                        <span>🔔</span>
+                        <span>Ushbu tur narxi tushganda xabar berish (Signal)</span>
+                      </button>
+                    )}
+                  </div>
+                </>
+              );
       })()}
     </div>
   </div>

@@ -262,7 +262,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       onBookCombo(selectedComboTour);
                     }
                     onCloseComboTour();
-                    onShowToast("Combo tur muvaffaqiyatli band qilindi va 'Mening turlarim' bo'limiga saqlandi! 🎒", "success");
+                    onShowToast("Combo tur muvaffaqiyatli bron qilindi va 'Mening turlarim' bo'limiga saqlandi! 🎒", "success");
                   }}
                   className="py-2.5 px-4 font-bold text-xs rounded-xl flex items-center gap-1.5 tap-bounce shadow-md"
                   style={{
@@ -271,7 +271,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   }}
                 >
                   <span>📌</span>
-                  <span>Band Qilish</span>
+                  <span>Bron Qilish</span>
                 </button>
               </div>
             </div>
@@ -666,7 +666,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       onBookHotel(selectedHotel);
                     }
                     onCloseHotel();
-                    onShowToast("Mehmonxona muvaffaqiyatli band qilindi va 'Mening turlarim' ga saqlandi! 🏨", "success");
+                    onShowToast("Mehmonxona muvaffaqiyatli bron qilindi va 'Mening turlarim' ga saqlandi! 🏨", "success");
                   }}
                   className="py-2.5 px-4 font-bold text-xs rounded-xl flex items-center gap-1.5 tap-bounce shadow-md"
                   style={{
@@ -674,8 +674,8 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     color: 'var(--tw-accent-contrast)'
                   }}
                 >
-                  <span>📌</span>
-                  <span>Band Qilish</span>
+                  <span>🏨</span>
+                  <span>Bron Qilish</span>
                 </button>
               </div>
             </div>
