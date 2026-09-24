@@ -20,7 +20,6 @@ interface ProfileScreenProps {
   onOpenSupport: () => void;
   onLogout: () => void;
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
-  onOpenAdmin?: () => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -41,8 +40,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onToggleNotifications,
   onOpenSupport,
   onLogout,
-  onShowToast,
-  onOpenAdmin
+  onShowToast
 }) => {
   const getInitials = (name: string) => {
     return name
@@ -667,46 +665,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"></path>
             </svg>
           </button>
-
-          {/* Admin Panel Desktop Access */}
-          {onOpenAdmin && (
-            <button
-              id="btn-profile-admin-panel"
-              className="w-full rounded-xl p-3 border flex items-center justify-between tap-bounce transition shadow-sm"
-              style={{
-                backgroundColor: 'rgba(6, 182, 212, 0.08)',
-                borderColor: 'rgba(6, 182, 212, 0.3)'
-              }}
-              onClick={onOpenAdmin}
-              type="button"
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="text-base">🛡️</span>
-                <div className="text-left">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-black text-cyan-400">
-                      Desktop Admin Panel (Boshqaruv)
-                    </p>
-                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                      Web Desktop
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    Bosh Admin & Tur Admin boshqaruv paneli, turlar, buyurtmalar va vaucherlar
-                  </p>
-                </div>
-              </div>
-              <svg
-                className="w-4 h-4 text-cyan-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"></path>
-              </svg>
-            </button>
-          )}
 
           {/* App Version */}
           <div

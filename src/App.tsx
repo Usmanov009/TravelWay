@@ -562,98 +562,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-start sm:justify-center p-0 sm:p-4 font-sans select-none overflow-x-hidden">
-      {/* Top App Control Bar for Preview, Palettes & Flutter Code Switcher */}
-      <aside aria-label="Ilova boshqaruv paneli" className="w-full max-w-[420px] sm:max-w-xl mb-2 px-3 py-2 bg-slate-900/95 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-lg text-xs">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button
-              className={`px-2.5 py-1 rounded-xl font-bold flex items-center gap-1.5 transition ${
-                !showFlutterCode ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'
-              }`}
-              onClick={() => setShowFlutterCode(false)}
-              type="button"
-            >
-              <span>📱 Ilova</span>
-            </button>
-            <button
-              className={`px-2.5 py-1 rounded-xl font-bold flex items-center gap-1.5 transition ${
-                showFlutterCode ? 'bg-sky-500 text-white shadow' : 'bg-slate-800 text-slate-300 hover:text-white'
-              }`}
-              onClick={() => setShowFlutterCode(true)}
-              type="button"
-            >
-              <span>💙 Flutter Kod</span>
-            </button>
-            <button
-              className="px-2.5 py-1 rounded-xl font-bold flex items-center gap-1.5 transition bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500 tap-bounce"
-              onClick={() => setIsAdminMode(true)}
-              type="button"
-              title="Desktop Web Admin Paneliga o'tish (Bosh Admin / Tur Admin)"
-            >
-              <span>🛡️ Admin Panel</span>
-            </button>
-          </div>
-
-          {/* Rejim: Kungi / Tungi (Light / Dark Mode) */}
-          <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => {
-                setThemeMode('light');
-                showToast("Kunduzgi rejim (Light Mode) ☀️", 'info');
-              }}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1.5 ${
-                themeMode === 'light'
-                  ? 'bg-sky-500 text-white shadow'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-              title="Kunduzgi rejim (Light Mode)"
-            >
-              <span>☀️</span>
-              <span>Kunduzgi</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setThemeMode('dark');
-                showToast("Tungi rejim (Dark Mode) 🌙", 'info');
-              }}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1.5 ${
-                themeMode === 'dark'
-                  ? 'bg-slate-700 text-sky-300 shadow border border-slate-600'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-              title="Tungi rejim (Dark Mode)"
-            >
-              <span>🌙</span>
-              <span>Tungi</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick screen switcher chips */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5 border-t border-slate-800/80">
-          {(['auth', 'search', 'explore', 'hot', 'trips', 'profile'] as const).map((tab) => (
-            <button
-              key={tab}
-              className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold uppercase transition ${
-                currentTab === tab && !showFlutterCode
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-              onClick={() => {
-                setShowFlutterCode(false);
-                setCurrentTab(tab);
-              }}
-              type="button"
-            >
-              {tab === 'auth' ? 'Kirish' : tab === 'search' ? 'Qidiruv' : tab === 'explore' ? 'Kashf' : tab === 'hot' ? 'Qaynoq' : tab === 'trips' ? 'Turlar' : 'Profil'}
-            </button>
-          ))}
-        </div>
-      </aside>
-
       {/* Main Container / Mobile Device Frame */}
       {showFlutterCode ? (
         <div className="w-full max-w-2xl h-[820px] max-h-[92vh]">
@@ -700,7 +608,6 @@ export default function App() {
                 showToast(`Akkaunt: ${user.name} (${user.tcId})`, 'info');
               }
             }}
-            onOpenAdmin={() => setIsAdminMode(true)}
           />
 
           {/* Main Scrollable Viewport */}
@@ -818,7 +725,6 @@ export default function App() {
                 onOpenSupport={() => setIsSupportOpen(true)}
                 onLogout={() => setIsLogoutConfirmOpen(true)}
                 onShowToast={showToast}
-                onOpenAdmin={() => setIsAdminMode(true)}
               />
             )}
           </main>

@@ -10,7 +10,6 @@ interface HeaderProps {
   onAvatarClick: () => void;
   themeMode?: ThemeMode;
   onToggleTheme?: () => void;
-  onOpenAdmin?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,8 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   userInitials,
   onAvatarClick,
   themeMode = 'light',
-  onToggleTheme,
-  onOpenAdmin
+  onToggleTheme
 }) => {
   const getTitles = () => {
     switch (currentTab) {
@@ -120,21 +118,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Header Action Tools */}
       <div className="flex items-center gap-1.5">
-        {/* Admin Panel Desktop Button */}
-        {onOpenAdmin && (
-          <button
-            id="btn-header-admin-panel"
-            aria-label="Desktop Admin Panel"
-            title="Desktop Admin Panel (Boshqaruv)"
-            className="h-8 px-2 rounded-xl flex items-center gap-1 tap-bounce transition border text-xs font-black shadow-xs bg-slate-900 text-cyan-400 border-cyan-500/30 hover:bg-slate-800"
-            onClick={onOpenAdmin}
-            type="button"
-          >
-            <span className="text-xs">🛡️</span>
-            <span className="text-[10px] font-extrabold hidden xs:inline tracking-tight">Admin</span>
-          </button>
-        )}
-
         {/* Light / Dark Mode Toggle */}
         {onToggleTheme && (
           <button
