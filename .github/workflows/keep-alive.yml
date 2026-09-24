@@ -1,0 +1,29 @@
+name: Render 24/7 Keep Alive
+
+on:
+  schedule:
+    # Har 14 daqiqada ishga tushadi (Render Free Tier 15 daqiqa harakatsizlikdan so'ng uxlaydi)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # GitHub orqali qo'lda ham ishga tushirish imkoni
+
+jobs:
+  ping-render:
+    name: Ping TravelWay Render Web Service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Keep-Alive HTTP Request
+        run: |
+          RENDER_URL="${{ secrets.RENDER_URL }}"
+          if [ -z "$RENDER_URL" ]; then
+            RENDER_URL="https://travelway-9x8l.onrender.com"
+          fi
+          
+          echo "Pinging: ${RENDER_URL}/api/health"
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}\nTIME_TOTAL:%{time_total}s\n" --max-time 30 "${RENDER_URL}/api/health" || echo "CURL_FAILED")
+          echo "$RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q "HTTP_STATUS:200"; then
+            echo "🟢 Render server muvaffaqiyatli uyg'oq saqlandi!"
+          else
+            echo "🟡 Server javob bermadi yoki uyg'onish jarayonida."
+          fi

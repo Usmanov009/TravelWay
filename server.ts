@@ -12,6 +12,7 @@ import {
   processTelegramUpdate,
   TELEGRAM_BOT_USERNAME
 } from './telegramBot.js';
+import { startKeepAlive } from './keepAlive.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -890,9 +891,21 @@ app.post('/api/telegram/webhook', async (req, res) => {
   }
 });
 
+// 11. HEALTH CHECK & KEEP-ALIVE ENDPOINTS
+app.get(['/api/health', '/healthz'], (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'TravelWay',
+    uptime: `${Math.floor(process.uptime())}s`,
+    timestamp: new Date().toISOString(),
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
 async function start() {
   await connectDB();
   startTelegramPolling();
+  startKeepAlive();
 
   if (!isProd) {
     process.env.DISABLE_HMR = 'true';
