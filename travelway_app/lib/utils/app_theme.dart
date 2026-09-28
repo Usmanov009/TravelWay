@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Web-aligned Palette tokens
-  static const Color primary = Color(0xFFFF5B00);
-  static const Color primaryDark = Color(0xFFE04E00);
-  static const Color accent = Color(0xFFFF5B00);
-  static const Color accentLight = Color(0x26FF5B00);
-  static const Color accentSky = Color(0xFF38BDF8);
-  static const Color secondary = Color(0xFF00D2D3);
+  // Web-aligned Palette tokens (Preset b6Z8C2NoO: Maia style / Mauve base / Cyan theme)
+  static const Color primary = Color(0xFF06B6D4);
+  static const Color primaryDark = Color(0xFF0891B2);
+  static const Color accent = Color(0xFF06B6D4);
+  static const Color accentLight = Color(0x2606B6D4);
+  static const Color accentSky = Color(0xFF22D3EE);
+  static const Color secondary = Color(0xFF00B8DB);
 
-  // Backgrounds matching Web CSS tokens
-  static const Color bgDark = Color(0xFF0F172A); // --tw-canvas
-  static const Color surfaceDark = Color(0xFF1E293B); // --tw-surface
-  static const Color subtleDark = Color(0xFF253349); // --tw-subtle
-  static const Color cardDark = Color(0xFF1E293B);
-  static const Color borderDark = Color(0xFF334155); // --tw-border
-  static const Color borderHover = Color(0xFF475569);
+  // Backgrounds matching Web CSS tokens (Mauve dark tokens)
+  static const Color bgDark = Color(0xFF141217); // --tw-canvas
+  static const Color surfaceDark = Color(0xFF1E1A23); // --tw-surface
+  static const Color subtleDark = Color(0xFF27222F); // --tw-subtle
+  static const Color cardDark = Color(0xFF1E1A23);
+  static const Color borderDark = Color(0x1AFFFFFF); // --tw-border
+  static const Color borderHover = Color(0x2EFFFFFF);
 
-  // Typography colors matching Web CSS tokens
-  static const Color textMain = Color(0xFFF1F5F9); // --tw-text-main
-  static const Color textSub = Color(0xFF94A3B8); // --tw-text-sub
-  static const Color textMuted = Color(0xFF64748B); // --tw-text-muted
+  // Typography colors matching Web CSS tokens (Mauve typography)
+  static const Color textMain = Color(0xFFFAF9FB); // --tw-text-main
+  static const Color textSub = Color(0xFFA39DB0); // --tw-text-sub
+  static const Color textMuted = Color(0xFF726C7F); // --tw-text-muted
 
   // Status & Badges
   static const Color accentGreen = Color(0xFF10B981);

@@ -121,7 +121,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
 
               <div className="flex items-center justify-between text-[10px] pt-1 border-t" style={{ borderColor: 'var(--tw-border)', color: 'var(--tw-text-sub)' }}>
                 <span className="truncate max-w-[210px]">✈️ {deal.flight}</span>
-                <span className="font-bold text-sky-500">Jonli Narx</span>
+                <span className="font-bold" style={{ color: 'var(--tw-accent)' }}>Jonli Narx</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-0.5">

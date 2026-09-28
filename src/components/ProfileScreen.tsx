@@ -71,7 +71,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             <div
               className="w-16 h-16 rounded-2xl p-[2px] shadow-md"
               style={{
-                background: 'linear-gradient(135deg, var(--tw-accent), #38BDF8)'
+                background: 'linear-gradient(135deg, var(--tw-accent), #06B6D4)'
               }}
             >
               <div
@@ -241,35 +241,35 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             }`}
             style={{
               backgroundColor: '#FFFFFF',
-              borderColor: themeMode === 'light' ? '#0EA5E9' : '#E2E8F0',
-              color: '#334155',
-              outlineColor: '#0EA5E9'
+              borderColor: themeMode === 'light' ? '#0891B2' : '#E5E2E7',
+              color: '#1B181F',
+              outlineColor: '#0891B2'
             }}
           >
             <div className="flex items-center gap-3">
               {/* Color swatches */}
               <div className="flex -space-x-1.5 shrink-0">
-                <span className="w-5 h-5 rounded-full border border-slate-300 bg-[#F8FAFC]" title="Fon: #F8FAFC"></span>
+                <span className="w-5 h-5 rounded-full border border-purple-200/60 bg-[#FAF9FB]" title="Fon: #FAF9FB"></span>
                 <span className="w-5 h-5 rounded-full border border-slate-200 bg-[#FFFFFF]" title="Kard: #FFFFFF"></span>
-                <span className="w-5 h-5 rounded-full bg-[#334155]" title="Matn: #334155"></span>
-                <span className="w-5 h-5 rounded-full bg-[#0EA5E9] shadow-xs" title="Accent: #0EA5E9"></span>
+                <span className="w-5 h-5 rounded-full bg-[#1B181F]" title="Matn: #1B181F"></span>
+                <span className="w-5 h-5 rounded-full bg-[#0891B2] shadow-xs" title="Accent: #0891B2"></span>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[#334155]">☀️ Kungi rejim (Light Mode)</span>
+                  <span className="text-xs font-bold text-[#1B181F]">☀️ Kunduzgi rejim (Light Mode)</span>
                   {themeMode === 'light' && (
-                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-sky-100 text-sky-700">
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800">
                       Faol
                     </span>
                   )}
                 </div>
                 <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
-                  Fon: <span className="font-mono text-[9px] font-bold text-slate-700">#F8FAFC</span> • Kardlar: <span className="font-mono text-[9px] font-bold text-slate-700">#FFFFFF</span> • Matn: <span className="font-mono text-[9px] font-bold text-slate-700">#334155</span> • Accent: <span className="font-mono text-[9px] font-bold text-sky-600">#0EA5E9</span>
+                  Fon: <span className="font-mono text-[9px] font-bold text-slate-700">#FAF9FB</span> • Kardlar: <span className="font-mono text-[9px] font-bold text-slate-700">#FFFFFF</span> • Matn: <span className="font-mono text-[9px] font-bold text-slate-700">#1B181F</span> • Accent: <span className="font-mono text-[9px] font-bold text-cyan-700">#0891B2</span>
                 </p>
               </div>
             </div>
             {themeMode === 'light' ? (
-              <span className="w-5 h-5 rounded-full bg-[#0EA5E9] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs">
+              <span className="w-5 h-5 rounded-full bg-[#0891B2] text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs">
                 ✓
               </span>
             ) : (
@@ -286,40 +286,40 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               themeMode === 'dark' ? 'ring-2' : ''
             }`}
             style={{
-              backgroundColor: '#1E293B',
-              borderColor: themeMode === 'dark' ? '#38BDF8' : '#334155',
-              color: '#F1F5F9',
-              outlineColor: '#38BDF8'
+              backgroundColor: '#1E1A23',
+              borderColor: themeMode === 'dark' ? '#06B6D4' : 'rgba(255, 255, 255, 0.1)',
+              color: '#FAF9FB',
+              outlineColor: '#06B6D4'
             }}
           >
             <div className="flex items-center gap-3">
               {/* Color swatches */}
               <div className="flex -space-x-1.5 shrink-0">
-                <span className="w-5 h-5 rounded-full border border-slate-700 bg-[#0F172A]" title="Fon: #0F172A"></span>
-                <span className="w-5 h-5 rounded-full border border-slate-600 bg-[#1E293B]" title="Kard: #1E293B"></span>
-                <span className="w-5 h-5 rounded-full bg-[#F1F5F9]" title="Matn: #F1F5F9"></span>
-                <span className="w-5 h-5 rounded-full bg-[#38BDF8] shadow-xs" title="Accent: #38BDF8"></span>
+                <span className="w-5 h-5 rounded-full border border-purple-900/50 bg-[#141217]" title="Fon: #141217"></span>
+                <span className="w-5 h-5 rounded-full border border-purple-800/40 bg-[#1E1A23]" title="Kard: #1E1A23"></span>
+                <span className="w-5 h-5 rounded-full bg-[#FAF9FB]" title="Matn: #FAF9FB"></span>
+                <span className="w-5 h-5 rounded-full bg-[#06B6D4] shadow-xs" title="Accent: #06B6D4"></span>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[#F1F5F9]">🌙 Tungi rejim (Dark Mode)</span>
+                  <span className="text-xs font-bold text-[#FAF9FB]">🌙 Tungi rejim (Dark Mode)</span>
                   {themeMode === 'dark' && (
-                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-sky-950 text-sky-300 border border-sky-800">
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
                       Faol
                     </span>
                   )}
                 </div>
                 <p className="text-[10px] text-slate-400 mt-0.5 leading-snug">
-                  Fon: <span className="font-mono text-[9px] font-bold text-slate-200">#0F172A</span> • Kardlar: <span className="font-mono text-[9px] font-bold text-slate-200">#1E293B</span> • Matn: <span className="font-mono text-[9px] font-bold text-slate-200">#F1F5F9</span> • Accent: <span className="font-mono text-[9px] font-bold text-sky-400">#38BDF8</span>
+                  Fon: <span className="font-mono text-[9px] font-bold text-slate-200">#141217</span> • Kardlar: <span className="font-mono text-[9px] font-bold text-slate-200">#1E1A23</span> • Matn: <span className="font-mono text-[9px] font-bold text-slate-200">#FAF9FB</span> • Accent: <span className="font-mono text-[9px] font-bold text-cyan-400">#06B6D4</span>
                 </p>
               </div>
             </div>
             {themeMode === 'dark' ? (
-              <span className="w-5 h-5 rounded-full bg-[#38BDF8] text-[#0F172A] text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
+              <span className="w-5 h-5 rounded-full bg-[#06B6D4] text-[#081B21] text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
                 ✓
               </span>
             ) : (
-              <span className="w-5 h-5 rounded-full border border-slate-600 shrink-0"></span>
+              <span className="w-5 h-5 rounded-full border border-slate-700 shrink-0"></span>
             )}
           </button>
         </div>

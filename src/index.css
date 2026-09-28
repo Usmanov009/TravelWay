@@ -5,45 +5,45 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* TravelWay Theme Tokens */
+/* TravelWay Theme Tokens - Synced with preset b6Z8C2NoO (Maia style, Mauve base, Cyan theme) */
 :root, [data-theme="light"] {
-  /* Kungi rejim (Light Mode) */
-  --tw-canvas: #F8FAFC;        /* Asosiy fon (Background): Juda och kulrang-ko'k */
+  /* Kunduzgi rejim (Light Mode) */
+  --tw-canvas: #FAF9FB;        /* Asosiy fon (Background): Mauve och fon */
   --tw-surface: #FFFFFF;       /* Kardlar va Menyular (Surface): Sof oq */
-  --tw-subtle: #F1F5F9;        /* Oraliq fonlar va yordamchi bloklar */
-  --tw-border: #E2E8F0;        /* Nozik ajratuvchi chiziqlar */
-  --tw-border-hover: #CBD5E1;
-  --tw-text-main: #334155;     /* Asosiy matn (Text): To'q kulrang */
-  --tw-text-sub: #64748B;      /* Ikkilamchi matn */
-  --tw-text-muted: #94A3B8;    /* Yordamchi matn */
-  --tw-accent: #0EA5E9;        /* Tugmalar va Faol ikonkalar (Accent): Yumshoq havorang */
-  --tw-accent-hover: #0284C7;
-  --tw-accent-light: #E0F2FE;
-  --tw-accent-border: #BAE6FD;
+  --tw-subtle: #F4F2F5;        /* Oraliq fonlar va yordamchi bloklar */
+  --tw-border: #E5E2E7;        /* Nozik ajratuvchi chiziqlar */
+  --tw-border-hover: #D4CED9;
+  --tw-text-main: #1B181F;     /* Asosiy matn (Text): Mauve to'q kulrang */
+  --tw-text-sub: #6F6978;      /* Ikkilamchi matn */
+  --tw-text-muted: #9993A3;    /* Yordamchi matn */
+  --tw-accent: #0891B2;        /* Tugmalar va Faol ikonkalar (Accent): Cyan 600 */
+  --tw-accent-hover: #0E7490;
+  --tw-accent-light: rgba(8, 145, 178, 0.12);
+  --tw-accent-border: rgba(8, 145, 178, 0.28);
   --tw-accent-contrast: #FFFFFF;
-  --tw-chip-bg: #F1F5F9;
-  --tw-chip-text: #334155;
-  --tw-card-shadow: 0 4px 20px -2px rgba(51, 65, 85, 0.06), 0 1px 3px rgba(51, 65, 85, 0.04);
+  --tw-chip-bg: #F4F2F5;
+  --tw-chip-text: #1B181F;
+  --tw-card-shadow: 0 4px 20px -2px rgba(27, 24, 31, 0.05), 0 1px 3px rgba(27, 24, 31, 0.03);
 }
 
 .dark, [data-theme="dark"] {
   /* Tungi rejim (Dark Mode) */
-  --tw-canvas: #0F172A;        /* Asosiy fon (Background): To'q ko'k-kulrang */
-  --tw-surface: #1E293B;       /* Kardlar va Menyular (Surface): Asosiy fondan biroz yorug'roq */
-  --tw-subtle: #253349;        /* Oraliq fonlar va yordamchi bloklar */
-  --tw-border: #334155;        /* Vizual ajratuvchi nozik chiziqlar */
-  --tw-border-hover: #475569;
-  --tw-text-main: #F1F5F9;     /* Asosiy matn (Text): Och kulrang-oq */
-  --tw-text-sub: #94A3B8;      /* Ikkilamchi matn */
-  --tw-text-muted: #64748B;    /* Yordamchi matn */
-  --tw-accent: #38BDF8;        /* Tugmalar va Faol ikonkalar (Accent): Yorqinroq havorang */
-  --tw-accent-hover: #7DD3FC;
-  --tw-accent-light: rgba(56, 189, 248, 0.16);
-  --tw-accent-border: rgba(56, 189, 248, 0.35);
-  --tw-accent-contrast: #0F172A;
-  --tw-chip-bg: #253349;
-  --tw-chip-text: #F1F5F9;
-  --tw-card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --tw-canvas: #141217;        /* Asosiy fon (Background): Mauve to'q fon */
+  --tw-surface: #1E1A23;       /* Kardlar va Menyular (Surface): Mauve kard */
+  --tw-subtle: #27222F;        /* Oraliq fonlar va yordamchi bloklar */
+  --tw-border: rgba(255, 255, 255, 0.10);        /* Vizual ajratuvchi nozik chiziqlar */
+  --tw-border-hover: rgba(255, 255, 255, 0.18);
+  --tw-text-main: #FAF9FB;     /* Asosiy matn (Text): Och mauve-oq */
+  --tw-text-sub: #A39DB0;      /* Ikkilamchi matn */
+  --tw-text-muted: #726C7F;    /* Yordamchi matn */
+  --tw-accent: #06B6D4;        /* Tugmalar va Faol ikonkalar (Accent): Yorqin Cyan */
+  --tw-accent-hover: #22D3EE;
+  --tw-accent-light: rgba(6, 182, 212, 0.16);
+  --tw-accent-border: rgba(6, 182, 212, 0.35);
+  --tw-accent-contrast: #081B21;
+  --tw-chip-bg: #27222F;
+  --tw-chip-text: #FAF9FB;
+  --tw-card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .theme-canvas {
