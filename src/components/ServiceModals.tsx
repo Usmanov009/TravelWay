@@ -65,7 +65,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   Combo Paket
                 </span>
                 <span className="bg-emerald-600/90 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                  1:1 Kompas Narx
+                  1:1 Rasmiy Narx
                 </span>
               </div>
 
@@ -175,7 +175,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-emerald-500 font-bold">✓</span>
-                    <span>Tibbiy sug'urta va Kompas Tour rasmiy vaucheri</span>
+                    <span>Tibbiy sug'urta va rasmiy vaucher</span>
                   </li>
                   {selectedComboTour.excursionsIncluded.map((exc, idx) => (
                     <li key={idx} className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
             >
               <div>
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>
-                  Kompas Tour 1:1 Jami Combo narxi:
+                  1:1 Jami Combo narxi:
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-black" style={{ color: 'var(--tw-accent)' }}>
@@ -245,7 +245,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="flex items-center gap-2">
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! TravelWay orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price} (1:1 Kompas Tour)\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
+                    `Assalomu alaykum! TravelWay orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price} (1:1 Rasmiy Narx)\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

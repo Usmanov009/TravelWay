@@ -52,7 +52,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
         <div className="mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[10px] text-white/90">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span className="font-semibold">online.uz.kompastour.com jonli turlari</span>
+            <span className="font-semibold">Jonli rasmiy turlar</span>
           </div>
           {onRefreshHotDeals && (
             <button
@@ -121,7 +121,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
 
               <div className="flex items-center justify-between text-[10px] pt-1 border-t" style={{ borderColor: 'var(--tw-border)', color: 'var(--tw-text-sub)' }}>
                 <span className="truncate max-w-[210px]">✈️ {deal.flight}</span>
-                <span className="font-bold text-sky-500">Live Kompas</span>
+                <span className="font-bold text-sky-500">Jonli Narx</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-0.5">

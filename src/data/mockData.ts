@@ -45,7 +45,7 @@ export const INITIAL_TOURS: TourPackage[] = [
     baggage: "20 kg bagaj + 8 kg qo'l yuki",
     seatsStatus: 'guaranteed',
     kompasTourCode: 'KMP-TR-8812',
-    inclusions: ["Charter aviaparvoz", "Guruhli transfer", "5★ Mehmonxona", "Ultra All Inclusive", "Kompas Sug'urta $30,000", "Gid xizmati"]
+    inclusions: ["Charter aviaparvoz", "Guruhli transfer", "5★ Mehmonxona", "Ultra All Inclusive", "Tibbiy Sug'urta $30,000", "Gid xizmati"]
   },
   {
     id: 'kmp-ayt-02',

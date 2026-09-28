@@ -74,7 +74,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
               To'g'ridan-to'g'ri Aviachiptalar
             </h3>
             <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-              Kompas Tour charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o'rinlar va rasmiy 1:1 narxlar.
+              Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o'rinlar va rasmiy 1:1 narxlar.
             </p>
           </div>
           <span className="text-3xl">🎫</span>

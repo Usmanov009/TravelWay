@@ -197,7 +197,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             Topilgan Mehmonxonalar ({filteredHotels.length})
           </span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-            Kompas Tour 1:1 Narxlar
+            1:1 Rasmiy Narxlar
           </span>
         </div>
 

@@ -580,13 +580,13 @@ export const Modals: React.FC<ModalsProps> = ({
             >
               <div>
                 <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
-                  {tourDetails.isLiveKompas ? "Kompas Tour 1:1 rasmiy narxi:" : "Turpaket to'liq narxi:"}
+                  {tourDetails.isLiveKompas ? "Jonli 1:1 rasmiy narx:" : "Turpaket to'liq narxi:"}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <p className="text-xl font-black" style={{ color: 'var(--tw-accent)' }}>${tourDetails.price}</p>
                   {tourDetails.isLiveKompas && (
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                      online.uz.kompastour.com 1:1
+                      Jonli 1:1
                     </span>
                   )}
                 </div>
@@ -843,7 +843,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     }}
                   >
                     <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
-                      <span>{checkoutTour.isLiveKompas ? 'Kompas Tour 1:1 rasmiy narxi:' : '1 kishi uchun narx:'}</span>
+                      <span>{checkoutTour.isLiveKompas ? 'Jonli 1:1 rasmiy narx:' : '1 kishi uchun narx:'}</span>
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
                           ${checkoutTour.isLiveKompas ? finalPackagePrice : checkoutTour.price}
@@ -883,7 +883,7 @@ export const Modals: React.FC<ModalsProps> = ({
                           ${finalPackagePrice}
                         </span>
                         <span className="text-[9px] block text-emerald-600 dark:text-emerald-400 font-bold">
-                          {checkoutTour.isLiveKompas ? "Kompas Tour bilan 1:1 bir xil" : "Bron to'lovi shart emas"}
+                          {checkoutTour.isLiveKompas ? "1:1 rasmiy kafolatlangan narx" : "Bron to'lovi shart emas"}
                         </span>
                       </div>
                     </div>
@@ -917,7 +917,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          const smeta = `TRAVELWAY — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${currentTravelersCount} kishi\nKompas Tour 1:1 Narxi: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'TW-UZ'}`;
+                          const smeta = `TRAVELWAY — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${currentTravelersCount} kishi\nJonli 1:1 Narxi: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'TW-UZ'}`;
                           navigator.clipboard.writeText(smeta);
                           onShowToast("Tur smetasi va hisob-kitobi buferga nusxalandi! 📋", "success");
                         }}

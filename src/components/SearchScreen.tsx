@@ -244,13 +244,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
         setLiveTours(data.tours);
         setIsLiveActive(true);
-        onShowToast(`Kompas Tour: ${data.tours.length} ta turpaket (1:1 rasmiy narxda) olindi!`, 'success');
+        onShowToast(`Jonli qidiruv: ${data.tours.length} ta turpaket (1:1 rasmiy narxda) olindi!`, 'success');
       } else {
-        onShowToast(`online.uz.kompastour.com natijalari yangilandi`, 'info');
+        onShowToast(`Qidiruv natijalari yangilandi`, 'info');
       }
     } catch (err) {
-      console.warn('Live Kompas search failed:', err);
-      onShowToast(`Kompas Tour turlari yangilandi`, 'info');
+      console.warn('Live search failed:', err);
+      onShowToast(`Turlar yangilandi`, 'info');
     } finally {
       setIsLoading(false);
     }
@@ -1137,7 +1137,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"></path>
             </svg>
-            <span>Qidirish ({filteredTours.length} ta Kompas tur topildi)</span>
+            <span>Qidirish ({filteredTours.length} ta turpaket topildi)</span>
           </button>
         </div>
       )}
@@ -1159,7 +1159,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             }}
           ></div>
           <h4 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>
-            Kompas Tour tizimi so'rovi bajarilmoqda...
+            Jonli tizim so'rovi bajarilmoqda...
           </h4>
           <p className="text-xs" style={{ color: 'var(--tw-text-sub)' }}>
             {departureCity} dan {currentCountry.name} yo'nalishidagi charter reyslar va xonalar tekshirilmoqda.
@@ -1222,7 +1222,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       {isNoExactMatch && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 text-xs text-amber-200 flex items-center gap-2">
           <span>ℹ️</span>
-          <span>Tanlangan parametrlar bo'yicha tur paketlar topilmadi. Barcha mavjud Kompas Tour takliflari ko'rsatilmoqda:</span>
+          <span>Tanlangan parametrlar bo'yicha tur paketlar topilmadi. Barcha mavjud takliflar ko'rsatilmoqda:</span>
         </div>
       )}
 
@@ -1278,7 +1278,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                     {tour.isLiveKompas && (
                       <span className="bg-emerald-600/95 text-white text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                        <span>Kompas 1:1 Narx</span>
+                        <span>Jonli 1:1 Narx</span>
                       </span>
                     )}
                   </div>
@@ -1410,7 +1410,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                           borderColor: 'var(--tw-border)',
                           color: 'var(--tw-text-main)'
                         }}
-                        title="online.uz.kompastour.com saytida ochish"
+                        title="Rasmiy tizimda ochish"
                       >
                         🌐
                       </a>

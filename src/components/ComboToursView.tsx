@@ -58,7 +58,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
               <span>🔄 Multi-City</span>
               <span>•</span>
-              <span>1:1 Kompas Paketlar</span>
+              <span>1:1 Rasmiy Paketlar</span>
             </div>
             <h3 className="text-base font-black leading-tight" style={{ color: 'var(--tw-text-main)' }}>
               Kombinatsiyalashgan Combo Turlar
@@ -168,7 +168,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             Mavjud Combo Paketlar ({filteredCombos.length})
           </span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-            Kompas Tour 1:1 Narxlar
+            1:1 Rasmiy Narxlar
           </span>
         </div>
 
