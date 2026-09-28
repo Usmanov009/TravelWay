@@ -22,6 +22,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
   onShowToast
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
+
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCombo, setEditingCombo] = useState<ComboTour | null>(null);
@@ -29,27 +30,21 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
   // Form
   const [formTitle, setFormTitle] = useState('');
   const [formRouteSummary, setFormRouteSummary] = useState('');
-  const [formCities, setFormCities] = useState('Istanbul, Kapadokya');
-  const [formNightsTotal, setFormNightsTotal] = useState(7);
-  const [formNightsSplit, setFormNightsSplit] = useState('3 kecha Istanbul + 4 kecha Kapadokya');
-  const [formPrice, setFormPrice] = useState(1290);
-  const [formOldPrice, setFormOldPrice] = useState(1550);
-  const [formAirline, setFormAirline] = useState('Uzbekistan Airways + Turkish Airlines');
-  const [formFlight, setFormFlight] = useState('HY-271 & TK-2010');
-  const [formImg, setFormImg] = useState('https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=800&auto=format&fit=crop&q=80');
+  const [formCities, setFormCities] = useState('');
+  const [formNightsSplit, setFormNightsSplit] = useState('');
+  const [formPrice, setFormPrice] = useState<number>(850);
+  const [formOldPrice, setFormOldPrice] = useState<number>(1050);
+  const [formImg, setFormImg] = useState('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80');
 
   const openAddModal = () => {
     setEditingCombo(null);
     setFormTitle('');
     setFormRouteSummary('Toshkent ➔ Istanbul (3k) ➔ Kapadokya (4k) ➔ Toshkent');
     setFormCities('Istanbul, Kapadokya');
-    setFormNightsTotal(7);
     setFormNightsSplit('3 kecha Istanbul + 4 kecha Kapadokya');
-    setFormPrice(1290);
-    setFormOldPrice(1550);
-    setFormAirline('Uzbekistan Airways');
-    setFormFlight('HY-271 & TK-2010');
-    setFormImg('https://images.unsplash.com/photo-1641128324972-af3212f0f6bd?w=800&auto=format&fit=crop&q=80');
+    setFormPrice(850);
+    setFormOldPrice(1050);
+    setFormImg('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80');
     setIsModalOpen(true);
   };
 
@@ -58,12 +53,9 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
     setFormTitle(c.title);
     setFormRouteSummary(c.routeSummary);
     setFormCities(c.cities.join(', '));
-    setFormNightsTotal(c.nightsTotal);
     setFormNightsSplit(c.nightsSplit);
     setFormPrice(c.price);
     setFormOldPrice(c.oldPrice || Math.round(c.price * 1.2));
-    setFormAirline(c.airline);
-    setFormFlight(c.flight);
     setFormImg(c.img);
     setIsModalOpen(true);
   };
@@ -75,56 +67,38 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
       return;
     }
 
-    const cityList = formCities.split(',').map(c => c.trim()).filter(Boolean);
+    const cityArray = formCities.split(',').map((s) => s.trim()).filter(Boolean);
 
     if (editingCombo) {
       const updated: ComboTour = {
         ...editingCombo,
-        title: formTitle,
-        routeSummary: formRouteSummary,
-        cities: cityList,
-        nightsTotal: formNightsTotal,
-        nightsSplit: formNightsSplit,
-        price: formPrice,
-        oldPrice: formOldPrice > formPrice ? formOldPrice : undefined,
-        airline: formAirline,
-        flight: formFlight,
-        img: formImg
+        title: formTitle.trim(),
+        routeSummary: formRouteSummary.trim(),
+        cities: cityArray.length > 0 ? cityArray : ['Istanbul', 'Kapadokya'],
+        nightsSplit: formNightsSplit.trim() || '3 kecha + 4 kecha',
+        price: Number(formPrice),
+        oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
+        img: formImg || 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80'
       };
       onUpdateComboTour(updated);
-      onShowToast(`"${formTitle}" combo turi yangilandi!`, 'success');
+      onShowToast(`"${formTitle}" Combo turi yangilandi!`, 'success');
     } else {
       const newCombo: ComboTour = {
-        id: `combo-adm-${Date.now()}`,
-        title: formTitle,
-        route: ['Toshkent', ...cityList, 'Toshkent'],
-        routeSummary: formRouteSummary,
-        cities: cityList,
-        nightsTotal: formNightsTotal,
-        nightsSplit: formNightsSplit,
-        hotels: [
-          { city: cityList[0] || 'Shahar 1', hotelName: 'Radisson Blu 5*', stars: '5★', nights: 3, meal: 'BB (Nonushta)' },
-          { city: cityList[1] || 'Shahar 2', hotelName: 'Deluxe Cave Suites 5*', stars: '5★', nights: 4, meal: 'BB (Nonushta)' }
-        ],
+        id: `combo-${Date.now()}`,
+        title: formTitle.trim(),
+        routeSummary: formRouteSummary.trim() || 'Toshkent ➔ Istanbul ➔ Kapadokya ➔ Toshkent',
+        cities: cityArray.length > 0 ? cityArray : ['Istanbul', 'Kapadokya'],
+        nightsSplit: formNightsSplit.trim() || '3 kecha + 4 kecha',
+        airline: 'Uzbekistan Airways',
         transfersIncluded: true,
-        excursionsIncluded: ["Shahar ekskursiyasi va VIP transfer", "Tarixiy obidalar sayri"],
-        price: formPrice,
-        oldPrice: formOldPrice > formPrice ? formOldPrice : undefined,
-        departureCity: 'Toshkent (TAS)',
-        departureDate: '2026-10-01',
-        airline: formAirline,
-        flight: formFlight,
-        img: formImg,
-        rating: 9.7,
-        kompasTourCode: `KMP-CMB-${Math.floor(1000 + Math.random() * 9000)}`,
-        itinerary: [
-          { day: 1, title: `${cityList[0]}ga parvoz`, desc: "Yetib borish va 5* mehmonxonaga joylashish." },
-          { day: 2, title: "Tarixiy markaz ekskursiyasi", desc: "Mashhur qadamjolar va diqqatga sazovor joylar sayohati." },
-          { day: 4, title: `${cityList[1] || 'Keyingi shahar'}ga transfer`, desc: "Ichki qulay transfer va yangi shahar safari." }
-        ]
+        price: Number(formPrice),
+        oldPrice: formOldPrice ? Number(formOldPrice) : Math.round(formPrice * 1.25),
+        img: formImg || 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80',
+        badge: 'Mashhur Combo',
+        kompasTourCode: `CMB-${Math.floor(1000 + Math.random() * 9000)}`
       };
       onAddComboTour(newCombo);
-      onShowToast(`Yangi "${formTitle}" combo turi katalogga qo'shildi!`, 'success');
+      onShowToast(`Yangi "${formTitle}" Combo turi katalogga qo'shildi!`, 'success');
     }
 
     setIsModalOpen(false);
@@ -132,36 +106,38 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
 
   const handleDelete = (id: string, title: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
-      onShowToast("Combo turlarni butunlay o'chirish faqat Bosh Admin huquqida!", 'error');
+      onShowToast("Combo turlarni o'chirish faqat Bosh Admin huquqida!", 'error');
       return;
     }
-    if (confirm(`"${title}" combo turini o'chirishni xohlaysizmi?`)) {
+    if (confirm(`"${title}" combo turini o'chirmoqchimisiz?`)) {
       onDeleteComboTour(id);
       onShowToast(`"${title}" o'chirildi!`, 'info');
     }
   };
 
-  const filteredCombos = comboTours.filter(c =>
-    c.title.toLowerCase().includes(search.toLowerCase()) ||
-    c.routeSummary.toLowerCase().includes(search.toLowerCase()) ||
-    c.cities.some(ct => ct.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredCombos = comboTours.filter((c) => {
+    return (
+      c.title.toLowerCase().includes(search.toLowerCase()) ||
+      c.routeSummary.toLowerCase().includes(search.toLowerCase()) ||
+      c.cities.some((city) => city.toLowerCase().includes(search.toLowerCase()))
+    );
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
+          <h2 className="text-xl font-black text-[#11142d] dark:text-white flex items-center gap-2">
             <span>🔄</span> Combo Turlar Boshqaruvi ({comboTours.length})
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-[#777e89] dark:text-[#a39db0] mt-0.5">
             Bitta sayohatda 2 yoki undan ko'p shaharlarni qamrab olgan kombinatsiyalangan turlar
           </p>
         </div>
 
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/20 transition-all shrink-0 tap-bounce"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0891b2] hover:bg-[#0e7490] text-white font-extrabold text-xs shadow-md shadow-[#0891b2]/20 transition-all shrink-0 tap-bounce"
         >
           <span className="material-symbols-outlined text-[18px]">add_circle</span>
           <span>Yangi Combo Qo'shish</span>
@@ -169,9 +145,9 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
       </div>
 
       {/* Search */}
-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#1e1a23] border border-[#e5eaef] dark:border-white/10 shadow-sm">
         <div className="relative max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#777e89] dark:text-[#726c7f] text-[18px]">
             search
           </span>
           <input
@@ -179,90 +155,87 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Combo tur yoki shaharlar bo'yicha qidiruv..."
-            className="w-full bg-slate-800 text-slate-100 placeholder-slate-400 pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-700 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white placeholder-[#777e89] dark:placeholder-[#726c7f] pl-9 pr-3 py-2 rounded-xl text-xs border border-transparent focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none transition-all"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+      <div className="bg-white dark:bg-[#1e1a23] rounded-2xl border border-[#e5eaef] dark:border-white/10 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-800/80 border-b border-slate-800 text-slate-400 text-xs font-extrabold uppercase tracking-wider">
+            <thead className="bg-[#fafbfb] dark:bg-white/5 border-b border-[#e5eaef] dark:border-white/10 text-[#777e89] dark:text-[#a39db0] text-[10px] font-extrabold uppercase tracking-wider">
               <tr>
-                <th className="py-3.5 pl-4">Combo Tur</th>
-                <th className="py-3.5">Marshrut & Shaharlar</th>
-                <th className="py-3.5">Kechalar Taqsimoti</th>
-                <th className="py-3.5">Aviakompaniya</th>
-                <th className="py-3.5">Narx (USD)</th>
-                <th className="py-3.5 pr-4 text-right">Amallar</th>
+                <th className="py-3.5 pl-5">Combo Tur</th>
+                <th className="py-3.5 px-3">Marshrut & Shaharlar</th>
+                <th className="py-3.5 px-3">Kechalar Taqsimoti</th>
+                <th className="py-3.5 px-3">Aviakompaniya</th>
+                <th className="py-3.5 px-3">Narx (USD)</th>
+                <th className="py-3.5 pr-5 text-right">Amallar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#f4f6f9] dark:divide-white/5 text-[#2a3547] dark:text-[#faf9fb]">
               {filteredCombos.map((combo) => (
-                <tr key={combo.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 pl-4">
+                <tr key={combo.id} className="hover:bg-[#f8f9fa] dark:hover:bg-white/5 transition-colors">
+                  <td className="py-3 pl-5">
                     <div className="flex items-center gap-3">
                       <img
                         src={combo.img}
                         alt=""
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0"
+                        className="w-12 h-12 rounded-xl object-cover border border-[#e5eaef] dark:border-white/10 shrink-0 shadow-xs"
                       />
                       <div className="min-w-0">
-                        <p className="font-bold text-white text-xs truncate max-w-[200px]">
+                        <p className="font-bold text-[#11142d] dark:text-white text-xs truncate max-w-[200px]">
                           {combo.title}
                         </p>
-                        <p className="text-[10px] font-mono text-cyan-400 mt-0.5">
+                        <p className="text-[10px] font-mono text-[#0891b2] dark:text-cyan-400 mt-0.5">
                           {combo.kompasTourCode}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3">
-                    <p className="text-xs font-bold text-slate-200">{combo.routeSummary}</p>
+                  <td className="py-3 px-3">
+                    <p className="text-xs font-bold text-[#11142d] dark:text-white">{combo.routeSummary}</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {combo.cities.map((ct) => (
-                        <span key={ct} className="text-[10px] bg-slate-800 text-cyan-300 px-1.5 py-0.2 rounded border border-slate-700">
+                        <span key={ct} className="text-[10px] bg-[#e0f7fa] dark:bg-cyan-950/40 text-[#0891b2] dark:text-cyan-300 px-1.5 py-0.2 rounded border border-[#b2ebf2] dark:border-cyan-800/40">
                           {ct}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="py-3">
-                    <span className="text-xs font-bold text-purple-300">
-                      {combo.nightsTotal} kecha jami
-                    </span>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{combo.nightsSplit}</p>
+                  <td className="py-3 px-3">
+                    <span className="text-xs font-bold text-[#11142d] dark:text-white">{combo.nightsSplit}</span>
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Transferlar ichida</p>
                   </td>
-                  <td className="py-3">
-                    <p className="text-xs font-bold text-slate-200">{combo.airline}</p>
-                    <p className="text-[10px] text-slate-400">{combo.flight}</p>
+                  <td className="py-3 px-3">
+                    <span className="text-xs font-bold text-[#11142d] dark:text-white">{combo.airline}</span>
                   </td>
-                  <td className="py-3">
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-sm font-black text-emerald-400">${combo.price}</span>
-                      {combo.oldPrice && (
-                        <span className="text-[11px] line-through text-slate-400">
-                          ${combo.oldPrice}
-                        </span>
-                      )}
-                    </div>
+                  <td className="py-3 px-3">
+                    <span className="text-sm font-black text-[#0891b2] dark:text-cyan-400">${combo.price}</span>
+                    {combo.oldPrice && (
+                      <span className="text-[11px] line-through text-[#9993a3] block">
+                        ${combo.oldPrice}
+                      </span>
+                    )}
                   </td>
-                  <td className="py-3 pr-4 text-right">
+                  <td className="py-3 pr-5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => openEditModal(combo)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-400"
+                        className="p-1.5 rounded-lg bg-[#f4f6f9] dark:bg-white/10 hover:bg-[#e0f7fa] dark:hover:bg-cyan-950/40 text-[#2a3547] dark:text-white hover:text-[#0891b2] transition-colors"
                         title="Tahrirlash"
                       >
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                       </button>
                       <button
                         onClick={() => handleDelete(combo.id, combo.title)}
-                        className={`p-1.5 rounded-lg bg-slate-800 hover:bg-rose-500/20 ${
-                          isMainAdmin ? 'text-slate-300 hover:text-rose-400' : 'text-slate-500 cursor-not-allowed'
+                        className={`p-1.5 rounded-lg bg-[#f4f6f9] dark:bg-white/10 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ${
+                          isMainAdmin
+                            ? 'text-[#2a3547] dark:text-white hover:text-rose-600'
+                            : 'text-[#9993a3] cursor-not-allowed'
                         }`}
-                        title={isMainAdmin ? "O'chirish" : "Faqat Bosh Admin"}
+                        title={isMainAdmin ? "O'chirish" : "Faqat Bosh Admin o'chira oladi"}
                       >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
                       </button>
@@ -277,15 +250,15 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="text-lg font-black text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white dark:bg-[#1e1a23] border border-[#e5eaef] dark:border-white/10 rounded-3xl w-full max-w-xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e5eaef] dark:border-white/10">
+              <h3 className="text-lg font-black text-[#11142d] dark:text-white">
                 {editingCombo ? "Combo Turni Tahrirlash" : "Yangi Combo Tur Qo'shish"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-[#f4f6f9] dark:bg-white/10 text-[#777e89] hover:text-[#11142d] dark:hover:text-white flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
@@ -293,94 +266,94 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Combo Tur Nomi *</label>
+                <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Combo Tur Nomi *</label>
                 <input
                   type="text"
                   required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   placeholder="Istanbul + Kapadokya Combo Safari"
-                  className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Marshrut Tavsifi</label>
+                <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Marshrut Tavsifi</label>
                 <input
                   type="text"
                   value={formRouteSummary}
                   onChange={(e) => setFormRouteSummary(e.target.value)}
                   placeholder="Toshkent ➔ Istanbul (3k) ➔ Kapadokya (4k) ➔ Toshkent"
-                  className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Shaharlar (vergul bilan)</label>
+                  <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Shaharlar (vergul bilan)</label>
                   <input
                     type="text"
                     value={formCities}
                     onChange={(e) => setFormCities(e.target.value)}
                     placeholder="Istanbul, Kapadokya"
-                    className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Kechalar Taqsimoti</label>
+                  <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Kechalar Taqsimoti</label>
                   <input
                     type="text"
                     value={formNightsSplit}
                     onChange={(e) => setFormNightsSplit(e.target.value)}
                     placeholder="3 kecha Istanbul + 4 kecha Kapadokya"
-                    className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Narxi (USD) *</label>
+                  <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Narxi (USD) *</label>
                   <input
                     type="number"
                     required
                     value={formPrice}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
-                    className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 font-bold text-emerald-400 focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#0891b2] dark:text-cyan-400 rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 font-bold focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1">Eski Narxi</label>
+                  <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Eski Narxi</label>
                   <input
                     type="number"
                     value={formOldPrice}
                     onChange={(e) => setFormOldPrice(Number(e.target.value))}
-                    className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 block mb-1">Rasm Havolasi</label>
+                <label className="text-xs font-bold text-[#777e89] dark:text-[#a39db0] block mb-1">Rasm Havolasi</label>
                 <input
                   type="url"
                   value={formImg}
                   onChange={(e) => setFormImg(e.target.value)}
-                  className="w-full bg-slate-800 text-white rounded-xl px-3 py-2 text-sm border border-slate-700 focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-slate-700 focus:border-[#0891b2] focus:bg-white dark:focus:bg-[#1e1a23] focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#e5eaef] dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl bg-[#f4f6f9] dark:bg-white/10 text-[#2a3547] dark:text-white text-xs font-bold hover:bg-[#e5eaef]"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-black shadow-lg shadow-cyan-500/20"
+                  className="px-5 py-2 rounded-xl bg-[#0891b2] hover:bg-[#0e7490] text-white text-xs font-black shadow-md shadow-[#0891b2]/20"
                 >
                   Saqlash
                 </button>

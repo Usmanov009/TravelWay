@@ -9,6 +9,7 @@ interface AdminSidebarProps {
   totalActiveBookings: number;
   totalAlerts: number;
   onExitToApp: () => void;
+  isCollapsed?: boolean;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -18,153 +19,197 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   currentAdmin,
   totalActiveBookings,
   totalAlerts,
-  onExitToApp
+  onExitToApp,
+  isCollapsed = false
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
 
-  const navItems: { id: AdminTab; label: string; icon: string; badge?: number; restricted?: boolean }[] = [
-    { id: 'dashboard', label: "Boshqaruv Paneli", icon: 'dashboard' },
-    { id: 'tours', label: "Turpaketlar (Katalog)", icon: 'travel_explore' },
-    { id: 'combo', label: "Combo Turlar", icon: 'alt_route' },
-    { id: 'flights', label: "Aviachiptalar (Charter)", icon: 'flight_takeoff' },
-    { id: 'hotels', label: "Faqat Mehmonxona", icon: 'hotel' },
-    { id: 'bookings', label: "Buyurtmalar & Bronlar", icon: 'receipt_long', badge: totalActiveBookings },
-    { id: 'price_alerts', label: "Narx Signallari", icon: 'notifications_active', badge: totalAlerts },
-    { id: 'users', label: "Mijozlar Bazasi", icon: 'group', restricted: !isMainAdmin },
-    { id: 'staff', label: "Tur Adminlar Jamoasi", icon: 'badge', restricted: !isMainAdmin },
-    { id: 'settings', label: "Tizim & Kompas API", icon: 'tune' }
+  interface NavItem {
+    id: AdminTab;
+    label: string;
+    icon: string;
+    badge?: number;
+    restricted?: boolean;
+  }
+
+  interface NavGroup {
+    title: string;
+    items: NavItem[];
+  }
+
+  const navGroups: NavGroup[] = [
+    {
+      title: 'Boshqaruv (Dashboard)',
+      items: [
+        { id: 'dashboard', label: 'Boshqaruv Paneli', icon: 'dashboard' }
+      ]
+    },
+    {
+      title: 'Xizmatlar & Katalog',
+      items: [
+        { id: 'tours', label: 'Turpaketlar (Katalog)', icon: 'travel_explore' },
+        { id: 'combo', label: 'Combo Turlar', icon: 'alt_route' },
+        { id: 'flights', label: 'Aviachiptalar (Charter)', icon: 'flight_takeoff' },
+        { id: 'hotels', label: 'Faqat Mehmonxona', icon: 'hotel' }
+      ]
+    },
+    {
+      title: 'Amaliyotlar & Mijozlar',
+      items: [
+        { id: 'bookings', label: 'Buyurtmalar & Bronlar', icon: 'receipt_long', badge: totalActiveBookings },
+        { id: 'price_alerts', label: 'Narx Signallari', icon: 'notifications_active', badge: totalAlerts },
+        { id: 'users', label: 'Mijozlar Bazasi', icon: 'group', restricted: !isMainAdmin }
+      ]
+    },
+    {
+      title: 'Tizim & Jamoa',
+      items: [
+        { id: 'staff', label: 'Tur Adminlar Jamoasi', icon: 'badge', restricted: !isMainAdmin },
+        { id: 'settings', label: 'Tizim & Kompas API', icon: 'tune' }
+      ]
+    }
   ];
 
   return (
-    <aside className="w-72 bg-slate-900 border-r border-slate-800 text-slate-100 flex flex-col shrink-0 select-none h-screen sticky top-0">
-      {/* Brand Header */}
-      <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 font-black text-xl tracking-wider">
+    <aside
+      className={`${
+        isCollapsed ? 'w-20' : 'w-72'
+      } bg-white dark:bg-[#1e1a23] border-r border-[#e5eaef] dark:border-white/10 text-[#11142d] dark:text-[#faf9fb] flex flex-col shrink-0 select-none h-screen sticky top-0 transition-all duration-300 z-40`}
+    >
+      {/* 1. Flexy Brand Header */}
+      <div className="h-[70px] px-5 border-b border-[#e5eaef] dark:border-white/10 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3 overflow-hidden">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0891b2] to-[#0284c7] flex items-center justify-center text-white shadow-md shadow-[#0891b2]/25 font-black text-xl tracking-wider shrink-0">
             TW
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-white text-base tracking-tight">TravelWay</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                PRO
-              </span>
+          {!isCollapsed && (
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-[#11142d] dark:text-white text-base tracking-tight truncate">
+                  TravelWay
+                </span>
+                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#e0f7fa] dark:bg-cyan-950/60 text-[#0891b2] dark:text-cyan-400 border border-[#b2ebf2] dark:border-cyan-800/40">
+                  FLEXY
+                </span>
+              </div>
+              <p className="text-[11px] text-[#777e89] dark:text-[#a39db0] font-medium truncate">
+                Material UI Admin
+              </p>
             </div>
-            <p className="text-xs text-slate-400 font-medium">Desktop Web Admin</p>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Admin Profile Box */}
-      <div className="p-4 mx-3 my-3 rounded-2xl bg-slate-800/60 border border-slate-700/60">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <img
-              src={currentAdmin.avatar}
-              alt={currentAdmin.name}
-              className="w-11 h-11 rounded-xl object-cover border-2 border-slate-600"
-            />
-            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-bold text-white truncate">{currentAdmin.name}</h4>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {isMainAdmin ? (
-                <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
-                  <span>👑</span> Bosh Admin
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-[11px] font-black text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded-full border border-indigo-400/20">
-                  <span>🧳</span> Tur Admin
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Destination assignment for tour admin */}
-        {!isMainAdmin && currentAdmin.assignedDestinations && (
-          <div className="mt-2.5 pt-2 border-t border-slate-700/50 flex flex-wrap gap-1">
-            <span className="text-[10px] text-slate-400 font-medium">Mas'ul:</span>
-            {currentAdmin.assignedDestinations.map((d) => (
-              <span key={d} className="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.2 rounded font-semibold">
-                {d}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Navigation Links */}
-      <div className="flex-1 px-3 py-2 space-y-1 overflow-y-auto custom-scrollbar">
-        <div className="px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-          Asosiy Bo'limlar
-        </div>
-
-        {navItems.map((item) => {
-          const isActive = currentTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelectTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-sm transition-all ${
-                isActive
-                  ? 'bg-cyan-500 text-white shadow-md shadow-cyan-500/25 font-extrabold'
-                  : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span
-                  className={`material-symbols-outlined text-[20px] ${
-                    isActive ? 'text-white' : 'text-slate-400'
+      {/* 2. Navigation Items Grouped by Category */}
+      <div className="flex-1 px-3 py-3 overflow-y-auto custom-scrollbar space-y-4">
+        {navGroups.map((group, gIdx) => (
+          <div key={gIdx} className="space-y-1">
+            {!isCollapsed && (
+              <div className="px-3.5 pt-1 pb-1 text-[11px] font-extrabold uppercase tracking-wider text-[#777e89] dark:text-[#726c7f]">
+                {group.title}
+              </div>
+            )}
+            {group.items.map((item) => {
+              const isActive = currentTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  title={isCollapsed ? item.label : undefined}
+                  className={`w-full flex items-center ${
+                    isCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'
+                  } py-2.5 rounded-xl font-bold text-[13px] transition-all my-0.5 tap-bounce ${
+                    isActive
+                      ? 'bg-[#0891b2] text-white shadow-md shadow-[#0891b2]/25 font-extrabold'
+                      : 'text-[#2a3547] dark:text-[#a39db0] hover:bg-[#ecf2ff] dark:hover:bg-white/5 hover:text-[#0891b2] dark:hover:text-cyan-400'
                   }`}
                 >
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
-              </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className={`material-symbols-outlined text-[20px] shrink-0 transition-transform ${
+                        isActive
+                          ? 'text-white'
+                          : 'text-[#777e89] dark:text-[#726c7f]'
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    {!isCollapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </div>
 
-              <div className="flex items-center gap-1.5">
-                {item.restricted && (
-                  <span className="material-symbols-outlined text-[16px] text-slate-400" title="Faqat Bosh Admin ruxsati">
-                    lock
-                  </span>
-                )}
-                {typeof item.badge === 'number' && item.badge > 0 && (
-                  <span
-                    className={`text-[11px] font-black px-2 py-0.5 rounded-full ${
-                      isActive
-                        ? 'bg-white text-cyan-600'
-                        : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
+                  {!isCollapsed && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {item.restricted && (
+                        <span
+                          className="material-symbols-outlined text-[16px] text-[#9993a3]"
+                          title="Faqat Bosh Admin ruxsati"
+                        >
+                          lock
+                        </span>
+                      )}
+                      {typeof item.badge === 'number' && item.badge > 0 && (
+                        <span
+                          className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                            isActive
+                              ? 'bg-white text-[#0891b2]'
+                              : 'bg-[#e0f7fa] dark:bg-cyan-950/60 text-[#0891b2] dark:text-cyan-400 border border-[#b2ebf2] dark:border-cyan-800/40'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* 3. Bottom Flexy Profile / Status Card */}
+      {!isCollapsed && (
+        <div className="p-3 border-t border-[#e5eaef] dark:border-white/10 shrink-0">
+          <div className="p-3 rounded-2xl bg-[#f0f9ff] dark:bg-white/5 border border-[#bae6fd] dark:border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="relative shrink-0">
+                <img
+                  src={currentAdmin.avatar}
+                  alt={currentAdmin.name}
+                  className="w-10 h-10 rounded-xl object-cover border-2 border-white dark:border-[#1e1a23] shadow-xs"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white dark:border-[#1e1a23]" />
               </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-bold text-[#11142d] dark:text-white truncate">
+                  {currentAdmin.name}
+                </h4>
+                <div className="flex items-center gap-1 mt-0.5">
+                  {isMainAdmin ? (
+                    <span className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/50 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-800/40">
+                      👑 Bosh Admin
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-extrabold text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/50 px-1.5 py-0.2 rounded border border-indigo-200 dark:border-indigo-800/40">
+                      🧳 Tur Admin
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={onExitToApp}
+              className="mt-2.5 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-white dark:bg-white/10 hover:bg-[#e0f7fa] dark:hover:bg-cyan-950/40 text-[#0891b2] dark:text-cyan-400 text-[11px] font-bold transition-all border border-[#bae6fd] dark:border-white/10 shadow-xs"
+            >
+              <span className="material-symbols-outlined text-[16px]">smartphone</span>
+              <span>Mobil Ilovani Ko'rish</span>
             </button>
-          );
-        })}
-      </div>
-
-      {/* Footer Exit to Client App */}
-      <div className="p-4 border-t border-slate-800 space-y-2">
-        <button
-          onClick={onExitToApp}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-all border border-slate-700 shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[18px]">smartphone</span>
-          <span>Mobil Ilovaga Qaytish</span>
-        </button>
-
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
-          <span>Kompas v3.4 Engine</span>
-          <span className="flex items-center gap-1 text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live Sync
-          </span>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };

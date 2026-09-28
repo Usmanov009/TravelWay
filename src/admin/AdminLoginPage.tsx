@@ -109,29 +109,29 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans relative overflow-hidden select-none">
-      {/* Background Glow Accents */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full bg-[#fafbfb] dark:bg-[#141217] text-[#11142d] dark:text-white flex items-center justify-center p-4 font-sans relative overflow-hidden select-none">
+      {/* Background Soft Accents */}
+      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Login Card */}
-      <div className="w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl shadow-cyan-950/30 relative z-10">
+      <div className="w-full max-w-md bg-white dark:bg-[#1e1a23] border border-[#e5eaef] dark:border-white/10 rounded-2xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-none relative z-10">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#0891b2] to-[#0284c7] text-white shadow-lg shadow-[#0891b2]/25 mb-4">
             <span className="text-3xl">🛡️</span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">TravelWay Admin</h1>
-          <p className="text-xs text-slate-400 mt-1">Boshqaruv paneliga xavfsiz kirish</p>
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/60 border border-cyan-800/40 text-[11px] font-semibold text-cyan-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+          <h1 className="text-2xl font-bold text-[#11142d] dark:text-white tracking-tight">TravelWay Admin</h1>
+          <p className="text-xs text-[#777e89] dark:text-[#a39db0] mt-1">Flexy Material UI boshqaruv paneliga xavfsiz kirish</p>
+          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e0f7fa] dark:bg-[#0891b2]/10 border border-[#b2ebf2] dark:border-[#0891b2]/20 text-[11px] font-semibold text-[#0891b2] dark:text-cyan-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#0891b2] animate-pulse" />
             <span>Himoyalangan Tizim (Restricted Access)</span>
           </div>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2.5 animate-shake">
+          <div className="mb-6 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2.5">
             <span className="text-base">⚠️</span>
             <span>{error}</span>
           </div>
@@ -140,11 +140,11 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold text-[#11142d] dark:text-white mb-1.5">
               Admin Login yoki Email
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#777e89] dark:text-[#a39db0] text-sm">
                 👤
               </span>
               <input
@@ -154,17 +154,17 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                 placeholder="Masalan: admin"
                 autoComplete="username"
                 autoFocus
-                className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition"
+                className="w-full pl-10 pr-4 py-3 bg-[#f4f6f9] dark:bg-white/5 border border-[#e5eaef] dark:border-white/10 rounded-xl text-sm text-[#11142d] dark:text-white placeholder-[#777e89] dark:placeholder-[#a39db0] focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+            <label className="block text-xs font-bold text-[#11142d] dark:text-white mb-1.5">
               Parol
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#777e89] dark:text-[#a39db0] text-sm">
                 🔒
               </span>
               <input
@@ -173,12 +173,12 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Parolingizni kiriting"
                 autoComplete="current-password"
-                className="w-full pl-10 pr-11 py-3 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition font-mono"
+                className="w-full pl-10 pr-11 py-3 bg-[#f4f6f9] dark:bg-white/5 border border-[#e5eaef] dark:border-white/10 rounded-xl text-sm text-[#11142d] dark:text-white placeholder-[#777e89] dark:placeholder-[#a39db0] focus:outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2] transition font-mono"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition text-sm"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#777e89] dark:text-[#a39db0] hover:text-[#11142d] dark:hover:text-white transition text-sm"
                 title={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
               >
                 {showPassword ? '🙈' : '👁️'}
@@ -190,7 +190,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full mt-2 py-3.5 px-4 rounded-xl font-bold text-sm bg-[#0891b2] hover:bg-[#0e7490] text-white shadow-md shadow-[#0891b2]/25 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isLoading ? (
               <>
@@ -207,27 +207,27 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         </form>
 
         {/* Credentials Hint Box */}
-        <div className="mt-6 p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1.5">
-          <div className="flex items-center justify-between text-slate-300 font-bold">
+        <div className="mt-6 p-3 rounded-xl bg-[#f4f6f9] dark:bg-white/5 border border-[#e5eaef] dark:border-white/10 text-[11px] text-[#777e89] dark:text-[#a39db0] space-y-1.5">
+          <div className="flex items-center justify-between text-[#11142d] dark:text-white font-bold">
             <span>Standart kirish (Super Admin):</span>
-            <span className="text-amber-400 text-[10px] uppercase font-mono">👑 Bosh Admin</span>
+            <span className="text-amber-600 dark:text-amber-400 text-[10px] uppercase font-mono">👑 Bosh Admin</span>
           </div>
-          <div className="flex justify-between font-mono text-[11px] pt-0.5">
-            <span>Login: <strong className="text-white">admin</strong></span>
-            <span>Parol: <strong className="text-white">admin123</strong></span>
+          <div className="flex justify-between font-mono text-[11px] pt-0.5 text-[#11142d] dark:text-white">
+            <span>Login: <strong className="text-[#0891b2]">admin</strong></span>
+            <span>Parol: <strong className="text-[#0891b2]">admin123</strong></span>
           </div>
-          <div className="pt-1.5 border-t border-slate-800/60 text-[10px] text-slate-400 flex items-center gap-1.5">
+          <div className="pt-1.5 border-t border-[#e5eaef] dark:border-white/10 text-[10px] text-[#777e89] dark:text-[#a39db0] flex items-center gap-1.5">
             <span>🧳</span>
             <span>Tur Adminlar o'zlariga tayinlangan shaxsiy login va parol orqali kiradilar.</span>
           </div>
         </div>
 
         {/* Back to Client App */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+        <div className="mt-6 pt-5 border-t border-[#e5eaef] dark:border-white/10 text-center">
           <button
             type="button"
             onClick={onExitToApp}
-            className="text-xs text-slate-400 hover:text-cyan-400 transition flex items-center justify-center gap-1.5 mx-auto tap-bounce"
+            className="text-xs text-[#777e89] dark:text-[#a39db0] hover:text-[#0891b2] transition flex items-center justify-center gap-1.5 mx-auto tap-bounce font-medium"
           >
             <span>📱</span>
             <span>Mobil ilovaga qaytish</span>

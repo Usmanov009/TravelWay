@@ -85,6 +85,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('travelway_admin_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+    } catch (e) {}
+    return 'light'; // Default to Flexy crisp light dashboard
+  });
+
+  const toggleAdminTheme = () => {
+    const next = adminTheme === 'light' ? 'dark' : 'light';
+    setAdminTheme(next);
+    try {
+      localStorage.setItem('travelway_admin_theme', next);
+    } catch (e) {}
+  };
 
   // Find active admin profile with safe fallback
   const fallbackAdmin: AdminUser = {
@@ -114,8 +130,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans antialiased">
-      {/* 1. DESKTOP SIDEBAR */}
+    <div
+      className={`${
+        adminTheme === 'dark'
+          ? 'dark bg-[#141217] text-[#FAF9FB]'
+          : 'bg-[#fafbfb] text-[#11142d]'
+      } min-h-screen flex font-sans antialiased transition-colors duration-200 select-none`}
+    >
+      {/* 1. FLEXY SIDEBAR */}
       <AdminSidebar
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}
@@ -124,9 +146,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         totalActiveBookings={activeBookingsCount}
         totalAlerts={priceAlerts.length}
         onExitToApp={onExitToApp}
+        isCollapsed={isSidebarCollapsed}
       />
 
-      {/* 2. MAIN DESKTOP CONTENT AREA */}
+      {/* 2. MAIN FLEXY CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* TOP BAR */}
         <AdminTopNav
@@ -137,6 +160,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           onExitToApp={onExitToApp}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
+          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          isSidebarCollapsed={isSidebarCollapsed}
+          adminTheme={adminTheme}
+          onToggleTheme={toggleAdminTheme}
         />
 
         {/* TAB CONTENT CONTAINER */}
