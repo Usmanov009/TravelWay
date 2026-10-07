@@ -9,6 +9,7 @@ interface AdminStaffManagerProps {
   onUpdateStaff: (staff: AdminUser) => void;
   onRemoveStaff: (staffId: string) => void;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
+  globalSearch?: string;
 }
 
 const POPULAR_DESTINATIONS = ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv', 'Xitoy', 'Vyetnam'];
@@ -20,9 +21,11 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   onAddStaff,
   onUpdateStaff,
   onRemoveStaff,
-  onShowToast
+  onShowToast,
+  globalSearch = ''
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
+  const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -38,12 +41,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
 
   if (!isMainAdmin) {
     return (
-      <div className="p-12 text-center bg-white dark:bg-[#1e1a23] rounded-2xl border border-[#e5eaef] dark:border-white/10 space-y-4 max-w-xl mx-auto my-8 shadow-sm">
-        <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center text-3xl border border-amber-200 dark:border-amber-500/20">
+      <div className="p-12 text-center bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/90 dark:border-slate-800 space-y-4 max-w-xl mx-auto my-8 shadow-2xs">
+        <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center text-3xl border border-amber-200/70 dark:border-amber-800/50">
           🛡️
         </div>
-        <h3 className="text-xl font-bold text-[#11142d] dark:text-white">Tur Adminlar Boshqaruvi Cheklangan</h3>
-        <p className="text-sm text-[#777e89] dark:text-[#a39db0]">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tur Adminlar Boshqaruvi Cheklangan</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Xodimlar, tur adminlar tayinlash va ularga ruxsatnomalar berish faqat
           <b> 👑 Bosh Admin (Super Admin)</b> vakolatiga kiradi.
         </p>
@@ -139,7 +142,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       canManageBookings: true,
       canManageCatalog: true,
       createdAt: new Date().toISOString().split('T')[0],
-      lastActive: 'Yangi tayinlangan',
+      lastActive: 'Hozir online',
       status: 'active'
     };
 
@@ -148,47 +151,75 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
     setIsModalOpen(false);
   };
 
+  const effectiveSearch = (search || globalSearch).trim().toLowerCase();
+
+  const filteredStaff = staffList.filter(s =>
+    !effectiveSearch ||
+    s.name.toLowerCase().includes(effectiveSearch) ||
+    (s.username && s.username.toLowerCase().includes(effectiveSearch)) ||
+    (s.phone && s.phone.includes(effectiveSearch))
+  );
+
   return (
     <div className="space-y-6">
+      {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-[#11142d] dark:text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span>🛡️</span> Tur Adminlar & Xodimlar Jamoasi ({staffList.length})
           </h2>
-          <p className="text-xs text-[#777e89] dark:text-[#a39db0] mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             TravelWay tizimidagi Tur Adminlar, ularning kirish login va parollari hamda mas'ul yo'nalishlari
           </p>
         </div>
 
         <button
           onClick={openNewStaffModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0891b2] hover:bg-[#0e7490] text-white font-bold text-xs shadow-sm shadow-[#0891b2]/20 transition-all tap-bounce shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           <span>Yangi Tur Admin Tayinlash</span>
         </button>
       </div>
 
-      {staffList.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#1e1a23] rounded-2xl border border-[#e5eaef] dark:border-white/10 space-y-4 max-w-lg mx-auto my-6 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-[#e0f7fa] dark:bg-[#0891b2]/10 text-[#0891b2] dark:text-cyan-400 mx-auto flex items-center justify-center text-3xl">
+      {/* 2. Search */}
+      <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs">
+        <div className="relative max-w-md">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+            search
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Xodim ismi, login yoki telefon..."
+            className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Staff Cards Grid */}
+      {filteredStaff.length === 0 ? (
+        <div className="p-12 text-center bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/90 dark:border-slate-800 space-y-4 max-w-lg mx-auto my-6 shadow-2xs">
+          <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 mx-auto flex items-center justify-center text-3xl">
             🧳
           </div>
-          <h3 className="text-lg font-bold text-[#11142d] dark:text-white">Hozircha Tur Adminlar Tayinlanmagan</h3>
-          <p className="text-xs text-[#777e89] dark:text-[#a39db0] leading-relaxed">
-            Siz yangi tur admin tayinlab, unga shaxsiy <b>login</b>, <b>parol</b> va mas'ul davlatlarni (Turkiya, BAA, Misr va h.k.) biriktirishingiz mumkin.
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Adminlar Topilmadi</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            Qidiruv so'rovi bo'yicha tur admin topilmadi.
           </p>
-          <button
-            onClick={openNewStaffModal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0891b2] hover:bg-[#0e7490] text-white font-bold text-xs transition tap-bounce shadow-sm"
-          >
-            <span className="material-symbols-outlined text-[18px]">add_circle</span>
-            <span>Birinchi Tur Adminni Tayinlash</span>
-          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {staffList.map((staff) => {
+          {filteredStaff.map((staff) => {
             const isMain = staff.role === 'main_admin';
             const displayUser = staff.username || staff.email.split('@')[0];
             const displayPass = staff.password || 'admin123';
@@ -197,23 +228,23 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
             return (
               <div
                 key={staff.id}
-                className="p-5 rounded-2xl bg-white dark:bg-[#1e1a23] border border-[#e5eaef] dark:border-white/10 space-y-4 shadow-sm relative overflow-hidden"
+                className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs relative overflow-hidden"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <img
                       src={staff.avatar}
                       alt=""
-                      className="w-12 h-12 rounded-2xl object-cover border border-[#e5eaef] dark:border-white/10"
+                      className="w-12 h-12 rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
                     />
                     <div>
-                      <h4 className="font-bold text-[#11142d] dark:text-white text-sm">{staff.name}</h4>
-                      <p className="text-xs text-[#777e89] dark:text-[#a39db0]">{staff.phone}</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-sm">{staff.name}</h4>
+                      <p className="text-xs text-slate-400">{staff.phone}</p>
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border ${
                           isMain
-                            ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
-                            : 'bg-[#e0f7fa] text-[#0891b2] border-[#b2ebf2] dark:bg-[#0891b2]/10 dark:text-cyan-400 dark:border-[#0891b2]/20'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50'
+                            : 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/50'
                         }`}
                       >
                         {isMain ? '👑 Bosh Admin' : '🧳 Tur Admin'}
@@ -229,7 +260,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                           onShowToast("Tur admin o'chirildi", 'info');
                         }
                       }}
-                      className="text-[#777e89] hover:text-rose-500 dark:hover:text-rose-400 p-1 transition"
+                      className="text-slate-400 hover:text-rose-600 p-1 transition"
                       title="O'chirish"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -238,17 +269,17 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                 </div>
 
                 {/* Login & Password Credentials Box */}
-                <div className="p-3 rounded-xl bg-[#f4f6f9] dark:bg-white/5 border border-[#e5eaef] dark:border-white/10 space-y-2 text-xs">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#777e89] dark:text-[#a39db0] flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-[#0891b2]">key</span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-sky-600 dark:text-sky-400">key</span>
                       Kirish Ma'lumotlari:
                     </span>
                     <button
                       type="button"
                       onClick={() => copyCredentials(staff)}
-                      className="flex items-center gap-1 text-[11px] text-[#0891b2] hover:text-[#0e7490] dark:text-cyan-400 font-bold px-2 py-0.5 rounded-lg bg-[#e0f7fa] dark:bg-[#0891b2]/10 hover:bg-[#b2ebf2] transition"
-                      title="Login va parolni nusxalash"
+                      className="flex items-center gap-1 text-[11px] text-sky-700 hover:text-sky-800 dark:text-sky-300 font-bold px-2 py-0.5 rounded-lg bg-sky-100/80 dark:bg-sky-950/70 hover:bg-sky-200/80 transition"
+                      title="Telegram uchun matnni nusxalash"
                     >
                       <span className="material-symbols-outlined text-[14px]">
                         {copiedId === staff.id ? 'check' : 'content_copy'}
@@ -258,20 +289,20 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="bg-white dark:bg-[#1e1a23] px-2.5 py-1.5 rounded-xl border border-[#e5eaef] dark:border-white/10">
-                      <span className="text-[10px] text-[#777e89] dark:text-[#a39db0] block font-medium">Login:</span>
-                      <span className="text-[#0891b2] dark:text-cyan-300 font-mono font-bold truncate block">
+                    <div className="bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">Login:</span>
+                      <span className="text-sky-600 dark:text-sky-400 font-mono font-bold truncate block">
                         @{displayUser}
                       </span>
                     </div>
 
-                    <div className="bg-white dark:bg-[#1e1a23] px-2.5 py-1.5 rounded-xl border border-[#e5eaef] dark:border-white/10">
+                    <div className="bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-[#777e89] dark:text-[#a39db0] block font-medium">Parol:</span>
+                        <span className="text-[10px] text-slate-400 block font-medium">Parol:</span>
                         <button
                           type="button"
                           onClick={() => setVisiblePasswordStaffId(isPassVisible ? null : staff.id)}
-                          className="text-[#777e89] dark:text-[#a39db0] hover:text-[#11142d] dark:hover:text-white p-0.5"
+                          className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-0.5"
                           title={isPassVisible ? "Parolni yashirish" : "Parolni ko'rish"}
                         >
                           <span className="material-symbols-outlined text-[14px]">
@@ -279,7 +310,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                           </span>
                         </button>
                       </div>
-                      <span className="text-[#11142d] dark:text-white font-mono font-bold truncate block">
+                      <span className="text-slate-900 dark:text-white font-mono font-bold truncate block">
                         {isPassVisible ? displayPass : '••••••••'}
                       </span>
                     </div>
@@ -287,45 +318,21 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                 </div>
 
                 {/* Destinations */}
-                <div className="space-y-1.5 pt-2 border-t border-[#e5eaef] dark:border-white/10">
-                  <span className="text-[11px] font-bold text-[#777e89] dark:text-[#a39db0] block">Mas'ul Yo'nalishlar:</span>
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-[11px] font-bold text-slate-400 block">Mas'ul Yo'nalishlar:</span>
                   <div className="flex flex-wrap gap-1">
                     {staff.assignedDestinations && staff.assignedDestinations.length > 0 ? (
                       staff.assignedDestinations.map((d) => (
                         <span
                           key={d}
-                          className="text-[10px] font-bold bg-[#f4f6f9] dark:bg-white/5 text-[#0891b2] dark:text-cyan-300 px-2 py-0.5 rounded-md border border-[#e5eaef] dark:border-white/10"
+                          className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-md"
                         >
                           {d}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[10px] text-[#777e89] dark:text-[#a39db0] italic">Barcha yo'nalishlar</span>
+                      <span className="text-[11px] text-slate-400">Barcha yo'nalishlar</span>
                     )}
-                  </div>
-                </div>
-
-                {/* Permissions Checklist */}
-                <div className="space-y-1.5 pt-2 border-t border-[#e5eaef] dark:border-white/10 text-xs text-[#777e89] dark:text-[#a39db0]">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span>Katalog tahrirlash:</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">Ruxsat bor</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span>Buyurtmalarni tasdiqlash:</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">Ruxsat bor</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span>Turni butunlay o'chirish:</span>
-                    <span className={staff.canDeleteTours || isMain ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[#777e89] dark:text-[#a39db0]'}>
-                      {staff.canDeleteTours || isMain ? 'Ruxsat bor' : "Cheklangan"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span>Moliyaviy hisobotlar:</span>
-                    <span className={isMain ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-[#777e89] dark:text-[#a39db0]'}>
-                      {isMain ? 'To\'liq' : "Cheklangan"}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -334,170 +341,152 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
         </div>
       )}
 
-      {/* Modal: Yangi Tur Admin Tayinlash */}
+      {/* 4. MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#1e1a23] border border-[#e5eaef] dark:border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto text-[#11142d] dark:text-white">
-            <div className="flex items-center justify-between pb-3 border-b border-[#e5eaef] dark:border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🧳</span>
-                <h3 className="text-lg font-bold text-[#11142d] dark:text-white">Yangi Tur Admin Tayinlash</h3>
-              </div>
-              <button onClick={() => setIsModalOpen(false)} className="text-[#777e89] dark:text-[#a39db0] hover:text-[#11142d] dark:hover:text-white text-lg">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>🛡️</span>
+                <span>Yangi Tur Admin Tayinlash</span>
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleAdd} className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-[#11142d] dark:text-white block mb-1">Xodim Ism Familiyasi *</label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Masalan: Shahzod Aliyev"
-                  className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none"
-                />
-              </div>
-
-              {/* Login & Password Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#f4f6f9] dark:bg-white/5 rounded-2xl border border-[#e5eaef] dark:border-white/10">
+              <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold text-[#0891b2] block mb-1">
-                    Login (Username) *
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    Xodim Ismi & Familiyasi *
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0891b2] font-mono font-bold text-xs">@</span>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    placeholder="Masalan: Sardor Rahimiy"
+                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                      Login (Username) *
+                    </label>
                     <input
                       type="text"
                       required
                       value={username}
-                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
-                      placeholder="tur_shahzod"
-                      className="w-full bg-white dark:bg-[#1e1a23] text-[#11142d] dark:text-white pl-7 pr-3 py-2 rounded-xl text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none font-mono"
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="tur_sardor"
+                      className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono"
                     />
                   </div>
-                  <p className="text-[10px] text-[#777e89] dark:text-[#a39db0] mt-1">Admin panelga kirish uchun login</p>
-                </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-[#0891b2]">
-                      Parol (Password) *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={generateRandomPassword}
-                      className="text-[10px] text-[#0891b2] hover:text-[#0e7490] font-bold bg-[#e0f7fa] dark:bg-[#0891b2]/10 px-1.5 py-0.5 rounded"
-                      title="Tasodifiy parol generatsiya qilish"
-                    >
-                      🎲 Generatsiya
-                    </button>
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                        Parol *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={generateRandomPassword}
+                        className="text-[10px] text-sky-600 dark:text-sky-400 font-bold hover:underline"
+                      >
+                        Qayta generatsiya
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showModalPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowModalPassword(!showModalPassword)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">
+                          {showModalPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="relative">
-                    <input
-                      type={showModalPassword ? 'text' : 'password'}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="tour123"
-                      className="w-full bg-white dark:bg-[#1e1a23] text-[#11142d] dark:text-white pl-3 pr-9 py-2 rounded-xl text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowModalPassword(!showModalPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#777e89] hover:text-[#11142d] dark:hover:text-white"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">
-                        {showModalPassword ? 'visibility_off' : 'visibility'}
-                      </span>
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-[#777e89] dark:text-[#a39db0] mt-1">Tur admin bilan ulashiladigan parol</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-[#11142d] dark:text-white block mb-1">Email Manzili</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="shahzod@travelway.uz"
-                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none"
-                  />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-[#11142d] dark:text-white block mb-1">Telefon Raqami</label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    Telefon Raqami
+                  </label>
                   <input
                     type="text"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+998 90 123 45 67"
-                    className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none"
+                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="text-xs font-bold text-[#11142d] dark:text-white block mb-1">Mas'ul Yo'nalishlar (Davlatlar)</label>
-                <input
-                  type="text"
-                  value={destinations}
-                  onChange={(e) => setDestinations(e.target.value)}
-                  placeholder="Turkiya, BAA, Misr"
-                  className="w-full bg-[#f4f6f9] dark:bg-white/5 text-[#11142d] dark:text-white rounded-xl px-3 py-2 text-sm border border-[#e5eaef] dark:border-white/10 focus:border-[#0891b2] focus:outline-none"
-                />
-                {/* Popular country quick chips */}
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  <span className="text-[10px] text-[#777e89] dark:text-[#a39db0] self-center mr-1">Tez tanlash:</span>
-                  {POPULAR_DESTINATIONS.map((dest) => {
-                    const isSelected = destinations.toLowerCase().includes(dest.toLowerCase());
-                    return (
-                      <button
-                        type="button"
-                        key={dest}
-                        onClick={() => toggleDestination(dest)}
-                        className={`text-[10px] px-2 py-0.5 rounded-lg border font-bold transition ${
-                          isSelected
-                            ? 'bg-[#0891b2] text-white border-[#0891b2]'
-                            : 'bg-[#f4f6f9] dark:bg-white/5 text-[#777e89] dark:text-[#a39db0] border-[#e5eaef] dark:border-white/10 hover:border-[#0891b2]'
-                        }`}
-                      >
-                        {isSelected ? '✓ ' : '+ '}{dest}
-                      </button>
-                    );
-                  })}
+                <div>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    Mas'ul Yo'nalishlar (Tanlang):
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {POPULAR_DESTINATIONS.map((dest) => {
+                      const isSelected = destinations.includes(dest);
+                      return (
+                        <button
+                          key={dest}
+                          type="button"
+                          onClick={() => toggleDestination(dest)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                            isSelected
+                              ? 'bg-sky-600 text-white border-sky-600'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
+                          }`}
+                        >
+                          {isSelected ? `✓ ${dest}` : `+ ${dest}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={canDeleteTours}
+                      onChange={(e) => setCanDeleteTours(e.target.checked)}
+                      className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
+                    />
+                    <span>Katalogdagi turlarni butunlay o'chirishga ruxsat berish</span>
+                  </label>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="delTours"
-                  checked={canDeleteTours}
-                  onChange={(e) => setCanDeleteTours(e.target.checked)}
-                  className="rounded text-[#0891b2] bg-[#f4f6f9] dark:bg-white/5 border-[#e5eaef] dark:border-white/10 focus:ring-[#0891b2]"
-                />
-                <label htmlFor="delTours" className="text-xs text-[#777e89] dark:text-[#a39db0] cursor-pointer">
-                  Turlarni katalogdan butunlay o'chirish huquqi berilsin
-                </label>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#e5eaef] dark:border-white/10">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-[#f4f6f9] dark:bg-white/5 text-[#777e89] dark:text-[#a39db0] hover:text-[#11142d] dark:hover:text-white border border-[#e5eaef] dark:border-white/10 text-xs font-bold transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#0891b2] hover:bg-[#0e7490] text-white text-xs font-bold shadow-sm shadow-[#0891b2]/20 transition tap-bounce"
+                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-2xs"
                 >
-                  Tayinlash & Saqlash
+                  Adminni Tayinlash
                 </button>
               </div>
             </form>

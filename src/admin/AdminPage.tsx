@@ -86,12 +86,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('travelway_admin_theme');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch (e) {}
-    return 'light'; // Default to Flexy crisp light dashboard
+    return 'light'; // Default to crisp, soft eye-friendly light dashboard
   });
 
   const toggleAdminTheme = () => {
@@ -129,15 +130,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setCurrentTab('tours');
   };
 
+  const handleToggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setIsMobileSidebarOpen(prev => !prev);
+    } else {
+      setIsSidebarCollapsed(prev => !prev);
+    }
+  };
+
   return (
     <div
       className={`${
         adminTheme === 'dark'
-          ? 'dark bg-[#141217] text-[#FAF9FB]'
-          : 'bg-[#fafbfb] text-[#11142d]'
+          ? 'dark bg-[#0b0f19] text-slate-100'
+          : 'bg-slate-50 text-slate-900'
       } min-h-screen flex font-sans antialiased transition-colors duration-200 select-none`}
     >
-      {/* 1. FLEXY SIDEBAR */}
+      {/* 1. SIDEBAR */}
       <AdminSidebar
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}
@@ -147,9 +156,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         totalAlerts={priceAlerts.length}
         onExitToApp={onExitToApp}
         isCollapsed={isSidebarCollapsed}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* 2. MAIN FLEXY CONTENT AREA */}
+      {/* 2. MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* TOP BAR */}
         <AdminTopNav
@@ -160,14 +171,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           onExitToApp={onExitToApp}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onToggleSidebar={handleToggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
           adminTheme={adminTheme}
           onToggleTheme={toggleAdminTheme}
         />
 
         {/* TAB CONTENT CONTAINER */}
-        <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-y-auto custom-scrollbar">
           {currentTab === 'dashboard' && (
             <AdminDashboard
               currentRole={currentRole}
@@ -195,6 +206,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateTour={onUpdateTour}
               onDeleteTour={onDeleteTour}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -207,6 +219,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateComboTour={onUpdateComboTour}
               onDeleteComboTour={onDeleteComboTour}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -219,6 +232,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateFlight={onUpdateFlight}
               onDeleteFlight={onDeleteFlight}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -231,6 +245,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateHotel={onUpdateHotel}
               onDeleteHotel={onDeleteHotel}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -242,6 +257,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateBookingStatus={onUpdateBookingStatus}
               onCancelBooking={onCancelBooking}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -250,6 +266,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               currentRole={currentRole}
               currentAdmin={currentAdmin}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -262,6 +279,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateStaff={onUpdateStaff}
               onRemoveStaff={onRemoveStaff}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
@@ -274,6 +292,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onSimulatePriceDrop={onSimulatePriceDrop}
               onDeletePriceAlert={onDeletePriceAlert}
               onShowToast={onShowToast}
+              globalSearch={searchTerm}
             />
           )}
 
