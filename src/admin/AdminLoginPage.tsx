@@ -47,6 +47,11 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       const data = await res.json();
 
       if (data.success) {
+        if (data.token) {
+          try {
+            sessionStorage.setItem('travelway_admin_token', data.token);
+          } catch (e) {}
+        }
         const isSuper = (data.role || 'main_admin') === 'main_admin';
         onShowToast(
           isSuper

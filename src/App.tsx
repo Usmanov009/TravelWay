@@ -565,12 +565,23 @@ export default function App() {
     }
   };
 
+  const getAuthHeaders = () => {
+    let token = '';
+    try {
+      token = sessionStorage.getItem('travelway_admin_token') || '';
+    } catch (e) {}
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+  };
+
   // ADMIN OPERATIONS (CRUD FOR TOURS, COMBOS, FLIGHTS, HOTELS, BOOKINGS, STAFF)
   const handleAddTour = (tour: TourPackage) => {
     setTours((prev) => [tour, ...prev]);
     fetch('/api/db/tours', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(tour)
     }).catch((e) => console.warn('MongoDB tour save error:', e));
   };
@@ -578,13 +589,16 @@ export default function App() {
     setTours((prev) => prev.map((t) => t.id === tour.id ? tour : t));
     fetch('/api/db/tours', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(tour)
     }).catch((e) => console.warn('MongoDB tour update error:', e));
   };
   const handleDeleteTour = (tourId: string) => {
     setTours((prev) => prev.filter((t) => t.id !== tourId));
-    fetch(`/api/db/tours/${tourId}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB tour delete error:', e));
+    fetch(`/api/db/tours/${tourId}`, { 
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    }).catch((e) => console.warn('MongoDB tour delete error:', e));
   };
 
   const handleAddComboTour = (combo: ComboTour) => {
@@ -641,7 +655,7 @@ export default function App() {
 
     fetch('/api/admin/staff', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(staff)
     }).catch((e) => console.warn('Sync staff to backend error:', e));
   };
@@ -657,7 +671,7 @@ export default function App() {
 
     fetch('/api/admin/staff', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(staff)
     }).catch((e) => console.warn('Sync staff update to backend error:', e));
   };
@@ -672,7 +686,8 @@ export default function App() {
     });
 
     fetch(`/api/admin/staff/${staffId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAuthHeaders()
     }).catch((e) => console.warn('Delete staff on backend error:', e));
   };
 

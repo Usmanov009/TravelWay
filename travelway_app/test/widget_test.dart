@@ -8,7 +8,7 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => AppProvider()),
+          ChangeNotifierProvider(create: (_) => AppProvider(autoInit: false)),
         ],
         child: const TravelWayApp(),
       ),

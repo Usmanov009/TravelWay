@@ -73,8 +73,10 @@ class AppProvider extends ChangeNotifier {
   final Set<String> _favoriteIds = {};
   bool isFavorite(String id) => _favoriteIds.contains(id);
 
-  AppProvider() {
-    initApp();
+  AppProvider({bool autoInit = true}) {
+    if (autoInit) {
+      initApp();
+    }
   }
 
   Future<void> initApp() async {

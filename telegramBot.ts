@@ -1,6 +1,6 @@
 import { UserModel } from './db.js';
 
-export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8983416515:AAEm_WQRTNK92mCHXi3EALGiJAPTFop4HLE';
+export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'mytravelwaybot';
 
 export interface PendingTelegramSession {
@@ -95,6 +95,10 @@ export function verifyTelegramCode(code: string, sessionToken?: string) {
  * Sends a message via the Telegram Bot API
  */
 export async function sendTelegramMessage(chatId: number | string, text: string, replyMarkup?: any) {
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.warn('TELEGRAM_BOT_TOKEN belgilanmagan — xabar yuborilmadi.');
+    return null;
+  }
   try {
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
@@ -301,6 +305,10 @@ let updateOffset = 0;
 
 export function startTelegramPolling() {
   if (isPolling) return;
+  if (!TELEGRAM_BOT_TOKEN) {
+    console.log('ℹ️ TELEGRAM_BOT_TOKEN belgilanmagan — Telegram bot polling xizmati faollashtirilmadi.');
+    return;
+  }
   isPolling = true;
   console.log(`🤖 Telegram Bot @${TELEGRAM_BOT_USERNAME} polling service started...`);
 

@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://imronbekusmonov392_db_user:bK7ikLMH2lsCZq1K@cluster0.8oc53jt.mongodb.net/travelway?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Tour Schema
 const TourSchema = new mongoose.Schema({
@@ -112,6 +113,14 @@ const AdminStaffSchema = new mongoose.Schema({
   status: { type: String, default: 'active' },
 }, { timestamps: true });
 
+AdminStaffSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  if (this.password && !this.password.startsWith('$2a$') && !this.password.startsWith('$2b$')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+});
+
 export const TourModel = mongoose.models.Tour || mongoose.model('Tour', TourSchema);
 export const BookingModel = mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
 export const PriceAlertModel = mongoose.models.PriceAlert || mongoose.model('PriceAlert', PriceAlertSchema);
@@ -122,12 +131,16 @@ let isConnected = false;
 
 export async function connectDB() {
   if (isConnected) return;
+  if (!MONGODB_URI) {
+    console.log('ℹ️ MONGODB_URI belgilanmagan — tizim xavfsiz in-memory zaxira rejimida ishlaydi.');
+    return;
+  }
   try {
     const conn = await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 8000,
     });
     isConnected = !!conn.connections[0].readyState;
-    console.log(` MongoDB Connected to database: ${conn.connection.name}`);
+    console.log(`✅ MongoDB Connected to database: ${conn.connection.name}`);
 
     // Auto-seed initial tours and bookings if empty
     const tourCount = await TourModel.countDocuments();

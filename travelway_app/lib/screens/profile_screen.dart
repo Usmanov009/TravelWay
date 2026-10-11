@@ -525,19 +525,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Widget? trailing,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppTheme.subtleDark,
-          borderRadius: BorderRadius.circular(10),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppTheme.subtleDark,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: AppTheme.textSub),
         ),
-        child: Icon(icon, size: 18, color: AppTheme.textSub),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textMain)),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+        trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 12, color: AppTheme.textMuted),
+        onTap: onTap,
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textMain)),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
-      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 12, color: AppTheme.textMuted),
-      onTap: onTap,
     );
   }
 }
