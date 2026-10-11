@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TourPackage, Booking, PriceAlert, ComboTour, FlightTicket, HotelOnly } from '../types';
 import { AdminRole, AdminTab, AdminUser } from './adminTypes';
 import { AdminSidebar } from './AdminSidebar';
@@ -94,6 +94,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     } catch (e) {}
     return 'light'; // Default to crisp, soft eye-friendly light dashboard
   });
+
+  // Guard: If non-main-admin tries to view closed sections, redirect to dashboard
+  useEffect(() => {
+    if (currentRole !== 'main_admin' && (currentTab === 'staff' || currentTab === 'users')) {
+      setCurrentTab('dashboard');
+    }
+  }, [currentRole, currentTab]);
 
   const toggleAdminTheme = () => {
     const next = adminTheme === 'light' ? 'dark' : 'light';
@@ -261,7 +268,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             />
           )}
 
-          {currentTab === 'users' && (
+          {currentTab === 'users' && currentRole === 'main_admin' && (
             <AdminUsersManager
               currentRole={currentRole}
               currentAdmin={currentAdmin}
@@ -270,7 +277,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             />
           )}
 
-          {currentTab === 'staff' && (
+          {currentTab === 'staff' && currentRole === 'main_admin' && (
             <AdminStaffManager
               currentRole={currentRole}
               currentAdmin={currentAdmin}

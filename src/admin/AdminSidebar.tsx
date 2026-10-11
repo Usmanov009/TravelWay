@@ -74,6 +74,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     }
   ];
 
+  const visibleNavGroups: NavGroup[] = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => isMainAdmin || !item.restricted)
+    }))
+    .filter((group) => group.items.length > 0);
+
   const handleItemClick = (id: AdminTab) => {
     onSelectTab(id);
     if (onCloseMobile) {
@@ -131,7 +138,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
         {/* Navigation Items Grouped by Category */}
         <div className="flex-1 px-3 py-3 overflow-y-auto custom-scrollbar space-y-4">
-          {navGroups.map((group, gIdx) => (
+          {visibleNavGroups.map((group, gIdx) => (
             <div key={gIdx} className="space-y-1">
               {(!isCollapsed || isMobileOpen) && (
                 <div className="px-3.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -170,14 +177,6 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
                     {(!isCollapsed || isMobileOpen) && (
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {item.restricted && (
-                          <span
-                            className="material-symbols-outlined text-[15px] text-slate-400"
-                            title="Faqat Bosh Admin ruxsati"
-                          >
-                            lock
-                          </span>
-                        )}
                         {typeof item.badge === 'number' && item.badge > 0 && (
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${

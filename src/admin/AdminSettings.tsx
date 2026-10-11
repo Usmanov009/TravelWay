@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
 
 interface AdminSettingsProps {
@@ -14,17 +14,60 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
   const [kompasUrl, setKompasUrl] = useState('https://online.uz.kompastour.com/search_tour');
-  const [usdRate, setUsdRate] = useState(12850);
-  const [commissionRate, setCommissionRate] = useState(8);
-  const [tgBotUsername, setTgBotUsername] = useState('@TravelWayUzBot');
+  const [commissionRate, setCommissionRate] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('travelway_agency_commission');
+      if (saved) return Number(saved);
+    } catch (e) {}
+    return 8;
+  });
+  const [tgBotUsername, setTgBotUsername] = useState('@mytravelwaybot');
+  const [isSavingCommission, setIsSavingCommission] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  // Sync commission from backend
+  useEffect(() => {
+    fetch('/api/admin/commission')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && typeof data.commissionRate === 'number') {
+          setCommissionRate(data.commissionRate);
+          try {
+            localStorage.setItem('travelway_agency_commission', String(data.commissionRate));
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isMainAdmin) {
-      onShowToast("Tizim sozlamalarini o'zgartirish faqat Bosh Admin huquqida!", 'error');
-      return;
+    setIsSavingCommission(true);
+
+    try {
+      // 1. Save commission (accessible to all admins: both Main Admin and Tour Admin)
+      const cleanCommission = Math.max(0, Math.min(100, Number(commissionRate) || 0));
+      setCommissionRate(cleanCommission);
+
+      try {
+        localStorage.setItem('travelway_agency_commission', String(cleanCommission));
+      } catch (e) {}
+
+      await fetch('/api/admin/commission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commissionRate: cleanCommission })
+      });
+
+      if (isMainAdmin) {
+        onShowToast(`Tizim sozlamalari va agentlik komissiyasi (${cleanCommission}%) muvaffaqiyatli saqlandi! ⚙️`, 'success');
+      } else {
+        onShowToast(`Agentlik komissiyasi (${cleanCommission}%) muvaffaqiyatli saqlandi! 💼`, 'success');
+      }
+    } catch (err) {
+      onShowToast("Sozlamalarni saqlashda xatolik yuz berdi", 'error');
+    } finally {
+      setIsSavingCommission(false);
     }
-    onShowToast("Tizim sozlamalari muvaffaqiyatli saqlandi! ⚙️", 'success');
   };
 
   const handleDownloadBackup = () => {
@@ -35,7 +78,8 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         tours: localStorage.getItem('travelway_tours'),
         bookings: localStorage.getItem('travelway_bookings'),
         staff: localStorage.getItem('travelway_admin_staff'),
-        priceAlerts: localStorage.getItem('travelway_price_alerts')
+        priceAlerts: localStorage.getItem('travelway_price_alerts'),
+        commissionRate: localStorage.getItem('travelway_agency_commission') || 8
       };
       const jsonBlob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(jsonBlob);
@@ -59,12 +103,59 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           <span>⚙️</span> Tizim & Kompas Tour API Sozlamalari
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Kompas Tour agregatsiya mexanizmi, valyuta kurslari va Telegram xabarnomalar
+          Kompas Tour agregatsiya mexanizmi, agentlik komissiyasi va bildirishnomalar
         </p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Kompas Tour Integration */}
+        {/* 1. Agency Commission (Editable and Savable by BOTH Tour Admins & Main Admin) */}
+        <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
+                💼
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Agentlik Komissiyasi</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Turpaketlar va biletlar narxiga qo'llaniladigan agentlik ustamasi
+                </p>
+              </div>
+            </div>
+
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-200/80 dark:border-emerald-800/60">
+              Faol: {commissionRate}%
+            </span>
+          </div>
+
+          <div className="max-w-md">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Agentlik Komissiyasi (%)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={commissionRate}
+                onChange={(e) => setCommissionRate(Number(e.target.value))}
+                className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-emerald-600 dark:text-emerald-400 font-bold text-sm rounded-xl pl-3 pr-10 py-2.5 border border-slate-200/80 dark:border-slate-700/80 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+                placeholder="Masalan: 8"
+              />
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                %
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+              {isMainAdmin 
+                ? "Tur adminlar hamda bosh admin tomonidan istalgan vaqtda o'zgartirilishi mumkin."
+                : "Tur Admin sifatida siz ushbu komissiya foizini o'zgartirish va saqlash huquqiga egasiz."}
+            </p>
+          </div>
+        </div>
+
+        {/* 2. Kompas Tour Integration */}
         <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -84,54 +175,20 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Kompas Tour Qidiruv URL</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Kompas Tour Qidiruv URL {isMainAdmin ? '' : '(Faqat Bosh Admin tahrirlay oladi)'}
+            </label>
             <input
               type="text"
               disabled={!isMainAdmin}
               value={kompasUrl}
               onChange={(e) => setKompasUrl(e.target.value)}
-              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent font-mono focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent font-mono focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none disabled:opacity-60"
             />
           </div>
         </div>
 
-        {/* Currency & Finance */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg">
-              💵
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Moliyaviy Koeffitsiyentlar & Kurslar</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Markaziy Bank kursi va keshbek hisobi</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">1 USD kursi (UZS)</label>
-              <input
-                type="number"
-                disabled={!isMainAdmin}
-                value={usdRate}
-                onChange={(e) => setUsdRate(Number(e.target.value))}
-                className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Agentlik Komissiyasi (%)</label>
-              <input
-                type="number"
-                disabled={!isMainAdmin}
-                value={commissionRate}
-                onChange={(e) => setCommissionRate(Number(e.target.value))}
-                className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white font-bold rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Telegram Notifications */}
+        {/* 3. Telegram Notifications */}
         <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-lg">
@@ -144,18 +201,20 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Rasmiy Bot Username</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Rasmiy Bot Username {isMainAdmin ? '' : '(Faqat Bosh Admin tahrirlay oladi)'}
+            </label>
             <input
               type="text"
               disabled={!isMainAdmin}
               value={tgBotUsername}
               onChange={(e) => setTgBotUsername(e.target.value)}
-              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none disabled:opacity-60"
             />
           </div>
         </div>
 
-        {/* Backup & System Data */}
+        {/* 4. Backup & System Data */}
         <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -164,7 +223,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               </div>
               <div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">Ma'lumotlar Bazasi Zaxirasi</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Barcha turlar, bronlar va xodimlar ma'lumotlarini JSON fayl qilib saqlash</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Barcha turlar, bronlar va ma'lumotlarni JSON fayl qilib saqlash</p>
               </div>
             </div>
 
@@ -179,16 +238,19 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
         </div>
 
-        {isMainAdmin && (
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce"
-            >
-              Sozlamalarni Saqlash
-            </button>
-          </div>
-        )}
+        {/* Save Button: Available for BOTH Main Admin and Tour Admin */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isSavingCommission}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[18px]">save</span>
+            <span>
+              {isMainAdmin ? "Barcha Sozlamalarni Saqlash" : "Agentlik Komissiyasini Saqlash"}
+            </span>
+          </button>
+        </div>
       </form>
     </div>
   );

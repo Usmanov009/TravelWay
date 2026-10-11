@@ -159,4 +159,27 @@ router.delete('/staff/:id', authenticateToken, requireRole('main_admin'), async 
   }
 });
 
+// ==========================================
+// 3. AGENCY COMMISSION (EDITABLE BY ALL ADMINS)
+// ==========================================
+let agencyCommissionRate: number = 8;
+
+router.get('/commission', (req, res) => {
+  res.json({ success: true, commissionRate: agencyCommissionRate });
+});
+
+router.post('/commission', (req, res) => {
+  try {
+    const { commissionRate } = req.body;
+    const num = Number(commissionRate);
+    if (!isNaN(num) && num >= 0 && num <= 100) {
+      agencyCommissionRate = num;
+      return res.json({ success: true, commissionRate: agencyCommissionRate });
+    }
+    res.status(400).json({ success: false, error: "Komissiya foizi 0 dan 100 gacha bo'lishi kerak" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;

@@ -73,35 +73,12 @@ export const AdminTopNav: React.FC<AdminTopNavProps> = ({
 
       {/* 2. Right: Role Switcher, Quick Actions, Theme Toggle, Profile */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Role Switcher Pill */}
-        <div className="bg-slate-100/90 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-1 shadow-2xs">
-          <button
-            onClick={() => onSwitchRole('main_admin')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              isMainAdmin
-                ? 'bg-white dark:bg-sky-600 text-sky-700 dark:text-white shadow-2xs font-extrabold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            title="Barcha huquqlarga ega Super Admin"
-            type="button"
-          >
-            <span>👑</span>
-            <span className="hidden md:inline">Bosh Admin</span>
-          </button>
-
-          <button
-            onClick={() => onSwitchRole('tour_admin')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              !isMainAdmin
-                ? 'bg-white dark:bg-sky-600 text-sky-700 dark:text-white shadow-2xs font-extrabold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-            title="Operatsion Tur Admin (Katalog & Bronlar)"
-            type="button"
-          >
-            <span>🧳</span>
-            <span className="hidden md:inline">Tur Admin</span>
-          </button>
+        {/* Active Role Status Badge (Tur admin oynasiga o'tish tugmasi olib tashlandi) */}
+        <div className="bg-slate-100/90 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 flex items-center gap-1.5 shadow-2xs">
+          <span>{isMainAdmin ? '👑' : '🧳'}</span>
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+            {isMainAdmin ? 'Bosh Admin' : 'Tur Admin'}
+          </span>
         </div>
 
         {/* Theme Toggle (Kunduzgi / Tungi rejim) */}
