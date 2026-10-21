@@ -20,24 +20,155 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Filters
   final TextEditingController _searchController = TextEditingController();
-  String _nights = '7 kecha';
+  final TextEditingController _nightsController = TextEditingController(text: '7');
 
   final List<Map<String, String>> _countries = const [
+    {'code': 'ALL', 'name': 'Barcha mamlakatlar', 'flag': '🌍'},
     {'code': 'TR', 'name': 'Turkiya', 'flag': '🇹🇷'},
-    {'code': 'AE', 'name': 'BAA', 'flag': '🇦🇪'},
     {'code': 'EG', 'name': 'Misr', 'flag': '🇪🇬'},
+    {'code': 'AE', 'name': 'BAA', 'flag': '🇦🇪'},
     {'code': 'TH', 'name': 'Tailand', 'flag': '🇹🇭'},
-    {'code': 'VN', 'name': 'Vyetnam', 'flag': '🇻🇳'},
+    {'code': 'VN', 'name': 'Vetnam', 'flag': '🇻🇳'},
     {'code': 'CN', 'name': 'Xitoy', 'flag': '🇨🇳'},
     {'code': 'MV', 'name': 'Maldiv', 'flag': '🇲🇻'},
     {'code': 'ID', 'name': 'Indoneziya', 'flag': '🇮🇩'},
     {'code': 'GE', 'name': 'Gruziya', 'flag': '🇬🇪'},
+    {'code': 'LK', 'name': 'Shri-Lanka', 'flag': '🇱🇰'},
+    {'code': 'MY', 'name': 'Malayziya', 'flag': '🇲🇾'},
+    {'code': 'QA', 'name': 'Qatar', 'flag': '🇶🇦'},
+    {'code': 'SA', 'name': 'Saudiya Arabistoni', 'flag': '🇸🇦'},
+    {'code': 'OM', 'name': 'Ummon', 'flag': '🇴🇲'},
+    {'code': 'AZ', 'name': 'Ozarbayjon', 'flag': '🇦🇿'},
+    {'code': 'CY', 'name': 'Kipr', 'flag': '🇨🇾'},
+    {'code': 'ME', 'name': 'Chernogoriya', 'flag': '🇲🇪'},
+    {'code': 'IT', 'name': 'Italiya', 'flag': '🇮🇹'},
+    {'code': 'ES', 'name': 'Ispaniya', 'flag': '🇪🇸'},
+    {'code': 'FR', 'name': 'Fransiya', 'flag': '🇫🇷'},
+    {'code': 'CZ', 'name': 'Chexiya', 'flag': '🇨🇿'},
+    {'code': 'JP', 'name': 'Yaponiya', 'flag': '🇯🇵'},
+    {'code': 'KR', 'name': 'Janubiy Koreya', 'flag': '🇰🇷'},
+    {'code': 'SC', 'name': 'Seyshel', 'flag': '🇸🇨'},
+    {'code': 'MU', 'name': 'Mavrikiy', 'flag': '🇲🇺'},
+    {'code': 'IN', 'name': 'Hindiston (Goa)', 'flag': '🇮🇳'},
   ];
 
   @override
   void dispose() {
     _searchController.dispose();
+    _nightsController.dispose();
     super.dispose();
+  }
+
+  void _openSearchableCountryPicker(BuildContext context, AppProvider provider) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.surfaceDark,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        String query = '';
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final filtered = _countries.where((c) {
+              if (query.isEmpty) return true;
+              return c['name']!.toLowerCase().contains(query.toLowerCase()) ||
+                     c['code']!.toLowerCase().contains(query.toLowerCase());
+            }).toList();
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.75,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppTheme.borderDark,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    '🌍 Davlatni tanlang yoki qidiring',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textMain,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Search Input (Type bo'lsin)
+                  TextField(
+                    autofocus: true,
+                    style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Davlat nomini yozing (masalan: Turkiya)...',
+                      hintStyle: const TextStyle(color: AppTheme.textSub, fontSize: 13),
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.primary, size: 20),
+                      filled: true,
+                      fillColor: AppTheme.subtleDark,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.borderDark),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.borderDark),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    ),
+                    onChanged: (val) {
+                      setModalState(() => query = val);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Selectable Country List with Flag in front of name
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const Divider(color: AppTheme.borderDark, height: 1),
+                      itemBuilder: (context, idx) {
+                        final c = filtered[idx];
+                        final isSel = provider.selectedCountry == c['code'];
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          leading: Text(c['flag']!, style: const TextStyle(fontSize: 22)),
+                          title: Text(
+                            c['name']!,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                              color: isSel ? AppTheme.primary : AppTheme.textMain,
+                            ),
+                          ),
+                          trailing: isSel
+                              ? const Icon(Icons.check_circle, color: AppTheme.primary, size: 18)
+                              : null,
+                          onTap: () {
+                            provider.setCountry(c['code']!);
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -181,30 +312,77 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🌙 Muddat', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        const Text('🌙 Kunlar soni (Kechalar)', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: AppTheme.subtleDark,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppTheme.borderDark),
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _nights,
-                              isExpanded: true,
-                              dropdownColor: AppTheme.surfaceDark,
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
-                              items: const [
-                                DropdownMenuItem(value: '7 kecha', child: Text('7 kecha')),
-                                DropdownMenuItem(value: '10 kecha', child: Text('10 kecha')),
-                                DropdownMenuItem(value: '14 kecha', child: Text('14 kecha')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => _nights = val);
-                              },
-                            ),
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  final cur = int.tryParse(_nightsController.text) ?? 7;
+                                  final next = cur > 1 ? cur - 1 : 1;
+                                  _nightsController.text = next.toString();
+                                  provider.setNightsCount(next);
+                                },
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surfaceDark,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Center(
+                                    child: Text('-', style: TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold, fontSize: 14)),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _nightsController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                    border: InputBorder.none,
+                                    hintText: '7',
+                                    hintStyle: TextStyle(color: AppTheme.textSub),
+                                  ),
+                                  onSubmitted: (val) {
+                                    final n = int.tryParse(val);
+                                    provider.setNightsCount(n);
+                                  },
+                                ),
+                              ),
+                              const Text('kun', style: TextStyle(fontSize: 10, color: AppTheme.textSub, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 4),
+                              GestureDetector(
+                                onTap: () {
+                                  final cur = int.tryParse(_nightsController.text) ?? 7;
+                                  final next = cur + 1;
+                                  _nightsController.text = next.toString();
+                                  provider.setNightsCount(next);
+                                },
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surfaceDark,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Center(
+                                    child: Text('+', style: TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold, fontSize: 14)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -214,9 +392,58 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Country Horizontal Chips
-              const Text('🌍 Yo\'nalish mamlakati', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              // Country Picker (Select ham, Type ham bo'lsin, bayroq nomi oldida)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('🌍 Borish mamlakati (Select & Qidiruv)', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                  GestureDetector(
+                    onTap: () => _openSearchableCountryPicker(context, provider),
+                    child: const Text('Barchasi ▾', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
               const SizedBox(height: 6),
+
+              // Searchable country card with flag in front of name
+              GestureDetector(
+                onTap: () => _openSearchableCountryPicker(context, provider),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.subtleDark,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.borderDark),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        _countries.firstWhere(
+                          (c) => c['code'] == provider.selectedCountry,
+                          orElse: () => _countries[1],
+                        )['flag']!,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _countries.firstWhere(
+                            (c) => c['code'] == provider.selectedCountry,
+                            orElse: () => _countries[1],
+                          )['name']!,
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                        ),
+                      ),
+                      const Icon(Icons.search, size: 16, color: AppTheme.textSub),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_drop_down, size: 18, color: AppTheme.textSub),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Country Horizontal Chips
               SizedBox(
                 height: 36,
                 child: ListView.separated(

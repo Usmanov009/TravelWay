@@ -20,12 +20,15 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
   const [nightsCount, setNightsCount] = useState<number>(7);
 
   const countryOptions = [
-    'Barchasi',
-    'Turkiya',
-    'BAA',
-    'Misr',
-    'Tailand',
-    'Maldiv'
+    { name: 'Barchasi', flag: '🌍' },
+    { name: 'Turkiya', flag: '🇹🇷' },
+    { name: 'BAA', flag: '🇦🇪' },
+    { name: 'Misr', flag: '🇪🇬' },
+    { name: 'Tailand', flag: '🇹🇭' },
+    { name: 'Maldiv', flag: '🇲🇻' },
+    { name: 'Vetnam', flag: '🇻🇳' },
+    { name: 'Indoneziya', flag: '🇮🇩' },
+    { name: 'Gruziya', flag: '🇬🇪' }
   ];
 
   const mealOptions = [
@@ -91,19 +94,20 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             Davlat / Kurort bo'yicha:
           </span>
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {countryOptions.map((country) => (
+            {countryOptions.map((c) => (
               <button
-                key={country}
+                key={c.name}
                 type="button"
-                onClick={() => setSelectedCountry(country)}
-                className="px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition tap-bounce border"
+                onClick={() => setSelectedCountry(c.name)}
+                className="px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition tap-bounce border flex items-center gap-1.5"
                 style={{
-                  backgroundColor: selectedCountry === country ? 'var(--tw-accent)' : 'var(--tw-subtle)',
-                  color: selectedCountry === country ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
-                  borderColor: selectedCountry === country ? 'var(--tw-accent)' : 'var(--tw-border)'
+                  backgroundColor: selectedCountry === c.name ? 'var(--tw-accent)' : 'var(--tw-subtle)',
+                  color: selectedCountry === c.name ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
+                  borderColor: selectedCountry === c.name ? 'var(--tw-accent)' : 'var(--tw-border)'
                 }}
               >
-                {country === 'Barchasi' ? '🌍 Barcha mehmonxonalar' : `🏖️ ${country}`}
+                <span>{c.flag}</span>
+                <span>{c.name === 'Barchasi' ? 'Barcha mehmonxonalar' : c.name}</span>
               </button>
             ))}
           </div>
@@ -168,16 +172,39 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
           </div>
         </div>
 
-        {/* Nights Selector */}
+        {/* Nights Selector with Typeable input and quick preset buttons */}
         <div className="flex items-center justify-between text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
-          <span style={{ color: 'var(--tw-text-sub)' }}>🌙 Tunlar soni:</span>
+          <div className="flex items-center gap-2">
+            <span style={{ color: 'var(--tw-text-sub)' }}>🌙 Tunlar soni:</span>
+            <div
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg border transition-colors"
+              style={{
+                backgroundColor: 'var(--tw-subtle)',
+                borderColor: 'var(--tw-border)'
+              }}
+            >
+              <input
+                id="hotels-nights-input"
+                type="number"
+                min="1"
+                max="60"
+                value={nightsCount}
+                onChange={(e) => setNightsCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="w-10 text-center text-xs font-black bg-transparent border-0 p-0 focus:ring-0"
+                style={{ color: 'var(--tw-text-main)' }}
+              />
+              <span className="text-[10px] font-bold" style={{ color: 'var(--tw-text-sub)' }}>
+                kecha
+              </span>
+            </div>
+          </div>
           <div className="flex items-center gap-1">
             {[3, 5, 7, 10, 14].map((num) => (
               <button
                 key={num}
                 type="button"
                 onClick={() => setNightsCount(num)}
-                className="px-2 py-0.5 rounded text-[11px] font-bold tap-bounce"
+                className="px-2 py-0.5 rounded text-[11px] font-bold tap-bounce transition"
                 style={{
                   backgroundColor: nightsCount === num ? 'var(--tw-accent)' : 'var(--tw-subtle)',
                   color: nightsCount === num ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'

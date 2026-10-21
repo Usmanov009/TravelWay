@@ -7,6 +7,7 @@ import { ComboToursView } from './ComboToursView';
 import { FlightsView } from './FlightsView';
 import { HotelsOnlyView } from './HotelsOnlyView';
 import { ServiceModals } from './ServiceModals';
+import { CountrySelectCombobox } from './CountrySelectCombobox';
 import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from '../data/extraServicesData';
 
 interface SearchScreenProps {
@@ -113,7 +114,109 @@ export const KOMPAS_COUNTRIES: KompasCountry[] = [
     code: 'GE',
     name: 'Gruziya',
     flag: '🇬🇪',
-    resorts: ['Barcha kurortlar', 'Batumi']
+    resorts: ['Barcha kurortlar', 'Batumi', 'Tbilisi']
+  },
+  {
+    code: 'LK',
+    name: 'Shri-Lanka',
+    flag: '🇱🇰',
+    resorts: ['Barcha kurortlar', 'Kolombo', 'Bentota']
+  },
+  {
+    code: 'MY',
+    name: 'Malayziya',
+    flag: '🇲🇾',
+    resorts: ['Barcha kurortlar', 'Kuala Lumpur', 'Langkawi']
+  },
+  {
+    code: 'QA',
+    name: 'Qatar',
+    flag: '🇶🇦',
+    resorts: ['Barcha kurortlar', 'Doha']
+  },
+  {
+    code: 'SA',
+    name: 'Saudiya Arabistoni',
+    flag: '🇸🇦',
+    resorts: ['Barcha kurortlar', 'Jidda', 'Makka', 'Madina', 'Riyoz']
+  },
+  {
+    code: 'OM',
+    name: 'Ummon (Oman)',
+    flag: '🇴🇲',
+    resorts: ['Barcha kurortlar', 'Maskat', 'Salala']
+  },
+  {
+    code: 'AZ',
+    name: 'Ozarbayjon',
+    flag: '🇦🇿',
+    resorts: ['Barcha kurortlar', 'Boku', 'Shahdag']
+  },
+  {
+    code: 'CY',
+    name: 'Kipr',
+    flag: '🇨🇾',
+    resorts: ['Barcha kurortlar', 'Ayia Napa', 'Larnaka', 'Limassol']
+  },
+  {
+    code: 'ME',
+    name: 'Chernogoriya',
+    flag: '🇲🇪',
+    resorts: ['Barcha kurortlar', 'Budva', 'Kotor', 'Tivat']
+  },
+  {
+    code: 'IT',
+    name: 'Italiya',
+    flag: '🇮🇹',
+    resorts: ['Barcha kurortlar', 'Rim', 'Venetsiya', 'Milan']
+  },
+  {
+    code: 'ES',
+    name: 'Ispaniya',
+    flag: '🇪🇸',
+    resorts: ['Barcha kurortlar', 'Barselona', 'Madrid', 'Mayorka']
+  },
+  {
+    code: 'FR',
+    name: 'Fransiya',
+    flag: '🇫🇷',
+    resorts: ['Barcha kurortlar', 'Parij', 'Nitsa']
+  },
+  {
+    code: 'CZ',
+    name: 'Chexiya',
+    flag: '🇨🇿',
+    resorts: ['Barcha kurortlar', 'Praga', 'Karlovi Vari']
+  },
+  {
+    code: 'JP',
+    name: 'Yaponiya',
+    flag: '🇯🇵',
+    resorts: ['Barcha kurortlar', 'Tokio', 'Kioto', 'Osaka']
+  },
+  {
+    code: 'KR',
+    name: 'Janubiy Koreya',
+    flag: '🇰🇷',
+    resorts: ['Barcha kurortlar', 'Seul', 'Jeju']
+  },
+  {
+    code: 'SC',
+    name: 'Seyshel',
+    flag: '🇸🇨',
+    resorts: ['Barcha kurortlar', 'Mae', 'Praslin']
+  },
+  {
+    code: 'MU',
+    name: 'Mavrikiy',
+    flag: '🇲🇺',
+    resorts: ['Barcha kurortlar', 'Port-Lui']
+  },
+  {
+    code: 'IN',
+    name: 'Hindiston (Goa)',
+    flag: '🇮🇳',
+    resorts: ['Barcha kurortlar', 'Shimoliy Goa', 'Janubiy Goa']
   }
 ];
 
@@ -225,13 +328,41 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   ) => {
     setIsLoading(true);
     try {
+      let nights_from = '5';
+      let nights_till = '14';
+      if (targetNights && targetNights !== 'ALL' && targetNights !== '') {
+        if (targetNights === '5-6') {
+          nights_from = '5';
+          nights_till = '6';
+        } else if (targetNights === '7-8') {
+          nights_from = '7';
+          nights_till = '8';
+        } else if (targetNights === '9-11') {
+          nights_from = '9';
+          nights_till = '11';
+        } else if (targetNights === '12+') {
+          nights_from = '12';
+          nights_till = '21';
+        } else if (targetNights.includes('-')) {
+          const parts = targetNights.split('-');
+          nights_from = parts[0];
+          nights_till = parts[1] || parts[0];
+        } else {
+          const num = parseInt(targetNights, 10);
+          if (!isNaN(num) && num > 0) {
+            nights_from = String(num);
+            nights_till = String(num);
+          }
+        }
+      }
+
       const params = new URLSearchParams({
         departure: targetCity,
         country: targetCountry,
         adult: String(targetAdults),
         child: String(targetChildren),
-        nights_from: targetNights === '5-6' ? '5' : targetNights === '7-8' ? '7' : targetNights === '9-11' ? '9' : targetNights === '12+' ? '12' : '6',
-        nights_till: targetNights === '5-6' ? '6' : targetNights === '7-8' ? '8' : targetNights === '9-11' ? '11' : targetNights === '12+' ? '15' : '10'
+        nights_from,
+        nights_till
       });
       if (targetDate) {
         params.set('checkin_beg', targetDate.replace(/-/g, ''));
@@ -350,13 +481,28 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
         if (!flightStr.includes(airLow)) return false;
       }
 
-      // 7. Nights Duration
-      if (nightsFilter !== 'ALL') {
+      // 7. Nights / Days Duration
+      if (nightsFilter && nightsFilter !== 'ALL' && nightsFilter !== '') {
         const n = tour.nightsCount || (tour.nights.match(/\d+/) ? parseInt(tour.nights.match(/\d+/)![0], 10) : 7);
-        if (nightsFilter === '5-6' && (n < 5 || n > 6)) return false;
-        if (nightsFilter === '7-8' && (n < 7 || n > 8)) return false;
-        if (nightsFilter === '9-11' && (n < 9 || n > 11)) return false;
-        if (nightsFilter === '12+' && n < 12) return false;
+        if (nightsFilter === '5-6') {
+          if (n < 5 || n > 6) return false;
+        } else if (nightsFilter === '7-8') {
+          if (n < 7 || n > 8) return false;
+        } else if (nightsFilter === '9-11') {
+          if (n < 9 || n > 11) return false;
+        } else if (nightsFilter === '12+') {
+          if (n < 12) return false;
+        } else if (nightsFilter.includes('-')) {
+          const [minStr, maxStr] = nightsFilter.split('-');
+          const min = parseInt(minStr, 10);
+          const max = parseInt(maxStr, 10);
+          if (n < min || n > max) return false;
+        } else {
+          const targetNum = parseInt(nightsFilter, 10);
+          if (!isNaN(targetNum) && targetNum > 0) {
+            if (n !== targetNum) return false;
+          }
+        }
       }
 
       // 8. Price range
@@ -404,7 +550,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     if (selectedMeal !== 'ALL') count++;
     if (selectedStars !== 'ALL') count++;
     if (selectedAirline !== 'Barcha aviakompaniyalar') count++;
-    if (nightsFilter !== 'ALL') count++;
+    if (nightsFilter && nightsFilter !== 'ALL' && nightsFilter !== '') count++;
     if (minPrice > 300 || maxPrice < 2000) count++;
     return count;
   }, [countryCode, selectedResort, selectedMeal, selectedStars, selectedAirline, nightsFilter, minPrice, maxPrice]);
@@ -745,38 +891,15 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               </select>
             </div>
 
-            {/* Страна (Mamlakat) */}
-            <div
-              className="p-2.5 rounded-2xl border transition-colors"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)'
-              }}
-            >
-              <label
-                className="text-[10px] block font-semibold mb-0.5"
-                style={{ color: 'var(--tw-text-sub)' }}
-              >
-                🌍 Borish mamlakati (Страна)
-              </label>
-              <select
-                id="kompas-country"
-                value={countryCode}
-                onChange={(e) => handleCountryChange(e.target.value)}
-                className="w-full bg-transparent text-xs font-extrabold border-0 p-0 focus:ring-0 cursor-pointer"
-                style={{ color: 'var(--tw-text-main)' }}
-              >
-                {KOMPAS_COUNTRIES.map((c) => (
-                  <option
-                    key={c.code}
-                    value={c.code}
-                    style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}
-                  >
-                    {c.flag} {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Страна (Mamlakat) - Select ham Type ham, davlat bayrog'i nomining oldida */}
+            <CountrySelectCombobox
+              id="kompas-country"
+              countries={KOMPAS_COUNTRIES}
+              selectedCode={countryCode}
+              onSelectCountry={handleCountryChange}
+              label="🌍 Borish mamlakati (Страна)"
+              placeholder="Davlat nomini yozing..."
+            />
           </div>
 
           {/* Second row: Resort & Dates */}
@@ -847,36 +970,109 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
           {/* Third row: Nights & Travelers */}
           <div className="grid grid-cols-2 gap-2.5">
-            {/* Ночей (Tunlar soni) */}
+            {/* Kunlar / tunlar soni (Foydalanuvchi type qiladi) */}
             <div
-              className="p-2.5 rounded-2xl border transition-colors"
+              className="p-2.5 rounded-2xl border transition-colors relative"
               style={{
                 backgroundColor: 'var(--tw-subtle)',
                 borderColor: 'var(--tw-border)'
               }}
             >
-              <label
-                className="text-[10px] block font-semibold mb-0.5"
-                style={{ color: 'var(--tw-text-sub)' }}
-              >
-                🌙 Tunlar soni (Ночей)
-              </label>
-              <select
-                id="kompas-nights"
-                value={nightsFilter}
-                onChange={(e) => {
-                  setNightsFilter(e.target.value);
-                  executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, e.target.value, adultsCount, childrenCount, departureDate);
-                }}
-                className="w-full bg-transparent text-xs font-extrabold border-0 p-0 focus:ring-0 cursor-pointer"
-                style={{ color: 'var(--tw-text-main)' }}
-              >
-                <option value="ALL" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Barchasi (5 - 14 kecha)</option>
-                <option value="5-6" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>5 - 6 kecha</option>
-                <option value="7-8" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>7 - 8 kecha (Standart)</option>
-                <option value="9-11" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>9 - 11 kecha</option>
-                <option value="12+" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>12+ kecha (Uzoq dam olish)</option>
-              </select>
+              <div className="flex items-center justify-between mb-0.5">
+                <label
+                  htmlFor="kompas-nights"
+                  className="text-[10px] block font-semibold cursor-pointer select-none"
+                  style={{ color: 'var(--tw-text-sub)' }}
+                >
+                  🌙 Kunlar soni (Kechalar)
+                </label>
+                {nightsFilter && nightsFilter !== 'ALL' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNightsFilter('ALL');
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, 'ALL', adultsCount, childrenCount, departureDate);
+                    }}
+                    className="text-[10px] text-slate-400 hover:text-white tap-bounce"
+                    title="Barcha kunlarga qaytarish"
+                  >
+                    Barchasi ✕
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input
+                  id="kompas-nights"
+                  type="number"
+                  min="1"
+                  max="60"
+                  step="1"
+                  placeholder="Masalan: 7"
+                  value={nightsFilter === 'ALL' ? '' : nightsFilter}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNightsFilter(val || 'ALL');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+                    }
+                  }}
+                  onBlur={() => {
+                    executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+                  }}
+                  className="w-full bg-transparent text-xs font-extrabold border-0 p-0 focus:ring-0"
+                  style={{ color: 'var(--tw-text-main)' }}
+                />
+                {nightsFilter && nightsFilter !== 'ALL' && (
+                  <span
+                    className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0"
+                    style={{
+                      backgroundColor: 'var(--tw-accent-light)',
+                      color: 'var(--tw-accent)'
+                    }}
+                  >
+                    kun
+                  </span>
+                )}
+                {/* Stepper buttons - / + */}
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cur = parseInt(nightsFilter, 10);
+                      const next = isNaN(cur) || cur <= 1 ? 1 : cur - 1;
+                      setNightsFilter(String(next));
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount, departureDate);
+                    }}
+                    className="w-5 h-5 rounded flex items-center justify-center text-xs font-black tap-bounce transition"
+                    style={{
+                      backgroundColor: 'var(--tw-surface)',
+                      color: 'var(--tw-text-main)'
+                    }}
+                    title="1 kunga kamaytirish"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cur = parseInt(nightsFilter, 10);
+                      const next = isNaN(cur) ? 7 : cur + 1;
+                      setNightsFilter(String(next));
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount, departureDate);
+                    }}
+                    className="w-5 h-5 rounded flex items-center justify-center text-xs font-black tap-bounce transition"
+                    style={{
+                      backgroundColor: 'var(--tw-surface)',
+                      color: 'var(--tw-text-main)'
+                    }}
+                    title="1 kunga oshirish"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Туристы (Sayyohlar) */}
@@ -1182,14 +1378,28 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             </span>
             {countryCode !== 'ALL' && (
               <span
-                className="px-2 py-0.5 rounded-lg border text-[10px] font-bold shrink-0"
+                className="px-2 py-0.5 rounded-lg border text-[10px] font-bold shrink-0 flex items-center gap-1"
                 style={{
                   backgroundColor: 'var(--tw-accent-light)',
                   borderColor: 'var(--tw-accent-border)',
                   color: 'var(--tw-accent)'
                 }}
               >
-                {currentCountry.name}
+                <span>{currentCountry.flag}</span>
+                <span>{currentCountry.name}</span>
+              </span>
+            )}
+            {nightsFilter && nightsFilter !== 'ALL' && (
+              <span
+                className="px-2 py-0.5 rounded-lg border text-[10px] font-bold shrink-0 flex items-center gap-1"
+                style={{
+                  backgroundColor: 'var(--tw-accent-light)',
+                  borderColor: 'var(--tw-accent-border)',
+                  color: 'var(--tw-accent)'
+                }}
+              >
+                <span>🌙</span>
+                <span>{nightsFilter} kun / kecha</span>
               </span>
             )}
             {selectedResort !== 'Barcha kurortlar' && (
@@ -1230,10 +1440,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       <div id="tour-cards-section" className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <span
-            className="text-xs sm:text-sm font-extrabold uppercase tracking-wider"
+            className="text-xs sm:text-sm font-extrabold uppercase tracking-wider flex items-center gap-1.5"
             style={{ color: 'var(--tw-text-main)' }}
           >
-            {currentCountry.name} bo'yicha SayrHub turpaketlari ({displayTours.length})
+            <span>{currentCountry.flag}</span>
+            <span>{currentCountry.name} bo'yicha SayrHub turpaketlari ({displayTours.length})</span>
           </span>
           <span
             className="text-[10px] sm:text-xs"

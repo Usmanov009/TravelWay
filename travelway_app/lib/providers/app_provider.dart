@@ -34,6 +34,9 @@ class AppProvider extends ChangeNotifier {
   String _selectedCountry = 'TR'; // Turkiya
   String get selectedCountry => _selectedCountry;
 
+  int? _nightsCount = 7;
+  int? get nightsCount => _nightsCount;
+
   String _activeFilter = 'ALL'; // 'ALL', '5STAR', 'CHEAP'
   String get activeFilter => _activeFilter;
 
@@ -122,6 +125,14 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  void setNightsCount(int? n) {
+    if (_nightsCount != n) {
+      _nightsCount = n;
+      notifyListeners();
+      loadTours();
+    }
+  }
+
   void setFilter(String filter) {
     _activeFilter = filter;
     notifyListeners();
@@ -143,6 +154,17 @@ class AppProvider extends ChangeNotifier {
       ).toList();
     }
 
+    if (_nightsCount != null && _nightsCount! > 0) {
+      list = list.where((t) {
+        if (t.nightsCount == _nightsCount) return true;
+        final match = RegExp(r'\d+').firstMatch(t.nights);
+        if (match != null && int.tryParse(match.group(0)!) == _nightsCount) {
+          return true;
+        }
+        return false;
+      }).toList();
+    }
+
     if (_activeFilter == '5STAR') {
       list = list.where((t) => t.is5Star || t.hotelStars.contains('5')).toList();
     } else if (_activeFilter == 'CHEAP') {
@@ -161,6 +183,8 @@ class AppProvider extends ChangeNotifier {
         departure: _selectedDeparture,
         country: _selectedCountry,
         query: _searchQuery,
+        nightsFrom: _nightsCount ?? 5,
+        nightsTill: _nightsCount ?? 14,
       );
     } catch (_) {}
 

@@ -68,7 +68,42 @@ export const COUNTRY_TO_STATEINC: Record<string, string> = {
   'IN': '6', // Hindiston
   'HINDISTON': '6',
   'INDIA': '6',
-  '6': '6'
+  '6': '6',
+  'MY': '39', // Malayziya
+  'MALAYZIYA': '39',
+  'MALAYSIA': '39',
+  'SA': '141', // Saudiya
+  'SAUDIYA': '141',
+  'OM': '84', // Ummon
+  'UMMON': '84',
+  'OMAN': '84',
+  'AZ': '41', // Ozarbayjon
+  'OZARBAYJON': '41',
+  'AZERBAIJAN': '41',
+  'CY': '19', // Kipr
+  'KIPR': '19',
+  'CYPRUS': '19',
+  'ME': '36', // Chernogoriya
+  'CHERNOGORIYA': '36',
+  'MONTENEGRO': '36',
+  'IT': '13', // Italiya
+  'ITALIYA': '13',
+  'ITALY': '13',
+  'ES': '12', // Ispaniya
+  'ISPANIYA': '12',
+  'SPAIN': '12',
+  'FR': '14', // Fransiya
+  'FRANSIYA': '14',
+  'FRANCE': '14',
+  'CZ': '24', // Chexiya
+  'CHEXIYA': '24',
+  'CZECH': '24',
+  'JP': '95', // Yaponiya
+  'YAPONIYA': '95',
+  'JAPAN': '95',
+  'KR': '96', // Janubiy Koreya
+  'KOREYA': '96',
+  'KOREA': '96'
 };
 
 export const COUNTRY_NAMES: Record<string, string> = {
@@ -85,7 +120,19 @@ export const COUNTRY_NAMES: Record<string, string> = {
   '27': 'Shri-Lanka',
   '30': 'Gruziya',
   '111': 'Qatar',
-  '6': 'Hindiston'
+  '6': 'Hindiston',
+  '39': 'Malayziya',
+  '141': 'Saudiya Arabistoni',
+  '84': 'Ummon',
+  '41': 'Ozarbayjon',
+  '19': 'Kipr',
+  '36': 'Chernogoriya',
+  '13': 'Italiya',
+  '12': 'Ispaniya',
+  '14': 'Fransiya',
+  '24': 'Chexiya',
+  '95': 'Yaponiya',
+  '96': 'Janubiy Koreya'
 };
 
 export const DEST_COORDS: Record<string, { lat: number; lng: number }> = {
