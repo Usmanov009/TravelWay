@@ -22,17 +22,56 @@ import adminRouter from './src/server/routes/adminRoutes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
-app.use(express.json());
+// 1. Security Headers
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
-// Enable CORS for Flutter mobile/web/desktop apps
+app.use(express.json({ limit: '1mb' }));
+
+// 2. Global Rate Limiter for all API routes (300 requests / 15 min)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Juda ko'p so'rovlar yuborildi. Iltimos, 15 daqiqadan so'ng qayta urinib ko'ring." }
+});
+app.use('/api/', apiLimiter);
+
+// 3. Strict Rate Limiter for Authentication (15 attempts / 15 min)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: "Xavfsizlik: ko'p marotaba urinish qayd etildi. Iltimos, birozdan so'ng qayta urinib ko'ring." }
+});
+app.use('/api/admin/login', authLimiter);
+app.use('/api/auth/telegram/verify-code', authLimiter);
+
+// 4. Secure CORS headers
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Telegram-Bot-Api-Secret-Token');
+  res.header('Access-Control-Allow-Credentials', 'true');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -79,6 +118,13 @@ app.post('/api/auth/telegram/verify-code', (req, res) => {
 
 app.post('/api/telegram/webhook', async (req, res) => {
   try {
+    const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const headerSecret = req.headers['x-telegram-bot-api-secret-token'];
+      if (headerSecret !== webhookSecret) {
+        return res.status(403).json({ ok: false, error: "Ruxsat berilmagan webhook so'rovi" });
+      }
+    }
     await processTelegramUpdate(req.body);
     res.json({ ok: true });
   } catch (err: any) {
@@ -90,7 +136,7 @@ app.post('/api/telegram/webhook', async (req, res) => {
 app.get(['/api/health', '/healthz'], (req, res) => {
   res.status(200).json({
     status: 'ok',
-    service: 'TravelWay',
+    service: 'SayrHub',
     uptime: `${Math.floor(process.uptime())}s`,
     timestamp: new Date().toISOString(),
     nodeEnv: process.env.NODE_ENV || 'development'
@@ -123,7 +169,7 @@ async function start() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 TravelWay server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 SayrHub server running on http://0.0.0.0:${PORT}`);
   });
 }
 

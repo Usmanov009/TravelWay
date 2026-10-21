@@ -89,7 +89,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
-      const saved = localStorage.getItem('travelway_admin_theme');
+      const saved = localStorage.getItem('sayrhub_admin_theme') || localStorage.getItem('travelway_admin_theme');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch (e) {}
     return 'light'; // Default to crisp, soft eye-friendly light dashboard
@@ -106,6 +106,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     const next = adminTheme === 'light' ? 'dark' : 'light';
     setAdminTheme(next);
     try {
+      localStorage.setItem('sayrhub_admin_theme', next);
       localStorage.setItem('travelway_admin_theme', next);
     } catch (e) {}
   };
@@ -114,7 +115,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const fallbackAdmin: AdminUser = {
     id: 'adm-root',
     name: 'Admin',
-    email: 'admin@travelway.uz',
+    email: 'admin@sayrhub.uz',
     role: currentRole,
     roleTitle: currentRole === 'main_admin' ? 'Bosh Admin' : 'Tur Admin',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',

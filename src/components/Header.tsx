@@ -26,12 +26,12 @@ export const Header: React.FC<HeaderProps> = ({
     switch (currentTab) {
       case 'auth':
         return {
-          title: 'TravelWay',
+          title: 'SayrHub',
           sub: 'Arzon turlar & Charter reyslar'
         };
       case 'search':
         return {
-          title: 'TravelWay',
+          title: 'SayrHub',
           sub: 'Turpaketlar qidiruvi & Charter reyslar'
         };
       case 'explore':
@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
         };
       default:
         return {
-          title: 'TravelWay',
+          title: 'SayrHub',
           sub: 'Arzon turlar & Charter reyslar'
         };
     }
@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="w-full h-full rounded-[14px] flex items-center justify-center font-black text-xs tracking-wider"
             style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-accent)' }}
           >
-            TW
+            SH
           </div>
         </div>
         <div>

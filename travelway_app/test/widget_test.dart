@@ -4,13 +4,13 @@ import 'package:travelway_app/main.dart';
 import 'package:travelway_app/providers/app_provider.dart';
 
 void main() {
-  testWidgets('TravelWay app smoke test', (WidgetTester tester) async {
+  testWidgets('SayrHub app smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => AppProvider(autoInit: false)),
         ],
-        child: const TravelWayApp(),
+        child: const SayrHubApp(),
       ),
     );
 

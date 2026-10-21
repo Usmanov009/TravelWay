@@ -1,5 +1,5 @@
 {
-  "name": "TravelWay",
+  "name": "SayrHub",
   "description": "Arzon turpaketlar, charter reyslar, qaynoq takliflar va qulay qidiruv mobil ilovasi",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

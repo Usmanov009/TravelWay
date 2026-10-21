@@ -2,7 +2,13 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'travelway_jwt_secret_dev_key_2026';
+const isProd = process.env.NODE_ENV === 'production';
+export const JWT_SECRET = process.env.JWT_SECRET || (isProd 
+  ? (() => { 
+      console.warn('⚠️ DIQQAT: Production muhitida JWT_SECRET belgilanmagan! Iltimos, .env faylida kuchli JWT_SECRET o\'rnating.'); 
+      return 'sayrhub_prod_secret_fallback_key_' + (process.pid || 2026); 
+    })()
+  : 'sayrhub_jwt_secret_dev_key_2026');
 
 export interface AuthenticatedUser {
   id: string;

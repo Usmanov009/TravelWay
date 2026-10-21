@@ -1,6 +1,6 @@
 {
-    "name": "travelway_app",
-    "short_name": "travelway_app",
+    "name": "SayrHub",
+    "short_name": "SayrHub",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

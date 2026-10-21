@@ -678,7 +678,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <span className="text-sm" style={{ color: 'var(--tw-accent)' }}>📱</span>
               <div>
                 <p className="text-xs font-semibold" style={{ color: 'var(--tw-text-main)' }}>
-                  TravelWay Mobile App
+                  SayrHub Mobile App
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
                   iOS / Android / Flutter Edition v3.2.0

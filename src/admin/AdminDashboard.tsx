@@ -265,7 +265,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                {typeof window !== 'undefined' ? (localStorage.getItem('travelway_agency_commission') || '8') : '8'}%
+                {typeof window !== 'undefined' ? (localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission') || '8') : '8'}%
               </span>
               <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 Faol foiz

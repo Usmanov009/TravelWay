@@ -23,18 +23,18 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
       ],
-      child: const TravelWayApp(),
+      child: const SayrHubApp(),
     ),
   );
 }
 
-class TravelWayApp extends StatelessWidget {
-  const TravelWayApp({super.key});
+class SayrHubApp extends StatelessWidget {
+  const SayrHubApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TravelWay',
+      title: 'SayrHub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: const MainNavigationScreen(),

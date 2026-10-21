@@ -107,13 +107,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         <div className="h-[70px] px-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-sm font-black text-lg tracking-wider shrink-0">
-              TW
+              SH
             </div>
             {(!isCollapsed || isMobileOpen) && (
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold text-slate-900 dark:text-white text-base tracking-tight truncate">
-                    TravelWay
+                    SayrHub
                   </span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60">
                     ADMIN

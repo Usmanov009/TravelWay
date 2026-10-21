@@ -128,14 +128,14 @@ class _TripsScreenState extends State<TripsScreen> {
 
   Future<void> _shareTelegram(Booking b) async {
     final text = Uri.encodeComponent(
-      'TravelWay Vaucher:\n'
+      'SayrHub Vaucher:\n'
       'Mehmonxona: ${b.tourTitle}\n'
       'Manzil: ${b.dest}\n'
       'Vaucher ID: ${b.voucherId}\n'
       'Narx: ${b.price}\n'
       'Holat: ${b.status}'
     );
-    final url = Uri.parse('https://t.me/share/url?url=https://travelway.uz&text=$text');
+    final url = Uri.parse('https://t.me/share/url?url=https://sayrhub.uz&text=$text');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
@@ -251,7 +251,7 @@ class _TripsScreenState extends State<TripsScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'TravelWay orqali o\'zingizga yoqqan turni bir zumda band qiling.',
+              'SayrHub orqali o\'zingizga yoqqan turni bir zumda band qiling.',
               style: TextStyle(fontSize: 11, color: AppTheme.textSub),
               textAlign: TextAlign.center,
             ),
@@ -400,7 +400,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(
-                          text: 'TRAVELWAY SMETA:\nTur: ${b.tourTitle}\nVaucher: ${b.voucherId}\nNarx: ${b.price}',
+                          text: 'SAYRHUB SMETA:\nTur: ${b.tourTitle}\nVaucher: ${b.voucherId}\nNarx: ${b.price}',
                         ));
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Smeta buferga nusxalandi! 📋')),

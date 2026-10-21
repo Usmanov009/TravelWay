@@ -214,7 +214,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       <div className="text-center pt-0.5 pb-1 flex flex-col items-center">
         <div
           className="relative mb-2.5 group cursor-pointer"
-          onClick={() => onShowToast("✈️ TravelWay — Eng unutilmas sayohatlaringiz hamrohi!", 'info')}
+          onClick={() => onShowToast("✈️ SayrHub — Eng unutilmas sayohatlaringiz hamrohi!", 'info')}
         >
           <div
             className="w-16 h-16 rounded-2xl p-[2px] shadow-md transition-transform active:scale-95"
@@ -224,7 +224,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               className="w-full h-full rounded-[14px] flex items-center justify-center relative overflow-hidden"
               style={{ backgroundColor: 'var(--tw-surface)' }}
             >
-              <span className="text-2xl font-black tracking-tight" style={{ color: 'var(--tw-text-main)' }}>TW</span>
+              <span className="text-2xl font-black tracking-tight" style={{ color: 'var(--tw-text-main)' }}>SH</span>
             </div>
           </div>
           <div
@@ -240,7 +240,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           id="auth-main-title"
           style={{ color: 'var(--tw-text-main)' }}
         >
-          {mode === 'register' ? "TravelWay-da ro'yxatdan o'tish" : "TravelWay hisobiga kirish"}
+          {mode === 'register' ? "SayrHub-da ro'yxatdan o'tish" : "SayrHub hisobiga kirish"}
         </h2>
         <p
           className="text-xs max-w-[290px] mt-1 leading-relaxed"
@@ -309,7 +309,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             </div>
             <div className="text-left">
               <span className="font-black text-xs block">Telegram orqali ro'yxatdan o'tish</span>
-              <span className="text-[10px] text-white/80">@mytravelwaybot orqali 1 soniyada</span>
+              <span className="text-[10px] text-white/80">@sayrhub_bot orqali 1 soniyada</span>
             </div>
           </div>
           <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-lg">+$30 bonus</span>
@@ -462,7 +462,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         {activeTab === 'email' && (
           <div className="space-y-3" id="section-email-input">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Email manzili yoki TC-ID</label>
+              <label className="text-[11px] font-semibold text-slate-300">Email manzili yoki SH-ID</label>
               <div className="flex items-center bg-[#16233a] rounded-2xl px-3 py-2.5 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">alternate_email</span>
                 <input
@@ -470,7 +470,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jasur@travelway.uz yoki #TW-884291"
+                  placeholder="jasur@sayrhub.uz yoki #SH-884291"
                   className="w-full bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder:text-slate-500"
                 />
               </div>
@@ -595,7 +595,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <span className="font-bold text-xs block" style={{ color: 'var(--tw-text-main)' }}>
                 {mode === 'register' ? "Telegram orqali ro'yxatdan o'tish" : "Telegram orqali tezkor kirish"}
               </span>
-              <span className="text-[10px] text-[#2AABEE]">@mytravelwaybot</span>
+              <span className="text-[10px] text-[#2AABEE]">@sayrhub_bot</span>
             </div>
           </div>
           <span className="text-[10px] bg-[#2AABEE]/20 px-2 py-0.5 rounded-md font-bold text-[#2AABEE]">1 soniya</span>
@@ -662,7 +662,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           </button>
         </div>
         <p className="text-[10px] leading-relaxed px-4" style={{ color: 'var(--tw-text-muted)' }}>
-          Kirish orqali siz TravelWay-ning{' '}
+          Kirish orqali siz SayrHub-ning{' '}
           <button
             type="button"
             className="underline hover:opacity-80"

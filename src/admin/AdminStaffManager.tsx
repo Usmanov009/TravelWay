@@ -96,7 +96,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   const copyCredentials = (staff: AdminUser) => {
     const loginVal = staff.username || staff.email.split('@')[0];
     const passVal = staff.password || 'admin123';
-    const textToCopy = `🛫 TravelWay Boshqaruv Paneli (Admin)\nHavola: https://travelway-9x8l.onrender.com/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
+    const textToCopy = `🛫 SayrHub Boshqaruv Paneli (Admin)\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(textToCopy);
@@ -129,7 +129,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       name: cleanName,
       username: cleanUser,
       password: cleanPass,
-      email: email.trim() || `${cleanUser}@travelway.uz`,
+      email: email.trim() || `${cleanUser}@sayrhub.uz`,
       phone: phone.trim() || '+998 90',
       role: 'tour_admin',
       roleTitle: 'Tur Admin (Operatsion)',
@@ -169,7 +169,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
             <span>🛡️</span> Tur Adminlar & Xodimlar Jamoasi ({staffList.length})
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            TravelWay tizimidagi Tur Adminlar, ularning kirish login va parollari hamda mas'ul yo'nalishlari
+            SayrHub tizimidagi Tur Adminlar, ularning kirish login va parollari hamda mas'ul yo'nalishlari
           </p>
         </div>
 

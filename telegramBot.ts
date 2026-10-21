@@ -1,32 +1,34 @@
+import { randomBytes, randomInt } from 'crypto';
 import { UserModel } from './db.js';
+import { generateToken } from './src/server/auth.js';
 
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-export const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'mytravelwaybot';
+export const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME || 'sayrhub_bot';
 
 export interface PendingTelegramSession {
   sessionToken: string;
-  code: string;
+  code?: string;
   authenticated: boolean;
   createdAt: number;
   user?: any;
+  token?: string;
+  attempts: number;
 }
 
 // In-memory session tracking and active verification codes
 export const pendingSessions = new Map<string, PendingTelegramSession>();
-export const activeOtpCodes = new Map<string, { user: any; expires: number }>();
 export const userChatSessions = new Map<number | string, string>(); // chatId -> sessionToken
 
 /**
  * Creates a unique registration/login session linked to Telegram deep linking
  */
 export function createTelegramAuthSession() {
-  const sessionToken = 'reg_' + Math.random().toString(36).substring(2, 10);
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const sessionToken = 'reg_' + randomBytes(16).toString('hex');
   const session: PendingTelegramSession = {
     sessionToken,
-    code,
     authenticated: false,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    attempts: 0
   };
   pendingSessions.set(sessionToken, session);
 
@@ -38,9 +40,10 @@ export function createTelegramAuthSession() {
     }
   }
 
+  // NOTE: 'code' is NEVER returned here to prevent OTP leakage.
+  // The OTP code is securely delivered strictly to the user's Telegram chat.
   return {
     sessionToken,
-    code,
     botUsername: TELEGRAM_BOT_USERNAME,
     deepLink: `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${sessionToken}`
   };
@@ -57,7 +60,8 @@ export function checkTelegramAuthSession(sessionToken: string) {
   return {
     success: true,
     authenticated: session.authenticated,
-    user: session.user || null
+    user: session.user || null,
+    token: session.token || null
   };
 }
 
@@ -66,29 +70,38 @@ export function checkTelegramAuthSession(sessionToken: string) {
  */
 export function verifyTelegramCode(code: string, sessionToken?: string) {
   const cleanCode = (code || '').trim();
-
-  // 1. Check if matches active OTP code map
-  const otpEntry = activeOtpCodes.get(cleanCode);
-  if (otpEntry && otpEntry.expires > Date.now()) {
-    return { success: true, user: otpEntry.user };
+  if (!cleanCode || cleanCode.length < 4) {
+    return { success: false, error: "Tasdiqlash kodi 4 xonali bo'lishi kerak" };
   }
 
-  // 2. Check if matches specific session
-  if (sessionToken) {
-    const session = pendingSessions.get(sessionToken);
-    if (session && session.code === cleanCode) {
-      return { success: true, user: session.user || null };
-    }
+  if (!sessionToken) {
+    return { success: false, error: "Sessiya identifikatori (sessionToken) ko'rsatilmadi" };
   }
 
-  // 3. Fallback check across all pending sessions
-  for (const session of pendingSessions.values()) {
-    if (session.code === cleanCode) {
-      return { success: true, user: session.user || null };
-    }
+  const session = pendingSessions.get(sessionToken);
+  if (!session) {
+    return { success: false, error: "Sessiya topilmadi yoki muddati tugagan" };
   }
 
-  return { success: false, error: "Tasdiqlash kodi noto'g'ri yoki muddati tugagan" };
+  if (session.attempts >= 5) {
+    pendingSessions.delete(sessionToken);
+    return { success: false, error: "Ko'p marotaba noto'g'ri kod kiritildi. Iltimos, yangi sessiya oching." };
+  }
+
+  if (session.code && session.code === cleanCode && (Date.now() - session.createdAt < 15 * 60 * 1000)) {
+    session.authenticated = true;
+    const user = session.user;
+    const token = session.token;
+    delete session.code; // Prevent replay attacks
+    return { success: true, user, token };
+  }
+
+  session.attempts = (session.attempts || 0) + 1;
+  const remaining = Math.max(0, 5 - session.attempts);
+  return { 
+    success: false, 
+    error: `Tasdiqlash kodi noto'g'ri! Qolgan urinishlar: ${remaining}` 
+  };
 }
 
 /**
@@ -138,7 +151,7 @@ export async function processTelegramUpdate(update: any) {
 
     const firstName = user.first_name || 'Hurmatli foydalanuvchi';
     const welcomeText = `👋 Assalomu alaykum, <b>${firstName}</b>!\n\n` +
-      `🛫 <b>TravelWay</b> rasmiy sayohat platformasiga xush kelibsiz!\n\n` +
+      `🛫 <b>SayrHub</b> rasmiy sayohat platformasiga xush kelibsiz!\n\n` +
       `🔐 Ilovada <b>ro'yxatdan o'tish</b> yoki hisobingizga kirish uchun quyidagi <b>"📱 Telefon raqamni ulashish"</b> tugmasini bosing:`;
 
     await sendTelegramMessage(chatId, welcomeText, {
@@ -153,14 +166,19 @@ export async function processTelegramUpdate(update: any) {
 
   // 2. User shared contact (phone number)
   if (message.contact) {
+    if (message.contact.user_id && message.contact.user_id !== user.id) {
+      await sendTelegramMessage(chatId, `⚠️ Iltimos, faqat o'zingizning telefon raqamingizni <b>"📱 Telefon raqamni ulashish"</b> tugmasi orqali yuboring.`);
+      return;
+    }
+
     let rawPhone = message.contact.phone_number.trim();
     if (!rawPhone.startsWith('+')) {
       rawPhone = '+' + rawPhone;
     }
 
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'TravelWay Mijoz';
+    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'SayrHub Mijoz';
     const tgUsername = user.username ? `@${user.username}` : '';
-    const otpCode = String(Math.floor(1000 + Math.random() * 9000));
+    const otpCode = String(randomInt(1000, 10000));
 
     let dbUser: any = null;
     try {
@@ -193,30 +211,33 @@ export async function processTelegramUpdate(update: any) {
       };
     }
 
+    const userToken = generateToken({
+      id: dbUser.tcId,
+      username: dbUser.phone || dbUser.tcId,
+      role: 'user',
+      name: dbUser.name
+    }, '30d');
+
     // Attach to pending session if exists
     const sessionToken = userChatSessions.get(chatId);
     if (sessionToken && pendingSessions.has(sessionToken)) {
       const sess = pendingSessions.get(sessionToken)!;
       sess.authenticated = true;
       sess.user = dbUser;
+      sess.token = userToken;
       sess.code = otpCode;
     }
-
-    activeOtpCodes.set(otpCode, {
-      user: dbUser,
-      expires: Date.now() + 15 * 60 * 1000
-    });
 
     const successText = `✅ <b>Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!</b>\n\n` +
       `👤 <b>Ism:</b> ${fullName}\n` +
       `📱 <b>Telefon:</b> ${rawPhone}\n` +
       `🎁 <b>Bonus:</b> Hisobingizga $30 sayohat vaucheri berildi!\n\n` +
       `🔑 <b>Sizning tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
-      `<i>TravelWay ilovasida ushbu kodni kiriting yoki quyidagi tugma orqali bevosita kiring:</i>`;
+      `<i>SayrHub ilovasida ushbu kodni kiriting yoki quyidagi tugma orqali bevosita kiring:</i>`;
 
     await sendTelegramMessage(chatId, successText, {
       inline_keyboard: [
-        [{ text: "🚀 TravelWay ilovasiga kirish", url: "https://travelway-9x8l.onrender.com" }]
+        [{ text: "🚀 SayrHub ilovasiga kirish", url: "https://sayrhub.uz" }]
       ]
     });
     return;
@@ -227,9 +248,9 @@ export async function processTelegramUpdate(update: any) {
     const digitsOnly = text.replace(/\D/g, '');
     if (digitsOnly.length >= 9) {
       const formattedPhone = '+' + (digitsOnly.startsWith('998') ? digitsOnly : '998' + digitsOnly);
-      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'TravelWay Mijoz';
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'SayrHub Mijoz';
       const tgUsername = user.username ? `@${user.username}` : '';
-      const otpCode = String(Math.floor(1000 + Math.random() * 9000));
+      const otpCode = String(randomInt(1000, 10000));
 
       let dbUser: any = null;
       try {
@@ -261,18 +282,21 @@ export async function processTelegramUpdate(update: any) {
         };
       }
 
+      const userToken = generateToken({
+        id: dbUser.tcId,
+        username: dbUser.phone || dbUser.tcId,
+        role: 'user',
+        name: dbUser.name
+      }, '30d');
+
       const sessionToken = userChatSessions.get(chatId);
       if (sessionToken && pendingSessions.has(sessionToken)) {
         const sess = pendingSessions.get(sessionToken)!;
         sess.authenticated = true;
         sess.user = dbUser;
+        sess.token = userToken;
         sess.code = otpCode;
       }
-
-      activeOtpCodes.set(otpCode, {
-        user: dbUser,
-        expires: Date.now() + 15 * 60 * 1000
-      });
 
       const reply = `✅ <b>Telefon raqamingiz qabul qilindi!</b>\n\n` +
         `🔑 <b>Tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
@@ -280,7 +304,7 @@ export async function processTelegramUpdate(update: any) {
 
       await sendTelegramMessage(chatId, reply, {
         inline_keyboard: [
-          [{ text: "🚀 TravelWay ilovasiga kirish", url: "https://travelway-9x8l.onrender.com" }]
+          [{ text: "🚀 SayrHub ilovasiga kirish", url: "https://sayrhub.uz" }]
         ]
       });
       return;

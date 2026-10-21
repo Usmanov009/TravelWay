@@ -14,7 +14,7 @@ export const FlutterCodeViewer: React.FC<FlutterCodeViewerProps> = ({
 
   const flutterCodes: Record<string, string> = {
     main: `// ==========================================
-// TravelWay App — Flutter main.dart
+// SayrHub App — Flutter main.dart
 // ==========================================
 import 'package:flutter/material.dart';
 import 'screens/auth_screen.dart';
@@ -25,16 +25,16 @@ import 'screens/trips_screen.dart';
 import 'screens/profile_screen.dart';
 
 void main() {
-  runApp(const TravelWayApp());
+  runApp(const SayrHubApp());
 }
 
-class TravelWayApp extends StatelessWidget {
-  const TravelWayApp({super.key});
+class SayrHubApp extends StatelessWidget {
+  const SayrHubApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TravelWay',
+      title: 'SayrHub',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -101,7 +101,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 }`,
     auth: `// ==========================================
-// TravelWay Auth Screen — Flutter Implementation
+// SayrHub Auth Screen — Flutter Implementation
 // ==========================================
 import 'package:flutter/material.dart';
 
@@ -228,12 +228,12 @@ class _AuthScreenState extends State<AuthScreen> {
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: const Center(
-                  child: Text('TC', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text('SH', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            const Text('TravelWay hisobiga kirish', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+            const Text('SayrHub hisobiga kirish', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
             const SizedBox(height: 4),
             const Text('Eng qulay turpaketlar va arzon charterlarga kirish', style: TextStyle(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 20),
@@ -331,7 +331,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }`,
     search: `// ==========================================
-// TravelWay Search & Booking Screen — Flutter
+// SayrHub Search & Booking Screen — Flutter
 // ==========================================
 import 'package:flutter/material.dart';
 
@@ -380,7 +380,7 @@ class SearchScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF0C1322),
       appBar: AppBar(
-        title: const Text('TravelWay — Turpaketlar'),
+        title: const Text('SayrHub — Turpaketlar'),
         backgroundColor: const Color(0xFF0C1322),
         elevation: 0,
       ),
@@ -451,7 +451,7 @@ class SearchScreen extends StatelessWidget {
   }
 }`,
     explore: `// ==========================================
-// TravelWay Explore Vibes — Flutter Screen
+// SayrHub Explore Vibes — Flutter Screen
 // ==========================================
 import 'package:flutter/material.dart';
 
@@ -529,7 +529,7 @@ class ExploreScreen extends StatelessWidget {
   }
 }`,
     hot: `// ==========================================
-// TravelWay Hot Deals — Flutter Screen
+// SayrHub Hot Deals — Flutter Screen
 // ==========================================
 import 'package:flutter/material.dart';
 
@@ -649,7 +649,7 @@ class HotDealsScreen extends StatelessWidget {
 
       {/* Bottom helper */}
       <div className="p-2.5 bg-[#0f172a] border-t border-[#18263f] text-[11px] text-slate-400 flex items-center justify-between">
-        <span>💡 Flutter loyihangizda foydalanish: <code className="text-[#ff5b00]">flutter create travelway</code></span>
+        <span>💡 Flutter loyihangizda foydalanish: <code className="text-[#ff5b00]">flutter create sayrhub</code></span>
         <button
           className="text-[#ff5b00] hover:underline font-semibold"
           onClick={handleCopyCode}

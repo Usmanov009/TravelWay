@@ -16,12 +16,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [kompasUrl, setKompasUrl] = useState('https://online.uz.kompastour.com/search_tour');
   const [commissionRate, setCommissionRate] = useState<number>(() => {
     try {
-      const saved = localStorage.getItem('travelway_agency_commission');
+      const saved = localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission');
       if (saved) return Number(saved);
     } catch (e) {}
     return 8;
   });
-  const [tgBotUsername, setTgBotUsername] = useState('@mytravelwaybot');
+  const [tgBotUsername, setTgBotUsername] = useState('@sayrhub_bot');
   const [isSavingCommission, setIsSavingCommission] = useState(false);
 
   // Sync commission from backend
@@ -32,6 +32,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         if (data.success && typeof data.commissionRate === 'number') {
           setCommissionRate(data.commissionRate);
           try {
+            localStorage.setItem('sayrhub_agency_commission', String(data.commissionRate));
             localStorage.setItem('travelway_agency_commission', String(data.commissionRate));
           } catch (e) {}
         }
@@ -49,12 +50,21 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       setCommissionRate(cleanCommission);
 
       try {
+        localStorage.setItem('sayrhub_agency_commission', String(cleanCommission));
         localStorage.setItem('travelway_agency_commission', String(cleanCommission));
+      } catch (e) {}
+
+      let token = '';
+      try {
+        token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
       } catch (e) {}
 
       await fetch('/api/admin/commission', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ commissionRate: cleanCommission })
       });
 
@@ -75,17 +85,17 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       const backupData = {
         exportedAt: new Date().toISOString(),
         version: '2.5.0',
-        tours: localStorage.getItem('travelway_tours'),
-        bookings: localStorage.getItem('travelway_bookings'),
-        staff: localStorage.getItem('travelway_admin_staff'),
-        priceAlerts: localStorage.getItem('travelway_price_alerts'),
-        commissionRate: localStorage.getItem('travelway_agency_commission') || 8
+        tours: localStorage.getItem('sayrhub_tours') || localStorage.getItem('travelway_tours'),
+        bookings: localStorage.getItem('sayrhub_bookings') || localStorage.getItem('travelway_bookings'),
+        staff: localStorage.getItem('sayrhub_admin_staff') || localStorage.getItem('travelway_admin_staff'),
+        priceAlerts: localStorage.getItem('sayrhub_price_alerts') || localStorage.getItem('travelway_price_alerts'),
+        commissionRate: localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission') || 8
       };
       const jsonBlob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(jsonBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `TravelWay_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `SayrHub_Backup_${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

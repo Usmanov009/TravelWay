@@ -17,17 +17,19 @@ const router = Router();
 // ==========================================
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  const isProd = process.env.NODE_ENV === 'production';
   const validUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
-  const validPass = process.env.ADMIN_PASSWORD || 'admin123';
+  const validPass = process.env.ADMIN_PASSWORD;
 
   const inputUser = (username || '').trim().toLowerCase();
   const inputPass = (password || '').trim();
 
   // 1. Super / Main Admin check (from environment)
-  if (
-    (inputUser === validUser || inputUser === 'admin@travelway.uz') &&
-    (inputPass === validPass || (process.env.NODE_ENV !== 'production' && inputPass === 'admin123'))
-  ) {
+  const isEnvAdminMatched = validPass 
+    ? (inputUser === validUser || inputUser === 'admin@sayrhub.uz' || inputUser === 'admin@travelway.uz') && (inputPass === validPass)
+    : (!isProd && (inputUser === validUser || inputUser === 'admin@sayrhub.uz' || inputUser === 'admin@travelway.uz') && (inputPass === 'admin123'));
+
+  if (isEnvAdminMatched) {
     const adminUser = {
       id: 'adm-root',
       name: 'Bosh Admin',
@@ -96,7 +98,7 @@ router.post('/login', async (req, res) => {
 // ==========================================
 // 2. ADMIN STAFF MANAGEMENT (PROTECTED)
 // ==========================================
-router.get('/staff', optionalAuth, async (req: AuthRequest, res) => {
+router.get('/staff', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
   try {
     const staff = await AdminStaffModel.find().sort({ createdAt: -1 });
     // Remove hashed password from returned payload for security
@@ -168,7 +170,7 @@ router.get('/commission', (req, res) => {
   res.json({ success: true, commissionRate: agencyCommissionRate });
 });
 
-router.post('/commission', (req, res) => {
+router.post('/commission', authenticateToken, requireRole('main_admin', 'tour_admin'), (req: AuthRequest, res) => {
   try {
     const { commissionRate } = req.body;
     const num = Number(commissionRate);

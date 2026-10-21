@@ -193,7 +193,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             <span>🏖️</span> Turpaketlar Katalogi ({tours.length})
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Kompas Tour va TravelWay tizimidagi barcha faol turpaketlar
+            Kompas Tour va SayrHub tizimidagi barcha faol turpaketlar
           </p>
         </div>
 

@@ -59,7 +59,7 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
       return;
     }
 
-    const headers = ['TravelWay ID', 'Ism', 'Telefon', 'Email', 'Pasport', 'Keshbek ($)', 'Sayohatlar soni', 'Jami Xarid ($)', 'Holat'];
+    const headers = ['SayrHub ID', 'Ism', 'Telefon', 'Email', 'Pasport', 'Keshbek ($)', 'Sayohatlar soni', 'Jami Xarid ($)', 'Holat'];
     const rows = filtered.map(u => [
       `"${u.tcId}"`,
       `"${u.name}"`,
@@ -76,7 +76,7 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `TravelWay_Mijozlar_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `SayrHub_Mijozlar_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -115,7 +115,7 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Ism, telefon, email yoki TravelWay ID..."
+            placeholder="Ism, telefon, email yoki SayrHub ID..."
             className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
           />
           {search && (

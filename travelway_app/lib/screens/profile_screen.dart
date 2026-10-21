@@ -16,7 +16,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _notifications = true;
 
   Future<void> _openTelegram() async {
-    final uri = Uri.parse('https://t.me/mytravelwaybot');
+    final uri = Uri.parse('https://t.me/sayrhub_bot');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -437,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildSettingItem(
                     icon: Icons.support_agent,
                     title: 'Telegram Operator & Yordam',
-                    subtitle: '@mytravelwaybot',
+                    subtitle: '@sayrhub_bot',
                     onTap: _openTelegram,
                   ),
                   const Divider(height: 1, indent: 56),
@@ -460,9 +460,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Center(
               child: Column(
                 children: [
-                  Text('TravelWay Mobile v1.0.0', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                  Text('SayrHub Mobile v1.0.0', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                   SizedBox(height: 2),
-                  Text('Powered by TravelWay Live Engine', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+                  Text('Powered by SayrHub Live Engine', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
                 ],
               ),
             ),

@@ -36,7 +36,7 @@ export default function App() {
   const [currentLang, setCurrentLang] = useState<LanguageCode>('UZ');
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     try {
-      const saved = localStorage.getItem('travelway_theme_mode');
+      const saved = localStorage.getItem('sayrhub_theme_mode') || localStorage.getItem('travelway_theme_mode');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch (e) {}
     return 'light';
@@ -65,7 +65,7 @@ export default function App() {
   });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem('travelway_admin_auth') === 'true';
+      return sessionStorage.getItem('sayrhub_admin_auth') === 'true' || sessionStorage.getItem('travelway_admin_auth') === 'true';
     } catch (e) {
       return false;
     }
@@ -73,33 +73,45 @@ export default function App() {
   const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>('main_admin');
   const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser | null>(() => {
     try {
-      const saved = sessionStorage.getItem('travelway_active_admin_user');
+      const saved = sessionStorage.getItem('sayrhub_active_admin_user') || sessionStorage.getItem('travelway_active_admin_user');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return null;
   });
   const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(() => {
     try {
-      const saved = localStorage.getItem('travelway_admin_staff');
+      const saved = localStorage.getItem('sayrhub_admin_staff') || localStorage.getItem('travelway_admin_staff');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return INITIAL_ADMIN_STAFF;
   });
 
-  // Sync staff list from backend / MongoDB
+  // Sync staff list from backend / MongoDB only when admin is authenticated
   useEffect(() => {
-    fetch('/api/admin/staff')
+    if (!isAdminAuthenticated) return;
+    let token = '';
+    try {
+      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+    } catch (e) {}
+    if (!token) return;
+
+    fetch('/api/admin/staff', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.staff)) {
           setAdminStaffList(data.staff);
           try {
+            localStorage.setItem('sayrhub_admin_staff', JSON.stringify(data.staff));
             localStorage.setItem('travelway_admin_staff', JSON.stringify(data.staff));
           } catch (e) {}
         }
       })
       .catch((err) => console.warn('Sync admin staff error:', err));
-  }, []);
+  }, [isAdminAuthenticated]);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -122,7 +134,9 @@ export default function App() {
 
   const handleAdminLogout = () => {
     try {
+      sessionStorage.removeItem('sayrhub_admin_auth');
       sessionStorage.removeItem('travelway_admin_auth');
+      sessionStorage.removeItem('sayrhub_active_admin_user');
       sessionStorage.removeItem('travelway_active_admin_user');
     } catch (e) {}
     setIsAdminAuthenticated(false);
@@ -159,15 +173,25 @@ export default function App() {
       })
       .catch((e) => console.warn('MongoDB tours fetch:', e));
 
-    // 2. Fetch live Bookings from MongoDB
-    fetch('/api/db/bookings')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.bookings) && data.bookings.length > 0) {
-          setBookings(data.bookings);
+    // 2. Fetch live Bookings from MongoDB (authenticated)
+    const adminToken = typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token')) : null;
+    const userToken = typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token')) : null;
+    const activeToken = adminToken || userToken;
+
+    if (activeToken) {
+      fetch('/api/db/bookings', {
+        headers: {
+          'Authorization': `Bearer ${activeToken}`
         }
       })
-      .catch((e) => console.warn('MongoDB bookings fetch:', e));
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.bookings) && data.bookings.length > 0) {
+            setBookings(data.bookings);
+          }
+        })
+        .catch((e) => console.warn('MongoDB bookings fetch:', e));
+    }
 
     // 3. Fetch Price Alerts from MongoDB
     fetch('/api/db/price-alerts')
@@ -183,7 +207,7 @@ export default function App() {
   // Price Alerts State
   const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>(() => {
     try {
-      const saved = localStorage.getItem('travelway_price_alerts') || localStorage.getItem('tripcraft_price_alerts');
+      const saved = localStorage.getItem('sayrhub_price_alerts') || localStorage.getItem('travelway_price_alerts') || localStorage.getItem('tripcraft_price_alerts');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return [];
@@ -192,6 +216,7 @@ export default function App() {
 
   useEffect(() => {
     try {
+      localStorage.setItem('sayrhub_price_alerts', JSON.stringify(priceAlerts));
       localStorage.setItem('travelway_price_alerts', JSON.stringify(priceAlerts));
     } catch (e) {}
   }, [priceAlerts]);
@@ -306,6 +331,7 @@ export default function App() {
   // Theme update
   useEffect(() => {
     try {
+      localStorage.setItem('sayrhub_theme_mode', themeMode);
       localStorage.setItem('travelway_theme_mode', themeMode);
     } catch (e) {}
     if (themeMode === 'light') {
@@ -373,12 +399,21 @@ export default function App() {
       };
       setUser(updatedUser);
       try {
+        localStorage.setItem('sayrhub_user_profile', JSON.stringify(updatedUser));
         localStorage.setItem('travelway_user_profile', JSON.stringify(updatedUser));
+      } catch (e) {}
+
+      let token = '';
+      try {
+        token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
       } catch (e) {}
 
       fetch('/api/db/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(updatedUser)
       }).catch((e) => console.warn('MongoDB save user error:', e));
     }
@@ -389,15 +424,32 @@ export default function App() {
 
   // MongoDB Booking helpers
   const saveBookingToDB = (booking: Booking) => {
+    let token = '';
+    try {
+      token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+    } catch (e) {}
     fetch('/api/db/bookings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify(booking)
     }).catch((e) => console.warn('MongoDB booking save error:', e));
   };
 
   const deleteBookingFromDB = (id: string) => {
-    fetch(`/api/db/bookings/${id}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB delete booking error:', e));
+    let token = '';
+    try {
+      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || '';
+    } catch (e) {}
+    fetch(`/api/db/bookings/${id}`, { 
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
+    }).catch((e) => console.warn('MongoDB delete booking error:', e));
   };
 
   // Booking handlers
@@ -568,7 +620,7 @@ export default function App() {
   const getAuthHeaders = () => {
     let token = '';
     try {
-      token = sessionStorage.getItem('travelway_admin_token') || '';
+      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
     } catch (e) {}
     return {
       'Content-Type': 'application/json',
@@ -635,7 +687,7 @@ export default function App() {
     setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status } : b));
     fetch(`/api/db/bookings/${bookingId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ status })
     }).catch((e) => console.warn('MongoDB update booking status error:', e));
   };
@@ -648,6 +700,7 @@ export default function App() {
     setAdminStaffList((prev) => {
       const updated = [staff, ...prev];
       try {
+        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
         localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
       } catch (e) {}
       return updated;
@@ -664,6 +717,7 @@ export default function App() {
     setAdminStaffList((prev) => {
       const updated = prev.map((s) => s.id === staff.id ? staff : s);
       try {
+        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
         localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
       } catch (e) {}
       return updated;
@@ -680,6 +734,7 @@ export default function App() {
     setAdminStaffList((prev) => {
       const updated = prev.filter((s) => s.id !== staffId);
       try {
+        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
         localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
       } catch (e) {}
       return updated;
@@ -738,8 +793,10 @@ export default function App() {
         <AdminLoginPage
           onLoginSuccess={(role, adminData) => {
             try {
+              sessionStorage.setItem('sayrhub_admin_auth', 'true');
               sessionStorage.setItem('travelway_admin_auth', 'true');
               if (adminData) {
+                sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(adminData));
                 sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(adminData));
                 setCurrentAdminUser(adminData);
               }
@@ -1005,7 +1062,7 @@ export default function App() {
             onCloseSupport={() => setIsSupportOpen(false)}
             onStartLiveChat={() => {
               setIsSupportOpen(false);
-              showToast("TravelWay Support Telegram boti (@travelway_support) ochilmoqda...", 'info');
+              showToast("SayrHub Support Telegram boti (@sayrhub_support) ochilmoqda...", 'info');
             }}
             isEditProfileOpen={isEditProfileOpen}
             currentName={user.name}

@@ -18,7 +18,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
 
   return (
     <div className="space-y-3.5 pb-20 select-none">
-      {/* TravelWay Vibes Banner */}
+      {/* SayrHub Vibes Banner */}
       <div
         className="border rounded-3xl p-4 shadow-sm"
         style={{
@@ -34,7 +34,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               color: 'var(--tw-accent)'
             }}
           >
-            TravelWay Vibes
+            SayrHub Vibes
           </span>
           <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Kayfiyatga mos yo'nalishlar</span>
         </div>

@@ -37,7 +37,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TravelWay Vibes Banner
+            // SayrHub Vibes Banner
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -65,7 +65,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                         ),
                         child: const Text(
-                          'TravelWay Vibes',
+                          'SayrHub Vibes',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

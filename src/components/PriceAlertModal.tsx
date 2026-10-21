@@ -351,7 +351,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
               <div className="flex items-center gap-2.5">
                 <span className="text-sm">✈️</span>
                 <div>
-                  <span className="text-xs font-bold block" style={{ color: 'var(--tw-text-main)' }}>Telegram Bot (@travelway_bot)</span>
+                  <span className="text-xs font-bold block" style={{ color: 'var(--tw-text-main)' }}>Telegram Bot (@sayrhub_bot)</span>
                   <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Telegram orqali to'g'ridan-to'g'ri xabar</span>
                 </div>
               </div>

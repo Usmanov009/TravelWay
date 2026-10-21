@@ -15,7 +15,7 @@ class AppHeader extends StatelessWidget {
     switch (index) {
       case 0:
         return {
-          'title': 'TravelWay',
+          'title': 'SayrHub',
           'sub': 'Turpaketlar qidiruvi & Charter reyslar',
         };
       case 1:
@@ -40,7 +40,7 @@ class AppHeader extends StatelessWidget {
         };
       default:
         return {
-          'title': 'TravelWay',
+          'title': 'SayrHub',
           'sub': 'Arzon turlar & Charter reyslar',
         };
     }
@@ -119,7 +119,7 @@ class AppHeader extends StatelessWidget {
         bottom: false,
         child: Row(
           children: [
-            // TW Logo
+            // SH Logo
             Container(
               width: 36,
               height: 36,
@@ -142,7 +142,7 @@ class AppHeader extends StatelessWidget {
                 ),
                 child: const Center(
                   child: Text(
-                    'TW',
+                    'SH',
                     style: TextStyle(
                       color: AppTheme.primary,
                       fontSize: 12,

@@ -1,6 +1,6 @@
-# TravelWay — Turizm Platformasi & Flutter Mobile App
+# SayrHub — Turizm Platformasi & Flutter Mobile App
 
-TravelWay — bu O'zbekiston sayyohlari uchun eng so'nggi charter narxlari, qaynoq takliflar va **Kompas Tour (online.uz.kompastour.com)** tizimi bilan 1:1 jonli integratsiya qilingan to'liq platforma.
+SayrHub — bu O'zbekiston sayyohlari uchun eng so'nggi charter narxlari, qaynoq takliflar va **Kompas Tour (online.uz.kompastour.com)** tizimi bilan 1:1 jonli integratsiya qilingan to'liq platforma.
 
 ---
 
@@ -11,7 +11,7 @@ TravelWay — bu O'zbekiston sayyohlari uchun eng so'nggi charter narxlari, qayn
    - **Kompas Tour Live Scraper**: `/api/kompas/search` va `/api/kompas/hot` (1:1 haqiqiy narxlar va qoldiq o'rinlar)
    - **Xizmatlar**: Combo turlar (`/api/combo/tours`), Aviabiletlar (`/api/flights/search`), Faqat mehmonxonalar (`/api/hotels/search`)
    - **Baza**: MongoDB integratsiyasi va xotirada tezkor zaxira (Buyurtmalar, Narx signallari, Admin)
-   - **Telegram Bot**: `@mytravelwaybot`
+   - **Telegram Bot**: `@sayrhub_bot`
 
 2. **Flutter Mobil Ilova (`travelway_app`)**
    - **Jonli Kompas integratsiyasi**: Backend orqali hamda backend offline bo'lganda to'g'ridan-to'g'ri `online.uz.kompastour.com` dan jonli ma'lumot olish mexanizmi

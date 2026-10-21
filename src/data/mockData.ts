@@ -847,7 +847,7 @@ export const INITIAL_HOT_SALES: HotSale[] = [
 
 export const TRANSLATIONS = {
   UZ: {
-    appTitle: 'TravelWay',
+    appTitle: 'SayrHub',
     appSubtitle: 'Arzon turlar & Charter reyslar',
     search: 'Qidiruv',
     explore: 'Kashf etish',
@@ -866,7 +866,7 @@ export const TRANSLATIONS = {
     bonusBannerDesc: "Ro'yxatdan o'ting va ilk turpaket uchun $30 chegirmaga ega bo'ling."
   },
   RU: {
-    appTitle: 'TravelWay',
+    appTitle: 'SayrHub',
     appSubtitle: 'Выгодные туры и чартерные рейсы',
     search: 'Поиск',
     explore: 'Обзор',
@@ -885,7 +885,7 @@ export const TRANSLATIONS = {
     bonusBannerDesc: 'Зарегистрируйтесь и получите скидку $30 на первый турпакет.'
   },
   EN: {
-    appTitle: 'TravelWay',
+    appTitle: 'SayrHub',
     appSubtitle: 'Affordable tours & Charter flights',
     search: 'Search',
     explore: 'Explore',

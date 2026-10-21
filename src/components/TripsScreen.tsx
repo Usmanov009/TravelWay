@@ -91,7 +91,7 @@ export const TripsScreen: React.FC<TripsScreenProps> = ({
                 onClick={onNavigateToSearch}
                 type="button"
               >
-                TravelWay turpaketlarini qidirish
+                SayrHub turpaketlarini qidirish
               </button>
             </div>
           ) : (

@@ -14,9 +14,8 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
   onShowToast
 }) => {
   const [sessionToken, setSessionToken] = useState<string>('');
-  const [expectedCode, setExpectedCode] = useState<string>('');
-  const [deepLink, setDeepLink] = useState<string>('https://t.me/mytravelwaybot');
-  const [botUsername, setBotUsername] = useState<string>('mytravelwaybot');
+  const [deepLink, setDeepLink] = useState<string>('https://t.me/sayrhub_bot');
+  const [botUsername, setBotUsername] = useState<string>('sayrhub_bot');
   const [isLoadingSession, setIsLoadingLoadingSession] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -40,7 +39,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
       .then((data) => {
         if (data.success) {
           setSessionToken(data.sessionToken);
-          setExpectedCode(data.code || '');
           setDeepLink(data.deepLink);
           if (data.botUsername) setBotUsername(data.botUsername);
 
@@ -50,10 +48,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
       })
       .catch((err) => {
         console.warn('Failed to create Telegram auth session:', err);
-        // Fallback demo session
-        const fakeToken = 'reg_' + Math.random().toString(36).substring(2, 8);
-        setSessionToken(fakeToken);
-        setDeepLink(`https://t.me/mytravelwaybot?start=${fakeToken}`);
       })
       .finally(() => {
         setIsLoadingLoadingSession(false);
@@ -73,6 +67,12 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
         const data = await res.json();
         if (data.authenticated && data.user) {
           clearInterval(pollIntervalRef.current);
+          if (data.token) {
+            try {
+              sessionStorage.setItem('sayrhub_user_token', data.token);
+              sessionStorage.setItem('travelway_user_token', data.token);
+            } catch (e) {}
+          }
           handleAuthSuccess(data.user);
         }
       } catch (err) {
@@ -135,18 +135,14 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
       const data = await res.json();
 
       if (data.success && data.user) {
+        if (data.token) {
+          try {
+            sessionStorage.setItem('sayrhub_user_token', data.token);
+            sessionStorage.setItem('travelway_user_token', data.token);
+          } catch (e) {}
+        }
         handleAuthSuccess(data.user);
       } else {
-        // Demo fallback check
-        if (code === expectedCode || code === '7788' || code === '1234') {
-          handleAuthSuccess({
-            name: 'Telegram Foydalanuvchisi',
-            phone: '+998 90 123 45 67',
-            telegramUsername: '@traveler',
-            cashback: 30
-          });
-          return;
-        }
         onShowToast(data.error || "Tasdiqlash kodi noto'g'ri!", 'error');
       }
     } catch (err) {

@@ -37,7 +37,7 @@ export function startKeepAlive() {
       const startTime = Date.now();
       const res = await fetch(pingUrl, {
         headers: {
-          'User-Agent': 'TravelWay-KeepAlive-Worker/1.0'
+          'User-Agent': 'SayrHub-KeepAlive-Worker/1.0'
         },
         signal: AbortSignal.timeout(20000) // 20 soniya kutish chegarasi
       });

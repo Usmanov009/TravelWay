@@ -17,12 +17,6 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fillSuperAdmin = () => {
-    setUsername('admin');
-    setPassword('admin123');
-    setError(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -38,7 +32,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
     setIsLoading(true);
 
     try {
-      // 1. Check with backend endpoint first
+      // Check with backend endpoint
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,6 +43,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       if (data.success) {
         if (data.token) {
           try {
+            sessionStorage.setItem('sayrhub_admin_token', data.token);
             sessionStorage.setItem('travelway_admin_token', data.token);
           } catch (e) {}
         }
@@ -62,58 +57,10 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         onLoginSuccess(data.role || 'main_admin', data.adminUser);
         return;
       } else {
-        // Fallback local check in case offline/static
-        try {
-          const rawStaff = localStorage.getItem('travelway_admin_staff');
-          if (rawStaff) {
-            const parsedStaff: any[] = JSON.parse(rawStaff);
-            const matched = parsedStaff.find(
-              (s) =>
-                ((s.username && s.username.toLowerCase() === cleanUser) ||
-                 (s.email && s.email.toLowerCase() === cleanUser)) &&
-                (s.password === cleanPass)
-            );
-            if (matched) {
-              onShowToast(`Tur Admin paneli: ${matched.name}! 🧳`, 'success');
-              onLoginSuccess(matched.role || 'tour_admin', matched);
-              return;
-            }
-          }
-        } catch (e) {}
-
-        if ((cleanUser === 'admin' || cleanUser === 'admin@travelway.uz') && (cleanPass === 'admin123' || cleanPass === 'admin')) {
-          onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
-          onLoginSuccess('main_admin');
-          return;
-        }
         setError(data.error || "Login yoki parol noto'g'ri!");
       }
     } catch (err) {
-      // Client-side fallback check
-      try {
-        const rawStaff = localStorage.getItem('travelway_admin_staff');
-        if (rawStaff) {
-          const parsedStaff: any[] = JSON.parse(rawStaff);
-          const matched = parsedStaff.find(
-            (s) =>
-              ((s.username && s.username.toLowerCase() === cleanUser) ||
-               (s.email && s.email.toLowerCase() === cleanUser)) &&
-              (s.password === cleanPass)
-          );
-          if (matched) {
-            onShowToast(`Tur Admin paneli: ${matched.name}! 🧳`, 'success');
-            onLoginSuccess(matched.role || 'tour_admin', matched);
-            return;
-          }
-        }
-      } catch (e) {}
-
-      if ((cleanUser === 'admin' || cleanUser === 'admin@travelway.uz') && (cleanPass === 'admin123' || cleanPass === 'admin')) {
-        onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
-        onLoginSuccess('main_admin');
-        return;
-      }
-      setError("Login yoki parol noto'g'ri!");
+      setError("Server bilan aloqa o'rnatib bo'lmadi. Iltimos, keyinroq qaytadan urinib ko'ring.");
     } finally {
       setIsLoading(false);
     }
@@ -130,9 +77,9 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         {/* Header Branding */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-500 text-white shadow-lg shadow-sky-500/20 mb-3 text-2xl font-black">
-            TW
+            SH
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">TravelWay Admin</h1>
+          <h1 className="text-2xl font-black text-white tracking-tight">SayrHub Admin</h1>
           <p className="text-xs text-slate-400 mt-1">Boshqaruv tizimiga xavfsiz kirish</p>
           <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/50 text-[11px] font-semibold text-sky-400">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
@@ -216,24 +163,6 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             )}
           </button>
         </form>
-
-        {/* Quick Demo Fill Box */}
-        <div className="mt-5 p-3 rounded-2xl bg-slate-800/60 border border-slate-700/70 text-xs text-slate-300 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-300">Tezkor Sinov (Demo):</span>
-            <button
-              type="button"
-              onClick={fillSuperAdmin}
-              className="text-[11px] font-bold text-sky-400 hover:text-sky-300 underline"
-            >
-              1-klikda to'ldirish ⚡
-            </button>
-          </div>
-          <div className="flex justify-between font-mono text-[11px] text-slate-400 pt-1 border-t border-slate-700/50">
-            <span>Login: <strong className="text-white">admin</strong></span>
-            <span>Parol: <strong className="text-white">admin123</strong></span>
-          </div>
-        </div>
 
         {/* Back to Client App */}
         <div className="mt-6 pt-4 border-t border-slate-800 text-center">

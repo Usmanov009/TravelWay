@@ -5,7 +5,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* TravelWay Theme Tokens - Synced with preset b6Z8C2NoO (Maia style, Mauve base, Cyan theme) */
+/* SayrHub Theme Tokens - Synced with preset b6Z8C2NoO (Maia style, Mauve base, Cyan theme) */
 :root, [data-theme="light"] {
   /* Kunduzgi rejim (Light Mode) */
   --tw-canvas: #FAF9FB;        /* Asosiy fon (Background): Mauve och fon */

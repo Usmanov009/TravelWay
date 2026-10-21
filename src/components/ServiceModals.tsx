@@ -244,8 +244,8 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
 
               <div className="flex items-center gap-2">
                 <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! TravelWay orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price} (1:1 Rasmiy Narx)\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
+                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
+                    `Assalomu alaykum! SayrHub orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price} (1:1 Rasmiy Narx)\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -464,7 +464,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
 
               <div className="flex items-center gap-2">
                 <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway.uz`)}&text=${encodeURIComponent(
+                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
                     `Assalomu alaykum! Ushbu aviabiletni band qilmoqchiman:\n\n✈️ Reys: ${selectedFlight.airline} (${selectedFlight.flightNumber})\n🛫 Yo'nalish: ${selectedFlight.departureCity} (${selectedFlight.departureAirportCode}) ➔ ${selectedFlight.arrivalCity} (${selectedFlight.arrivalAirportCode})\n📅 Sana: ${selectedFlight.departureDate} (${selectedFlight.departureTime})\n🧳 Bagaj: ${selectedFlight.baggage}\n💵 Narx: $${selectedFlight.price}\n🆔 Kod: ${selectedFlight.kompasFlightCode}`
                   )}`}
                   target="_blank"
@@ -648,8 +648,8 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
 
               <div className="flex items-center gap-2">
                 <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! TravelWay orqali ushbu MEHMONXONA bo'yicha ma'lumot olmoqchiman:\n\n🏨 Mehmonxona: ${selectedHotel.name}\n📍 Manzil: ${selectedHotel.resort}, ${selectedHotel.country}\n🛏 Xona: ${selectedHotel.roomType}\n🍽 Ovqat: ${selectedHotel.mealDesc}\n🌙 Muddat: ${selectedHotel.nightsCount} kecha\n💵 Narx: $${selectedHotel.totalPrice} ($${selectedHotel.pricePerNight}/kecha)\n🆔 Kod: ${selectedHotel.kompasHotelCode}`
+                  href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
+                    `Assalomu alaykum! SayrHub orqali ushbu MEHMONXONA bo'yicha ma'lumot olmoqchiman:\n\n🏨 Mehmonxona: ${selectedHotel.name}\n📍 Manzil: ${selectedHotel.resort}, ${selectedHotel.country}\n🛏 Xona: ${selectedHotel.roomType}\n🍽 Ovqat: ${selectedHotel.mealDesc}\n🌙 Muddat: ${selectedHotel.nightsCount} kecha\n💵 Narx: $${selectedHotel.totalPrice} ($${selectedHotel.pricePerNight}/kecha)\n🆔 Kod: ${selectedHotel.kompasHotelCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

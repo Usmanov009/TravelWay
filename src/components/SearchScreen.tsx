@@ -424,7 +424,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
   return (
     <div className="space-y-3.5 pb-24 select-none font-sans">
-      {/* 1. TRAVELWAY OFFICIAL HEADER BAR */}
+      {/* 1. SAYRHUB OFFICIAL HEADER BAR */}
       <div
         className="rounded-3xl p-3.5 border transition-colors"
         style={{
@@ -453,7 +453,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   className="font-black text-xs uppercase tracking-wider"
                   style={{ color: 'var(--tw-text-main)' }}
                 >
-                  TRAVELWAY
+                  SAYRHUB
                 </span>
                 <span
                   className="text-[9px] font-bold px-1.5 py-0.5 rounded border"
@@ -1233,7 +1233,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             className="text-xs font-bold uppercase tracking-wider"
             style={{ color: 'var(--tw-text-main)' }}
           >
-            {currentCountry.name} bo'yicha TravelWay turpaketlari ({displayTours.length})
+            {currentCountry.name} bo'yicha SayrHub turpaketlari ({displayTours.length})
           </span>
           <span
             className="text-[10px]"

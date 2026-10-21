@@ -55,4 +55,40 @@ describe('Authentication & Security Utilities', () => {
     const verified = verifyToken('invalid.token.structure');
     expect(verified).toBeNull();
   });
+
+  it('should not leak OTP code in createTelegramAuthSession', async () => {
+    const { createTelegramAuthSession } = await import('../telegramBot.js');
+    const session = createTelegramAuthSession();
+    expect(session.sessionToken).toBeDefined();
+    expect(session.sessionToken.startsWith('reg_')).toBe(true);
+    // CRITICAL: Ensure code is NOT in returned payload
+    expect((session as any).code).toBeUndefined();
+  });
+
+  it('should enforce OTP verification security and lockout after failed attempts', async () => {
+    const { pendingSessions, verifyTelegramCode } = await import('../telegramBot.js');
+    const token = 'reg_test_' + Math.random().toString(36).substring(2, 8);
+    pendingSessions.set(token, {
+      sessionToken: token,
+      code: '8492',
+      authenticated: false,
+      createdAt: Date.now(),
+      attempts: 0,
+      user: { tcId: 'tw-test-1', name: 'Test User' },
+      token: 'mock-jwt-token'
+    });
+
+    // 1. Wrong code
+    const wrong = verifyTelegramCode('1111', token);
+    expect(wrong.success).toBe(false);
+
+    // 2. Correct code
+    const success = verifyTelegramCode('8492', token);
+    expect(success.success).toBe(true);
+    expect(success.user?.name).toBe('Test User');
+
+    // 3. Replay attack: cannot verify again with same code
+    const replay = verifyTelegramCode('8492', token);
+    expect(replay.success).toBe(false);
+  });
 });

@@ -632,7 +632,7 @@ export const Modals: React.FC<ModalsProps> = ({
         </div>
       )}
 
-      {/* 5. TRAVELWAY TOUR SPECIFICATION & CALCULATION SHEET (NO BOOKING REQUIRED) */}
+      {/* 5. SAYRHUB TOUR SPECIFICATION & CALCULATION SHEET (NO BOOKING REQUIRED) */}
       {checkoutTour && (
         <div
           id="modal-checkout"
@@ -656,10 +656,10 @@ export const Modals: React.FC<ModalsProps> = ({
                       color: 'var(--tw-accent)'
                     }}
                   >
-                    TRAVELWAY
+                    SAYRHUB
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono">
-                    {checkoutTour.kompasTourCode || 'TW-UZ-9021'}
+                    {checkoutTour.kompasTourCode || 'SH-UZ-9021'}
                   </span>
                 </div>
                 <h3 className="text-base font-extrabold mt-1" style={{ color: 'var(--tw-text-main)' }}>{checkoutTour.title}</h3>
@@ -819,7 +819,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-emerald-500 font-bold">✓</span>
-                  <span>TravelWay Gid xizmati</span>
+                  <span>SayrHub Gid xizmati</span>
                 </div>
               </div>
             </div>
@@ -897,7 +897,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       onClick={() => {
                         onConfirmBooking({
                           tour: checkoutTour,
-                          travelerName: currentName || 'TravelWay Sayohatchi',
+                          travelerName: currentName || 'SayrHub Sayohatchi',
                           passport: currentPassport || 'N/A',
                           dob: '',
                           payType: 'online_booking',
@@ -917,7 +917,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          const smeta = `TRAVELWAY — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${currentTravelersCount} kishi\nJonli 1:1 Narxi: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'TW-UZ'}`;
+                          const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${currentTravelersCount} kishi\nJonli 1:1 Narxi: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-UZ'}`;
                           navigator.clipboard.writeText(smeta);
                           onShowToast("Tur smetasi va hisob-kitobi buferga nusxalandi! 📋", "success");
                         }}
@@ -933,8 +933,8 @@ export const Modals: React.FC<ModalsProps> = ({
                       </button>
 
                       <a
-                        href={`https://t.me/share/url?url=${encodeURIComponent(`https://travelway-9x8l.onrender.com`)}&text=${encodeURIComponent(
-                          `Assalomu alaykum! TravelWay orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${currentTravelersCount} kishi\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'TW-TR'}`
+                        href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
+                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${currentTravelersCount} kishi\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -1085,7 +1085,7 @@ export const Modals: React.FC<ModalsProps> = ({
               borderColor: 'var(--tw-border)'
             }}
           >
-            <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>TravelWay Foydalanuvchi QR</h3>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>SayrHub Foydalanuvchi QR</h3>
             <p className="text-xs" style={{ color: 'var(--tw-text-sub)' }}>
               Aeroport va turoperator kassalarida tezkor identifikatsiya uchun
             </p>
@@ -1149,7 +1149,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 >
                   <span className="material-symbols-outlined text-[18px]">support_agent</span>
                 </div>
-                <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>TravelWay 24/7 Yordam</h3>
+                <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>SayrHub 24/7 Yordam</h3>
               </div>
               <button
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border"
@@ -1682,7 +1682,7 @@ export const Modals: React.FC<ModalsProps> = ({
             <div>
               <h3 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Akkauntdan chiqish</h3>
               <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-                TravelWay tizimidan xavfsiz chiqmoqchimisiz? Qayta kirish uchun telefon raqami yoki biometrika kifoya.
+                SayrHub tizimidan xavfsiz chiqmoqchimisiz? Qayta kirish uchun telefon raqami yoki biometrika kifoya.
               </p>
             </div>
             <div className="flex gap-2">
