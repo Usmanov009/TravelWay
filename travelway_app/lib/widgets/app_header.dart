@@ -135,19 +135,26 @@ class AppHeader extends StatelessWidget {
                 ],
               ),
               padding: const EdgeInsets.all(1.5),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceDark,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Center(
-                  child: Text(
-                    'SH',
-                    style: TextStyle(
-                      color: AppTheme.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceDark,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'SH',
+                        style: TextStyle(
+                          color: AppTheme.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ),
                 ),

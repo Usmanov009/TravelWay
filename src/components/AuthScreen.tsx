@@ -217,15 +217,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           onClick={() => onShowToast("✈️ SayrHub — Eng unutilmas sayohatlaringiz hamrohi!", 'info')}
         >
           <div
-            className="w-16 h-16 rounded-2xl p-[2px] shadow-md transition-transform active:scale-95"
-            style={{ backgroundColor: 'var(--tw-accent)' }}
+            className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg transition-transform active:scale-95 bg-[#0038E2] flex items-center justify-center relative ring-2 ring-slate-200/60 dark:ring-slate-700/60"
           >
-            <div
-              className="w-full h-full rounded-[14px] flex items-center justify-center relative overflow-hidden"
-              style={{ backgroundColor: 'var(--tw-surface)' }}
-            >
-              <span className="text-2xl font-black tracking-tight" style={{ color: 'var(--tw-text-main)' }}>SH</span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="SayrHub"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <span className="text-2xl font-black text-white tracking-tight absolute pointer-events-none">SH</span>
           </div>
           <div
             className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md"

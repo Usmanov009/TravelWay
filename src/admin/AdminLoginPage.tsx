@@ -76,8 +76,16 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10">
         {/* Header Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-500 text-white shadow-lg shadow-sky-500/20 mb-3 text-2xl font-black">
-            SH
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0038E2] overflow-hidden shadow-lg shadow-sky-500/20 mb-3 relative ring-2 ring-white/10">
+            <img
+              src="/logo.png"
+              alt="SayrHub"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <span className="text-white font-black text-2xl tracking-wider absolute pointer-events-none">SH</span>
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">SayrHub Admin</h1>
           <p className="text-xs text-slate-400 mt-1">Boshqaruv tizimiga xavfsiz kirish</p>

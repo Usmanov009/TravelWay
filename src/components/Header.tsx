@@ -88,16 +88,18 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onTabSelect && onTabSelect('search')}
         >
           {/* App Brand Logo Icon */}
-          <div
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl p-[1.5px] shadow-sm flex items-center justify-center transition-colors"
-            style={{ backgroundColor: 'var(--tw-accent)' }}
-          >
-            <div
-              className="w-full h-full rounded-[14px] flex items-center justify-center font-black text-xs sm:text-sm tracking-wider"
-              style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-accent)' }}
-            >
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl overflow-hidden shadow-sm shrink-0 bg-[#0038E2] flex items-center justify-center">
+            <img
+              src="/logo.png"
+              alt="SayrHub"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            <span className="text-white font-black text-xs sm:text-sm tracking-wider absolute pointer-events-none">
               SH
-            </div>
+            </span>
           </div>
           <div>
             <div className="flex items-center gap-1.5">

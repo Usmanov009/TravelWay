@@ -224,11 +224,18 @@ class _AuthScreenState extends State<AuthScreen> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFFFF5B00), Color(0xFFFF8C42)]),
+                  color: const Color(0xFF0038E2),
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: const Center(
-                  child: Text('SH', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) => const Center(
+                      child: Text('SH', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                  ),
                 ),
               ),
             ),

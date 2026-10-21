@@ -106,8 +106,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         {/* Brand Header */}
         <div className="h-[70px] px-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-sm font-black text-lg tracking-wider shrink-0">
-              SH
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#0038E2] flex items-center justify-center text-white shadow-sm shrink-0 relative">
+              <img
+                src="/logo.png"
+                alt="SayrHub"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+              <span className="font-black text-lg tracking-wider absolute pointer-events-none">SH</span>
             </div>
             {(!isCollapsed || isMobileOpen) && (
               <div className="min-w-0">
