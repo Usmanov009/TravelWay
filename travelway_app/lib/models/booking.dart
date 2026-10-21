@@ -17,6 +17,10 @@ class Booking {
   final int nightsCount;
   final String passport;
   final String phone;
+  final int guestsCount;
+  final int adultsCount;
+  final int childrenCount;
+  final String cancellationReason;
 
   Booking({
     required this.id,
@@ -37,6 +41,10 @@ class Booking {
     this.nightsCount = 7,
     this.passport = '',
     this.phone = '',
+    this.guestsCount = 2,
+    this.adultsCount = 2,
+    this.childrenCount = 0,
+    this.cancellationReason = '',
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -59,6 +67,10 @@ class Booking {
       nightsCount: (json['nightsCount'] is num) ? (json['nightsCount'] as num).toInt() : 7,
       passport: json['passport']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
+      guestsCount: (json['guestsCount'] is num) ? (json['guestsCount'] as num).toInt() : 2,
+      adultsCount: (json['adultsCount'] is num) ? (json['adultsCount'] as num).toInt() : 2,
+      childrenCount: (json['childrenCount'] is num) ? (json['childrenCount'] as num).toInt() : 0,
+      cancellationReason: json['cancellationReason']?.toString() ?? '',
     );
   }
 
@@ -82,6 +94,10 @@ class Booking {
       'nightsCount': nightsCount,
       'passport': passport,
       'phone': phone,
+      'guestsCount': guestsCount,
+      'adultsCount': adultsCount,
+      'childrenCount': childrenCount,
+      'cancellationReason': cancellationReason,
     };
   }
 }

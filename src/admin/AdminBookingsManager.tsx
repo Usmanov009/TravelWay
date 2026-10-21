@@ -91,6 +91,7 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
   const pendingCount = bookings.filter(b => b.status === 'Jarayonda').length;
   const confirmedCount = bookings.filter(b => b.status === 'Tasdiqlangan').length;
   const readyCount = bookings.filter(b => b.status === 'Vaucher tayyor').length;
+  const cancelledCount = bookings.filter(b => b.status === 'Bekor qilingan').length;
 
   return (
     <div className="space-y-6">
@@ -167,6 +168,18 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
           >
             <span>🎟️ Vaucher tayyor</span>
             <span className="font-bold">({readyCount})</span>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter('Bekor qilingan')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 ${
+              statusFilter === 'Bekor qilingan'
+                ? 'bg-rose-600 text-white shadow-2xs'
+                : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200/80 dark:border-rose-800/60'
+            }`}
+          >
+            <span>✕ Bekor qilingan</span>
+            <span className="font-bold">({cancelledCount})</span>
           </button>
         </div>
 

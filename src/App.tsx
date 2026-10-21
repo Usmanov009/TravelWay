@@ -304,6 +304,8 @@ export default function App() {
   const [tourDetails, setTourDetails] = useState<TourPackage | null>(null);
   const [checkoutTour, setCheckoutTour] = useState<TourPackage | null>(null);
   const [checkoutTravelers, setCheckoutTravelers] = useState<number>(2);
+  const [checkoutAdults, setCheckoutAdults] = useState<number>(2);
+  const [checkoutChildren, setCheckoutChildren] = useState<number>(0);
   const [successBooking, setSuccessBooking] = useState<Booking | null>(null);
   const [cancelBookingTarget, setCancelBookingTarget] = useState<Booking | null>(null);
   const [isEditPassportOpen, setIsEditPassportOpen] = useState(false);
@@ -456,17 +458,25 @@ export default function App() {
   const handleConfirmBooking = (bookingData: {
     tour: TourPackage;
     travelerName: string;
+    phone?: string;
     passport: string;
     dob: string;
     payType: string;
     discount: number;
     travelersCount?: number;
+    adultsCount?: number;
+    childrenCount?: number;
   }) => {
     const travelers = bookingData.travelersCount || checkoutTravelers || 2;
+    const adults = bookingData.adultsCount !== undefined ? bookingData.adultsCount : 2;
+    const children = bookingData.childrenCount !== undefined ? bookingData.childrenCount : 0;
     const code = `TW-VOUCHER-${Math.floor(1000 + Math.random() * 9000)}`;
-    const packageTotal = bookingData.tour.isLiveKompas
-      ? bookingData.tour.price
-      : bookingData.tour.price * travelers;
+
+    const perAdult = bookingData.tour.isLiveKompas
+      ? Math.round(bookingData.tour.price / 2)
+      : bookingData.tour.price;
+    const perChild = Math.round(perAdult * 0.5);
+    const packageTotal = (adults * perAdult) + (children * perChild);
     const total = Math.max(0, packageTotal - bookingData.discount);
 
     const depDate = bookingData.tour.departureDate || '2026-10-15';
@@ -478,6 +488,10 @@ export default function App() {
 
     const formattedDates = `${startDateObj.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' })} — ${endDateObj.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short', year: 'numeric' })}`;
 
+    const priceText = children > 0
+      ? `$${total} (${travelers} kishi: ${adults} katta, ${children} bola)`
+      : `$${total} (${travelers} kishi: ${adults} katta)`;
+
     const newBooking: Booking = {
       id: `b${Date.now()}`,
       tourTitle: bookingData.tour.title,
@@ -487,14 +501,19 @@ export default function App() {
       endDate: endDateStr,
       status: 'Tasdiqlangan',
       voucherId: code,
-      price: `$${total} (${travelers} kishi)`,
+      price: priceText,
       totalNumeric: total,
       travelerName: bookingData.travelerName,
+      travelerPhone: bookingData.phone || user.phone,
+      travelerPassport: bookingData.passport || user.passportNumber,
       type: 'active',
       hotelImg: bookingData.tour.img,
       flight: bookingData.tour.flight,
       airline: bookingData.tour.airline,
-      nightsCount: nights
+      nightsCount: nights,
+      guestsCount: travelers,
+      adultsCount: adults,
+      childrenCount: children
     };
 
     setBookings((prev) => [newBooking, ...prev]);
@@ -516,7 +535,10 @@ export default function App() {
       price: `${deal.price} (1 kishi)`,
       totalNumeric: deal.priceNumeric || 495,
       travelerName: user.name,
-      type: 'active'
+      type: 'active',
+      guestsCount: 1,
+      adultsCount: 1,
+      childrenCount: 0
     };
 
     setBookings((prev) => [newBooking, ...prev]);
@@ -543,7 +565,10 @@ export default function App() {
       hotelImg: combo.img,
       flight: combo.flight,
       airline: combo.airline,
-      nightsCount: combo.nightsTotal
+      nightsCount: combo.nightsTotal,
+      guestsCount: 2,
+      adultsCount: 2,
+      childrenCount: 0
     };
     setBookings((prev) => [newBooking, ...prev]);
     saveBookingToDB(newBooking);
@@ -568,7 +593,10 @@ export default function App() {
       hotelImg: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&auto=format&fit=crop&q=80',
       flight: `${flight.airline} ${flight.flightNumber}`,
       airline: flight.airline,
-      nightsCount: 0
+      nightsCount: 0,
+      guestsCount: 1,
+      adultsCount: 1,
+      childrenCount: 0
     };
     setBookings((prev) => [newBooking, ...prev]);
     saveBookingToDB(newBooking);
@@ -593,7 +621,10 @@ export default function App() {
       hotelImg: hotel.img,
       flight: "Mehmonxona vaucheri (Aviaparvozsiz)",
       airline: "O'z hisobidan",
-      nightsCount: hotel.nightsCount
+      nightsCount: hotel.nightsCount,
+      guestsCount: 2,
+      adultsCount: 2,
+      childrenCount: 0
     };
     setBookings((prev) => [newBooking, ...prev]);
     saveBookingToDB(newBooking);
@@ -607,14 +638,46 @@ export default function App() {
     }
   };
 
-  const handleConfirmCancelBooking = () => {
+  const handleConfirmCancelBooking = (reason?: string) => {
     if (cancelBookingTarget) {
       const targetId = cancelBookingTarget.id;
-      setBookings((prev) => prev.filter((b) => b.id !== targetId));
-      deleteBookingFromDB(targetId);
+      const cancellationReason = reason || "Foydalanuvchi tomonidan bekor qilindi";
+      const cancelledAt = new Date().toISOString();
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === targetId
+            ? {
+                ...b,
+                status: 'Bekor qilingan' as const,
+                type: 'cancelled' as const,
+                cancellationReason,
+                cancelledAt
+              }
+            : b
+        )
+      );
+
+      fetch(`/api/db/bookings/${targetId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          status: 'Bekor qilingan',
+          type: 'cancelled',
+          cancellationReason,
+          cancelledAt
+        })
+      }).catch((e) => console.warn('MongoDB update booking cancellation error:', e));
+
       showToast(`"${cancelBookingTarget.tourTitle}" buyurtmasi bekor qilindi. Mablag' to'liq qaytarildi.`, 'info');
       setCancelBookingTarget(null);
     }
+  };
+
+  const handleRemoveBooking = (bookingId: string) => {
+    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+    deleteBookingFromDB(bookingId);
+    showToast("Buyurtma tarixdan o'chirildi.", 'info');
   };
 
   const getAuthHeaders = () => {
@@ -938,8 +1001,10 @@ export default function App() {
                 hotels={hotels}
                 onToggleSave={handleToggleSaveTour}
                 onOpenTourDetails={(tour) => setTourDetails(tour)}
-                onQuickBook={(tour, count) => {
+                onQuickBook={(tour, count, adults, children) => {
                   setCheckoutTravelers(count || 2);
+                  setCheckoutAdults(adults !== undefined ? adults : 2);
+                  setCheckoutChildren(children !== undefined ? children : 0);
                   setCheckoutTour(tour);
                 }}
                 onShowToast={showToast}
@@ -979,6 +1044,7 @@ export default function App() {
                 onOpenTourModal={(tour) => setTourDetails(tour)}
                 onDownloadVoucher={(id, b) => setActiveVoucherBooking(b)}
                 onCancelBooking={handleCancelBooking}
+                onRemoveBooking={handleRemoveBooking}
                 onRemoveSaved={(id) => handleToggleSaveTour(id)}
                 onNavigateToSearch={() => setCurrentTab('search')}
               />
@@ -1053,6 +1119,8 @@ export default function App() {
             onOpenPriceAlert={(tour) => setActivePriceAlertTour(tour)}
             checkoutTour={checkoutTour}
             checkoutTravelers={checkoutTravelers}
+            checkoutAdults={checkoutAdults}
+            checkoutChildren={checkoutChildren}
             onCloseCheckout={() => setCheckoutTour(null)}
             onConfirmBooking={handleConfirmBooking}
             successBooking={successBooking}

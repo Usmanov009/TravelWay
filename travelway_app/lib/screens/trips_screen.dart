@@ -16,7 +16,7 @@ class TripsScreen extends StatefulWidget {
 }
 
 class _TripsScreenState extends State<TripsScreen> {
-  // 'active' or 'saved'
+  // 'active', 'cancelled', 'saved'
   String _subTab = 'active';
 
   void _showVoucherDetails(BuildContext context, Booking booking) {
@@ -72,6 +72,17 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        const Text('Sayohatchilar:', style: TextStyle(color: AppTheme.textSub, fontSize: 12)),
+                        Text(
+                          '${booking.guestsCount} kishi (${booking.adultsCount} katta${booking.childrenCount > 0 ? ', ${booking.childrenCount} bola' : ''})',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textMain, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
                         const Text('Holati:', style: TextStyle(color: AppTheme.textSub, fontSize: 12)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -108,7 +119,7 @@ class _TripsScreenState extends State<TripsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Jami to\'lov:', style: TextStyle(color: AppTheme.textSub)),
-                  Text(booking.price, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                  Text(booking.price, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -126,11 +137,123 @@ class _TripsScreenState extends State<TripsScreen> {
     );
   }
 
+  void _confirmCancelBooking(BuildContext context, AppProvider provider, Booking booking) {
+    String selectedReason = "Rejalarim o'zgardi";
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            backgroundColor: AppTheme.surfaceDark,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+                SizedBox(width: 10),
+                Text('Turni bekor qilish', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${booking.tourTitle} (${booking.voucherId}) turini bekor qilishni xohlaysizmi?',
+                    style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.subtleDark,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.borderDark),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('To\'langan summa:', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                            Text(booking.price, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Qaytariladigan summa:', style: TextStyle(fontSize: 11, color: AppTheme.accentGreen)),
+                            Text('100% Qaytariladi ✓', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text('Bekor qilish sababi:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textSub)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      "Rejalarim o'zgardi",
+                      "Boshqa sanaga",
+                      "Boshqa turpaket",
+                      "Shaxsiy sabab"
+                    ].map((reason) {
+                      final isSelected = selectedReason == reason;
+                      return ChoiceChip(
+                        label: Text(reason, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : AppTheme.textSub)),
+                        selected: isSelected,
+                        selectedColor: AppTheme.primary,
+                        backgroundColor: AppTheme.cardDark,
+                        onSelected: (val) {
+                          if (val) setDialogState(() => selectedReason = reason);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Qaytish'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  Navigator.pop(ctx);
+                  await provider.cancelBooking(booking.id, reason: selectedReason);
+                  if (mounted) {
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('"${booking.tourTitle}" turi bekor qilindi. Mablag\' to\'liq qaytarildi.'),
+                        backgroundColor: Colors.red[700],
+                      ),
+                    );
+                    setState(() => _subTab = 'cancelled');
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red[700]),
+                child: const Text('Ha, bekor qilinsin', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _shareTelegram(Booking b) async {
     final text = Uri.encodeComponent(
       'SayrHub Vaucher:\n'
       'Mehmonxona: ${b.tourTitle}\n'
       'Manzil: ${b.dest}\n'
+      'Sayyohlar: ${b.guestsCount} kishi (${b.adultsCount} katta, ${b.childrenCount} bola)\n'
       'Vaucher ID: ${b.voucherId}\n'
       'Narx: ${b.price}\n'
       'Holat: ${b.status}'
@@ -145,6 +268,8 @@ class _TripsScreenState extends State<TripsScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
 
+    final activeBookings = provider.bookings.where((b) => b.type == 'active' && b.status != 'Bekor qilingan').toList();
+    final cancelledBookings = provider.bookings.where((b) => b.type == 'cancelled' || b.status == 'Bekor qilingan').toList();
     final savedTours = provider.tours.where((t) => provider.isFavorite(t.id)).toList();
 
     return Scaffold(
@@ -154,7 +279,7 @@ class _TripsScreenState extends State<TripsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Trips Subheader Toggle Tabs (Exact Web Match)
+            // Trips Subheader Toggle Tabs (Faol, Bekor qilingan, Saqlangan)
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -175,11 +300,33 @@ class _TripsScreenState extends State<TripsScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            '📋 Buyurtmalar (${provider.bookings.length})',
+                            '📋 Faol (${activeBookings.length})',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: _subTab == 'active' ? Colors.white : AppTheme.textSub,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _subTab = 'cancelled'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _subTab == 'cancelled' ? AppTheme.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            '🚫 Bekor (${cancelledBookings.length})',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: _subTab == 'cancelled' ? Colors.white : AppTheme.textSub,
                             ),
                           ),
                         ),
@@ -197,7 +344,7 @@ class _TripsScreenState extends State<TripsScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            '❤️ Saqlanganlar (${savedTours.length})',
+                            '❤️ Saqlangan (${savedTours.length})',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -213,9 +360,11 @@ class _TripsScreenState extends State<TripsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Active Tab Content
+            // Tab Content
             if (_subTab == 'active')
-              _buildBookingsList(context, provider)
+              _buildActiveBookingsList(context, provider, activeBookings)
+            else if (_subTab == 'cancelled')
+              _buildCancelledBookingsList(context, provider, cancelledBookings)
             else
               _buildSavedList(context, provider, savedTours),
           ],
@@ -224,7 +373,7 @@ class _TripsScreenState extends State<TripsScreen> {
     );
   }
 
-  Widget _buildBookingsList(BuildContext context, AppProvider provider) {
+  Widget _buildActiveBookingsList(BuildContext context, AppProvider provider, List<Booking> bookings) {
     if (provider.isLoadingBookings) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
@@ -232,7 +381,7 @@ class _TripsScreenState extends State<TripsScreen> {
       );
     }
 
-    if (provider.bookings.isEmpty) {
+    if (bookings.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
@@ -268,10 +417,10 @@ class _TripsScreenState extends State<TripsScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: provider.bookings.length,
+      itemCount: bookings.length,
       separatorBuilder: (_, __) => const SizedBox(height: 14),
       itemBuilder: (context, idx) {
-        final b = provider.bookings[idx];
+        final b = bookings[idx];
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -358,6 +507,19 @@ class _TripsScreenState extends State<TripsScreen> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
+                        const Icon(Icons.people_outline, size: 14, color: AppTheme.primary),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Sayohatchilar: ${b.guestsCount} kishi (${b.adultsCount} katta${b.childrenCount > 0 ? ', ${b.childrenCount} bola' : ''})',
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMain),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
                         const Icon(Icons.person, size: 14, color: AppTheme.textMuted),
                         const SizedBox(width: 6),
                         Expanded(child: Text('Sayyoh: ${b.travelerName}', style: const TextStyle(fontSize: 11, color: AppTheme.textSub))),
@@ -375,7 +537,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   const Text('Jami to\'lov:', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
                   Text(
                     b.price,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.primary),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppTheme.primary),
                   ),
                 ],
               ),
@@ -395,26 +557,20 @@ class _TripsScreenState extends State<TripsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(
-                          text: 'SAYRHUB SMETA:\nTur: ${b.tourTitle}\nVaucher: ${b.voucherId}\nNarx: ${b.price}',
-                        ));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Smeta buferga nusxalandi! 📋')),
-                        );
-                      },
-                      icon: const Icon(Icons.copy, size: 14),
-                      label: const Text('Smeta', style: TextStyle(fontSize: 11)),
+                      onPressed: () => _confirmCancelBooking(context, provider, b),
+                      icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.redAccent),
+                      label: const Text('Bekor qilish', style: TextStyle(fontSize: 11, color: Colors.redAccent, fontWeight: FontWeight.bold)),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 8),
+                        side: BorderSide(color: Colors.red.withOpacity(0.5)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   IconButton(
                     onPressed: () => _shareTelegram(b),
                     icon: const Icon(Icons.send, size: 18, color: Color(0xFF24A1DE)),
@@ -422,6 +578,138 @@ class _TripsScreenState extends State<TripsScreen> {
                       backgroundColor: AppTheme.subtleDark,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCancelledBookingsList(BuildContext context, AppProvider provider, List<Booking> cancelledBookings) {
+    if (cancelledBookings.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.borderDark),
+        ),
+        alignment: Alignment.center,
+        child: const Column(
+          children: [
+            Text('✅', style: TextStyle(fontSize: 48)),
+            SizedBox(height: 12),
+            Text(
+              'Bekor qilingan buyurtmalar mavjud emas',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+            ),
+            SizedBox(height: 6),
+            Text(
+              'Barcha faol bronlaringiz "Faol" bo\'limida saqlanadi.',
+              style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: cancelledBookings.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      itemBuilder: (context, idx) {
+        final b = cancelledBookings[idx];
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.red.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('ID: ${b.voucherId}', style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textSub)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.withOpacity(0.4)),
+                    ),
+                    child: const Text(
+                      '✕ Bekor qilingan',
+                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // 100% Refund banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentGreen.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.accentGreen.withOpacity(0.25)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('💸 Mablag\' to\'liq qaytarilgan (100%)', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen)),
+                    Text('Qaytarildi ✓', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              Text(
+                b.tourTitle,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textSub, decoration: TextDecoration.lineThrough),
+              ),
+              const SizedBox(height: 6),
+
+              Text('📍 ${b.dest} • 📅 ${b.dates}', style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              const SizedBox(height: 4),
+              Text(
+                '👥 Sayohatchilar: ${b.guestsCount} kishi (${b.adultsCount} katta${b.childrenCount > 0 ? ', ${b.childrenCount} bola' : ''})',
+                style: const TextStyle(fontSize: 11, color: AppTheme.textMain),
+              ),
+              if (b.cancellationReason.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text('Sababi: ${b.cancellationReason}', style: const TextStyle(fontSize: 10, color: Colors.redAccent)),
+              ],
+              const SizedBox(height: 12),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(b.price, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textSub, decoration: TextDecoration.lineThrough)),
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => provider.setTabIndex(0),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        ),
+                        child: const Text('Qayta bron qilish', style: TextStyle(fontSize: 10)),
+                      ),
+                      const SizedBox(width: 6),
+                      TextButton(
+                        onPressed: () => provider.removeBooking(b.id),
+                        child: const Text('O\'chirish', style: TextStyle(fontSize: 10, color: Colors.redAccent)),
+                      ),
+                    ],
                   ),
                 ],
               ),

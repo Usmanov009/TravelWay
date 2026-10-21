@@ -23,15 +23,20 @@ interface ModalsProps {
   // Checkout Modal
   checkoutTour: TourPackage | null;
   checkoutTravelers?: number;
+  checkoutAdults?: number;
+  checkoutChildren?: number;
   onCloseCheckout: () => void;
   onConfirmBooking: (bookingData: {
     tour: TourPackage;
     travelerName: string;
+    phone?: string;
     passport: string;
     dob: string;
     payType: string;
     discount: number;
     travelersCount?: number;
+    adultsCount?: number;
+    childrenCount?: number;
   }) => void;
 
   // Booking Success Modal
@@ -67,7 +72,7 @@ interface ModalsProps {
   // Cancel Booking Modal
   cancelBookingTarget: Booking | null;
   onCloseCancelBooking: () => void;
-  onConfirmCancelBooking: () => void;
+  onConfirmCancelBooking: (reason?: string) => void;
 
   // Logout Modal
   isLogoutConfirmOpen: boolean;
@@ -100,6 +105,8 @@ export const Modals: React.FC<ModalsProps> = ({
   onOpenPriceAlert,
   checkoutTour,
   checkoutTravelers = 2,
+  checkoutAdults = 2,
+  checkoutChildren = 0,
   onCloseCheckout,
   onConfirmBooking,
   successBooking,
@@ -139,18 +146,23 @@ export const Modals: React.FC<ModalsProps> = ({
   const [otpDigits, setOtpDigits] = useState(['', '', '', '']);
   const [otpSeconds, setOtpSeconds] = useState(59);
 
-  // Checkout state
-  const [travelerFirstName, setTravelerFirstName] = useState('JASUR');
-  const [travelerLastName, setTravelerLastName] = useState('RAHIMOV');
-  const [travelerPassport, setTravelerPassport] = useState('FA 9842104');
-  const [travelerDob, setTravelerDob] = useState('1994-08-15');
+  // Checkout & Travelers state
+  const [adultsCount, setAdultsCount] = useState<number>(checkoutAdults || 2);
+  const [childrenCount, setChildrenCount] = useState<number>(checkoutChildren || 0);
+  const [bookingTravelerName, setBookingTravelerName] = useState<string>(currentName || 'SayrHub Sayohatchi');
+  const [bookingPhone, setBookingPhone] = useState<string>(currentPhone || '+998 90 123 45 67');
+  const [bookingPassport, setBookingPassport] = useState<string>(currentPassport || 'FA 9842104');
   const [selectedPayType, setSelectedPayType] = useState('humo');
-  const [currentTravelersCount, setCurrentTravelersCount] = useState(checkoutTravelers);
+  const [cancelReason, setCancelReason] = useState<string>("Rejalarim o'zgardi");
 
-  // Sync checkout travelers count
+  // Sync checkout travelers count & user data
   useEffect(() => {
-    setCurrentTravelersCount(checkoutTravelers);
-  }, [checkoutTravelers, checkoutTour]);
+    if (checkoutAdults !== undefined) setAdultsCount(checkoutAdults);
+    if (checkoutChildren !== undefined) setChildrenCount(checkoutChildren);
+    if (currentName) setBookingTravelerName(currentName);
+    if (currentPhone) setBookingPhone(currentPhone);
+    if (currentPassport) setBookingPassport(currentPassport);
+  }, [checkoutAdults, checkoutChildren, checkoutTour, currentName, currentPhone, currentPassport]);
 
   // Edit profile state
   const [editName, setEditName] = useState(currentName);
@@ -621,7 +633,8 @@ export const Modals: React.FC<ModalsProps> = ({
                   onClick={() => onProceedToCheckout(tourDetails)}
                   type="button"
                 >
-                  <span>Tur smetasi & Hisob</span>
+                  <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+                  <span>Turni Bron Qilish</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round"></path>
                   </svg>
@@ -681,33 +694,233 @@ export const Modals: React.FC<ModalsProps> = ({
               </button>
             </div>
 
-            {/* Travelers Count Switcher */}
+            {/* Sayohatchilar va odamlar soni (Kattalar va Yosh Bolalar) */}
             <div
-              className="p-3 rounded-2xl border flex items-center justify-between"
+              className="p-3.5 rounded-2xl border space-y-3"
               style={{
                 backgroundColor: 'var(--tw-subtle)',
                 borderColor: 'var(--tw-border)'
               }}
             >
-              <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                <span>👥</span> Sayohatchilar hisobi:
-              </span>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4].map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setCurrentTravelersCount(num)}
-                    className="px-3 py-1 rounded-xl text-xs font-bold transition tap-bounce border"
-                    style={{
-                      backgroundColor: currentTravelersCount === num ? 'var(--tw-accent)' : 'var(--tw-surface)',
-                      color: currentTravelersCount === num ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
-                      borderColor: currentTravelersCount === num ? 'var(--tw-accent)' : 'var(--tw-border)'
-                    }}
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
+                  <span>👥</span> Sayohatchilar tarkibi va soni:
+                </span>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                  Jami: {adultsCount + childrenCount} kishi
+                </span>
+              </div>
+
+              {/* 1. Katta Odamlar (Adults 12+) */}
+              <div
+                className="p-2.5 rounded-xl border flex items-center justify-between gap-2"
+                style={{
+                  backgroundColor: 'var(--tw-surface)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>🧑 Katta odamlar</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400">12+ yosh</span>
+                  </div>
+                  <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>To'liq tarif bo'yicha</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setAdultsCount(num)}
+                        className="w-7 h-7 rounded-lg text-xs font-bold transition tap-bounce border"
+                        style={{
+                          backgroundColor: adultsCount === num ? 'var(--tw-accent)' : 'var(--tw-subtle)',
+                          color: adultsCount === num ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
+                          borderColor: adultsCount === num ? 'var(--tw-accent)' : 'var(--tw-border)'
+                        }}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div
+                    className="flex items-center border rounded-lg overflow-hidden ml-0.5"
+                    style={{ borderColor: 'var(--tw-border)' }}
                   >
-                    {num} kishi
-                  </button>
-                ))}
+                    <button
+                      type="button"
+                      onClick={() => setAdultsCount((prev) => Math.max(1, prev - 1))}
+                      className="w-7 h-7 flex items-center justify-center font-bold text-sm tap-bounce hover:opacity-80 transition"
+                      style={{ backgroundColor: 'var(--tw-subtle)', color: 'var(--tw-text-main)' }}
+                      title="Kamaytirish"
+                    >
+                      -
+                    </button>
+                    <span className="w-6 text-center text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>
+                      {adultsCount}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setAdultsCount((prev) => Math.min(10, prev + 1))}
+                      className="w-7 h-7 flex items-center justify-center font-bold text-sm tap-bounce hover:opacity-80 transition"
+                      style={{ backgroundColor: 'var(--tw-subtle)', color: 'var(--tw-text-main)' }}
+                      title="Ko'paytirish"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Yosh Bolalar (Children 0-11) */}
+              <div
+                className="p-2.5 rounded-xl border flex items-center justify-between gap-2"
+                style={{
+                  backgroundColor: 'var(--tw-surface)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>👶 Yosh bolalar</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">0-11 yosh</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">50% maxsus chegirma</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setChildrenCount(num)}
+                        className="w-7 h-7 rounded-lg text-xs font-bold transition tap-bounce border"
+                        style={{
+                          backgroundColor: childrenCount === num ? 'var(--tw-accent)' : 'var(--tw-subtle)',
+                          color: childrenCount === num ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
+                          borderColor: childrenCount === num ? 'var(--tw-accent)' : 'var(--tw-border)'
+                        }}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div
+                    className="flex items-center border rounded-lg overflow-hidden ml-0.5"
+                    style={{ borderColor: 'var(--tw-border)' }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setChildrenCount((prev) => Math.max(0, prev - 1))}
+                      className="w-7 h-7 flex items-center justify-center font-bold text-sm tap-bounce hover:opacity-80 transition"
+                      style={{ backgroundColor: 'var(--tw-subtle)', color: 'var(--tw-text-main)' }}
+                      title="Kamaytirish"
+                    >
+                      -
+                    </button>
+                    <span className="w-6 text-center text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>
+                      {childrenCount}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setChildrenCount((prev) => Math.min(6, prev + 1))}
+                      className="w-7 h-7 flex items-center justify-center font-bold text-sm tap-bounce hover:opacity-80 transition"
+                      style={{ backgroundColor: 'var(--tw-subtle)', color: 'var(--tw-text-main)' }}
+                      title="Ko'paytirish"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Jami Xulosa Banner */}
+              <div
+                className="p-2 rounded-xl text-[11px] flex items-center justify-between"
+                style={{
+                  backgroundColor: 'var(--tw-surface)',
+                  color: 'var(--tw-text-sub)'
+                }}
+              >
+                <span>👥 Sayohatchilar hisobi:</span>
+                <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
+                  {adultsCount} ta katta odam{childrenCount > 0 ? `, ${childrenCount} ta yosh bola` : ''}
+                </span>
+              </div>
+            </div>
+
+            {/* Asosiy Sayohatchi Ma'lumotlarini To'ldirish */}
+            <div
+              className="p-3.5 rounded-2xl border space-y-2.5"
+              style={{
+                backgroundColor: 'var(--tw-subtle)',
+                borderColor: 'var(--tw-border)'
+              }}
+            >
+              <h4 className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
+                <span>📝</span> Asosiy sayohatchi ma'lumotlari:
+              </h4>
+
+              <div className="space-y-2 text-[11px]">
+                <div>
+                  <label className="text-[10px] block font-semibold mb-1" style={{ color: 'var(--tw-text-sub)' }}>
+                    F.I.SH (Ism va Familiya)
+                  </label>
+                  <input
+                    type="text"
+                    value={bookingTravelerName}
+                    onChange={(e) => setBookingTravelerName(e.target.value)}
+                    placeholder="Masalan: Jasur Rahimov"
+                    className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
+                    style={{
+                      backgroundColor: 'var(--tw-surface)',
+                      borderColor: 'var(--tw-border)',
+                      color: 'var(--tw-text-main)'
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] block font-semibold mb-1" style={{ color: 'var(--tw-text-sub)' }}>
+                      Telefon raqami
+                    </label>
+                    <input
+                      type="text"
+                      value={bookingPhone}
+                      onChange={(e) => setBookingPhone(e.target.value)}
+                      placeholder="+998 90 123 45 67"
+                      className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
+                      style={{
+                        backgroundColor: 'var(--tw-surface)',
+                        borderColor: 'var(--tw-border)',
+                        color: 'var(--tw-text-main)'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] block font-semibold mb-1" style={{ color: 'var(--tw-text-sub)' }}>
+                      Pasport / ID seriya
+                    </label>
+                    <input
+                      type="text"
+                      value={bookingPassport}
+                      onChange={(e) => setBookingPassport(e.target.value)}
+                      placeholder="FA 9842104"
+                      className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
+                      style={{
+                        backgroundColor: 'var(--tw-surface)',
+                        borderColor: 'var(--tw-border)',
+                        color: 'var(--tw-text-main)'
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -826,12 +1039,13 @@ export const Modals: React.FC<ModalsProps> = ({
 
             {/* Official Price Calculation Sheet */}
             {(() => {
-              const finalPackagePrice = checkoutTour.isLiveKompas
-                ? checkoutTour.price
-                : checkoutTour.price * currentTravelersCount;
-              const perPersonEstimate = checkoutTour.isLiveKompas
-                ? Math.round(checkoutTour.price / (currentTravelersCount || 1))
+              const totalTravelers = adultsCount + childrenCount;
+              const perAdult = checkoutTour.isLiveKompas
+                ? Math.round(checkoutTour.price / 2)
                 : checkoutTour.price;
+              const perChild = Math.round(perAdult * 0.5);
+              const finalPackagePrice = (adultsCount * perAdult) + (childrenCount * perChild);
+              const perPersonEstimate = Math.round(finalPackagePrice / (totalTravelers || 1));
 
               return (
                 <>
@@ -843,23 +1057,29 @@ export const Modals: React.FC<ModalsProps> = ({
                     }}
                   >
                     <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
-                      <span>{checkoutTour.isLiveKompas ? 'Jonli 1:1 rasmiy narx:' : '1 kishi uchun narx:'}</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
-                          ${checkoutTour.isLiveKompas ? finalPackagePrice : checkoutTour.price}
+                      <span>Katta odamlar ({adultsCount} kishi):</span>
+                      <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
+                        {adultsCount} × ${perAdult} = ${adultsCount * perAdult}
+                      </span>
+                    </div>
+
+                    {childrenCount > 0 && (
+                      <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
+                        <span>Yosh bolalar ({childrenCount} bola - 50%):</span>
+                        <span className="font-bold text-emerald-500">
+                          {childrenCount} × ${perChild} = ${childrenCount * perChild}
                         </span>
-                        {checkoutTour.isLiveKompas && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
-                            1:1 Aniq
-                          </span>
-                        )}
                       </div>
-                    </div>
+                    )}
+
                     <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
-                      <span>Sayohatchilar miqdori:</span>
-                      <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>{currentTravelersCount} kishi</span>
+                      <span>Jami sayohatchilar:</span>
+                      <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
+                        {totalTravelers} kishi ({adultsCount} katta, {childrenCount} bola)
+                      </span>
                     </div>
-                    {checkoutTour.isLiveKompas && currentTravelersCount > 1 && (
+
+                    {totalTravelers > 1 && (
                       <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
                         <span>1 kishiga to'g'ri keladi:</span>
                         <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>
@@ -867,10 +1087,12 @@ export const Modals: React.FC<ModalsProps> = ({
                         </span>
                       </div>
                     )}
+
                     <div className="flex justify-between items-center text-xs text-emerald-500">
                       <span>Charter & Aeroport yig'imlari:</span>
                       <span className="font-bold">Kiritilgan (0$)</span>
                     </div>
+
                     <div className="border-t pt-2 flex justify-between items-end" style={{ borderColor: 'var(--tw-border)' }}>
                       <div>
                         <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Jami yakuniy narx:</span>
@@ -897,12 +1119,15 @@ export const Modals: React.FC<ModalsProps> = ({
                       onClick={() => {
                         onConfirmBooking({
                           tour: checkoutTour,
-                          travelerName: currentName || 'SayrHub Sayohatchi',
-                          passport: currentPassport || 'N/A',
+                          travelerName: bookingTravelerName.trim() || currentName || 'SayrHub Sayohatchi',
+                          phone: bookingPhone.trim() || currentPhone || '',
+                          passport: bookingPassport.trim() || currentPassport || 'N/A',
                           dob: '',
                           payType: 'online_booking',
                           discount: 0,
-                          travelersCount: currentTravelersCount
+                          travelersCount: totalTravelers,
+                          adultsCount: adultsCount,
+                          childrenCount: childrenCount
                         });
                         onShowToast(`"${checkoutTour.title}" turi muvaffaqiyatli bron qilindi! 🎉`, 'success');
                       }}
@@ -917,7 +1142,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${currentTravelersCount} kishi\nJonli 1:1 Narxi: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-UZ'}`;
+                          const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nSayyoh: ${bookingTravelerName}\nTel: ${bookingPhone}\nPasport: ${bookingPassport}\nJonli Narx: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-UZ'}`;
                           navigator.clipboard.writeText(smeta);
                           onShowToast("Tur smetasi va hisob-kitobi buferga nusxalandi! 📋", "success");
                         }}
@@ -934,7 +1159,7 @@ export const Modals: React.FC<ModalsProps> = ({
 
                       <a
                         href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${currentTravelersCount} kishi\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
+                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\n👤 Sayyoh: ${bookingTravelerName}\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -1019,6 +1244,12 @@ export const Modals: React.FC<ModalsProps> = ({
                 <p className="font-bold truncate" style={{ color: 'var(--tw-text-main)' }}>{successBooking.tourTitle}</p>
                 <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
                   Sayohatchi: <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>{successBooking.travelerName}</span>
+                </p>
+                <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
+                  Sayohatchilar: <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>
+                    {successBooking.guestsCount || 1} kishi
+                    {successBooking.adultsCount ? ` (${successBooking.adultsCount} katta${successBooking.childrenCount ? `, ${successBooking.childrenCount} bola` : ''})` : ''}
+                  </span>
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
                   Reys: <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>TAS → AYT (Charter)</span>
@@ -1468,6 +1699,20 @@ export const Modals: React.FC<ModalsProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
+                <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Sayohatchilar tarkibi:</span>
+                <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>
+                  👥 {activeVoucherBooking.guestsCount || 1} kishi
+                  {activeVoucherBooking.adultsCount ? ` (${activeVoucherBooking.adultsCount} katta${activeVoucherBooking.childrenCount ? `, ${activeVoucherBooking.childrenCount} bola` : ''})` : ''}
+                </span>
+              </div>
+
+              <div
+                className="p-2.5 rounded-xl border"
+                style={{
+                  backgroundColor: 'var(--tw-subtle)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Parvoz & Transfer:</span>
                 <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>TAS → AYT Charter reysi kiritilgan</span>
               </div>
@@ -1512,23 +1757,24 @@ export const Modals: React.FC<ModalsProps> = ({
           className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
         >
           <div
-            className="border rounded-3xl p-5 max-w-[330px] w-full space-y-3.5 text-center shadow-2xl animate-scaleUp"
+            className="border rounded-3xl p-5 max-w-[340px] w-full space-y-3.5 text-center shadow-2xl animate-scaleUp"
             style={{
               backgroundColor: 'var(--tw-surface)',
               borderColor: 'var(--tw-border)'
             }}
           >
-            <div className="w-12 h-12 mx-auto rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xl border border-red-500/30">
+            <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center text-xl border border-rose-500/30">
               ⚠️
             </div>
             <div>
-              <h3 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Buyurtmani bekor qilasizmi?</h3>
+              <h3 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Turni bekor qilasizmi?</h3>
               <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
                 <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>{cancelBookingTarget.tourTitle}</span> ({cancelBookingTarget.voucherId}) buyurtmasi bekor qilinadi.
               </p>
             </div>
+
             <div
-              className="p-3 rounded-xl border text-[11px] text-left space-y-1"
+              className="p-3 rounded-xl border text-[11px] text-left space-y-1.5"
               style={{
                 backgroundColor: 'var(--tw-subtle)',
                 borderColor: 'var(--tw-border)',
@@ -1536,26 +1782,63 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <p className="flex justify-between">
+                <span>Sayohatchilar:</span>
+                <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>
+                  {cancelBookingTarget.guestsCount || 1} kishi
+                  {cancelBookingTarget.adultsCount ? ` (${cancelBookingTarget.adultsCount} katta${cancelBookingTarget.childrenCount ? `, ${cancelBookingTarget.childrenCount} bola` : ''})` : ''}
+                </span>
+              </p>
+              <p className="flex justify-between">
                 <span>To'langan summa:</span>
                 <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>{cancelBookingTarget.price}</span>
               </p>
-              <p className="flex justify-between text-emerald-500">
-                <span>Qaytariladigan balans:</span>
+              <p className="flex justify-between text-emerald-500 font-medium">
+                <span>Qaytariladigan mablag':</span>
                 <span className="font-bold">100% Qaytariladi ✓</span>
               </p>
             </div>
-            <div className="flex gap-2">
+
+            {/* Cancellation reason selector */}
+            <div className="text-left space-y-1.5">
+              <label className="text-[10px] font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                Bekor qilish sababi:
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  "Rejalarim o'zgardi",
+                  "Boshqa sanaga",
+                  "Boshqa turpaket",
+                  "Shaxsiy sabab"
+                ].map((reason) => (
+                  <button
+                    key={reason}
+                    type="button"
+                    onClick={() => setCancelReason(reason)}
+                    className="px-2 py-1.5 text-[10px] font-semibold rounded-lg border text-left truncate transition tap-bounce"
+                    style={{
+                      backgroundColor: cancelReason === reason ? 'var(--tw-accent)' : 'var(--tw-subtle)',
+                      color: cancelReason === reason ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
+                      borderColor: cancelReason === reason ? 'var(--tw-accent)' : 'var(--tw-border)'
+                    }}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-1">
               <button
                 type="button"
-                onClick={onConfirmCancelBooking}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl tap-bounce shadow-xs"
+                onClick={() => onConfirmCancelBooking(cancelReason)}
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl tap-bounce shadow-xs transition"
               >
                 Ha, bekor qilinsin
               </button>
               <button
                 type="button"
                 onClick={onCloseCancelBooking}
-                className="px-3 py-2.5 text-xs font-semibold rounded-xl tap-bounce border"
+                className="px-3 py-2.5 text-xs font-semibold rounded-xl tap-bounce border transition"
                 style={{
                   backgroundColor: 'var(--tw-subtle)',
                   borderColor: 'var(--tw-border)',

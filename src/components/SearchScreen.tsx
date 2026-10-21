@@ -14,7 +14,7 @@ interface SearchScreenProps {
   tours: TourPackage[];
   onToggleSave: (id: string, e?: React.MouseEvent) => void;
   onOpenTourDetails: (tour: TourPackage) => void;
-  onQuickBook: (tour: TourPackage, travelersCount?: number) => void;
+  onQuickBook: (tour: TourPackage, travelersCount?: number, adults?: number, children?: number) => void;
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
   priceAlerts?: PriceAlert[];
   onSavePriceAlert?: (alertData: {
@@ -1647,10 +1647,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                         backgroundColor: 'var(--tw-accent)',
                         color: 'var(--tw-accent-contrast)'
                       }}
-                      onClick={() => onQuickBook(tour, totalTravelers)}
+                      onClick={() => onQuickBook(tour, totalTravelers, adultsCount, childrenCount)}
                       type="button"
                     >
-                      <span>Spesifikatsiya & Hisob</span>
+                      <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                      <span>Bron qilish</span>
                     </button>
                   </div>
                 </div>

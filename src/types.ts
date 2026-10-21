@@ -48,11 +48,13 @@ export interface Booking {
   tourTitle: string;
   dest: string;
   dates: string;
-  status: 'Tasdiqlangan' | 'Vaucher tayyor' | 'Jarayonda';
+  status: 'Tasdiqlangan' | 'Vaucher tayyor' | 'Jarayonda' | 'Bekor qilingan';
   voucherId: string;
   price: string;
   totalNumeric: number;
   travelerName: string;
+  travelerPhone?: string;
+  travelerPassport?: string;
   type: 'active' | 'completed' | 'cancelled';
   startDate?: string; // YYYY-MM-DD
   endDate?: string;   // YYYY-MM-DD
@@ -60,6 +62,11 @@ export interface Booking {
   flight?: string;
   airline?: string;
   nightsCount?: number;
+  guestsCount?: number;
+  adultsCount?: number;
+  childrenCount?: number;
+  cancellationReason?: string;
+  cancelledAt?: string;
 }
 
 export interface ExploreVibe {

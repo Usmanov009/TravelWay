@@ -21,6 +21,14 @@ class _BookingDialogState extends State<BookingDialog> {
   String _selectedPayment = 'Payme';
   bool _isSubmitting = false;
 
+  int _adultsCount = 2;
+  int _childrenCount = 0;
+
+  int get _perAdult => widget.tour.isLiveKompas ? (widget.tour.price / 2).round() : widget.tour.price;
+  int get _perChild => (_perAdult * 0.5).round();
+  int get _totalPrice => (_adultsCount * _perAdult) + (_childrenCount * _perChild);
+  int get _totalGuests => _adultsCount + _childrenCount;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -43,6 +51,10 @@ class _BookingDialogState extends State<BookingDialog> {
     final voucherCode = 'VCH-TR-${DateTime.now().millisecondsSinceEpoch % 100000}';
     final bookingId = 'BK-${DateTime.now().millisecondsSinceEpoch % 1000000}';
 
+    final priceStr = _childrenCount > 0
+        ? '\$$_totalPrice ($_totalGuests kishi: $_adultsCount katta, $_childrenCount bola)'
+        : '\$$_totalPrice ($_totalGuests kishi: $_adultsCount katta)';
+
     final newBooking = Booking(
       id: bookingId,
       tourTitle: widget.tour.title,
@@ -50,8 +62,8 @@ class _BookingDialogState extends State<BookingDialog> {
       dates: widget.tour.departureDate.isNotEmpty ? widget.tour.departureDate : 'Kelgusi hafta',
       status: 'Tasdiqlangan',
       voucherId: voucherCode,
-      price: '\$${widget.tour.price}',
-      totalNumeric: widget.tour.price,
+      price: priceStr,
+      totalNumeric: _totalPrice,
       travelerName: _nameController.text.trim(),
       type: 'active',
       hotelImg: widget.tour.img,
@@ -60,6 +72,9 @@ class _BookingDialogState extends State<BookingDialog> {
       nightsCount: widget.tour.nightsCount,
       passport: _passportController.text.trim(),
       phone: _phoneController.text.trim(),
+      guestsCount: _totalGuests,
+      adultsCount: _adultsCount,
+      childrenCount: _childrenCount,
     );
 
     await provider.createBooking(newBooking);
@@ -77,7 +92,7 @@ class _BookingDialogState extends State<BookingDialog> {
             children: [
               Icon(Icons.check_circle, color: AppTheme.accentGreen, size: 28),
               SizedBox(width: 10),
-              Text('Muvaffaqiyatli band qilindi!', style: TextStyle(fontSize: 16)),
+              Text('Muvaffaqiyatli bron qilindi!', style: TextStyle(fontSize: 16)),
             ],
           ),
           content: Column(
@@ -87,7 +102,8 @@ class _BookingDialogState extends State<BookingDialog> {
               Text('Vaucher raqamingiz: $voucherCode', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
               const SizedBox(height: 8),
               Text('Mehmonxona: ${widget.tour.title}'),
-              Text('Narx: \$${widget.tour.price} (${widget.tour.nights})'),
+              Text('Sayohatchilar: $_totalGuests kishi ($_adultsCount katta, $_childrenCount bola)'),
+              Text('Jami narx: \$$_totalPrice (${widget.tour.nights})'),
               const SizedBox(height: 8),
               const Text('Vaucher "Turlarim" bo\'limiga qo\'shildi va tizimda ro\'yxatga olindi.', style: TextStyle(fontSize: 12, color: AppTheme.textMuted)),
             ],
@@ -98,7 +114,7 @@ class _BookingDialogState extends State<BookingDialog> {
                 Navigator.of(ctx).pop();
                 provider.setTabIndex(3); // Navigate to Trips screen
               },
-              child: const Text('Vaucherni ko\'rish'),
+              child: const Text('Turlarimga o\'tish'),
             ),
           ],
         ),
@@ -122,7 +138,7 @@ class _BookingDialogState extends State<BookingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Turpaketni band qilish', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Turni Bron Qilish', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     onPressed: () => Navigator.of(context).pop(),
@@ -162,15 +178,183 @@ class _BookingDialogState extends State<BookingDialog> {
                           Text(widget.tour.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                           Text(widget.tour.location, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                           const SizedBox(height: 2),
-                          Text('\$${widget.tour.price} • ${widget.tour.nights}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text('\$$_totalPrice • ${widget.tour.nights}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13)),
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 16),
-              const Text('Sayohatchi ma\'lumotlari', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              // Sayohatchilar Tarkibi va Soni
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Sayohatchilar tarkibi va soni', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentGreen.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.accentGreen.withOpacity(0.3)),
+                    ),
+                    child: Text('Jami: $_totalGuests kishi', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Katta odamlar
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.subtleDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('🧑 Katta odamlar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text('12 yoshdan yuqori', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        for (int i = 1; i <= 4; i++)
+                          GestureDetector(
+                            onTap: () => setState(() => _adultsCount = i),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: _adultsCount == i ? AppTheme.primary : AppTheme.cardDark,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: _adultsCount == i ? AppTheme.primary : AppTheme.borderDark),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$i',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: _adultsCount == i ? Colors.white : AppTheme.textSub,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () => setState(() => _adultsCount = (_adultsCount - 1).clamp(1, 10)),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
+                            child: const Center(child: Text('-', style: TextStyle(fontWeight: FontWeight.bold))),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text('$_adultsCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                        InkWell(
+                          onTap: () => setState(() => _adultsCount = (_adultsCount + 1).clamp(1, 10)),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
+                            child: const Center(child: Text('+', style: TextStyle(fontWeight: FontWeight.bold))),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Yosh bolalar
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.subtleDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('👶 Yosh bolalar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text('0-11 yosh (50% chegirma)', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        for (int i = 0; i <= 3; i++)
+                          GestureDetector(
+                            onTap: () => setState(() => _childrenCount = i),
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: _childrenCount == i ? AppTheme.primary : AppTheme.cardDark,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: _childrenCount == i ? AppTheme.primary : AppTheme.borderDark),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$i',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: _childrenCount == i ? Colors.white : AppTheme.textSub,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 4),
+                        InkWell(
+                          onTap: () => setState(() => _childrenCount = (_childrenCount - 1).clamp(0, 6)),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
+                            child: const Center(child: Text('-', style: TextStyle(fontWeight: FontWeight.bold))),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text('$_childrenCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                        InkWell(
+                          onTap: () => setState(() => _childrenCount = (_childrenCount + 1).clamp(0, 6)),
+                          child: Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
+                            child: const Center(child: Text('+', style: TextStyle(fontWeight: FontWeight.bold))),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              const Text('Asosiy sayohatchi ma\'lumotlari', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
@@ -196,7 +380,48 @@ class _BookingDialogState extends State<BookingDialog> {
                   prefixIcon: Icon(Icons.badge_outlined, size: 18),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 14),
+              // Narx smetasi hisob-kitobi
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.subtleDark,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Katta odamlar ($_adultsCount kishi):', style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        Text('\$${_adultsCount * _perAdult}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    if (_childrenCount > 0) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Yosh bolalar ($_childrenCount bola - 50%):', style: const TextStyle(fontSize: 11, color: AppTheme.accentGreen)),
+                          Text('\$${_childrenCount * _perChild}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                        ],
+                      ),
+                    ],
+                    const Divider(color: AppTheme.borderDark, height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Jami to\'lov summasi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text('\$$_totalPrice', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
               const Text('To\'lov usuli', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               const SizedBox(height: 8),
               Row(
@@ -231,11 +456,15 @@ class _BookingDialogState extends State<BookingDialog> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: _isSubmitting ? null : _submitBooking,
-                  child: _isSubmitting
+                  icon: const Icon(Icons.calendar_month, size: 18),
+                  label: _isSubmitting
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('To\'lovga o\'tish va Band qilish (\$${widget.tour.price})'),
+                      : Text('Turni Bron Qilish (\$$_totalPrice)'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
                 ),
               ),
             ],

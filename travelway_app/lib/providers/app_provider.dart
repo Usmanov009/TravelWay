@@ -242,6 +242,49 @@ class AppProvider extends ChangeNotifier {
     return success;
   }
 
+  Future<bool> cancelBooking(String bookingId, {String reason = "Mijoz tomonidan bekor qilindi"}) async {
+    final idx = _bookings.indexWhere((b) => b.id == bookingId);
+    if (idx != -1) {
+      final old = _bookings[idx];
+      final updated = Booking(
+        id: old.id,
+        tourTitle: old.tourTitle,
+        dest: old.dest,
+        dates: old.dates,
+        status: 'Bekor qilingan',
+        voucherId: old.voucherId,
+        price: old.price,
+        totalNumeric: old.totalNumeric,
+        travelerName: old.travelerName,
+        type: 'cancelled',
+        startDate: old.startDate,
+        endDate: old.endDate,
+        hotelImg: old.hotelImg,
+        flight: old.flight,
+        airline: old.airline,
+        nightsCount: old.nightsCount,
+        passport: old.passport,
+        phone: old.phone,
+        guestsCount: old.guestsCount,
+        adultsCount: old.adultsCount,
+        childrenCount: old.childrenCount,
+        cancellationReason: reason,
+      );
+      _bookings[idx] = updated;
+      notifyListeners();
+      try {
+        await apiService.cancelBooking(bookingId, reason: reason);
+      } catch (_) {}
+      return true;
+    }
+    return false;
+  }
+
+  void removeBooking(String bookingId) {
+    _bookings.removeWhere((b) => b.id == bookingId);
+    notifyListeners();
+  }
+
   Future<bool> createPriceAlert(PriceAlert alert) async {
     final success = await apiService.createPriceAlert(alert);
     _alerts.insert(0, alert);

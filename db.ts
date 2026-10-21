@@ -51,6 +51,8 @@ const BookingSchema = new mongoose.Schema({
   price: String,
   totalNumeric: Number,
   travelerName: String,
+  travelerPhone: String,
+  travelerPassport: String,
   type: { type: String, default: 'active' },
   startDate: String,
   endDate: String,
@@ -58,6 +60,11 @@ const BookingSchema = new mongoose.Schema({
   flight: String,
   airline: String,
   nightsCount: Number,
+  guestsCount: Number,
+  adultsCount: Number,
+  childrenCount: Number,
+  cancellationReason: String,
+  cancelledAt: String,
 }, { timestamps: true });
 
 // Price Alert Schema

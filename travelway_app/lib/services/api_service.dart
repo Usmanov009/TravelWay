@@ -234,6 +234,26 @@ class ApiService {
     return false;
   }
 
+  Future<bool> cancelBooking(String bookingId, {String reason = "Mijoz tomonidan bekor qilindi"}) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/db/bookings/$bookingId');
+      final res = await http.put(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'status': 'Bekor qilingan',
+          'type': 'cancelled',
+          'cancellationReason': reason,
+        }),
+      ).timeout(const Duration(seconds: 8));
+
+      return res.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error cancelling booking: $e');
+    }
+    return false;
+  }
+
   // 9. Price Alerts (DB)
   Future<List<PriceAlert>> getPriceAlerts() async {
     try {
