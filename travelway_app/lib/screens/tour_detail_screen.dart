@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
 import '../widgets/booking_dialog.dart';
@@ -9,15 +8,6 @@ class TourDetailScreen extends StatelessWidget {
   final TourPackage tour;
 
   const TourDetailScreen({super.key, required this.tour});
-
-  Future<void> _openKompasWeb() async {
-    if (tour.kompasOnlineUrl.isNotEmpty) {
-      final uri = Uri.parse(tour.kompasOnlineUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -243,49 +233,7 @@ class TourDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // Official Kompas Tour Link
-                  if (tour.kompasOnlineUrl.isNotEmpty) ...[
-                    GestureDetector(
-                      onTap: _openKompasWeb,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppTheme.cardDark,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppTheme.primary.withOpacity(0.4)),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primary.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.link, color: AppTheme.primary, size: 20),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tour.kompasTourCode.isNotEmpty ? 'Tur kodi: ${tour.kompasTourCode}' : 'Jonli Rasmiy Narx',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  ),
-                                  const Text('Rasmiy tizimda tekshirish', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.open_in_new, size: 16, color: AppTheme.primary),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 100),
-                  ],
+                  const SizedBox(height: 100),
                 ],
               ),
             ),

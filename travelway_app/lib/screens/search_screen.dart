@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
@@ -39,14 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  Future<void> _openUrl(String url) async {
-    if (url.isEmpty) return;
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   @override
@@ -645,18 +636,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     // Actions
                     Row(
                       children: [
-                        if (tour.kompasOnlineUrl.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: IconButton(
-                              icon: const Icon(Icons.language, size: 20, color: AppTheme.textSub),
-                              onPressed: () => _openUrl(tour.kompasOnlineUrl),
-                              style: IconButton.styleFrom(
-                                backgroundColor: AppTheme.subtleDark,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                            ),
-                          ),
+
                         OutlinedButton(
                           onPressed: () {
                             Navigator.push(

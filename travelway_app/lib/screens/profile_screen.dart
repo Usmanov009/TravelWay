@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
-import 'admin_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,56 +19,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
-  }
-
-  void _showBackendDialog(BuildContext context, AppProvider provider) {
-    final controller = TextEditingController(text: provider.apiService.baseUrl);
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.dns_outlined, color: AppTheme.primary, size: 22),
-            SizedBox(width: 8),
-            Text('Server Manzili', style: TextStyle(fontSize: 16)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Agar emulatorda bo\'lsangiz: http://10.0.2.2:3000\nAgar Wi-Fi orqali real telefon bo\'lsa: kompyuteringiz IP manzili',
-              style: TextStyle(fontSize: 11, color: AppTheme.textSub),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(labelText: 'Backend URL'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Bekor qilish'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              provider.updateBackendUrl(controller.text.trim());
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Server manzili yangilandi!')),
-              );
-            },
-            child: const Text('Saqlash'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -322,14 +271,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     subtitle: 'Uzcard, Humo, Visa',
                     onTap: () {},
                   ),
-                  const Divider(height: 1, indent: 56),
-                  _buildSettingItem(
-                    icon: Icons.dns_outlined,
-                    title: 'Server manzili (Backend URL)',
-                    subtitle: provider.apiService.baseUrl,
-                    trailing: const Icon(Icons.edit, size: 16, color: AppTheme.primary),
-                    onTap: () => _showBackendDialog(context, provider),
-                  ),
                 ],
               ),
             ),
@@ -346,53 +287,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Column(
                 children: [
-                  // Live Engine Status Tile
-                  Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: provider.isKompasOnline ? AppTheme.accentGreen.withOpacity(0.15) : Colors.orange.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.radar,
-                            color: provider.isKompasOnline ? AppTheme.accentGreen : Colors.orange,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Jonli Turlar Tizimi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textMain)),
-                              Text('Jonli 1:1 Rasmiy Narxlar', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: provider.isKompasOnline ? AppTheme.accentGreen.withOpacity(0.15) : Colors.orange.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            provider.isKompasOnline ? 'Faol' : 'Kutilmoqda',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: provider.isKompasOnline ? AppTheme.accentGreen : Colors.orange,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1, indent: 56),
-
                   // Notifications Toggle
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -439,17 +333,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: 'Telegram Operator & Yordam',
                     subtitle: '@sayrhub_bot',
                     onTap: _openTelegram,
-                  ),
-                  const Divider(height: 1, indent: 56),
-
-                  _buildSettingItem(
-                    icon: Icons.admin_panel_settings_outlined,
-                    title: 'Boshqaruv Paneli (Admin)',
-                    subtitle: 'Turlar, buyurtmalar va statistika',
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textMuted),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()));
-                    },
                   ),
                 ],
               ),

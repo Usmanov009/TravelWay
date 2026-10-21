@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
 import '../models/hot_deal.dart';
 import '../models/tour_package.dart';
@@ -42,14 +41,6 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
     final m = ((totalSecs % 3600) ~/ 60).toString().padLeft(2, '0');
     final s = (totalSecs % 60).toString().padLeft(2, '0');
     return '$h:$m:$s';
-  }
-
-  Future<void> _openUrl(String url) async {
-    if (url.isEmpty) return;
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
   }
 
   @override
@@ -491,19 +482,6 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 // Action Buttons
                 Row(
                   children: [
-                    if (deal.kompasOnlineUrl.isNotEmpty)
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _openUrl(deal.kompasOnlineUrl),
-                          icon: const Icon(Icons.language, size: 14),
-                          label: const Text('Saytda ko\'rish', style: TextStyle(fontSize: 11)),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
-                      ),
-                    if (deal.kompasOnlineUrl.isNotEmpty) const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
