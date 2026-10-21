@@ -172,6 +172,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
           </span>
         </div>
 
+        <div className="space-y-3.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">
         {filteredCombos.map((combo) => (
           <div
             key={combo.id}
@@ -313,6 +314,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             </div>
           </div>
         ))}
+        </div>
       </div>
     </div>
   );

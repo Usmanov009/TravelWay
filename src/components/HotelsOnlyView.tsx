@@ -201,6 +201,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
           </span>
         </div>
 
+        <div className="space-y-3.5 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">
         {filteredHotels.map((hotel) => {
           const dynamicTotalPrice = hotel.pricePerNight * nightsCount;
 
@@ -337,6 +338,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );

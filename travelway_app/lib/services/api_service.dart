@@ -11,12 +11,11 @@ import '../models/booking.dart';
 import '../models/price_alert.dart';
 
 class ApiService {
-  static const String _defaultUrlKey = 'travelway_backend_url';
+  static const String _defaultUrlKey = 'sayrhub_backend_url';
   
   // Default base URL:
-  // On web / desktop: http://localhost:3000
-  // On Android emulator: http://10.0.2.2:3000
-  static String defaultBaseUrl = 'http://localhost:3000';
+  // Points to live Render backend for mobile app and web
+  static String defaultBaseUrl = 'https://travelway-9x8l.onrender.com';
   String _baseUrl = defaultBaseUrl;
 
   String get baseUrl => _baseUrl;
@@ -28,7 +27,7 @@ class ApiService {
   Future<void> _initUrl() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final saved = prefs.getString(_defaultUrlKey);
+      final saved = prefs.getString(_defaultUrlKey) ?? prefs.getString('travelway_backend_url');
       if (saved != null && saved.isNotEmpty) {
         _baseUrl = saved;
       }

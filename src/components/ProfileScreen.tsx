@@ -52,7 +52,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   };
 
   return (
-    <div className="space-y-3.5 pb-24 select-none">
+    <div className="max-w-3xl mx-auto space-y-4 pb-20 select-none">
       {/* 1. User Info Card */}
       <section
         className="rounded-3xl p-4 shadow-lg relative overflow-hidden border transition-colors"

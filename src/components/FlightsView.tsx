@@ -269,7 +269,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
       </div>
 
       {/* Flight Cards List */}
-      <div className="space-y-3">
+      <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
         {filteredFlights.map((flight) => {
           const calculatedPrice = tripType === 'round_trip'
             ? Math.round(flight.price * 1.7) * passengersCount

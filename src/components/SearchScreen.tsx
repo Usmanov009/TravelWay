@@ -1227,22 +1227,23 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       )}
 
       {/* 4. RESULTS SECTION - TOUR CARDS */}
-      <div className="space-y-3" id="tour-cards-container">
+      <div id="tour-cards-section" className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <span
-            className="text-xs font-bold uppercase tracking-wider"
+            className="text-xs sm:text-sm font-extrabold uppercase tracking-wider"
             style={{ color: 'var(--tw-text-main)' }}
           >
             {currentCountry.name} bo'yicha SayrHub turpaketlari ({displayTours.length})
           </span>
           <span
-            className="text-[10px]"
+            className="text-[10px] sm:text-xs"
             style={{ color: 'var(--tw-text-sub)' }}
           >
-            Valyuta: <strong style={{ color: 'var(--tw-text-main)' }}>{currency}</strong> • Hisoblash & Spesifikatsiya
+            Valyuta: <strong style={{ color: 'var(--tw-text-main)' }}>{currency}</strong> • Jonli 1:1 Kompas
           </span>
         </div>
 
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 md:gap-5" id="tour-cards-container">
           {displayTours.map((tour) => {
             const activeAlert = priceAlerts.find((a) => a.tourId === tour.id);
 
@@ -1446,7 +1447,8 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             );
           })}
         </div>
-        </>
+      </div>
+      </>
       )}
 
       {/* SERVICE MODALS: Combo Tour Details, Flight E-Ticket, Hotel-Only Voucher */}

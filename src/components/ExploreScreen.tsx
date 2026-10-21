@@ -70,7 +70,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
       </div>
 
       {/* Explore Grid Cards */}
-      <div className="grid grid-cols-1 gap-3" id="explore-cards-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="explore-cards-grid">
         {filteredItems.map((item) => (
           <div
             key={item.id}

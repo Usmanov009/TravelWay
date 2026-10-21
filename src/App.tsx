@@ -28,7 +28,7 @@ import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from './dat
 
 export default function App() {
   // Navigation & Screen state
-  const [currentTab, setCurrentTab] = useState<TabType>('auth');
+  const [currentTab, setCurrentTab] = useState<TabType>('search');
   const [isPhoneFrame, setIsPhoneFrame] = useState(true);
   const [showFlutterCode, setShowFlutterCode] = useState(false);
 
@@ -853,58 +853,63 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-start sm:justify-center p-0 sm:p-4 font-sans select-none overflow-x-hidden">
-      {/* Main Container / Mobile Device Frame */}
+    <div
+      id="app-container"
+      data-theme={themeMode}
+      style={{
+        backgroundColor: 'var(--tw-canvas)',
+        color: 'var(--tw-text-main)'
+      }}
+      className="min-h-screen w-full flex flex-col font-sans select-none overflow-x-hidden transition-colors duration-200"
+    >
+      {/* Dynamic Desktop / Mobile Header */}
+      <Header
+        currentTab={currentTab}
+        onTabSelect={(tab) => setCurrentTab(tab)}
+        onOpenQr={() => setIsQrOpen(true)}
+        onToggleNotifs={() => {
+          setHasUnreadNotifs(false);
+          showToast("Yangi bildirishnoma: Maldiv va Dubay turlariga 30% chegirmalar!", 'info');
+        }}
+        hasUnreadNotifs={hasUnreadNotifs}
+        userInitials={userInitials}
+        userName={user.name}
+        themeMode={themeMode}
+        onToggleTheme={() => {
+          const next = themeMode === 'light' ? 'dark' : 'light';
+          setThemeMode(next);
+          showToast(
+            next === 'light'
+              ? "Kungi rejim (Light Mode) yoqildi ☀️"
+              : "Tungi rejim (Dark Mode) yoqildi 🌙",
+            'info'
+          );
+        }}
+        onOpenAdmin={() => setIsAdminMode(true)}
+        onAvatarClick={() => {
+          if (currentTab !== 'profile') {
+            setCurrentTab('profile');
+          } else {
+            showToast(`Akkaunt: ${user.name} (${user.tcId})`, 'info');
+          }
+        }}
+        activeTripsCount={bookings.length}
+      />
+
+      {/* Main Viewport Container */}
       {showFlutterCode ? (
-        <div className="w-full max-w-2xl h-[820px] max-h-[92vh]">
-          <FlutterCodeViewer
-            onClose={() => setShowFlutterCode(false)}
-            onShowToast={showToast}
-          />
+        <div className="flex-1 w-full max-w-4xl mx-auto p-4 flex items-center justify-center">
+          <div className="w-full h-[820px] max-h-[90vh]">
+            <FlutterCodeViewer
+              onClose={() => setShowFlutterCode(false)}
+              onShowToast={showToast}
+            />
+          </div>
         </div>
       ) : (
-        <div
-          id="app-container"
-          data-theme={themeMode}
-          style={{
-            backgroundColor: 'var(--tw-canvas)',
-            color: 'var(--tw-text-main)'
-          }}
-          className="relative w-full max-w-[420px] h-[900px] max-h-[100vh] sm:max-h-[96vh] rounded-none sm:rounded-[50px] border-0 sm:border-[8px] sm:border-slate-800 phone-shadow flex flex-col overflow-hidden transition-colors duration-200"
-        >
-          {/* Dynamic Mobile Header */}
-          <Header
-            currentTab={currentTab}
-            onOpenQr={() => setIsQrOpen(true)}
-            onToggleNotifs={() => {
-              setHasUnreadNotifs(false);
-              showToast("Yangi bildirishnoma: Maldiv va Dubay turlariga 30% chegirmalar!", 'info');
-            }}
-            hasUnreadNotifs={hasUnreadNotifs}
-            userInitials={userInitials}
-            themeMode={themeMode}
-            onToggleTheme={() => {
-              const next = themeMode === 'light' ? 'dark' : 'light';
-              setThemeMode(next);
-              showToast(
-                next === 'light'
-                  ? "Kungi rejim (Light Mode) yoqildi ☀️"
-                  : "Tungi rejim (Dark Mode) yoqildi 🌙",
-                'info'
-              );
-            }}
-            onAvatarClick={() => {
-              if (currentTab !== 'profile') {
-                setCurrentTab('profile');
-              } else {
-                showToast(`Akkaunt: ${user.name} (${user.tcId})`, 'info');
-              }
-            }}
-          />
-
-          {/* Main Scrollable Viewport */}
-          <main className="flex-1 overflow-y-auto no-scrollbar relative p-4 space-y-4">
-            {currentTab === 'auth' && (
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative">
+          {currentTab === 'auth' && (
+            <div className="max-w-md mx-auto py-2 sm:py-6">
               <AuthScreen
                 currentLang={currentLang}
                 onSelectLang={(lang) => {
@@ -922,7 +927,8 @@ export default function App() {
                 }}
                 onShowToast={showToast}
               />
-            )}
+            </div>
+          )}
 
             {currentTab === 'search' && (
               <SearchScreen
@@ -1020,13 +1026,14 @@ export default function App() {
               />
             )}
           </main>
+        )}
 
-          {/* Bottom Native Tab Bar */}
-          <BottomNav
-            currentTab={currentTab}
-            onTabSelect={(tab) => setCurrentTab(tab)}
-            activeTripsCount={bookings.length}
-          />
+        {/* Mobile-Only Bottom Navigation Dock */}
+        <BottomNav
+          currentTab={currentTab}
+          onTabSelect={(tab) => setCurrentTab(tab)}
+          activeTripsCount={bookings.length}
+        />
 
           {/* Interactive Modals Overlays */}
           <Modals
@@ -1126,8 +1133,6 @@ export default function App() {
               </div>
             ))}
           </div>
-        </div>
-      )}
     </div>
   );
 }

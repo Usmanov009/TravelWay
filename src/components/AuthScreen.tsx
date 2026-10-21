@@ -107,7 +107,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   return (
     <div
-      className="flex flex-col w-full font-sans space-y-3.5 select-none pb-8 transition-colors"
+      className="flex flex-col w-full max-w-md mx-auto font-sans space-y-3.5 select-none pb-8 transition-colors"
       style={{ color: 'var(--tw-text-main)' }}
     >
       {/* Top Bar Controls (Back, Language, Support) */}

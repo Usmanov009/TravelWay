@@ -69,7 +69,7 @@ export const TripsScreen: React.FC<TripsScreenProps> = ({
 
       {/* ACTIVE BOOKINGS LIST VIEW */}
       {subTab === 'active' && (
-        <div className="space-y-3" id="trips-list-container">
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4" id="trips-list-container">
           {activeBookings.length === 0 ? (
             <div
               className="text-center py-12 space-y-2 rounded-2xl border p-6 transition-colors"
@@ -222,7 +222,7 @@ export const TripsScreen: React.FC<TripsScreenProps> = ({
 
       {/* 3. SAVED TOURS VIEW */}
       {subTab === 'saved' && (
-        <div className="space-y-3">
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4">
           {savedTours.length === 0 ? (
             <div
               className="text-center py-12 space-y-2 rounded-2xl border p-6 transition-colors"

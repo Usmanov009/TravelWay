@@ -14,7 +14,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 }) => {
   return (
     <div
-      className="absolute bottom-0 inset-x-0 backdrop-blur-xl border-t z-30 flex flex-col justify-between transition-colors"
+      className="md:hidden fixed bottom-0 inset-x-0 backdrop-blur-xl border-t z-30 flex flex-col justify-between transition-colors"
       style={{
         backgroundColor: 'var(--tw-surface)',
         borderColor: 'var(--tw-border)',

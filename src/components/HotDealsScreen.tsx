@@ -71,7 +71,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
       </div>
 
       {/* Hot Deals List */}
-      <div className="space-y-3" id="hot-deals-container">
+      <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4" id="hot-deals-container">
         {hotDeals.map((deal) => (
           <div
             key={deal.id}
