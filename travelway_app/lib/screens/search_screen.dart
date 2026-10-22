@@ -635,7 +635,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Positioned(
                 top: 10,
                 left: 10,
-                right: 50,
+                right: 88,
                 child: Wrap(
                   spacing: 6,
                   runSpacing: 4,
@@ -820,50 +820,55 @@ class _SearchScreenState extends State<SearchScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${tour.nights} (${tour.departureCity})',
-                          style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '\$${tour.price}',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                                color: AppTheme.primary,
-                              ),
-                            ),
-                            if ((tour.oldPrice ?? 0) > 0) ...[
-                              const SizedBox(width: 6),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${tour.nights} (${tour.departureCity})',
+                            style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
                               Text(
-                                '\$${tour.oldPrice}',
+                                '\$${tour.price}',
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: AppTheme.textMuted,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.primary,
                                 ),
                               ),
+                              if ((tour.oldPrice ?? 0) > 0) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  '\$${tour.oldPrice}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    decoration: TextDecoration.lineThrough,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        Text(
-                          '~${(tour.price * 12950 / 1000).toStringAsFixed(0)} ming UZS',
-                          style: const TextStyle(fontSize: 9, color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                          ),
+                          Text(
+                            '~${(tour.price * 12950 / 1000).toStringAsFixed(0)} ming UZS',
+                            style: const TextStyle(fontSize: 9, color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 6),
 
                     // Actions
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-
                         OutlinedButton(
                           onPressed: () {
                             Navigator.push(
@@ -872,7 +877,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                           child: const Text('Batafsil', style: TextStyle(fontSize: 11)),
@@ -883,7 +890,9 @@ class _SearchScreenState extends State<SearchScreen> {
                             showDialog(context: context, builder: (_) => BookingDialog(tour: tour));
                           },
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
                           child: const Text('Band qilish', style: TextStyle(fontSize: 11)),

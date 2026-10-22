@@ -461,15 +461,18 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                     border: Border.all(color: AppTheme.borderDark),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.flight, size: 13, color: AppTheme.accentSky),
-                          const SizedBox(width: 6),
-                          Text(deal.flight, style: const TextStyle(fontSize: 10, color: AppTheme.textSub)),
-                        ],
+                      const Icon(Icons.flight, size: 13, color: AppTheme.accentSky),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          deal.flight,
+                          style: const TextStyle(fontSize: 10, color: AppTheme.textSub),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
+                      const SizedBox(width: 6),
                       const Text(
                         'Jonli Narx',
                         style: TextStyle(color: AppTheme.accentSky, fontSize: 10, fontWeight: FontWeight.bold),

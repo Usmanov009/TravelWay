@@ -89,15 +89,25 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
-                  children: [
-                    Icon(Icons.notifications_active_outlined, color: AppTheme.accentGold, size: 22),
-                    SizedBox(width: 8),
-                    Text('Narx tushishini kuzatish', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
+                const Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.notifications_active_outlined, color: AppTheme.accentGold, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Narx tushishini kuzatish',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 18),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],

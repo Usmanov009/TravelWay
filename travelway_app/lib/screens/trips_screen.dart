@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/app_provider.dart';
@@ -73,9 +72,13 @@ class _TripsScreenState extends State<TripsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Sayohatchilar:', style: TextStyle(color: AppTheme.textSub, fontSize: 12)),
-                        Text(
-                          '${booking.guestsCount} kishi (${booking.adultsCount} katta${booking.childrenCount > 0 ? ', ${booking.childrenCount} bola' : ''})',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textMain, fontSize: 11),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '${booking.guestsCount} kishi (${booking.adultsCount} katta${booking.childrenCount > 0 ? ', ${booking.childrenCount} bola' : ''})',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textMain, fontSize: 11),
+                            textAlign: TextAlign.end,
+                          ),
                         ),
                       ],
                     ),
@@ -119,7 +122,14 @@ class _TripsScreenState extends State<TripsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Jami to\'lov:', style: TextStyle(color: AppTheme.textSub)),
-                  Text(booking.price, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      booking.price,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -177,7 +187,14 @@ class _TripsScreenState extends State<TripsScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('To\'langan summa:', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
-                            Text(booking.price, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                booking.price,
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 6),
@@ -535,9 +552,13 @@ class _TripsScreenState extends State<TripsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Jami to\'lov:', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
-                  Text(
-                    b.price,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppTheme.primary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      b.price,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppTheme.primary),
+                      textAlign: TextAlign.end,
+                    ),
                   ),
                 ],
               ),
@@ -691,25 +712,52 @@ class _TripsScreenState extends State<TripsScreen> {
               ],
               const SizedBox(height: 12),
 
+              // Price and Cancelled notice
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(b.price, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textSub, decoration: TextDecoration.lineThrough)),
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => provider.setTabIndex(0),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        ),
-                        child: const Text('Qayta bron qilish', style: TextStyle(fontSize: 10)),
+                  const Text('Bekor qilingan summa:', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      b.price,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textSub,
+                        decoration: TextDecoration.lineThrough,
                       ),
-                      const SizedBox(width: 6),
-                      TextButton(
-                        onPressed: () => provider.removeBooking(b.id),
-                        child: const Text('O\'chirish', style: TextStyle(fontSize: 10, color: Colors.redAccent)),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => provider.setTabIndex(0),
+                      icon: const Icon(Icons.refresh, size: 14),
+                      label: const Text('Qayta bron qilish', style: TextStyle(fontSize: 11)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                    ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => provider.removeBooking(b.id),
+                    icon: const Icon(Icons.delete_outline, size: 14, color: Colors.redAccent),
+                    label: const Text('O\'chirish', style: TextStyle(fontSize: 11, color: Colors.redAccent)),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      side: BorderSide(color: Colors.red.withOpacity(0.4)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                   ),
                 ],
               ),

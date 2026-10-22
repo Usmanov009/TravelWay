@@ -207,72 +207,64 @@ class _BookingDialogState extends State<BookingDialog> {
 
               // Katta odamlar
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppTheme.subtleDark,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppTheme.borderDark),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('🧑 Katta odamlar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        Text('12 yoshdan yuqori', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
-                      ],
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('🧑 Katta odamlar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 2),
+                          Text('12 yoshdan yuqori', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                        ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        for (int i = 1; i <= 4; i++)
-                          GestureDetector(
-                            onTap: () => setState(() => _adultsCount = i),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardDark,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.borderDark),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () => setState(() => _adultsCount = (_adultsCount - 1).clamp(1, 10)),
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: _adultsCount == i ? AppTheme.primary : AppTheme.cardDark,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _adultsCount == i ? AppTheme.primary : AppTheme.borderDark),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '$i',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: _adultsCount == i ? Colors.white : AppTheme.textSub,
-                                  ),
-                                ),
-                              ),
+                              width: 32,
+                              height: 32,
+                              alignment: Alignment.center,
+                              child: const Text('-', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
                             ),
                           ),
-                        const SizedBox(width: 4),
-                        InkWell(
-                          onTap: () => setState(() => _adultsCount = (_adultsCount - 1).clamp(1, 10)),
-                          child: Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
-                            child: const Center(child: Text('-', style: TextStyle(fontWeight: FontWeight.bold))),
+                          Container(
+                            constraints: const BoxConstraints(minWidth: 32),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$_adultsCount',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text('$_adultsCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                        ),
-                        InkWell(
-                          onTap: () => setState(() => _adultsCount = (_adultsCount + 1).clamp(1, 10)),
-                          child: Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
-                            child: const Center(child: Text('+', style: TextStyle(fontWeight: FontWeight.bold))),
+                          InkWell(
+                            onTap: () => setState(() => _adultsCount = (_adultsCount + 1).clamp(1, 10)),
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              alignment: Alignment.center,
+                              child: const Text('+', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -282,72 +274,64 @@ class _BookingDialogState extends State<BookingDialog> {
 
               // Yosh bolalar
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppTheme.subtleDark,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppTheme.borderDark),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('👶 Yosh bolalar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        Text('0-11 yosh (50% chegirma)', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen)),
-                      ],
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('👶 Yosh bolalar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 2),
+                          Text('0-11 yosh (50% chegirma)', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen)),
+                        ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        for (int i = 0; i <= 3; i++)
-                          GestureDetector(
-                            onTap: () => setState(() => _childrenCount = i),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardDark,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.borderDark),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () => setState(() => _childrenCount = (_childrenCount - 1).clamp(0, 6)),
+                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
                             child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              width: 28,
-                              height: 28,
-                              decoration: BoxDecoration(
-                                color: _childrenCount == i ? AppTheme.primary : AppTheme.cardDark,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: _childrenCount == i ? AppTheme.primary : AppTheme.borderDark),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '$i',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: _childrenCount == i ? Colors.white : AppTheme.textSub,
-                                  ),
-                                ),
-                              ),
+                              width: 32,
+                              height: 32,
+                              alignment: Alignment.center,
+                              child: const Text('-', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
                             ),
                           ),
-                        const SizedBox(width: 4),
-                        InkWell(
-                          onTap: () => setState(() => _childrenCount = (_childrenCount - 1).clamp(0, 6)),
-                          child: Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
-                            child: const Center(child: Text('-', style: TextStyle(fontWeight: FontWeight.bold))),
+                          Container(
+                            constraints: const BoxConstraints(minWidth: 32),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '$_childrenCount',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.accentGreen),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Text('$_childrenCount', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                        ),
-                        InkWell(
-                          onTap: () => setState(() => _childrenCount = (_childrenCount + 1).clamp(0, 6)),
-                          child: Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(color: AppTheme.cardDark, borderRadius: BorderRadius.circular(6)),
-                            child: const Center(child: Text('+', style: TextStyle(fontWeight: FontWeight.bold))),
+                          InkWell(
+                            onTap: () => setState(() => _childrenCount = (_childrenCount + 1).clamp(0, 6)),
+                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              alignment: Alignment.center,
+                              child: const Text('+', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -395,7 +379,9 @@ class _BookingDialogState extends State<BookingDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Katta odamlar ($_adultsCount kishi):', style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        Expanded(
+                          child: Text('Katta odamlar ($_adultsCount kishi):', style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        ),
                         Text('\$${_adultsCount * _perAdult}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -404,7 +390,9 @@ class _BookingDialogState extends State<BookingDialog> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Yosh bolalar ($_childrenCount bola - 50%):', style: const TextStyle(fontSize: 11, color: AppTheme.accentGreen)),
+                          Expanded(
+                            child: Text('Yosh bolalar ($_childrenCount bola - 50%):', style: const TextStyle(fontSize: 11, color: AppTheme.accentGreen)),
+                          ),
                           Text('\$${_childrenCount * _perChild}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
                         ],
                       ),

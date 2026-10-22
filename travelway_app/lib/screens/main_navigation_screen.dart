@@ -139,8 +139,8 @@ class MainNavigationScreen extends StatelessWidget {
                   // Pill Badge (e.g. HOT)
                   if (badgeText != null)
                     Positioned(
-                      top: -6,
-                      right: -14,
+                      top: -5,
+                      right: -8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                         decoration: BoxDecoration(

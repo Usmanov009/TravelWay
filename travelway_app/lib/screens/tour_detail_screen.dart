@@ -72,15 +72,19 @@ class TourDetailScreen extends StatelessWidget {
                     right: 16,
                     child: Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            tour.tag,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              tour.tag,
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -91,6 +95,7 @@ class TourDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.star, color: AppTheme.accentGold, size: 14),
                               const SizedBox(width: 4),
@@ -107,6 +112,7 @@ class TourDetailScreen extends StatelessWidget {
                             border: Border.all(color: AppTheme.accentGreen),
                           ),
                           child: const Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.bolt, color: AppTheme.accentGreen, size: 14),
                               SizedBox(width: 4),
@@ -251,29 +257,31 @@ class TourDetailScreen extends StatelessWidget {
         child: SafeArea(
           child: Row(
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Umumiy narx (1 kishi):', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
-                  Row(
-                    children: [
-                      Text(
-                        '\$${tour.price}',
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                      ),
-                      if (tour.oldPrice != null) ...[
-                        const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Umumiy narx (1 kishi):', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                    Row(
+                      children: [
                         Text(
-                          '\$${tour.oldPrice}',
-                          style: const TextStyle(fontSize: 14, color: AppTheme.textMuted, decoration: TextDecoration.lineThrough),
+                          '\$${tour.price}',
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primary),
                         ),
+                        if (tour.oldPrice != null) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            '\$${tour.oldPrice}',
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, decoration: TextDecoration.lineThrough),
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
                   showDialog(
@@ -282,7 +290,7 @@ class TourDetailScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
                   backgroundColor: AppTheme.primary,
                 ),
                 child: const Text('Band qilish', style: TextStyle(fontWeight: FontWeight.bold)),

@@ -170,13 +170,17 @@ class AppHeader extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        titles['title']!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.textMain,
-                          letterSpacing: -0.3,
+                      Flexible(
+                        child: Text(
+                          titles['title']!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.textMain,
+                            letterSpacing: -0.3,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 6),
