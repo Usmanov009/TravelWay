@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { TourPackage, Booking, PaymentCard } from '../types';
 import { SingleTourMap } from './GoogleTourMap';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  X,
+  MessageSquare,
+  CheckCircle2,
+  Calendar,
+  Headphones,
+  Bell,
+  Star,
+  MapPin,
+  Plane,
+  Download,
+  Trash2,
+  ShieldCheck,
+  CreditCard,
+  User,
+  QrCode,
+  AlertTriangle
+} from 'lucide-react';
 
 interface ModalsProps {
   // OTP Modal
@@ -249,7 +270,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     color: 'var(--tw-accent)'
                   }}
                 >
-                  <span className="material-symbols-outlined text-[20px]">sms</span>
+                  <MessageSquare className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>Tasdiqlash kodi</h3>
@@ -355,7 +376,7 @@ export const Modals: React.FC<ModalsProps> = ({
               type="button"
             >
               <span>Tasdiqlash va Kirish</span>
-              <span className="material-symbols-outlined text-[16px]">verified</span>
+              <CheckCircle2 className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -633,7 +654,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   onClick={() => onProceedToCheckout(tourDetails)}
                   type="button"
                 >
-                  <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+                  <Calendar className="w-4 h-4" />
                   <span>Turni Bron Qilish</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round"></path>
@@ -1133,7 +1154,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       }}
                       className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 tap-bounce transition cursor-pointer active:scale-98"
                     >
-                      <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+                      <Calendar className="w-4 h-4" />
                       <span>Turni Bron Qilish</span>
                       <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-bold ml-1">${finalPackagePrice}</span>
                     </button>
@@ -1378,7 +1399,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     color: 'var(--tw-accent)'
                   }}
                 >
-                  <span className="material-symbols-outlined text-[18px]">support_agent</span>
+                  <Headphones className="w-4 h-4" />
                 </div>
                 <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>SayrHub 24/7 Yordam</h3>
               </div>

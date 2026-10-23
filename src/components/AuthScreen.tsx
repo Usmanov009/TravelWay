@@ -1,5 +1,26 @@
 import React, { useState } from 'react';
 import { LanguageCode } from '../types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  ArrowLeft,
+  Headphones,
+  Phone,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  Tag,
+  Globe,
+  ChevronDown,
+  Check,
+  Plane,
+  Gift,
+  ArrowRight
+} from 'lucide-react';
 
 interface AuthScreenProps {
   currentLang: LanguageCode;
@@ -78,7 +99,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       setIsSubmitting(false);
 
       if (mode === 'register') {
-        onAuthSuccess(`Xush kelibsiz, ${regFullName}! $30 sayohat vaucheri balansingizga qo'shildi! 🎉`);
+        onAuthSuccess(`Xush kelibsiz, ${regFullName || 'Foydalanuvchi'}! $30 sayohat vaucheri balansingizga qo'shildi! 🎉`);
         return;
       }
 
@@ -106,119 +127,98 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   };
 
   return (
-    <div
-      className="flex flex-col w-full max-w-md mx-auto font-sans space-y-3.5 select-none pb-8 transition-colors"
-      style={{ color: 'var(--tw-text-main)' }}
-    >
-      {/* Top Bar Controls (Back, Language, Support) */}
+    <div className="flex flex-col w-full max-w-md mx-auto space-y-4 select-none pb-8 transition-colors">
+      {/* Top Bar Controls */}
       <div className="flex items-center justify-between px-1">
-        <button
+        <Button
           id="btn-auth-back"
-          className="w-10 h-10 rounded-2xl flex items-center justify-center transition border tap-bounce shadow-xs"
-          style={{
-            backgroundColor: 'var(--tw-surface)',
-            borderColor: 'var(--tw-border)',
-            color: 'var(--tw-text-main)'
-          }}
+          variant="outline"
+          size="icon"
           onClick={onBack}
-          type="button"
+          className="rounded-xl w-9 h-9"
           title="Orqaga"
         >
-          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
-        </button>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
 
         <div className="flex items-center gap-2">
           {/* Language Selector */}
           <div className="relative">
-            <button
+            <Button
               id="auth-lang-btn"
-              className="h-10 px-3 rounded-xl border flex items-center gap-1.5 text-xs font-semibold shadow-xs tap-bounce transition"
-              style={{
-                backgroundColor: 'var(--tw-surface)',
-                borderColor: 'var(--tw-border)',
-                color: 'var(--tw-text-main)'
-              }}
+              variant="outline"
+              size="sm"
               onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-              type="button"
+              className="rounded-xl h-9 px-3 gap-1.5 text-xs font-semibold"
             >
               <span className="text-sm">{getLangFlag(currentLang)}</span>
               <span>{currentLang}</span>
-              <span className="material-symbols-outlined text-[16px]" style={{ color: 'var(--tw-text-sub)' }}>expand_more</span>
-            </button>
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            </Button>
 
             {isLangMenuOpen && (
               <div
                 id="auth-lang-dropdown"
-                className="absolute right-0 mt-1.5 w-32 border rounded-xl shadow-xl overflow-hidden z-40 p-1 flex flex-col gap-0.5"
-                style={{
-                  backgroundColor: 'var(--tw-surface)',
-                  borderColor: 'var(--tw-border)'
-                }}
+                className="absolute right-0 mt-1.5 w-32 border border-border bg-popover text-popover-foreground rounded-xl shadow-xl overflow-hidden z-40 p-1 flex flex-col gap-0.5"
               >
-                <button
-                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg transition-colors w-full text-left"
-                  style={{ color: 'var(--tw-text-main)' }}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs h-8"
                   onClick={() => {
                     onSelectLang('UZ');
                     setIsLangMenuOpen(false);
                   }}
-                  type="button"
                 >
-                  <span>🇺🇿</span> O'zbek
-                </button>
-                <button
-                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg transition-colors w-full text-left"
-                  style={{ color: 'var(--tw-text-main)' }}
+                  🇺🇿 O'zbek
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs h-8"
                   onClick={() => {
                     onSelectLang('RU');
                     setIsLangMenuOpen(false);
                   }}
-                  type="button"
                 >
-                  <span>🇷🇺</span> Русский
-                </button>
-                <button
-                  className="flex items-center gap-2 px-2.5 py-1.5 text-xs rounded-lg transition-colors w-full text-left"
-                  style={{ color: 'var(--tw-text-main)' }}
+                  🇷🇺 Русский
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-xs h-8"
                   onClick={() => {
                     onSelectLang('EN');
                     setIsLangMenuOpen(false);
                   }}
-                  type="button"
                 >
-                  <span>🇬🇧</span> English
-                </button>
+                  🇬🇧 English
+                </Button>
               </div>
             )}
           </div>
 
           {/* Quick Help & Support 24/7 */}
-          <button
+          <Button
             id="btn-auth-support"
-            className="w-10 h-10 rounded-2xl flex items-center justify-center transition border tap-bounce shadow-xs"
-            style={{
-              backgroundColor: 'var(--tw-surface)',
-              borderColor: 'var(--tw-border)',
-              color: 'var(--tw-text-main)'
-            }}
+            variant="outline"
+            size="icon"
             onClick={onOpenSupport}
+            className="rounded-xl w-9 h-9 text-muted-foreground hover:text-foreground"
             title="24/7 Qo'llab-quvvatlash"
-            type="button"
           >
-            <span className="material-symbols-outlined text-[18px]">support_agent</span>
-          </button>
+            <Headphones className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Hero Header & App Glow Icon */}
-      <div className="text-center pt-0.5 pb-1 flex flex-col items-center">
+      {/* Hero Header & Brand Icon */}
+      <div className="text-center pt-1 pb-1 flex flex-col items-center">
         <div
-          className="relative mb-2.5 group cursor-pointer"
-          onClick={() => onShowToast("✈️ SayrHub — Eng unutilmas sayohatlaringiz hamrohi!", 'info')}
+          className="relative mb-3 group cursor-pointer"
+          onClick={() => onShowToast("SayrHub — Unutilmas sayohatlar onlayn platformasi", 'info')}
         >
-          <div
-            className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg transition-transform active:scale-95 bg-[#0038E2] flex items-center justify-center relative ring-2 ring-slate-200/60 dark:ring-slate-700/60"
-          >
+          <div className="w-16 h-16 rounded-2xl overflow-hidden bg-primary shadow-sm flex items-center justify-center relative transition-transform group-hover:scale-105">
             <img
               src="/logo.png"
               alt="SayrHub"
@@ -227,460 +227,369 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 e.currentTarget.style.display = 'none';
               }}
             />
-            <span className="text-2xl font-black text-white tracking-tight absolute pointer-events-none">SH</span>
+            <span className="text-2xl font-black text-primary-foreground tracking-tight absolute pointer-events-none">
+              SH
+            </span>
           </div>
-          <div
-            className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center shadow-md"
-            style={{ backgroundColor: 'var(--tw-accent)', color: 'var(--tw-accent-contrast)' }}
-          >
-            <span className="material-symbols-outlined text-[12px]">flight</span>
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-xs">
+            <Plane className="w-3 h-3" />
           </div>
         </div>
 
-        <h2
-          className="text-xl font-black tracking-tight"
-          id="auth-main-title"
-          style={{ color: 'var(--tw-text-main)' }}
-        >
+        <h2 className="text-xl font-bold tracking-tight text-foreground" id="auth-main-title">
           {mode === 'register' ? "SayrHub-da ro'yxatdan o'tish" : "SayrHub hisobiga kirish"}
         </h2>
-        <p
-          className="text-xs max-w-[290px] mt-1 leading-relaxed"
-          id="auth-main-subtitle"
-          style={{ color: 'var(--tw-text-sub)' }}
-        >
+        <p className="text-xs text-muted-foreground max-w-xs mt-1" id="auth-main-subtitle">
           {mode === 'register'
-            ? "Yangi akkaunt oching va sayohat takliflarini birinchi bo'lib oling!"
-            : "Eng qulay turpaketlar, arzon charterlar va narx signallariga kirish uchun kiring"}
+            ? "Yangi akkaunt oching va sayohat chegirmalarini birinchi bo'lib oling!"
+            : "Eng qulay turpaketlar, charter reyslar va narx signallariga kirish uchun kiring"}
         </p>
       </div>
 
-      {/* Auth Mode Segmented Control (Phone vs Email) */}
-      <div
-        className="p-1 rounded-2xl flex items-center border transition-colors"
-        id="auth-tabs-wrapper"
-        style={{
-          backgroundColor: 'var(--tw-subtle)',
-          borderColor: 'var(--tw-border)'
-        }}
-      >
-        <button
+      {/* Segmented Control (Phone vs Email) */}
+      <div className="p-1 rounded-2xl flex items-center bg-muted/60 border border-border/80" id="auth-tabs-wrapper">
+        <Button
           id="tab-phone-btn"
-          className={`flex-1 py-2 text-xs font-bold rounded-xl active:scale-98 transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === 'phone' ? 'shadow-xs' : ''
-          }`}
-          style={{
-            backgroundColor: activeTab === 'phone' ? 'var(--tw-accent)' : 'transparent',
-            color: activeTab === 'phone' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-sub)'
-          }}
+          variant={activeTab === 'phone' ? 'default' : 'ghost'}
+          size="sm"
           onClick={() => setActiveTab('phone')}
-          type="button"
+          className="flex-1 rounded-xl text-xs font-semibold h-8 gap-1.5 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[15px]">call</span>
+          <Phone className="w-3.5 h-3.5" />
           <span>Telefon raqam</span>
-        </button>
-        <button
+        </Button>
+        <Button
           id="tab-email-btn"
-          className={`flex-1 py-2 text-xs font-medium rounded-xl active:scale-98 transition-all flex items-center justify-center gap-1.5 ${
-            activeTab === 'email' ? 'shadow-xs' : ''
-          }`}
-          style={{
-            backgroundColor: activeTab === 'email' ? 'var(--tw-accent)' : 'transparent',
-            color: activeTab === 'email' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-sub)'
-          }}
+          variant={activeTab === 'email' ? 'default' : 'ghost'}
+          size="sm"
           onClick={() => setActiveTab('email')}
-          type="button"
+          className="flex-1 rounded-xl text-xs font-semibold h-8 gap-1.5 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[15px]">mail</span>
+          <Mail className="w-3.5 h-3.5" />
           <span>Email / TW-ID</span>
-        </button>
+        </Button>
       </div>
 
       {/* Featured Telegram Registration */}
       {mode === 'register' && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
           onClick={onTelegramAuth}
-          className="w-full py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#2AABEE] to-[#229ED9] text-white flex items-center justify-between shadow-lg shadow-[#2AABEE]/25 tap-bounce active:scale-98 transition cursor-pointer"
+          className="w-full h-auto py-3 px-3.5 rounded-2xl bg-sky-500/10 hover:bg-sky-500/20 border-sky-500/30 text-sky-600 dark:text-sky-400 justify-between cursor-pointer"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
-              </svg>
+          <div className="flex items-center gap-2.5 text-left">
+            <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0">
+              <span className="font-bold text-xs">TG</span>
             </div>
-            <div className="text-left">
-              <span className="font-black text-xs block">Telegram orqali ro'yxatdan o'tish</span>
-              <span className="text-[10px] text-white/80">@sayrhub_bot orqali 1 soniyada</span>
+            <div>
+              <span className="font-bold text-xs block text-foreground">Telegram orqali ro'yxatdan o'tish</span>
+              <span className="text-[10px] text-muted-foreground">@sayrhub_bot orqali 1 soniyada</span>
             </div>
           </div>
-          <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-lg">+$30 bonus</span>
-        </button>
+          <Badge variant="secondary" className="bg-sky-500/20 text-sky-600 dark:text-sky-400 text-xs font-bold">
+            +$30 bonus
+          </Badge>
+        </Button>
       )}
 
       {/* Main Auth Form Card */}
-      <form onSubmit={handleSubmit} className="bg-[#111c30] border border-[#1b2b46] rounded-3xl p-4 shadow-xl space-y-3.5">
-        {/* REGISTRATION-ONLY FIELDS */}
-        {mode === 'register' && (
-          <div className="space-y-3 animate-fadeIn" id="section-register-fields">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                <span>To'liq ismingiz</span>
-                <span className="text-[10px] text-[#ff5b00] font-bold">Xalqaro pasport bo'yicha</span>
-              </label>
-              <div className="flex items-center bg-[#16233a] rounded-2xl px-3 py-2 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">badge</span>
-                <input
-                  id="reg-fullname-input"
-                  type="text"
-                  value={regFullName}
-                  onChange={(e) => setRegFullName(e.target.value)}
-                  placeholder="Masalan: Jasur Rahimov"
-                  className="w-full bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder:text-slate-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                <span>Promo-kod (Ixtiyoriy)</span>
-                <span className="text-[10px] text-amber-400 font-bold">+$30 bonus beradi</span>
-              </label>
-              <div className="flex items-center bg-[#16233a] rounded-2xl px-3 py-2 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                <span className="material-symbols-outlined text-amber-400 text-[18px] mr-2">loyalty</span>
-                <input
-                  id="reg-promo-input"
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                  placeholder="PROMO: TRIP30BONUS"
-                  className="w-full bg-transparent border-none text-amber-300 text-xs font-mono font-bold focus:outline-none focus:ring-0 placeholder:text-slate-500 uppercase"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Phone Input Form Section */}
-        {activeTab === 'phone' && (
-          <div className="space-y-3" id="section-phone-input">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
-                <span>Telefon raqamingiz</span>
-                <span className="text-[10px] text-[#ff5b00] font-bold" id="phone-hint-tag">
-                  {isPasswordMode ? 'Akkaunt raqami' : 'SMS orqali kod keladi'}
-                </span>
-              </label>
-
-              <div className="relative flex items-center bg-[#16233a] rounded-2xl p-1.5 transition-all shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                {/* Country code pill */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#0f1828] rounded-xl text-xs font-bold text-slate-100 shrink-0 border border-[#1b2b45]">
-                  <span className="text-sm">🇺🇿</span>
-                  <span>+998</span>
-                </div>
-
-                {/* Formatted Input */}
-                <input
-                  id="phone-input"
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={12}
-                  value={phoneNumber}
-                  onChange={handlePhoneChange}
-                  placeholder="90 123-45-67"
-                  className="w-full bg-transparent border-none text-white text-sm font-semibold tracking-wide px-3 py-1.5 focus:outline-none focus:ring-0 placeholder:text-slate-500"
-                />
-
-                {/* Live validation feedback indicator */}
-                {isPhoneValid && (
-                  <div className="pr-1.5 flex items-center" id="phone-valid-indicator">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[12px] font-bold">
-                      ✓
-                    </span>
-                  </div>
-                )}
-
-                {/* Clear Button */}
-                {phoneNumber.length > 0 && (
-                  <button
-                    id="phone-clear-btn"
-                    className="pr-2 text-slate-500 hover:text-slate-300 active:scale-90"
-                    onClick={() => setPhoneNumber('')}
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">cancel</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Verification Type Option (OTP vs Password) */}
-            {mode === 'login' && (
-              <div className="flex items-center justify-between pt-0.5" id="phone-switch-row">
-                <button
-                  id="auth-method-toggle"
-                  className="text-[11px] font-semibold text-[#ff5b00] hover:text-[#e55200] active:scale-95 transition-transform flex items-center gap-1"
-                  onClick={() => setIsPasswordMode(!isPasswordMode)}
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[14px]">lock_reset</span>
-                  <span id="auth-method-label">
-                    {isPasswordMode ? 'SMS kod bilan kirish' : 'Parol bilan kirish'}
-                  </span>
-                </button>
-                <span className="text-[10px] text-slate-500">Tezkor & xavfsiz</span>
-              </div>
-            )}
-
-            {/* Hidden Password Field for Phone Account if enabled */}
-            {(isPasswordMode || mode === 'register') && (
+      <Card className="border-border bg-card shadow-xs p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          {/* REGISTRATION-ONLY FIELDS */}
+          {mode === 'register' && (
+            <div className="space-y-3" id="section-register-fields">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-slate-300">Maxfiy parol</label>
-                <div className="relative flex items-center bg-[#16233a] rounded-2xl px-3 py-2 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                  <input
-                    id="phone-pass-input"
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>To'liq ismingiz</span>
+                  <span className="text-[10px] text-primary font-bold">Pasport bo'yicha</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="reg-fullname-input"
+                    type="text"
+                    value={regFullName}
+                    onChange={(e) => setRegFullName(e.target.value)}
+                    placeholder="Masalan: Jasur Rahimov"
+                    className="pl-9 h-10 rounded-xl bg-background text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Promo-kod (Ixtiyoriy)</span>
+                  <span className="text-[10px] text-amber-500 font-bold">+$30 bonus</span>
+                </label>
+                <div className="relative">
+                  <Tag className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-amber-500" />
+                  <Input
+                    id="reg-promo-input"
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="PROMO: TRIP30BONUS"
+                    className="pl-9 h-10 rounded-xl bg-background text-xs uppercase font-mono font-bold text-amber-600 dark:text-amber-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Phone Input Form Section */}
+          {activeTab === 'phone' && (
+            <div className="space-y-3" id="section-phone-input">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <span>Telefon raqamingiz</span>
+                  <span className="text-[10px] text-primary font-bold" id="phone-hint-tag">
+                    {isPasswordMode ? 'Akkaunt raqami' : 'SMS orqali kod keladi'}
+                  </span>
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 h-10 bg-muted/60 rounded-xl text-xs font-bold text-foreground shrink-0 border border-border">
+                    <span>🇺🇿</span>
+                    <span>+998</span>
+                  </div>
+                  <Input
+                    id="phone-input"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={12}
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    placeholder="90 123-45-67"
+                    className="h-10 rounded-xl bg-background text-xs font-semibold tracking-wide flex-1"
+                  />
+                  {isPhoneValid && (
+                    <Badge variant="secondary" className="h-10 px-2 rounded-xl text-emerald-600 bg-emerald-500/10">
+                      <Check className="w-4 h-4" />
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Verification Type Option */}
+              {mode === 'login' && (
+                <div className="flex items-center justify-between pt-0.5" id="phone-switch-row">
+                  <Button
+                    variant="link"
+                    size="sm"
+                    id="auth-method-toggle"
+                    onClick={() => setIsPasswordMode(!isPasswordMode)}
+                    type="button"
+                    className="p-0 h-auto text-xs font-semibold text-primary"
+                  >
+                    <span id="auth-method-label">
+                      {isPasswordMode ? 'SMS kod bilan kirish' : 'Parol bilan kirish'}
+                    </span>
+                  </Button>
+                  <span className="text-[10px] text-muted-foreground">Tezkor & xavfsiz</span>
+                </div>
+              )}
+
+              {/* Password Field */}
+              {(isPasswordMode || mode === 'register') && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">Maxfiy parol</label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="phone-pass-input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Kamida 8 ta belgi"
+                      className="pl-9 pr-9 h-10 rounded-xl bg-background text-xs"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 text-muted-foreground"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Email & TW-ID Section */}
+          {activeTab === 'email' && (
+            <div className="space-y-3" id="section-email-input">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground">Email manzili yoki SH-ID</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="email-input"
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jasur@sayrhub.uz yoki #SH-884291"
+                    className="pl-9 h-10 rounded-xl bg-background text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">Parol</label>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => onShowToast("Parolni qayta tiklash havolasi emailingizga yuborildi", 'info')}
+                    type="button"
+                    className="p-0 h-auto text-[11px] text-primary"
+                  >
+                    Parolni unutdingizmi?
+                  </Button>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="email-pass-input"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Kamida 8 ta belgi"
-                    className="w-full bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder:text-slate-500"
+                    className="pl-9 pr-9 h-10 rounded-xl bg-background text-xs"
                   />
-                  <button
-                    className="text-slate-400 hover:text-slate-200"
-                    onClick={() => setShowPassword(!showPassword)}
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 text-muted-foreground"
                   >
-                    <span className="material-symbols-outlined text-[18px]">
-                      {showPassword ? 'visibility_off' : 'visibility'}
-                    </span>
-                  </button>
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
                 </div>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Email & TC-ID Input Form Section */}
-        {activeTab === 'email' && (
-          <div className="space-y-3" id="section-email-input">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-slate-300">Email manzili yoki SH-ID</label>
-              <div className="flex items-center bg-[#16233a] rounded-2xl px-3 py-2.5 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">alternate_email</span>
-                <input
-                  id="email-input"
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jasur@sayrhub.uz yoki #SH-884291"
-                  className="w-full bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder:text-slate-500"
-                />
-              </div>
             </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-semibold text-slate-300">Parol</label>
-                <button
-                  className="text-[11px] font-semibold text-[#ff5b00] hover:underline"
-                  onClick={() => onShowToast("Parolni qayta tiklash havolasi emailingizga yuborildi", 'info')}
-                  type="button"
-                >
-                  Parolni unutdingizmi?
-                </button>
-              </div>
-              <div className="flex items-center bg-[#16233a] rounded-2xl px-3 py-2.5 shadow-inner border border-[#1f3150] focus-within:border-[#ff5b00]">
-                <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">key</span>
-                <input
-                  id="email-pass-input"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Kamida 8 ta belgi"
-                  className="w-full bg-transparent border-none text-white text-xs font-semibold focus:outline-none focus:ring-0 placeholder:text-slate-500"
-                />
-                <button
-                  className="text-slate-400 hover:text-slate-200"
-                  onClick={() => setShowPassword(!showPassword)}
-                  type="button"
-                >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Remember Me & Terms Acceptance Switch */}
-        <div className="flex items-center justify-between pt-1">
-          <label
-            className="flex items-center gap-2 cursor-pointer select-none"
-            onClick={() => setRememberMe(!rememberMe)}
-          >
-            <div
-              id="remember-switch-box"
-              className={`w-5 h-5 rounded-lg flex items-center justify-center text-white text-xs font-bold transition-colors shadow ${
-                rememberMe ? 'bg-[#ff5b00]' : 'bg-[#16233a] border border-[#233550]'
-              }`}
-            >
-              {rememberMe && <span className="material-symbols-outlined text-[14px]">check</span>}
-            </div>
-            <span className="text-xs text-slate-300 font-medium">Meni eslab qol</span>
-          </label>
-          <span className="text-[10px] text-slate-400">30 kunlik faollik</span>
-        </div>
-
-        {/* Primary Action Button with Spinner state */}
-        <button
-          id="submit-auth-btn"
-          disabled={isSubmitting}
-          className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-[#ff5b00] via-[#ff6a1a] to-[#ff7d36] hover:brightness-110 active:scale-98 transition-all text-white font-bold text-sm shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 relative overflow-hidden"
-          type="submit"
-        >
-          {isSubmitting ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" d="M4 12a8 8 0 018-8v8H4z" fill="currentColor"></path>
-              </svg>
-              <span>Tekshirilmoqda...</span>
-            </>
-          ) : (
-            <>
-              <span id="submit-auth-label">
-                {mode === 'register'
-                  ? "Ro'yxatdan o'tish"
-                  : activeTab === 'phone' && !isPasswordMode
-                  ? 'Tasdiqlash kodini olish'
-                  : 'Tizimga kirish'}
-              </span>
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </>
           )}
-        </button>
-      </form>
 
-      {/* Quick Social Fast Login Divider */}
-      <div className="relative flex items-center justify-center my-0.5">
+          {/* Remember Me */}
+          <div className="flex items-center justify-between pt-1">
+            <label
+              className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-foreground"
+              onClick={() => setRememberMe(!rememberMe)}
+            >
+              <div
+                id="remember-switch-box"
+                className={`w-4 h-4 rounded flex items-center justify-center text-primary-foreground text-xs font-bold transition-colors ${
+                  rememberMe ? 'bg-primary' : 'border border-input'
+                }`}
+              >
+                {rememberMe && <Check className="w-3 h-3 text-white" />}
+              </div>
+              <span>Meni eslab qol</span>
+            </label>
+            <span className="text-[10px] text-muted-foreground">30 kunlik faollik</span>
+          </div>
+
+          {/* Primary Action Button */}
+          <Button
+            id="submit-auth-btn"
+            disabled={isSubmitting}
+            variant="default"
+            size="lg"
+            className="w-full rounded-xl h-11 text-xs font-bold gap-2 cursor-pointer"
+            type="submit"
+          >
+            {isSubmitting ? (
+              <span>Tekshirilmoqda...</span>
+            ) : (
+              <>
+                <span id="submit-auth-label">
+                  {mode === 'register'
+                    ? "Ro'yxatdan o'tish"
+                    : activeTab === 'phone' && !isPasswordMode
+                    ? 'Tasdiqlash kodini olish'
+                    : 'Tizimga kirish'}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </Button>
+        </form>
+      </Card>
+
+      {/* Social Fast Login Divider */}
+      <div className="relative flex items-center justify-center my-1">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full h-[1px] border-t" style={{ borderColor: 'var(--tw-border)' }}></div>
+          <div className="w-full border-t border-border" />
         </div>
-        <span
-          className="relative px-3 text-[11px] font-semibold"
-          style={{
-            backgroundColor: 'var(--tw-canvas)',
-            color: 'var(--tw-text-muted)'
-          }}
-        >
+        <span className="relative px-3 text-[11px] font-medium bg-background text-muted-foreground">
           Yoki tezkor usulda kiring
         </span>
       </div>
 
-      {/* Social & Fast Login Grid */}
-      <div className="space-y-2">
-        {/* Telegram 1-Tap Login */}
-        <button
+      {/* Social Buttons */}
+      <div className="grid grid-cols-2 gap-2">
+        <Button
           id="btn-login-telegram"
-          className="w-full py-2.5 px-3 rounded-2xl bg-[#2AABEE]/15 hover:bg-[#2AABEE]/25 border border-[#2AABEE]/40 active:scale-98 transition-all text-[#2AABEE] text-xs font-bold flex items-center justify-between shadow-sm cursor-pointer"
+          variant="outline"
           onClick={onTelegramAuth}
+          className="rounded-xl h-10 text-xs font-semibold gap-2 border-border"
           type="button"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-[#2AABEE] text-white flex items-center justify-center shadow-md">
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
-              </svg>
-            </div>
-            <div className="text-left">
-              <span className="font-bold text-xs block" style={{ color: 'var(--tw-text-main)' }}>
-                {mode === 'register' ? "Telegram orqali ro'yxatdan o'tish" : "Telegram orqali tezkor kirish"}
-              </span>
-              <span className="text-[10px] text-[#2AABEE]">@sayrhub_bot</span>
-            </div>
-          </div>
-          <span className="text-[10px] bg-[#2AABEE]/20 px-2 py-0.5 rounded-md font-bold text-[#2AABEE]">1 soniya</span>
-        </button>
+          <span className="font-bold text-sky-500">TG</span>
+          <span>Telegram</span>
+        </Button>
 
-        {/* Google 1-Tap Login */}
-        <button
+        <Button
           id="btn-login-google"
-          className="w-full py-2.5 px-3 rounded-2xl border active:scale-98 transition-all flex items-center justify-between shadow-sm"
-          style={{
-            backgroundColor: 'var(--tw-surface)',
-            borderColor: 'var(--tw-border)',
-            color: 'var(--tw-text-main)'
-          }}
+          variant="outline"
           onClick={() => onOpenSocial('google')}
+          className="rounded-xl h-10 text-xs font-semibold gap-2 border-border"
           type="button"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-xl bg-white shadow-xs border border-slate-200/80 flex items-center justify-center">
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                <path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" fill="#4285F4"></path>
-                <path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z" fill="#34A853"></path>
-                <path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" fill="#FBBC05"></path>
-                <path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" fill="#EA4335"></path>
-              </svg>
-            </div>
-            <span className="font-semibold text-xs" style={{ color: 'var(--tw-text-main)' }}>Google orqali tezkor kirish</span>
-          </div>
-          <span className="text-[10px] px-2 py-0.5 rounded-md font-bold text-slate-400">1 soniya</span>
-        </button>
+          <span className="font-bold text-red-500">G</span>
+          <span>Google</span>
+        </Button>
       </div>
 
-      {/* Value-Add Micro Perk Banner */}
-      <div className="bg-gradient-to-r from-amber-500/10 via-[#ff5b00]/15 to-amber-500/10 border border-[#ff5b00]/20 rounded-2xl p-3 flex items-center gap-3 shadow-md">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-[#ff5b00] flex items-center justify-center shrink-0 shadow-md">
-          <span className="text-lg">🎁</span>
+      {/* Bonus Perk Banner */}
+      <Card className="border-border bg-muted/40 p-3.5 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+          <Gift className="w-5 h-5" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 bg-amber-400/20 px-1.5 py-0.2 rounded">
+            <Badge variant="secondary" className="text-[9px] uppercase font-bold text-primary">
               Bonus
-            </span>
-            <p className="text-xs font-bold text-white truncate">$30 vaucher kutmoqda!</p>
+            </Badge>
+            <p className="text-xs font-bold text-foreground truncate">$30 vaucher kutmoqda!</p>
           </div>
-          <p className="text-[11px] text-slate-300 line-clamp-1 mt-0.5">
+          <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
             Ro'yxatdan o'ting va ilk turpaket uchun $30 chegirmaga ega bo'ling.
           </p>
         </div>
-      </div>
+      </Card>
 
-      {/* Bottom Toggle: Register vs Login Flow */}
+      {/* Bottom Switch Footer */}
       <div className="pt-1 text-center space-y-2">
-        <div className="text-xs text-slate-400" id="auth-switch-footer">
+        <div className="text-xs text-muted-foreground" id="auth-switch-footer">
           <span id="footer-switch-prompt">
             {mode === 'login' ? "Hisobingiz yo'qmi?" : "Hisobingiz bormi?"}
           </span>
-          <button
+          <Button
+            variant="link"
+            size="sm"
             id="footer-switch-link"
-            className="font-bold text-[#ff5b00] hover:text-[#e55200] underline ml-1 active:scale-95 transition"
+            className="font-bold text-primary p-0 h-auto ml-1 text-xs"
             onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-            type="button"
           >
             {mode === 'login' ? "Ro'yxatdan o'tish" : 'Tizimga kirish'}
-          </button>
+          </Button>
         </div>
-        <p className="text-[10px] leading-relaxed px-4" style={{ color: 'var(--tw-text-muted)' }}>
-          Kirish orqali siz SayrHub-ning{' '}
-          <button
-            type="button"
-            className="underline hover:opacity-80"
-            onClick={() => onShowToast("Foydalanish shartlari va qoidalari hujjati yuklanmoqda", 'info')}
-          >
-            Foydalanish qoidalari
-          </button>{' '}
-          va{' '}
-          <button
-            type="button"
-            className="underline hover:opacity-80"
-            onClick={() => onShowToast("Maxfiylik va ma'lumotlar xavfsizligi siyosati yuklanmoqda", 'info')}
-          >
-            Maxfiylik siyosatiga
-          </button>{' '}
-          rozilik bildirasiz.
+        <p className="text-[10px] text-muted-foreground px-4 leading-relaxed">
+          Kirish orqali siz SayrHub-ning Foydalanish qoidalari va Maxfiylik siyosatiga rozilik bildirasiz.
         </p>
       </div>
     </div>

@@ -930,11 +930,7 @@ export default function App() {
     <div
       id="app-container"
       data-theme={themeMode}
-      style={{
-        backgroundColor: 'var(--tw-canvas)',
-        color: 'var(--tw-text-main)'
-      }}
-      className="min-h-screen w-full flex flex-col font-sans select-none overflow-x-hidden transition-colors duration-200"
+      className="min-h-screen w-full flex flex-col font-sans select-none overflow-x-hidden bg-background text-foreground transition-colors duration-200"
     >
       {/* Dynamic Desktop / Mobile Header */}
       <Header
@@ -1195,16 +1191,16 @@ export default function App() {
           />
 
           {/* In-app Toast Messages Overlay */}
-          <div className="absolute top-16 inset-x-4 z-50 pointer-events-none flex flex-col items-center gap-2">
+          <div className="fixed top-16 inset-x-4 z-50 pointer-events-none flex flex-col items-center gap-2">
             {toasts.map((t) => (
               <div
                 key={t.id}
-                className={`px-4 py-2.5 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 pointer-events-auto border ${
+                className={`px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2.5 transform transition-all duration-300 pointer-events-auto border backdrop-blur-md ${
                   t.type === 'success'
-                    ? 'bg-emerald-600/95 text-white border-emerald-400'
+                    ? 'bg-emerald-600 text-white border-emerald-500/30'
                     : t.type === 'error'
-                    ? 'bg-rose-600/95 text-white border-rose-400'
-                    : 'bg-[#182740]/95 text-white border-[#2d4268]'
+                    ? 'bg-destructive text-destructive-foreground border-destructive/30'
+                    : 'bg-card text-card-foreground border-border'
                 }`}
               >
                 <span>{t.type === 'success' ? '✅' : t.type === 'error' ? '⚠️' : '🔔'}</span>

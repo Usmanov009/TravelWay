@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { ExploreVibe } from '../types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Palmtree, Landmark, Mountain, Crown, ArrowRight, Compass } from 'lucide-react';
 
 interface ExploreScreenProps {
   exploreItems: ExploreVibe[];
@@ -16,95 +20,85 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
     ? exploreItems
     : exploreItems.filter((i) => i.vibe === activeVibe);
 
+  const vibeCategories = [
+    { id: 'all', label: 'Hammasi', icon: Sparkles },
+    { id: 'beach', label: 'Plyaj & Dengiz', icon: Palmtree },
+    { id: 'culture', label: 'Tarix & Madaniyat', icon: Landmark },
+    { id: 'mountain', label: "Tog'lar", icon: Mountain },
+    { id: 'luxury', label: 'Hashamat', icon: Crown }
+  ] as const;
+
   return (
-    <div className="space-y-3.5 pb-20 select-none">
+    <div className="space-y-4 pb-20 select-none">
       {/* SayrHub Vibes Banner */}
-      <div
-        className="border rounded-3xl p-4 shadow-sm"
-        style={{
-          backgroundColor: 'var(--tw-surface)',
-          borderColor: 'var(--tw-border)'
-        }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="text-xs font-bold px-2.5 py-0.5 rounded-full"
-            style={{
-              backgroundColor: 'var(--tw-accent-light)',
-              color: 'var(--tw-accent)'
-            }}
-          >
+      <Card className="p-5 border-border bg-card shadow-xs">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="secondary" className="gap-1 font-semibold text-primary">
+            <Compass className="w-3.5 h-3.5" />
             SayrHub Vibes
-          </span>
-          <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Kayfiyatga mos yo'nalishlar</span>
+          </Badge>
+          <span className="text-xs text-muted-foreground">Kayfiyatga mos yo'nalishlar</span>
         </div>
-        <h2 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Qayerga dam olishga boramiz?</h2>
-        <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-          Vizasiz mamlakatlar, iliq dengizlar va eng qiziqarli shahar turlari.
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+          Qayerga dam olishga boramiz?
+        </h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
+          Vizasiz mamlakatlar, iliq dengiz sohillari va eng qiziqarli shahar turlari sizni kutmoqda.
         </p>
-      </div>
+      </Card>
 
       {/* Vibe Categories */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-        {[
-          { id: 'all', label: '✨ Hammasi' },
-          { id: 'beach', label: '🏖 Plyaj & Dengiz' },
-          { id: 'culture', label: '🏛 Tarix & Madaniyat' },
-          { id: 'mountain', label: "⛰ Tog'lar" },
-          { id: 'luxury', label: '💎 Hashamat' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            className="text-[11px] font-bold px-3 py-1.5 rounded-xl whitespace-nowrap border transition tap-bounce"
-            style={{
-              backgroundColor: activeVibe === tab.id ? 'var(--tw-accent)' : 'var(--tw-surface)',
-              color: activeVibe === tab.id ? 'var(--tw-accent-contrast)' : 'var(--tw-text-sub)',
-              borderColor: activeVibe === tab.id ? 'var(--tw-accent)' : 'var(--tw-border)'
-            }}
-            onClick={() => setActiveVibe(tab.id as any)}
-            type="button"
-          >
-            {tab.label}
-          </button>
-        ))}
+        {vibeCategories.map((cat) => {
+          const Icon = cat.icon;
+          const isActive = activeVibe === cat.id;
+          return (
+            <Button
+              key={cat.id}
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setActiveVibe(cat.id as any)}
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 shrink-0 cursor-pointer"
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{cat.label}</span>
+            </Button>
+          );
+        })}
       </div>
 
       {/* Explore Grid Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="explore-cards-grid">
         {filteredItems.map((item) => (
-          <div
+          <Card
             key={item.id}
-            className="border rounded-2xl overflow-hidden relative shadow-sm transition tap-bounce cursor-pointer"
-            style={{
-              backgroundColor: 'var(--tw-surface)',
-              borderColor: 'var(--tw-border)'
-            }}
+            className="overflow-hidden border-border bg-card hover:shadow-md transition-all cursor-pointer group"
             onClick={() => onSelectVibeItem(item.destQuery)}
           >
-            <div className="h-36 relative">
-              <img src={item.img} className="w-full h-full object-cover" alt={item.title} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
-              <span
-                className="absolute top-2.5 left-2.5 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase"
-                style={{
-                  backgroundColor: 'var(--tw-accent)',
-                  color: 'var(--tw-accent-contrast)'
-                }}
-              >
+            <div className="h-44 relative overflow-hidden">
+              <img
+                src={item.img}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                alt={item.title}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              
+              <Badge variant="default" className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider">
                 {item.badge}
-              </span>
-              <div className="absolute bottom-2.5 left-3 right-3 flex items-end justify-between text-white">
+              </Badge>
+
+              <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between text-white">
                 <div>
-                  <h4 className="text-sm font-bold leading-tight">{item.title}</h4>
-                  <p className="text-[10px] text-slate-300">{item.count}</p>
+                  <h4 className="text-base font-bold leading-tight drop-shadow-xs">{item.title}</h4>
+                  <p className="text-xs text-white/80 mt-0.5">{item.count}</p>
                 </div>
-                <div className="text-right bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                  <span className="text-[9px] text-slate-300 block">Boshlang'ich</span>
-                  <span className="text-xs font-black" style={{ color: 'var(--tw-accent)' }}>{item.priceFrom}</span>
+                <div className="text-right bg-black/60 px-2.5 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
+                  <span className="text-[10px] text-white/70 block font-medium">Boshlang'ich</span>
+                  <span className="text-sm font-black text-primary">{item.priceFrom}</span>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

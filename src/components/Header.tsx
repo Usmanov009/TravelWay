@@ -1,5 +1,21 @@
 import React from 'react';
 import { TabType, ThemeMode } from '../types';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Search,
+  Compass,
+  Flame,
+  Luggage,
+  User,
+  Sun,
+  Moon,
+  QrCode,
+  Bell,
+  ShieldCheck,
+  CheckCircle2
+} from 'lucide-react';
 
 interface HeaderProps {
   currentTab: TabType;
@@ -30,65 +46,15 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAdmin,
   activeTripsCount = 0
 }) => {
-  const getTitles = () => {
-    switch (currentTab) {
-      case 'auth':
-        return {
-          title: 'SayrHub',
-          sub: 'Arzon turlar & Charter reyslar'
-        };
-      case 'search':
-        return {
-          title: 'SayrHub',
-          sub: 'Turpaketlar qidiruvi & Charter reyslar'
-        };
-      case 'explore':
-        return {
-          title: 'Kashf etish',
-          sub: "Sayohat g'oyalari va yo'nalishlar"
-        };
-      case 'hot':
-        return {
-          title: 'Qaynoq Takliflar',
-          sub: '50% gacha tejash • Cheklangan vaqt'
-        };
-      case 'trips':
-        return {
-          title: 'Mening Turlarim',
-          sub: 'Buyurtmalar, vaucherlar va hisob'
-        };
-      case 'profile':
-        return {
-          title: 'Mening Profilim',
-          sub: 'Sozlamalar va shaxsiy kabinet'
-        };
-      default:
-        return {
-          title: 'SayrHub',
-          sub: 'Arzon turlar & Charter reyslar'
-        };
-    }
-  };
-
-  const { title, sub } = getTitles();
-
   return (
-    <header
-      className="w-full backdrop-blur-md shrink-0 border-b z-30 sticky top-0 transition-colors"
-      style={{
-        backgroundColor: 'var(--tw-surface)',
-        borderColor: 'var(--tw-border)',
-        boxShadow: 'var(--tw-card-shadow)'
-      }}
-    >
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md transition-colors shadow-2xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-6">
         {/* Left: Brand Logo */}
         <div
-          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none shrink-0 group"
           onClick={() => onTabSelect && onTabSelect('search')}
         >
-          {/* App Brand Logo Icon */}
-          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-2xl overflow-hidden shadow-sm shrink-0 bg-[#0038E2] flex items-center justify-center">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden bg-primary shadow-xs shrink-0 flex items-center justify-center transition-transform group-hover:scale-105">
             <img
               src="/logo.png"
               alt="SayrHub"
@@ -97,126 +63,88 @@ export const Header: React.FC<HeaderProps> = ({
                 e.currentTarget.style.display = 'none';
               }}
             />
-            <span className="text-white font-black text-xs sm:text-sm tracking-wider absolute pointer-events-none">
+            <span className="text-primary-foreground font-black text-xs sm:text-sm tracking-wider absolute pointer-events-none">
               SH
             </span>
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h1
-                className="text-base sm:text-lg font-black tracking-tight leading-none"
-                id="app-nav-title"
-                style={{ color: 'var(--tw-text-main)' }}
-              >
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-none">
                 SayrHub
               </h1>
-              <span
-                className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-md border"
-                style={{
-                  backgroundColor: 'var(--tw-accent-light)',
-                  color: 'var(--tw-accent)',
-                  borderColor: 'var(--tw-accent-border)'
-                }}
-              >
-                TRAVEL
-              </span>
-              <span className="hidden sm:inline-flex text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                1:1 Kompas Jonli
-              </span>
+              <Badge variant="secondary" className="text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0 h-4">
+                Travel
+              </Badge>
+              <Badge variant="outline" className="hidden sm:inline-flex text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 h-4">
+                <CheckCircle2 className="w-2.5 h-2.5 mr-0.5 inline" /> 1:1 Kompas
+              </Badge>
             </div>
-            <p
-              className="text-[10px] sm:text-[11px] leading-tight mt-0.5"
-              id="app-nav-subtitle"
-              style={{ color: 'var(--tw-text-sub)' }}
-            >
-              Arzon turpaketlar, charter reyslar va qaynoq takliflar
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight mt-0.5">
+              Arzon turpaketlar, charter reyslar & onlayn qidiruv
             </p>
           </div>
         </div>
 
         {/* Center: Desktop Navigation Tabs (Visible on md and larger) */}
         {onTabSelect && (
-          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 bg-slate-100 dark:bg-slate-900/70 p-1 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-            <button
+          <nav className="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-muted/60 border border-border/80">
+            <Button
+              variant={currentTab === 'search' ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onTabSelect('search')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer tap-bounce ${
-                currentTab === 'search' ? 'shadow-xs' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: currentTab === 'search' ? 'var(--tw-accent)' : 'transparent',
-                color: currentTab === 'search' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-              }}
-              type="button"
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 px-3.5 cursor-pointer"
             >
-              <span>🔍</span>
+              <Search className="w-3.5 h-3.5" />
               <span>Qidiruv</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant={currentTab === 'explore' ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onTabSelect('explore')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer tap-bounce ${
-                currentTab === 'explore' ? 'shadow-xs' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: currentTab === 'explore' ? 'var(--tw-accent)' : 'transparent',
-                color: currentTab === 'explore' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-              }}
-              type="button"
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 px-3.5 cursor-pointer"
             >
-              <span>✨</span>
+              <Compass className="w-3.5 h-3.5" />
               <span>Kashf etish</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant={currentTab === 'hot' ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onTabSelect('hot')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer tap-bounce relative ${
-                currentTab === 'hot' ? 'shadow-xs' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: currentTab === 'hot' ? 'var(--tw-accent)' : 'transparent',
-                color: currentTab === 'hot' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-              }}
-              type="button"
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 px-3.5 cursor-pointer relative"
             >
-              <span>🔥</span>
+              <Flame className="w-3.5 h-3.5 text-red-500" />
               <span>Qaynoq</span>
-              <span className="text-[8px] bg-red-500 text-white font-extrabold px-1 rounded-full uppercase">HOT</span>
-            </button>
+              <Badge variant="destructive" className="text-[8px] font-black px-1 py-0 h-3.5 uppercase ml-0.5">
+                HOT
+              </Badge>
+            </Button>
 
-            <button
+            <Button
+              variant={currentTab === 'trips' ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onTabSelect('trips')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer tap-bounce ${
-                currentTab === 'trips' ? 'shadow-xs' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: currentTab === 'trips' ? 'var(--tw-accent)' : 'transparent',
-                color: currentTab === 'trips' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-              }}
-              type="button"
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 px-3.5 cursor-pointer"
             >
-              <span>🧳</span>
-              <span>Mening Turlarim</span>
+              <Luggage className="w-3.5 h-3.5" />
+              <span>Turlarim</span>
               {activeTripsCount > 0 && (
-                <span className="text-[10px] bg-emerald-500 text-white font-black px-1.5 rounded-full">
+                <Badge variant="default" className="text-[10px] font-bold px-1.5 py-0 h-4 rounded-full ml-0.5">
                   {activeTripsCount}
-                </span>
+                </Badge>
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
+              variant={currentTab === 'profile' ? 'default' : 'ghost'}
+              size="sm"
               onClick={() => onTabSelect('profile')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer tap-bounce ${
-                currentTab === 'profile' ? 'shadow-xs' : 'hover:opacity-80'
-              }`}
-              style={{
-                backgroundColor: currentTab === 'profile' ? 'var(--tw-accent)' : 'transparent',
-                color: currentTab === 'profile' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-              }}
-              type="button"
+              className="rounded-xl gap-1.5 text-xs font-semibold h-8 px-3.5 cursor-pointer"
             >
-              <span>👤</span>
+              <User className="w-3.5 h-3.5" />
               <span>Profil</span>
-            </button>
+            </Button>
           </nav>
         )}
 
@@ -224,132 +152,89 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Desktop Admin Portal Quick Link */}
           {onOpenAdmin && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onOpenAdmin}
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all tap-bounce cursor-pointer"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)',
-                color: 'var(--tw-accent)'
-              }}
+              className="hidden lg:flex items-center gap-1.5 rounded-xl text-xs font-semibold h-8 px-2.5 cursor-pointer"
               title="Boshqaruv tizimiga o'tish (Admin Portal)"
-              type="button"
             >
-              <span>🛡️</span>
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               <span>Admin Portal</span>
-            </button>
+            </Button>
           )}
 
           {/* Light / Dark Mode Toggle */}
           {onToggleTheme && (
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               id="btn-header-theme-toggle"
               aria-label={themeMode === 'light' ? "Tungi rejimga o'tish" : "Kungi rejimga o'tish"}
               title={themeMode === 'light' ? "Tungi rejim (Dark Mode)" : "Kungi rejim (Light Mode)"}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center tap-bounce transition border shadow-xs cursor-pointer"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)',
-                color: 'var(--tw-text-main)'
-              }}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl cursor-pointer"
               onClick={onToggleTheme}
-              type="button"
             >
-              <span className="text-sm">{themeMode === 'light' ? '🌙' : '☀️'}</span>
-            </button>
+              {themeMode === 'light' ? (
+                <Moon className="w-4 h-4 text-foreground" />
+              ) : (
+                <Sun className="w-4 h-4 text-amber-400" />
+              )}
+            </Button>
           )}
 
           {/* QR Passport Scanner */}
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             id="btn-header-qr"
             aria-label="QR kod"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center tap-bounce transition border cursor-pointer"
-            style={{
-              backgroundColor: 'var(--tw-subtle)',
-              borderColor: 'var(--tw-border)',
-              color: 'var(--tw-text-sub)'
-            }}
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl cursor-pointer text-muted-foreground hover:text-foreground"
             onClick={onOpenQr}
-            type="button"
             title="QR Identifikator"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <rect height="6" rx="1" width="6" x="3" y="3"></rect>
-              <rect height="6" rx="1" width="6" x="15" y="3"></rect>
-              <rect height="6" rx="1" width="6" x="15" y="15"></rect>
-              <rect height="6" rx="1" width="6" x="3" y="15"></rect>
-              <path d="M7 7h.01M19 7h.01M7 19h.01M17 19h.01"></path>
-            </svg>
-          </button>
+            <QrCode className="w-4 h-4" />
+          </Button>
 
           {/* Notification Bell */}
           <div className="relative">
-            <button
+            <Button
+              variant="outline"
+              size="icon"
               id="btn-header-notifs"
               aria-label="Bildirishnomalar"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center tap-bounce transition border cursor-pointer"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)',
-                color: 'var(--tw-text-sub)'
-              }}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl cursor-pointer text-muted-foreground hover:text-foreground"
               onClick={onToggleNotifs}
-              type="button"
               title="Bildirishnomalar"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                <path
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                ></path>
-              </svg>
-            </button>
+              <Bell className="w-4 h-4" />
+            </Button>
             {hasUnreadNotifs && (
               <span
-                className="absolute top-1 right-1 w-2 h-2 rounded-full border"
-                style={{
-                  backgroundColor: 'var(--tw-accent)',
-                  borderColor: 'var(--tw-surface)'
-                }}
                 id="notif-badge"
-              ></span>
+                className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary ring-2 ring-background pointer-events-none"
+              />
             )}
           </div>
 
           {/* User Avatar & Name Quick Action */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             id="btn-header-avatar"
-            className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-2xl border transition-all tap-bounce cursor-pointer shadow-2xs"
-            style={{
-              backgroundColor: 'var(--tw-subtle)',
-              borderColor: 'var(--tw-border)'
-            }}
+            className="h-8 sm:h-9 rounded-xl pl-1 pr-2.5 gap-2 cursor-pointer shadow-2xs"
             onClick={onAvatarClick}
-            type="button"
             title="Foydalanuvchi profili va sozlamalar"
           >
-            <div
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl p-[1.5px] shadow-xs shrink-0"
-              style={{ backgroundColor: 'var(--tw-accent)' }}
-            >
-              <div
-                className="w-full h-full rounded-[10px] flex items-center justify-center text-[11px] font-black"
-                style={{
-                  backgroundColor: 'var(--tw-surface)',
-                  color: 'var(--tw-accent)'
-                }}
-              >
+            <Avatar className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg">
+              <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold text-[11px]">
                 {userInitials}
-              </div>
-            </div>
-            <span
-              className="hidden sm:inline-block text-xs font-bold max-w-[100px] truncate"
-              style={{ color: 'var(--tw-text-main)' }}
-            >
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden sm:inline-block text-xs font-semibold max-w-[100px] truncate text-foreground">
               {userName}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
     </header>

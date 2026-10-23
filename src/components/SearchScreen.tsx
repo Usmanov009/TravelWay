@@ -9,6 +9,10 @@ import { HotelsOnlyView } from './HotelsOnlyView';
 import { ServiceModals } from './ServiceModals';
 import { CountrySelectCombobox } from './CountrySelectCombobox';
 import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from '../data/extraServicesData';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface SearchScreenProps {
   tours: TourPackage[];
@@ -571,231 +575,144 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   return (
     <div className="space-y-3.5 pb-24 select-none font-sans">
       {/* 1. SAYRHUB OFFICIAL HEADER BAR */}
-      <div
-        className="rounded-3xl p-3.5 border transition-colors"
-        style={{
-          backgroundColor: 'var(--tw-surface)',
-          borderColor: 'var(--tw-border)',
-          boxShadow: 'var(--tw-card-shadow)'
-        }}
-      >
-        <div
-          className="flex items-center justify-between gap-2 border-b pb-2.5"
-          style={{ borderColor: 'var(--tw-border)' }}
-        >
+      <Card className="rounded-2xl p-4 border-border bg-card shadow-xs transition-colors">
+        <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm shadow-xs transition-colors"
-              style={{
-                backgroundColor: 'var(--tw-accent)',
-                color: 'var(--tw-accent-contrast)'
-              }}
-            >
+            <div className="w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
               ✈️
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span
-                  className="font-black text-xs uppercase tracking-wider"
-                  style={{ color: 'var(--tw-text-main)' }}
-                >
-                  SAYRHUB
+                <span className="font-bold text-xs uppercase tracking-wider text-foreground">
+                  SayrHub
                 </span>
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 rounded border"
-                  style={{
-                    backgroundColor: 'var(--tw-accent-light)',
-                    color: 'var(--tw-accent)',
-                    borderColor: 'var(--tw-accent-border)'
-                  }}
-                >
-                  ONLAYN QIDIRUV
-                </span>
+                <Badge variant="secondary" className="text-[9px] font-bold px-1.5 py-0 h-4 uppercase">
+                  Onlayn Qidiruv
+                </Badge>
               </div>
-              <p
-                className="text-[10px] truncate"
-                style={{ color: 'var(--tw-text-sub)' }}
-              >
+              <p className="text-[11px] text-muted-foreground truncate">
                 Arzon turpaketlar, charter reyslar & narx signallari
               </p>
             </div>
           </div>
 
           {/* Currency Switcher */}
-          <div
-            className="flex items-center gap-1 p-1 rounded-xl border shrink-0 transition-colors"
-            style={{
-              backgroundColor: 'var(--tw-subtle)',
-              borderColor: 'var(--tw-border)'
-            }}
-          >
+          <div className="flex items-center gap-1 p-1 rounded-xl border border-border bg-muted/60 shrink-0">
             {(['USD', 'EUR', 'UZS'] as const).map((curr) => (
-              <button
+              <Button
                 key={curr}
                 type="button"
+                variant={currency === curr ? 'default' : 'ghost'}
+                size="xs"
                 onClick={() => setCurrency(curr)}
-                className={`px-2 py-1 rounded-lg text-[10px] font-extrabold transition tap-bounce ${
-                  currency === curr ? 'shadow-xs' : 'hover:opacity-80'
-                }`}
-                style={{
-                  backgroundColor: currency === curr ? 'var(--tw-accent)' : 'transparent',
-                  color: currency === curr ? 'var(--tw-accent-contrast)' : 'var(--tw-text-muted)'
-                }}
+                className="h-6 px-2 text-[10px] font-bold rounded-lg"
               >
                 {curr === 'USD' ? '$' : curr === 'EUR' ? '€' : "so'm"}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Live Info and Alerts */}
-        <div className="flex items-center justify-between pt-2.5">
+        <div className="flex items-center justify-between pt-3">
           <div className="flex items-center gap-2">
-            <span
-              className="text-xs font-bold"
-              style={{ color: 'var(--tw-text-main)' }}
-            >
+            <span className="text-xs font-bold text-foreground">
               {displayTours.length} ta mavjud turpaket
             </span>
-            <span
-              className="text-[10px]"
-              style={{ color: 'var(--tw-text-sub)' }}
-            >
+            <span className="text-xs text-muted-foreground">
               ({departureCity})
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <button
+            <Button
               type="button"
               id="btn-open-google-tour-map"
+              variant="outline"
+              size="sm"
               onClick={() => setIsMapModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl border text-xs font-bold tap-bounce shadow-xs transition"
-              style={{
-                backgroundColor: 'var(--tw-accent-light)',
-                borderColor: 'var(--tw-accent)',
-                color: 'var(--tw-accent)'
-              }}
+              className="h-8 px-2.5 text-xs font-semibold rounded-xl text-primary gap-1"
               title="Mehmonxonalarni Google Xaritasida ko'rish"
             >
               <span>🗺️</span>
-              <span className="text-[10px]">Xarita</span>
-            </button>
+              <span className="text-[11px]">Xarita</span>
+            </Button>
 
             {priceAlerts && priceAlerts.length > 0 && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => setIsActiveAlertsModalOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-xl border text-xs font-bold tap-bounce"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-accent)'
-                }}
+                className="h-8 px-2.5 text-xs font-semibold rounded-xl gap-1 text-foreground"
                 title="Mening narx signallarim"
               >
                 <span>🔔</span>
-                <span
-                  className="w-4 h-4 rounded-full text-[10px] font-black flex items-center justify-center"
-                  style={{
-                    backgroundColor: 'var(--tw-accent)',
-                    color: 'var(--tw-accent-contrast)'
-                  }}
-                >
+                <Badge variant="default" className="w-4 h-4 p-0 text-[10px] font-bold flex items-center justify-center rounded-full">
                   {priceAlerts.length}
-                </span>
-                <span className="text-[10px] hidden sm:inline">Signallar</span>
-              </button>
+                </Badge>
+                <span className="text-[11px] hidden sm:inline">Signallar</span>
+              </Button>
             )}
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setIsFormCollapsed(!isFormCollapsed)}
-              className="px-2 py-1 rounded-xl border text-xs font-semibold tap-bounce flex items-center gap-1 transition-colors"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)',
-                color: 'var(--tw-text-main)'
-              }}
+              className="h-8 px-2.5 text-xs font-semibold rounded-xl"
             >
               <span>{isFormCollapsed ? 'Filtrni ochish ▾' : 'Yig‘ish ▴'}</span>
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* SERVICE MODE TABS: Turpaketlar | Combo Turlar | Aviabiletlar | Mehmonxonalar */}
-      <div
-        className="grid grid-cols-4 gap-1 p-1 rounded-2xl border"
-        style={{
-          backgroundColor: 'var(--tw-surface)',
-          borderColor: 'var(--tw-border)',
-          boxShadow: 'var(--tw-card-shadow)'
-        }}
-      >
-        <button
+      <div className="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl border border-border bg-muted/60 shadow-xs">
+        <Button
           type="button"
           id="tab-mode-tours"
+          variant={serviceMode === 'tours' ? 'default' : 'ghost'}
           onClick={() => setServiceMode('tours')}
-          className={`py-2 px-1 rounded-xl text-center font-black transition-all flex flex-col items-center gap-0.5 tap-bounce ${
-            serviceMode === 'tours' ? 'shadow-xs' : 'opacity-70 hover:opacity-100'
-          }`}
-          style={{
-            backgroundColor: serviceMode === 'tours' ? 'var(--tw-accent)' : 'transparent',
-            color: serviceMode === 'tours' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-          }}
+          className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
           <span className="text-sm">🏖️</span>
-          <span className="text-[10px] leading-tight font-extrabold">Turpaketlar</span>
-        </button>
+          <span className="text-[10px] leading-tight font-bold">Turpaketlar</span>
+        </Button>
 
-        <button
+        <Button
           type="button"
           id="tab-mode-combo"
+          variant={serviceMode === 'combo' ? 'default' : 'ghost'}
           onClick={() => setServiceMode('combo')}
-          className={`py-2 px-1 rounded-xl text-center font-black transition-all flex flex-col items-center gap-0.5 tap-bounce ${
-            serviceMode === 'combo' ? 'shadow-xs' : 'opacity-70 hover:opacity-100'
-          }`}
-          style={{
-            backgroundColor: serviceMode === 'combo' ? 'var(--tw-accent)' : 'transparent',
-            color: serviceMode === 'combo' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-          }}
+          className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
           <span className="text-sm">🔄</span>
-          <span className="text-[10px] leading-tight font-extrabold">Combo</span>
-        </button>
+          <span className="text-[10px] leading-tight font-bold">Combo</span>
+        </Button>
 
-        <button
+        <Button
           type="button"
           id="tab-mode-flights"
+          variant={serviceMode === 'flights' ? 'default' : 'ghost'}
           onClick={() => setServiceMode('flights')}
-          className={`py-2 px-1 rounded-xl text-center font-black transition-all flex flex-col items-center gap-0.5 tap-bounce ${
-            serviceMode === 'flights' ? 'shadow-xs' : 'opacity-70 hover:opacity-100'
-          }`}
-          style={{
-            backgroundColor: serviceMode === 'flights' ? 'var(--tw-accent)' : 'transparent',
-            color: serviceMode === 'flights' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-          }}
+          className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
           <span className="text-sm">✈️</span>
-          <span className="text-[10px] leading-tight font-extrabold">Biletlar</span>
-        </button>
+          <span className="text-[10px] leading-tight font-bold">Biletlar</span>
+        </Button>
 
-        <button
+        <Button
           type="button"
           id="tab-mode-hotels"
+          variant={serviceMode === 'hotels' ? 'default' : 'ghost'}
           onClick={() => setServiceMode('hotels')}
-          className={`py-2 px-1 rounded-xl text-center font-black transition-all flex flex-col items-center gap-0.5 tap-bounce ${
-            serviceMode === 'hotels' ? 'shadow-xs' : 'opacity-70 hover:opacity-100'
-          }`}
-          style={{
-            backgroundColor: serviceMode === 'hotels' ? 'var(--tw-accent)' : 'transparent',
-            color: serviceMode === 'hotels' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
-          }}
+          className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
           <span className="text-sm">🏨</span>
-          <span className="text-[10px] leading-tight font-extrabold">Mehmonxona</span>
-        </button>
+          <span className="text-[10px] leading-tight font-bold">Mehmonxona</span>
+        </Button>
       </div>
 
       {/* RENDER ACTIVE MODE */}
@@ -1459,203 +1376,160 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             const activeAlert = priceAlerts.find((a) => a.tourId === tour.id);
 
             return (
-              <div
+              <Card
                 key={tour.id}
-                className="rounded-2xl overflow-hidden border transition-colors shadow-sm"
-                style={{
-                  backgroundColor: 'var(--tw-surface)',
-                  borderColor: 'var(--tw-border)',
-                  boxShadow: 'var(--tw-card-shadow)'
-                }}
+                className="rounded-2xl overflow-hidden border-border bg-card shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
-                {/* Image Banner */}
-                <div className="relative h-36 w-full bg-slate-200">
-                  <img src={tour.img} alt={tour.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30"></div>
+                <div>
+                  {/* Image Banner */}
+                  <div className="relative h-40 w-full bg-muted">
+                    <img src={tour.img} alt={tour.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
 
-                  {/* Badges */}
-                  <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap max-w-[230px]">
-                    <span
-                      className="text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs"
-                      style={{
-                        backgroundColor: 'var(--tw-accent)',
-                        color: 'var(--tw-accent-contrast)'
+                    {/* Badges */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap max-w-[230px]">
+                      <Badge variant="default" className="text-[9px] font-extrabold px-2 py-0.5 uppercase tracking-wider shadow-xs">
+                        {tour.mealType || tour.tag}
+                      </Badge>
+                      <Badge variant="outline" className="bg-black/60 backdrop-blur-md text-emerald-300 text-[9px] font-mono font-bold px-2 py-0.5 border-emerald-500/30">
+                        {tour.kompasTourCode || 'TW-UZ'}
+                      </Badge>
+                      {tour.isLiveKompas && (
+                        <Badge variant="secondary" className="bg-emerald-600 text-white text-[8px] font-black px-2 py-0.5 flex items-center gap-1 shadow-xs border border-white/20">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          <span>Jonli 1:1 Narx</span>
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Price Alert Bell */}
+                    <button
+                      id={`btn-price-alert-${tour.id}`}
+                      className={`absolute top-2.5 right-11 h-7 px-2 rounded-full backdrop-blur-md flex items-center gap-1 tap-bounce transition border text-xs cursor-pointer ${
+                        activeAlert
+                          ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow-lg shadow-amber-500/40 animate-pulse'
+                          : 'bg-black/50 hover:bg-black/75 text-white/90 border-white/20'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedAlertTour(tour);
                       }}
+                      type="button"
+                      title={activeAlert ? `Narx signali: < $${activeAlert.targetPrice}` : "Narx tushishiga signal o'rnatish"}
                     >
-                      {tour.mealType || tour.tag}
-                    </span>
-                    <span className="bg-black/60 backdrop-blur-md text-emerald-300 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                      {tour.kompasTourCode || 'TW-UZ'}
-                    </span>
-                    {tour.isLiveKompas && (
-                      <span className="bg-emerald-600/95 text-white text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs border border-white/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                        <span>Jonli 1:1 Narx</span>
+                      <span className="text-xs">🔔</span>
+                      {activeAlert ? (
+                        <span className="text-[10px] font-black font-mono leading-none">&lt;${activeAlert.targetPrice}</span>
+                      ) : (
+                        <span className="text-[9px] font-semibold hidden sm:inline">Signal</span>
+                      )}
+                    </button>
+
+                    {/* Favorite button */}
+                    <button
+                      className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white tap-bounce cursor-pointer"
+                      onClick={(e) => onToggleSave(tour.id, e)}
+                      type="button"
+                    >
+                      {tour.saved ? '❤️' : '🤍'}
+                    </button>
+
+                    {/* Rating & Nights on banner */}
+                    <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-amber-300 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md flex items-center gap-1">
+                        ★ {tour.rating} ({tour.hotelStars || '5★'})
                       </span>
-                    )}
+                      <span className="text-[10px] text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md">
+                        🌙 {tour.nights}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Price Alert Bell */}
-                  <button
-                    id={`btn-price-alert-${tour.id}`}
-                    className={`absolute top-2.5 right-11 h-7 px-2 rounded-full backdrop-blur-md flex items-center gap-1 tap-bounce transition border text-xs ${
-                      activeAlert
-                        ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow-lg shadow-amber-500/40 animate-pulse'
-                        : 'bg-black/50 hover:bg-black/75 text-white/90 border-white/20'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedAlertTour(tour);
-                    }}
-                    type="button"
-                    title={activeAlert ? `Narx signali: < $${activeAlert.targetPrice}` : "Narx tushishiga signal o'rnatish"}
-                  >
-                    <span className="text-xs">🔔</span>
-                    {activeAlert ? (
-                      <span className="text-[10px] font-black font-mono leading-none">&lt;${activeAlert.targetPrice}</span>
-                    ) : (
-                      <span className="text-[9px] font-semibold hidden sm:inline">Signal</span>
-                    )}
-                  </button>
+                  {/* Card Body */}
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="text-sm font-bold leading-tight text-foreground">
+                          {tour.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          📍 {tour.location}
+                        </p>
+                        {tour.roomType && (
+                          <p className="text-xs font-semibold text-primary mt-0.5">
+                            🛏 {tour.roomType}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        {tour.oldPrice && (
+                          <span className="text-xs line-through text-muted-foreground mr-1">
+                            {formatPrice(tour.oldPrice)}
+                          </span>
+                        )}
+                        <p className="text-lg font-black text-primary leading-none">
+                          {formatPrice(tour.price)}
+                        </p>
+                        <span className="text-[10px] block mt-0.5 font-medium text-muted-foreground">
+                          {tour.isLiveKompas
+                            ? (adultsCount > 1 
+                                ? `${formatPrice(Math.round(tour.price / adultsCount))} / kishi (${totalTravelers} kishi jami)`
+                                : "1 kishi uchun to'liq narx")
+                            : (totalTravelers > 1
+                                ? `${formatPrice(tour.price * totalTravelers)} jami (${totalTravelers} kishi)`
+                                : "1 kishi uchun to'liq narx")}
+                        </span>
+                      </div>
+                    </div>
 
-                  {/* Favorite button */}
-                  <button
-                    className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white tap-bounce"
-                    onClick={(e) => onToggleSave(tour.id, e)}
-                    type="button"
-                  >
-                    {tour.saved ? '❤️' : '🤍'}
-                  </button>
-
-                  {/* Rating & Nights on banner */}
-                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-amber-300 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md flex items-center gap-1">
-                      ★ {tour.rating} ({tour.hotelStars || '5★'})
-                    </span>
-                    <span className="text-[10px] text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                      🌙 {tour.nights}
-                    </span>
+                    {/* Flight & Inclusions bar */}
+                    <div className="p-2.5 rounded-xl border border-border bg-muted/40 flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5 truncate max-w-[210px]">
+                        <span>✈️</span>
+                        <span className="truncate font-medium">{tour.flight}</span>
+                      </div>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">Transfer ✓ Sug'urta ✓</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-3.5 space-y-2.5">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4
-                        className="text-xs font-extrabold leading-tight"
-                        style={{ color: 'var(--tw-text-main)' }}
-                      >
-                        {tour.title}
-                      </h4>
-                      <p
-                        className="text-[10px] mt-0.5"
-                        style={{ color: 'var(--tw-text-sub)' }}
-                      >
-                        📍 {tour.location}
-                      </p>
-                      {tour.roomType && (
-                        <p
-                          className="text-[10px] font-medium mt-0.5"
-                          style={{ color: 'var(--tw-accent)' }}
-                        >
-                          🛏 {tour.roomType}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      {tour.oldPrice && (
-                        <span
-                          className="text-[10px] line-through mr-1"
-                          style={{ color: 'var(--tw-text-muted)' }}
-                        >
-                          {formatPrice(tour.oldPrice)}
-                        </span>
-                      )}
-                      <p
-                        className="text-base font-black leading-none"
-                        style={{ color: 'var(--tw-accent)' }}
-                      >
-                        {formatPrice(tour.price)}
-                      </p>
-                      <span
-                        className="text-[8px] block mt-0.5 font-medium"
-                        style={{ color: 'var(--tw-text-sub)' }}
-                      >
-                        {tour.isLiveKompas
-                          ? (adultsCount > 1 
-                              ? `${formatPrice(Math.round(tour.price / adultsCount))} / kishi (${totalTravelers} kishi jami)`
-                              : "1 kishi uchun to'liq narx")
-                          : (totalTravelers > 1
-                              ? `${formatPrice(tour.price * totalTravelers)} jami (${totalTravelers} kishi)`
-                              : "1 kishi uchun to'liq narx")}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Flight & Inclusions bar */}
-                  <div
-                    className="p-2.5 rounded-xl border flex items-center justify-between text-[10px] transition-colors"
-                    style={{
-                      backgroundColor: 'var(--tw-subtle)',
-                      borderColor: 'var(--tw-border)',
-                      color: 'var(--tw-text-sub)'
-                    }}
-                  >
-                    <div className="flex items-center gap-1.5 truncate max-w-[210px]">
-                      <span>✈️</span>
-                      <span className="truncate font-medium">{tour.flight}</span>
-                    </div>
-                    <span className="text-emerald-600 font-semibold shrink-0">Transfer ✓ Sug'urta ✓</span>
-                  </div>
-
-                  {/* Action Buttons (NO BOOKING FLOW!) */}
-                  <div className="flex items-center gap-2 pt-0.5">
-                    {tour.kompasOnlineUrl && (
-                      <a
-                        href={tour.kompasOnlineUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center tap-bounce shadow-xs"
-                        style={{
-                          backgroundColor: 'var(--tw-subtle)',
-                          borderColor: 'var(--tw-border)',
-                          color: 'var(--tw-text-main)'
-                        }}
-                        title="Rasmiy tizimda ochish"
-                      >
+                {/* Action Buttons */}
+                <div className="p-4 pt-0 flex items-center gap-2">
+                  {tour.kompasOnlineUrl && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="h-9 px-2.5 rounded-xl"
+                      title="Rasmiy tizimda ochish"
+                    >
+                      <a href={tour.kompasOnlineUrl} target="_blank" rel="noreferrer">
                         🌐
                       </a>
-                    )}
+                    </Button>
+                  )}
 
-                    <button
-                      className="flex-1 py-2.5 text-xs font-bold rounded-xl tap-bounce transition border"
-                      style={{
-                        backgroundColor: 'var(--tw-subtle)',
-                        borderColor: 'var(--tw-border)',
-                        color: 'var(--tw-text-main)'
-                      }}
-                      onClick={() => onOpenTourDetails(tour)}
-                      type="button"
-                    >
-                      Batafsil ma'lumot
-                    </button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 rounded-xl text-xs font-semibold h-9"
+                    onClick={() => onOpenTourDetails(tour)}
+                    type="button"
+                  >
+                    Batafsil
+                  </Button>
 
-                    <button
-                      className="px-4 py-2.5 text-xs font-black rounded-xl tap-bounce shadow-md flex items-center gap-1.5 transition"
-                      style={{
-                        backgroundColor: 'var(--tw-accent)',
-                        color: 'var(--tw-accent-contrast)'
-                      }}
-                      onClick={() => onQuickBook(tour, totalTravelers, adultsCount, childrenCount)}
-                      type="button"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                      <span>Bron qilish</span>
-                    </button>
-                  </div>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="px-4 text-xs font-bold rounded-xl h-9 gap-1.5"
+                    onClick={() => onQuickBook(tour, totalTravelers, adultsCount, childrenCount)}
+                    type="button"
+                  >
+                    <span>Bron qilish</span>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>

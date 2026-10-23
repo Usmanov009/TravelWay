@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+  Send,
+  X,
+  Check,
+  Phone,
+  User,
+  FileText,
+  Sparkles,
+  ArrowRight,
+  ExternalLink
+} from 'lucide-react';
 
 interface TelegramAuthModalProps {
   isOpen: boolean;
@@ -35,7 +50,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
   const [codeDigits, setCodeDigits] = useState<string[]>(['', '', '', '']);
   const pollIntervalRef = useRef<any>(null);
 
-  // Format phone display nicely: +998 (90) 123-45-67
   const formatPhoneDisplay = (phone: string) => {
     if (!phone) return '+998 (**) ***-**-**';
     const clean = phone.trim();
@@ -46,7 +60,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
     return clean.startsWith('+') ? clean : `+${clean}`;
   };
 
-  // Initialize session whenever modal opens
   useEffect(() => {
     if (!isOpen) {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
@@ -69,13 +82,14 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
           setSessionToken(data.sessionToken);
           setDeepLink(data.deepLink);
           if (data.botUsername) setBotUsername(data.botUsername);
-
-          // Start polling check-session
           startPolling(data.sessionToken);
+        } else {
+          onShowToast("Telegram sessiya yaratishda xatolik yuz berdi", 'error');
         }
       })
       .catch((err) => {
-        console.warn('Failed to create Telegram auth session:', err);
+        console.warn('Telegram session error:', err);
+        onShowToast("Server bilan ulanishda xatolik", 'error');
       })
       .finally(() => {
         setIsLoadingLoadingSession(false);
@@ -91,9 +105,10 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
 
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/auth/telegram/check-session?sessionToken=${token}`);
+        const res = await fetch(`/api/auth/telegram/check-session?token=${token}`);
         const data = await res.json();
-        if (data.authenticated && data.user) {
+
+        if (data.success && data.status === 'verified' && data.user) {
           clearInterval(pollIntervalRef.current);
           if (data.token) {
             try {
@@ -103,8 +118,8 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
           }
           handleAuthVerified(data.user);
         }
-      } catch (err) {
-        // Silent poll error
+      } catch (e) {
+        console.warn('Poll error:', e);
       }
     }, 2000);
   };
@@ -113,10 +128,9 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
     setVerifiedUserData(userData);
     setIsSuccess(true);
 
-    // Extract first and last name if available
-    const rawName = (userData.name || '').trim();
     let fn = '';
     let ln = '';
+    const rawName = (userData.name || '').trim();
     if (
       rawName &&
       !rawName.toLowerCase().includes('mijoz') &&
@@ -138,7 +152,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
 
     onShowToast(`Telegram orqali tasdiqlandi! Shaxsiy ma'lumotlarni to'ldiring.`, 'success');
 
-    // Switch to Profile Completion Step
     setTimeout(() => {
       setStep('profile');
       setIsSuccess(false);
@@ -221,49 +234,30 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
 
     const trimmedFirst = firstName.trim();
     const trimmedLast = lastName.trim();
-    const cleanPassport = passportSeries.trim().toUpperCase();
+    const trimmedPassport = passportSeries.trim();
 
-    if (!trimmedFirst || trimmedFirst.length < 2) {
-      onShowToast("Iltimos, ismingizni to'liq kiriting", 'error');
+    if (!trimmedFirst || !trimmedLast) {
+      onShowToast("Iltimos, ism va familiyangizni to'liq kiriting", 'error');
       return;
     }
 
-    if (!trimmedLast || trimmedLast.length < 2) {
-      onShowToast("Iltimos, familiyangizni to'liq kiriting", 'error');
-      return;
-    }
-
-    const passportLettersOnly = cleanPassport.replace(/[^A-Z]/g, '');
-    const passportDigitsOnly = cleanPassport.replace(/[^0-9]/g, '');
-
-    if (passportLettersOnly.length < 2 || passportDigitsOnly.length < 7) {
-      onShowToast("Iltimos, pasport seriya va raqamini to'g'ri kiriting (Masalan: AA 1234567)", 'error');
+    if (!trimmedPassport || trimmedPassport.length < 9) {
+      onShowToast("Pasport seriya va raqamini to'liq kiriting (masalan, AA 1234567)", 'error');
       return;
     }
 
     setIsSubmittingProfile(true);
 
-    const fullName = `${trimmedFirst} ${trimmedLast}`;
     const completeUser = {
       ...verifiedUserData,
-      name: fullName,
-      phone: verifiedUserData?.phone || '',
-      passportNumber: cleanPassport,
-      passportExpiry: passportExpiry.trim() || '2034-12-31',
-      isVerified: true
+      name: `${trimmedFirst} ${trimmedLast}`,
+      passportNumber: trimmedPassport,
+      passportExpiry: passportExpiry || '2034-12-31'
     };
 
-    // Save to Backend Database
     try {
-      let token = '';
-      try {
-        token =
-          sessionStorage.getItem('sayrhub_user_token') ||
-          sessionStorage.getItem('travelway_user_token') ||
-          '';
-      } catch (e) {}
-
-      await fetch('/api/db/users', {
+      const token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token');
+      await fetch('/api/auth/telegram/update-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -275,7 +269,6 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
       console.warn('Backend user profile update warning:', err);
     }
 
-    // Persist to Local Storage
     try {
       localStorage.setItem('sayrhub_user_profile', JSON.stringify(completeUser));
       localStorage.setItem('travelway_user_profile', JSON.stringify(completeUser));
@@ -290,127 +283,109 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 select-none animate-fadeIn">
-      <div
-        className="w-full max-w-md rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl border flex flex-col space-y-4 max-h-[92vh] overflow-y-auto"
-        style={{
-          backgroundColor: 'var(--tw-surface)',
-          borderColor: 'var(--tw-border)',
-          color: 'var(--tw-text-main)'
-        }}
-      >
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 select-none animate-fadeIn">
+      <Card className="w-full max-w-md rounded-t-[28px] sm:rounded-2xl p-6 shadow-2xl border-border bg-card text-card-foreground flex flex-col space-y-4 max-h-[92vh] overflow-y-auto no-scrollbar">
         {/* ================= STEP 1: TELEGRAM BOT AUTH ================= */}
         {step === 'auth' && (
           <>
             {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#2AABEE] text-white flex items-center justify-center shadow-lg shadow-[#2AABEE]/25">
-                  <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
-                  </svg>
+                <div className="w-11 h-11 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-md">
+                  <Send className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-base font-black tracking-tight" style={{ color: 'var(--tw-text-main)' }}>
+                    <h3 className="text-base font-bold text-foreground">
                       Telegram orqali kirish
                     </h3>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#2AABEE]/15 text-[#2AABEE]">
+                    <Badge variant="secondary" className="text-[10px] text-sky-600 bg-sky-500/10">
                       Rasmiy Bot
-                    </span>
+                    </Badge>
                   </div>
-                  <p className="text-xs font-semibold" style={{ color: 'var(--tw-text-sub)' }}>
+                  <p className="text-xs text-muted-foreground">
                     @{botUsername} orqali 1 soniyada
                   </p>
                 </div>
               </div>
 
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onClose}
-                className="w-8 h-8 rounded-full border flex items-center justify-center text-sm font-bold transition active:scale-95"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-text-main)'
-                }}
+                className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground"
               >
-                ✕
-              </button>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
 
             {/* Success Banner */}
             {isSuccess ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2 animate-bounce">
-                <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
+              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
+                <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                   ✓
                 </div>
-                <h4 className="font-bold text-emerald-400 text-sm">Muvaffaqiyatli Tasdiqlandi!</h4>
-                <p className="text-xs text-slate-300">Profil ma'lumotlarini to'ldirishga o'tilmoqda...</p>
+                <h4 className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">Muvaffaqiyatli Tasdiqlandi!</h4>
+                <p className="text-xs text-muted-foreground">Profil ma'lumotlarini to'ldirishga o'tilmoqda...</p>
               </div>
             ) : (
               <>
                 {/* Steps Visual Guide */}
-                <div
-                  className="p-4 rounded-2xl border space-y-3"
-                  style={{
-                    backgroundColor: 'var(--tw-canvas)',
-                    borderColor: 'var(--tw-border)'
-                  }}
-                >
+                <div className="p-4 rounded-xl border border-border bg-muted/40 space-y-3">
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#2AABEE] text-white flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                    <Badge variant="default" className="w-5 h-5 p-0 flex items-center justify-center rounded-full text-xs font-bold shrink-0 mt-0.5">
                       1
-                    </span>
-                    <p className="text-xs" style={{ color: 'var(--tw-text-main)' }}>
+                    </Badge>
+                    <p className="text-xs text-foreground">
                       Quyidagi tugmani bosib, Telegramdagi <b>@{botUsername}</b> botimizni oching.
                     </p>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#2AABEE] text-white flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                    <Badge variant="default" className="w-5 h-5 p-0 flex items-center justify-center rounded-full text-xs font-bold shrink-0 mt-0.5">
                       2
-                    </span>
-                    <p className="text-xs" style={{ color: 'var(--tw-text-main)' }}>
-                      Botda <b>Start</b> bosib, <b>"📱 Telefon raqamni ulashish"</b> tugmasini bosing.
+                    </Badge>
+                    <p className="text-xs text-foreground">
+                      Botda <b>Start</b> bosib, <b>"Telefon raqamni ulashish"</b> tugmasini bosing.
                     </p>
                   </div>
 
                   <div className="flex items-start gap-2.5">
-                    <span className="w-5 h-5 rounded-full bg-[#2AABEE] text-white flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                    <Badge variant="default" className="w-5 h-5 p-0 flex items-center justify-center rounded-full text-xs font-bold shrink-0 mt-0.5">
                       3
-                    </span>
-                    <p className="text-xs" style={{ color: 'var(--tw-text-main)' }}>
-                      Bot bergan 4 xonali tasdiqlash kodini kiriting <i>(yoki botda tasdiqlangach, avtomatik ochiladi)</i>.
+                    </Badge>
+                    <p className="text-xs text-foreground">
+                      Bot bergan 4 xonali kodni kiriting yoki botda tasdiqlangach avtomatik ochiladi.
                     </p>
                   </div>
                 </div>
 
                 {/* Direct Open Button */}
-                <a
-                  href={deepLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3.5 px-4 rounded-2xl bg-[#2AABEE] hover:bg-[#229ED9] text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#2AABEE]/30 active:scale-98 transition tap-bounce"
+                <Button
+                  variant="default"
+                  size="lg"
+                  asChild
+                  className="w-full rounded-xl h-12 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs gap-2"
                 >
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
-                  </svg>
-                  <span>Telegram Botni Ochish (@{botUsername})</span>
-                </a>
+                  <a href={deepLink} target="_blank" rel="noopener noreferrer">
+                    <Send className="w-4 h-4" />
+                    <span>Telegram Botni Ochish (@{botUsername})</span>
+                  </a>
+                </Button>
 
                 {/* Waiting indicator */}
-                <div className="flex items-center justify-center gap-2 text-xs font-semibold py-1 text-[#2AABEE]">
-                  <span className="w-2 h-2 rounded-full bg-[#2AABEE] animate-ping" />
+                <div className="flex items-center justify-center gap-2 text-xs font-medium py-1 text-sky-500">
+                  <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
                   <span>Telegram botdan tasdiqlash kutilmoqda...</span>
                 </div>
 
                 {/* Manual Code Input Divider */}
                 <div className="relative flex py-1 items-center">
-                  <div className="flex-grow border-t" style={{ borderColor: 'var(--tw-border)' }} />
-                  <span className="flex-shrink mx-3 text-[11px] font-bold" style={{ color: 'var(--tw-text-muted)' }}>
-                    YOKI KODNI KIRITING
+                  <div className="flex-grow border-t border-border" />
+                  <span className="flex-shrink mx-3 text-[10px] font-bold text-muted-foreground uppercase">
+                    Yoki kodni kiriting
                   </span>
-                  <div className="flex-grow border-t" style={{ borderColor: 'var(--tw-border)' }} />
+                  <div className="flex-grow border-t border-border" />
                 </div>
 
                 {/* 4-digit code fields */}
@@ -431,31 +406,20 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
                             if (prevInput) prevInput.focus();
                           }
                         }}
-                        className="w-13 h-14 text-center text-xl font-black rounded-2xl border focus:border-[#2AABEE] focus:ring-2 focus:ring-[#2AABEE]/30 focus:outline-none transition shadow-sm font-mono"
-                        style={{
-                          backgroundColor: 'var(--tw-canvas)',
-                          borderColor: digit ? '#2AABEE' : 'var(--tw-border)',
-                          color: 'var(--tw-text-main)'
-                        }}
+                        className="w-12 h-14 text-center text-xl font-black rounded-xl border border-input bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition font-mono"
                       />
                     ))}
                   </div>
 
-                  <button
+                  <Button
                     type="button"
+                    variant="default"
                     onClick={() => submitManualCode()}
                     disabled={isVerifying || codeDigits.join('').length < 4}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#2AABEE] to-blue-600 hover:from-[#229ED9] text-white font-bold text-xs shadow-md transition tap-bounce disabled:opacity-50 flex items-center justify-center gap-1.5"
+                    className="w-full h-10 rounded-xl text-xs font-bold"
                   >
-                    {isVerifying ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Tekshirilmoqda...</span>
-                      </>
-                    ) : (
-                      <span>Kodni Tasdiqlash</span>
-                    )}
-                  </button>
+                    {isVerifying ? 'Tekshirilmoqda...' : 'Kodni Tasdiqlash'}
+                  </Button>
                 </div>
               </>
             )}
@@ -468,171 +432,130 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
             {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                  <User className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black tracking-tight" style={{ color: 'var(--tw-text-main)' }}>
+                  <h3 className="text-base font-bold text-foreground">
                     Profilni to'ldirish
                   </h3>
-                  <p className="text-xs font-semibold" style={{ color: 'var(--tw-text-sub)' }}>
+                  <p className="text-xs text-muted-foreground">
                     Ism, familiya va pasport ma'lumotlari
                   </p>
                 </div>
               </div>
 
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onClose}
                 disabled={isSubmittingProfile}
-                className="w-8 h-8 rounded-full border flex items-center justify-center text-sm font-bold transition active:scale-95 disabled:opacity-50"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-text-main)'
-                }}
+                className="w-8 h-8 rounded-full text-muted-foreground hover:text-foreground"
               >
-                ✕
-              </button>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
 
             {/* Telegram Verified Status Badge */}
-            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-emerald-400 font-semibold">
-                <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
-                  ✓
-                </span>
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <Check className="w-4 h-4" />
                 <span>Telegram orqali tasdiqlandi</span>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+              <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
                 2-bosqich: Shaxsiy ma'lumot
-              </span>
+              </Badge>
             </div>
 
-            {/* 1. TELEFON RAQAM (KO'RINIB TURADI - READONLY) */}
-            <div>
-              <label className="text-[11px] font-bold block mb-1" style={{ color: 'var(--tw-text-sub)' }}>
-                📱 Tasdiqlangan telefon raqamingiz
+            {/* Phone */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-foreground">
+                Tasdiqlangan telefon raqamingiz
               </label>
-              <div
-                className="w-full px-3.5 py-2.5 rounded-xl border flex items-center justify-between font-mono text-xs font-bold select-text"
-                style={{
-                  backgroundColor: 'var(--tw-canvas)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-text-main)'
-                }}
-              >
+              <div className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/40 flex items-center justify-between font-mono text-xs font-bold">
                 <div className="flex items-center gap-2">
                   <span>🇺🇿</span>
-                  <span className="text-sm tracking-wide">
-                    {formatPhoneDisplay(verifiedUserData?.phone || '')}
-                  </span>
+                  <span>{formatPhoneDisplay(verifiedUserData?.phone || '')}</span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-500 flex items-center gap-1">
-                  <span>✓</span> Ulangan
-                </span>
+                <Badge variant="secondary" className="text-[10px] text-emerald-600 bg-emerald-500/10">
+                  ✓ Ulangan
+                </Badge>
               </div>
-              <p className="text-[10px] text-slate-400 mt-1">
-                * Bu raqam Telegram bot orqali rasman tasdiqlandi va o'zgartirilmaydi.
-              </p>
             </div>
 
-            {/* 2. ISM VA FAMILIYA QATORI */}
+            {/* First & Last Name */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[11px] font-bold block mb-1" style={{ color: 'var(--tw-text-sub)' }}>
-                  Ism <span className="text-rose-500">*</span>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Ism <span className="text-destructive">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Masalan: Jasur"
-                  className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#2AABEE] transition"
-                  style={{
-                    backgroundColor: 'var(--tw-canvas)',
-                    borderColor: 'var(--tw-border)',
-                    color: 'var(--tw-text-main)'
-                  }}
+                  className="h-10 text-xs rounded-xl"
                 />
               </div>
 
-              <div>
-                <label className="text-[11px] font-bold block mb-1" style={{ color: 'var(--tw-text-sub)' }}>
-                  Familiya <span className="text-rose-500">*</span>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-foreground">
+                  Familiya <span className="text-destructive">*</span>
                 </label>
-                <input
+                <Input
                   type="text"
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Masalan: Rahimov"
-                  className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#2AABEE] transition"
-                  style={{
-                    backgroundColor: 'var(--tw-canvas)',
-                    borderColor: 'var(--tw-border)',
-                    color: 'var(--tw-text-main)'
-                  }}
+                  className="h-10 text-xs rounded-xl"
                 />
               </div>
             </div>
 
-            {/* 3. PASPORT SERIYA VA RAQAMI */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[11px] font-bold" style={{ color: 'var(--tw-text-sub)' }}>
-                  🛂 Pasport seriya va raqami <span className="text-rose-500">*</span>
+            {/* Passport */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground">
+                  Pasport seriya va raqami <span className="text-destructive">*</span>
                 </label>
-                <span className="text-[10px] text-slate-400 font-mono">Namuna: AA 1234567</span>
+                <span className="text-[10px] text-muted-foreground font-mono">Namuna: AA 1234567</span>
               </div>
-              <input
+              <Input
                 type="text"
                 required
                 maxLength={10}
                 value={passportSeries}
                 onChange={(e) => handlePassportChange(e.target.value)}
                 placeholder="AA 1234567"
-                className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono font-bold tracking-wider uppercase focus:outline-none focus:ring-2 focus:ring-[#2AABEE] transition"
-                style={{
-                  backgroundColor: 'var(--tw-canvas)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-text-main)'
-                }}
+                className="h-10 text-xs font-mono font-bold tracking-wider uppercase rounded-xl"
               />
-              <p className="text-[10px] text-slate-400 mt-1">
+              <p className="text-[10px] text-muted-foreground mt-0.5">
                 Aviachipta, turpaket bron qilish va vaucherlar uchun kerak bo'ladi.
               </p>
             </div>
 
-            {/* Submit Button */}
-            <button
+            {/* Submit */}
+            <Button
               type="submit"
               disabled={isSubmittingProfile}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#2AABEE] to-blue-600 hover:from-[#229ED9] text-white font-black text-sm shadow-lg shadow-[#2AABEE]/30 active:scale-98 transition tap-bounce disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              variant="default"
+              size="lg"
+              className="w-full rounded-xl h-11 text-xs font-bold gap-2 mt-2"
             >
               {isSubmittingProfile ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Saqlanmoqda...</span>
-                </>
+                <span>Saqlanmoqda...</span>
               ) : (
                 <>
-                  <span>🚀</span>
                   <span>Saqlash va SayrHub'ga kirish</span>
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
         )}
-      </div>
+      </Card>
     </div>
   );
 };
