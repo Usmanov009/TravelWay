@@ -114,9 +114,9 @@ class TourDetailScreen extends StatelessWidget {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.bolt, color: AppTheme.accentGreen, size: 14),
+                              Icon(Icons.verified, color: AppTheme.accentGreen, size: 14),
                               SizedBox(width: 4),
-                              Text('Jonli Narx', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen, fontWeight: FontWeight.bold)),
+                              Text('Kafolatlangan narx', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),

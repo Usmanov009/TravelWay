@@ -193,7 +193,6 @@ export async function processTelegramUpdate(update: any) {
             telegramUsername: tgUsername
           },
           $setOnInsert: {
-            cashbackBalance: 30, // $30 registration bonus
             citizenship: "O'zbekiston"
           }
         },
@@ -206,8 +205,7 @@ export async function processTelegramUpdate(update: any) {
         name: fullName,
         phone: rawPhone,
         telegramId: String(user.id),
-        telegramUsername: tgUsername,
-        cashbackBalance: 30
+        telegramUsername: tgUsername
       };
     }
 
@@ -230,10 +228,9 @@ export async function processTelegramUpdate(update: any) {
 
     const successText = `✅ <b>Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!</b>\n\n` +
       `👤 <b>Ism:</b> ${fullName}\n` +
-      `📱 <b>Telefon:</b> ${rawPhone}\n` +
-      `🎁 <b>Bonus:</b> Hisobingizga $30 sayohat vaucheri berildi!\n\n` +
+      `📱 <b>Telefon:</b> ${rawPhone}\n\n` +
       `🔑 <b>Sizning tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
-      `<i>SayrHub ilovasida ushbu kodni kiriting yoki quyidagi tugma orqali bevosita kiring:</i>`;
+      `<i>SayrHub mobil ilovasida ushbu kodni kiriting:</i>`;
 
     await sendTelegramMessage(chatId, successText, {
       inline_keyboard: [
@@ -265,7 +262,6 @@ export async function processTelegramUpdate(update: any) {
               telegramUsername: tgUsername
             },
             $setOnInsert: {
-              cashbackBalance: 30,
               citizenship: "O'zbekiston"
             }
           },
@@ -277,8 +273,7 @@ export async function processTelegramUpdate(update: any) {
           name: fullName,
           phone: formattedPhone,
           telegramId: String(user.id),
-          telegramUsername: tgUsername,
-          cashbackBalance: 30
+          telegramUsername: tgUsername
         };
       }
 

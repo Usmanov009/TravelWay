@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
+import 'notifications_dialog.dart';
 
 class AppHeader extends StatelessWidget {
   final int currentTabIndex;
@@ -240,12 +241,7 @@ class AppHeader extends StatelessWidget {
                 // Notifications Bell with Red Dot
                 GestureDetector(
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Yangi bildirishnoma: Maldiv va Dubay turlariga 30% chegirmalar!'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                    NotificationsModal.show(context);
                   },
                   child: Container(
                     width: 32,
@@ -296,13 +292,10 @@ class AppHeader extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Center(
-                        child: Text(
-                          'AY',
-                          style: TextStyle(
-                            color: AppTheme.primary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                          ),
+                        child: Icon(
+                          Icons.person_outline,
+                          color: AppTheme.primary,
+                          size: 18,
                         ),
                       ),
                     ),

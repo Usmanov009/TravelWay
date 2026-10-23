@@ -7,26 +7,7 @@ const router = Router();
 
 // In-memory fallback stores when MongoDB is buffering or offline
 let memoryTours: any[] = [...INITIAL_TOURS];
-let memoryBookings: any[] = [
-  {
-    id: 'BK-99120',
-    tourTitle: 'Rixos Premium Belek 5* Deluxe',
-    dest: 'Antalya, Turkiya',
-    dates: '12.06.2025 - 19.06.2025',
-    status: 'Tasdiqlangan',
-    voucherId: 'VCH-TR-88219',
-    price: '$740',
-    totalNumeric: 740,
-    travelerName: 'Sardor Alimov',
-    type: 'active',
-    startDate: '2025-06-12',
-    endDate: '2025-06-19',
-    hotelImg: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-    flight: 'HY 3501 (Toshkent — Antalya)',
-    airline: 'Uzbekistan Airways',
-    nightsCount: 7
-  }
-];
+let memoryBookings: any[] = [];
 let memoryPriceAlerts: any[] = [];
 let memoryUsers: any[] = [];
 

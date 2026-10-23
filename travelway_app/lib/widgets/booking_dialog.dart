@@ -18,7 +18,7 @@ class _BookingDialogState extends State<BookingDialog> {
   final _nameController = TextEditingController(text: 'Sardor Alimov');
   final _phoneController = TextEditingController(text: '+998 90 123 45 67');
   final _passportController = TextEditingController(text: 'AA 1234567');
-  String _selectedPayment = 'Payme';
+  String _selectedPayment = 'Humo/Uzcard';
   bool _isSubmitting = false;
 
   int _adultsCount = 2;
@@ -413,7 +413,7 @@ class _BookingDialogState extends State<BookingDialog> {
               const Text('To\'lov usuli', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               const SizedBox(height: 8),
               Row(
-                children: ['Payme', 'Click', 'Uzum', 'Visa'].map((m) {
+                children: ['Humo/Uzcard', 'Payme', 'Click', 'Visa'].map((m) {
                   final isSel = _selectedPayment == m;
                   return Expanded(
                     child: GestureDetector(

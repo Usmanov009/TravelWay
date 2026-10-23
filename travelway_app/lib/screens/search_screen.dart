@@ -22,6 +22,11 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _nightsController = TextEditingController(text: '7');
 
+  // Combo Filters
+  final TextEditingController _comboSearchController = TextEditingController();
+  String _comboSelectedCity = 'ALL';
+  String _comboPriceFilter = 'ALL'; // 'ALL', 'CHEAP', 'LUXURY'
+
   final List<Map<String, String>> _countries = const [
     {'code': 'ALL', 'name': 'Barcha mamlakatlar', 'flag': '🌍'},
     {'code': 'TR', 'name': 'Turkiya', 'flag': '🇹🇷'},
@@ -56,6 +61,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     _nightsController.dispose();
+    _comboSearchController.dispose();
     super.dispose();
   }
 
@@ -529,10 +535,10 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.bolt, size: 12, color: AppTheme.accentGreen),
+                  Icon(Icons.verified, size: 12, color: AppTheme.accentGreen),
                   SizedBox(width: 4),
                   Text(
-                    'Jonli 1:1 Narxlar',
+                    'Rasmiy Turpaketlar',
                     style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
                   ),
                 ],
@@ -551,7 +557,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   CircularProgressIndicator(color: AppTheme.primary),
                   SizedBox(height: 12),
-                  Text('Jonli narxlar olinmoqda...', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                  Text('Narxlar tekshirilmoqda...', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
                 ],
               ),
             ),
@@ -673,10 +679,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.bolt, size: 10, color: Colors.white),
+                          Icon(Icons.verified, size: 10, color: Colors.white),
                           SizedBox(width: 2),
                           Text(
-                            'Jonli 1:1 Narx',
+                            'Kafolatlangan',
                             style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ],
@@ -921,6 +927,35 @@ class _SearchScreenState extends State<SearchScreen> {
       return const Center(child: Text('Combo turlar mavjud emas'));
     }
 
+    // Dynamic cities extraction
+    final Set<String> citySet = {};
+    for (final c in provider.comboTours) {
+      citySet.addAll(c.cities);
+    }
+    final allCities = citySet.toList()..sort();
+
+    // Filtering logic
+    final q = _comboSearchController.text.trim().toLowerCase();
+    final filtered = provider.comboTours.where((combo) {
+      if (q.isNotEmpty) {
+        final matchesTitle = combo.title.toLowerCase().contains(q);
+        final matchesRoute = combo.route.toLowerCase().contains(q);
+        final matchesCity = combo.cities.any((c) => c.toLowerCase().contains(q));
+        if (!matchesTitle && !matchesRoute && !matchesCity) return false;
+      }
+
+      if (_comboSelectedCity != 'ALL') {
+        final matchesSelected = combo.cities.any((c) => c.toLowerCase() == _comboSelectedCity.toLowerCase()) ||
+            combo.route.toLowerCase().contains(_comboSelectedCity.toLowerCase());
+        if (!matchesSelected) return false;
+      }
+
+      if (_comboPriceFilter == 'CHEAP' && combo.price >= 900) return false;
+      if (_comboPriceFilter == 'LUXURY' && combo.price < 900) return false;
+
+      return true;
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -937,7 +972,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🔄 Multi-City • 1:1 Rasmiy Paketlar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+              Text('🔄 Multi-City • Eksklyuziv Paketlar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
               SizedBox(height: 4),
               Text('Kombinatsiyalashgan Combo Turlar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
               SizedBox(height: 4),
@@ -947,85 +982,262 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         const SizedBox(height: 14),
 
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: provider.comboTours.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 14),
-          itemBuilder: (context, idx) {
-            final combo = provider.comboTours[idx];
-            return Container(
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceDark,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.borderDark),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.network(
-                    combo.img,
-                    height: 135,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(height: 135, color: AppTheme.subtleDark),
+        // COMBO FILTER SECTION
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.borderDark),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search Input
+              Container(
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppTheme.subtleDark,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                child: TextField(
+                  controller: _comboSearchController,
+                  style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: 'Combo qidiruvi (shahar, yo\'nalish)...',
+                    hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                    prefixIcon: const Icon(Icons.search, size: 18, color: AppTheme.primary),
+                    suffixIcon: _comboSearchController.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: () {
+                              _comboSearchController.clear();
+                              setState(() {});
+                            },
+                            child: const Icon(Icons.close, size: 16, color: AppTheme.textSub),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(combo.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain)),
-                        const SizedBox(height: 4),
-                        Text(combo.route, style: const TextStyle(color: AppTheme.accentSky, fontSize: 11, fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          children: combo.cities.map((c) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(color: AppTheme.subtleDark, borderRadius: BorderRadius.circular(6)),
-                            child: Text(c, style: const TextStyle(fontSize: 9, color: AppTheme.textSub)),
-                          )).toList(),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('\$${combo.price}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                            ElevatedButton(
-                              onPressed: () {
-                                final tempTour = TourPackage(
-                                  id: combo.id,
-                                  title: combo.title,
-                                  location: combo.route,
-                                  tag: 'Combo Tur',
-                                  nights: '${combo.nights} kecha',
-                                  flight: 'Toshkentdan reys',
-                                  price: combo.price,
-                                  img: combo.img,
-                                  country: combo.cities.isNotEmpty ? combo.cities.first : 'Combo',
-                                  resort: combo.cities.join(' - '),
-                                );
-                                showDialog(context: context, builder: (_) => BookingDialog(tour: tempTour));
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
-                            ),
-                          ],
-                        ),
-                      ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // City filter chips (horizontal scroll)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildComboChip(
+                      label: 'Barchasi',
+                      isSelected: _comboSelectedCity == 'ALL',
+                      onTap: () => setState(() => _comboSelectedCity = 'ALL'),
                     ),
+                    const SizedBox(width: 6),
+                    ...allCities.map((city) => Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: _buildComboChip(
+                            label: city,
+                            isSelected: _comboSelectedCity == city,
+                            onTap: () => setState(() => _comboSelectedCity = city),
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Price filters row
+              Row(
+                children: [
+                  _buildComboChip(
+                    label: 'Barcha narxlar',
+                    isSelected: _comboPriceFilter == 'ALL',
+                    onTap: () => setState(() => _comboPriceFilter = 'ALL'),
+                  ),
+                  const SizedBox(width: 6),
+                  _buildComboChip(
+                    label: 'Arzonroq (< \$900)',
+                    isSelected: _comboPriceFilter == 'CHEAP',
+                    onTap: () => setState(() => _comboPriceFilter = 'CHEAP'),
+                  ),
+                  const SizedBox(width: 6),
+                  _buildComboChip(
+                    label: 'Premium (\$900+)',
+                    isSelected: _comboPriceFilter == 'LUXURY',
+                    onTap: () => setState(() => _comboPriceFilter = 'LUXURY'),
                   ),
                 ],
               ),
-            );
-          },
+              const SizedBox(height: 8),
+
+              // Results count & reset
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${filtered.length} ta combo tur topildi',
+                    style: const TextStyle(fontSize: 11, color: AppTheme.textSub, fontWeight: FontWeight.w600),
+                  ),
+                  if (_comboSearchController.text.isNotEmpty || _comboSelectedCity != 'ALL' || _comboPriceFilter != 'ALL')
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _comboSearchController.clear();
+                          _comboSelectedCity = 'ALL';
+                          _comboPriceFilter = 'ALL';
+                        });
+                      },
+                      child: const Text(
+                        'Filtrni tozalash',
+                        style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
+        const SizedBox(height: 14),
+
+        if (filtered.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                const Icon(Icons.hub_outlined, size: 44, color: AppTheme.textMuted),
+                const SizedBox(height: 10),
+                const Text('Ushbu filtr bo\'yicha combo turlar topilmadi', style: TextStyle(color: AppTheme.textSub, fontSize: 13)),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _comboSearchController.clear();
+                      _comboSelectedCity = 'ALL';
+                      _comboPriceFilter = 'ALL';
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                  child: const Text('Barcha combo turlarni ko\'rsatish', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: filtered.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 14),
+            itemBuilder: (context, idx) {
+              final combo = filtered[idx];
+              return Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceDark,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppTheme.borderDark),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.network(
+                      combo.img,
+                      height: 135,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(height: 135, color: AppTheme.subtleDark),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(combo.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain)),
+                          const SizedBox(height: 4),
+                          Text(combo.route, style: const TextStyle(color: AppTheme.accentSky, fontSize: 11, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 6,
+                            children: combo.cities.map((c) => Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(color: AppTheme.subtleDark, borderRadius: BorderRadius.circular(6)),
+                              child: Text(c, style: const TextStyle(fontSize: 9, color: AppTheme.textSub)),
+                            )).toList(),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('\$${combo.price}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final tempTour = TourPackage(
+                                    id: combo.id,
+                                    title: combo.title,
+                                    location: combo.route,
+                                    tag: 'Combo Tur',
+                                    nights: '${combo.nights} kecha',
+                                    flight: 'Toshkentdan reys',
+                                    price: combo.price,
+                                    img: combo.img,
+                                    country: combo.cities.isNotEmpty ? combo.cities.first : 'Combo',
+                                    resort: combo.cities.join(' - '),
+                                  );
+                                  showDialog(context: context, builder: (_) => BookingDialog(tour: tempTour));
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
+    );
+  }
+
+  Widget _buildComboChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary : AppTheme.subtleDark,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : AppTheme.borderDark,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : AppTheme.textSub,
+          ),
+        ),
+      ),
     );
   }
 
@@ -1058,7 +1270,7 @@ class _SearchScreenState extends State<SearchScreen> {
               SizedBox(height: 4),
               Text('To\'g\'ridan-to\'g\'ri Aviachiptalar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
               SizedBox(height: 4),
-              Text('Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o\'rinlar va 1:1 narxlar.', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              Text('Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o\'rinlar va qulay tariflar.', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
             ],
           ),
         ),
@@ -1195,7 +1407,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🏨 Faqat Mehmonxona • 1:1 Narxlar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+              Text('🏨 Faqat Mehmonxona • Qulay Tariflar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
               SizedBox(height: 4),
               Text('Dunyo Mehmonxonalari', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
               SizedBox(height: 4),

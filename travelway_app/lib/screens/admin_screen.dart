@@ -28,7 +28,7 @@ class AdminScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 _buildStatCard('Narx Signallari', '${provider.alerts.length}', Icons.notifications_active_outlined, AppTheme.accentGold),
                 const SizedBox(width: 10),
-                _buildStatCard('Jonli Tizim', provider.isKompasOnline ? 'Faol' : 'Kutilmoqda', Icons.wifi, AppTheme.accentGreen),
+                _buildStatCard('Kompas Tizimi', provider.isKompasOnline ? 'Faol' : 'Kutilmoqda', Icons.wifi, AppTheme.accentGreen),
               ],
             ),
             const SizedBox(height: 20),
@@ -64,9 +64,9 @@ class AdminScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Jonli Tizim Serveri:', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                      const Text('Kompas Tizimi Serveri:', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                       Text(
-                        provider.isKompasOnline ? 'Jonli tizim faol (200 OK)' : 'Aloqa yo\'q',
+                        provider.isKompasOnline ? 'Tizim faol (200 OK)' : 'Aloqa yo\'q',
                         style: TextStyle(
                           color: provider.isKompasOnline ? AppTheme.accentGreen : Colors.orange,
                           fontWeight: FontWeight.bold,

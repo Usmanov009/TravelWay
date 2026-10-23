@@ -174,7 +174,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                             ),
                             const SizedBox(width: 6),
                             const Text(
-                              'Jonli rasmiy turlar',
+                              'Rasmiy turpaketlar',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
@@ -200,7 +200,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  provider.isLoadingHotDeals ? 'Yuklanmoqda...' : 'Jonli yangilash',
+                                  provider.isLoadingHotDeals ? 'Yuklanmoqda...' : 'Yangilash',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -452,7 +452,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // Flight bar & Jonli Narx
+                // Flight bar
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
@@ -474,7 +474,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                       ),
                       const SizedBox(width: 6),
                       const Text(
-                        'Jonli Narx',
+                        'Kafolatlangan',
                         style: TextStyle(color: AppTheme.accentSky, fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ],
