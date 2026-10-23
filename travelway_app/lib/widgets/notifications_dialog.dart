@@ -64,7 +64,7 @@ class _NotificationsModalState extends State<NotificationsModal> {
     NotificationItem(
       id: 'notif_3',
       title: 'Telegram Bot orqali ro\'yxatdan o\'tish',
-      message: '@mytravelwaybot orqali telefon raqamingizni tasdiqlang va hisobingizga bir zumda kiring.',
+      message: '@sayrhub_bot orqali telefon raqamingizni tasdiqlang va hisobingizga bir zumda kiring.',
       time: 'Kecha, 18:20',
       category: 'Tizim',
       icon: Icons.send_rounded,

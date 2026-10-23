@@ -38,10 +38,18 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController(text: '+998 ');
 
+  // Profile completion controllers
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _passportController = TextEditingController();
+
   bool _isLoading = false;
+  bool _isProfileStep = false;
+  String _verifiedPhone = '';
+  String _verifiedTcId = '';
   String? _sessionToken;
 
-  static const String botUsername = 'mytravelwaybot';
+  static const String botUsername = 'sayrhub_bot';
 
   @override
   void initState() {
@@ -69,6 +77,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     _otpController.dispose();
     _nameController.dispose();
     _phoneController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _passportController.dispose();
     super.dispose();
   }
 
@@ -82,7 +93,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @mytravelwaybot qidiring.')),
+          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot qidiring.')),
         );
       }
     }
@@ -99,6 +110,11 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
 
     setState(() => _isLoading = true);
 
+    String verifiedName = 'Mijoz';
+    String verifiedPhone = '+998 90 000 00 00';
+    String verifiedTcId = 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+    String verifiedPassport = '';
+
     try {
       final baseUrl = ApiService().baseUrl;
       final res = await http.post(
@@ -114,20 +130,79 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
         final data = jsonDecode(res.body);
         if (data['success'] == true && data['user'] != null) {
           final u = data['user'];
-          final name = u['name'] ?? 'Mijoz';
-          final phone = u['phone'] ?? '+998 90 000 00 00';
-          final tcId = u['tcId'] ?? 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
-          _completeLogin(name, phone, tcId);
-          return;
+          verifiedName = u['name'] ?? 'Mijoz';
+          verifiedPhone = u['phone'] ?? '+998 90 000 00 00';
+          verifiedTcId = u['tcId'] ?? 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+          verifiedPassport = u['passportNumber'] ?? '';
         }
       }
     } catch (_) {}
 
-    // Fallback if backend network timed out or in offline testing:
-    final fallbackName = 'Telegram Foydalanuvchi';
-    final fallbackPhone = '+998 90 *** ** **';
-    final fallbackTcId = 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
-    _completeLogin(fallbackName, fallbackPhone, fallbackTcId);
+    String fn = '';
+    String ln = '';
+    if (verifiedName.isNotEmpty && !verifiedName.toLowerCase().contains('mijoz')) {
+      final parts = verifiedName.split(' ');
+      fn = parts.first;
+      if (parts.length > 1) {
+        ln = parts.sublist(1).join(' ');
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _isProfileStep = true;
+        _verifiedPhone = verifiedPhone;
+        _verifiedTcId = verifiedTcId;
+        _firstNameController.text = fn;
+        _lastNameController.text = ln;
+        _passportController.text = verifiedPassport;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Telegram orqali tasdiqlandi! Endi shaxsiy ma\'lumotlaringizni to\'ldiring.'),
+          backgroundColor: AppTheme.accentGreen,
+        ),
+      );
+    }
+  }
+
+  Future<void> _submitProfileStep() async {
+    final fn = _firstNameController.text.trim();
+    final ln = _lastNameController.text.trim();
+    final pass = _passportController.text.trim().toUpperCase();
+
+    if (fn.isEmpty || fn.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Iltimos, ismingizni to\'liq kiriting')),
+      );
+      return;
+    }
+
+    if (ln.isEmpty || ln.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Iltimos, familiyangizni to\'liq kiriting')),
+      );
+      return;
+    }
+
+    final passClean = pass.replaceAll(RegExp(r'\s'), '');
+    if (passClean.length < 7) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Iltimos, pasport seriya va raqamini to\'liq kiriting (masalan: AA 1234567)')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final fullName = '$fn $ln';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('sayrhub_user_passport', pass);
+    } catch (_) {}
+
+    _completeLogin(fullName, _verifiedPhone, _verifiedTcId);
   }
 
   Future<void> _registerManual() async {
@@ -210,19 +285,23 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                           color: const Color(0xFF229ED9).withOpacity(0.18),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.send_rounded, color: Color(0xFF229ED9), size: 20),
+                        child: Icon(
+                          _isProfileStep ? Icons.badge_outlined : Icons.send_rounded,
+                          color: const Color(0xFF229ED9),
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Telegram orqali Kirish',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                            _isProfileStep ? 'Profilni to\'ldirish' : 'Telegram orqali Kirish',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
                           ),
                           Text(
-                            'Rasmiy @mytravelwaybot',
-                            style: TextStyle(fontSize: 11, color: AppTheme.accentSky),
+                            _isProfileStep ? 'Ism, familiya va pasport' : 'Rasmiy @$botUsername',
+                            style: const TextStyle(fontSize: 11, color: AppTheme.accentSky),
                           ),
                         ],
                       ),
@@ -237,168 +316,303 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
             ),
             const Divider(height: 1, color: AppTheme.borderDark),
 
-            // Tab bar
-            TabBar(
-              controller: _tabController,
-              indicatorColor: AppTheme.primary,
-              labelColor: AppTheme.primary,
-              unselectedLabelColor: AppTheme.textMuted,
-              tabs: const [
-                Tab(icon: Icon(Icons.security, size: 16), text: 'Telegram Bot'),
-                Tab(icon: Icon(Icons.person_add_outlined, size: 16), text: 'Ma\'lumot kiritish'),
-              ],
-            ),
-
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 330),
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Tab 1: Telegram Bot Code
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF229ED9).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFF229ED9).withOpacity(0.3)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.info_outline, color: Color(0xFF229ED9), size: 20),
-                              const SizedBox(width: 10),
-                              const Expanded(
-                                child: Text(
-                                  'Botda "Start" va "Telefon raqamni ulashish" tugmasini bosing va olingan 4 xonali kodni kiriting.',
-                                  style: TextStyle(fontSize: 11, color: AppTheme.textMain, height: 1.3),
+            // Content: Either Profile Completion or Tabs
+            if (_isProfileStep)
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Verified Phone Card (ko'rinib turadi)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.subtleDark,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppTheme.accentGreen.withOpacity(0.35)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle_rounded, color: AppTheme.accentGreen, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Tasdiqlangan telefon raqami:',
+                                  style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // Button to open bot
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _openTelegramBot,
-                            icon: const Icon(Icons.open_in_new, size: 16),
-                            label: const Text('Telegram Botni ochish (@mytravelwaybot)'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF229ED9),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _verifiedPhone,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textMain,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        const Text('Bot bergan 4 xonali tasdiqlash kodi:', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _otpController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(4),
-                          ],
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8, color: AppTheme.textMain),
-                          decoration: InputDecoration(
-                            hintText: '0000',
-                            hintStyle: const TextStyle(color: AppTheme.textMuted, letterSpacing: 8),
-                            filled: true,
-                            fillColor: AppTheme.subtleDark,
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _verifyOtpCode,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentGreen.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: _isLoading
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Text('Tasdiqlash va Kirish', style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: const Text(
+                              'Ulangan',
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                            ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // First Name
+                    const Text('Ism *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _firstNameController,
+                      style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                      decoration: InputDecoration(
+                        hintText: 'Masalan: Jasur',
+                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                        filled: true,
+                        fillColor: AppTheme.subtleDark,
+                        prefixIcon: const Icon(Icons.person_outline, size: 18, color: AppTheme.primary),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Last Name
+                    const Text('Familiya *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _lastNameController,
+                      style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                      decoration: InputDecoration(
+                        hintText: 'Masalan: Rahimov',
+                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                        filled: true,
+                        fillColor: AppTheme.subtleDark,
+                        prefixIcon: const Icon(Icons.badge_outlined, size: 18, color: AppTheme.primary),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Passport Series & Number
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('Pasport seriya va raqami *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                        Text('Namuna: AA 1234567', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
                       ],
                     ),
-                  ),
-
-                  // Tab 2: Manual Data Entry
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Ism va Familiya', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _nameController,
-                          style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
-                          decoration: InputDecoration(
-                            hintText: 'Masalan: Alisher Yusupov',
-                            hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                            filled: true,
-                            fillColor: AppTheme.subtleDark,
-                            prefixIcon: const Icon(Icons.person_outline, size: 18, color: AppTheme.primary),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        const Text('Telefon raqam', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _phoneController,
-                          keyboardType: TextInputType.phone,
-                          style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
-                          decoration: InputDecoration(
-                            hintText: '+998 90 123 45 67',
-                            hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                            filled: true,
-                            fillColor: AppTheme.subtleDark,
-                            prefixIcon: const Icon(Icons.phone_outlined, size: 18, color: AppTheme.primary),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _registerManual,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Text('Ro\'yxatdan o\'tish va Kirish', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _passportController,
+                      textCapitalization: TextCapitalization.characters,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: AppTheme.textMain),
+                      decoration: InputDecoration(
+                        hintText: 'AA 1234567',
+                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12, letterSpacing: 1.5),
+                        filled: true,
+                        fillColor: AppTheme.subtleDark,
+                        prefixIcon: const Icon(Icons.flight_takeoff, size: 18, color: AppTheme.primary),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 18),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _submitProfileStep,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : const Text('Saqlash va SayrHub\'ga kirish 🚀', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else ...[
+              // Tab bar
+              TabBar(
+                controller: _tabController,
+                indicatorColor: AppTheme.primary,
+                labelColor: AppTheme.primary,
+                unselectedLabelColor: AppTheme.textMuted,
+                tabs: const [
+                  Tab(icon: Icon(Icons.security, size: 16), text: 'Telegram Bot'),
+                  Tab(icon: Icon(Icons.person_add_outlined, size: 16), text: 'Ma\'lumot kiritish'),
                 ],
               ),
-            ),
+
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 330),
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Tab 1: Telegram Bot Code
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF229ED9).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFF229ED9).withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.info_outline, color: Color(0xFF229ED9), size: 20),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Text(
+                                    'Botda "Start" va "Telefon raqamni ulashish" tugmasini bosing va olingan 4 xonali kodni kiriting.',
+                                    style: TextStyle(fontSize: 11, color: AppTheme.textMain, height: 1.3),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Button to open bot
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _openTelegramBot,
+                              icon: const Icon(Icons.open_in_new, size: 16),
+                              label: const Text('Telegram Botni ochish (@sayrhub_bot)'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF229ED9),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          const Text('Bot bergan 4 xonali tasdiqlash kodi:', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _otpController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(4),
+                            ],
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8, color: AppTheme.textMain),
+                            decoration: InputDecoration(
+                              hintText: '0000',
+                              hintStyle: const TextStyle(color: AppTheme.textMuted, letterSpacing: 8),
+                              filled: true,
+                              fillColor: AppTheme.subtleDark,
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _verifyOtpCode,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 13),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : const Text('Tasdiqlash va Davom etish', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Tab 2: Manual Data Entry
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Ism va Familiya', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _nameController,
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                            decoration: InputDecoration(
+                              hintText: 'Masalan: Alisher Yusupov',
+                              hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                              filled: true,
+                              fillColor: AppTheme.subtleDark,
+                              prefixIcon: const Icon(Icons.person_outline, size: 18, color: AppTheme.primary),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          const Text('Telefon raqam', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const SizedBox(height: 6),
+                          TextField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                            decoration: InputDecoration(
+                              hintText: '+998 90 123 45 67',
+                              hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                              filled: true,
+                              fillColor: AppTheme.subtleDark,
+                              prefixIcon: const Icon(Icons.phone_outlined, size: 18, color: AppTheme.primary),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _registerManual,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 13),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                  : const Text('Ro\'yxatdan o\'tish va Kirish', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

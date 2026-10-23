@@ -45,7 +45,13 @@ export default function App() {
   const [hasUnreadNotifs, setHasUnreadNotifs] = useState(true);
 
   // Data state
-  const [user, setUser] = useState<UserProfile>(INITIAL_USER);
+  const [user, setUser] = useState<UserProfile>(() => {
+    try {
+      const saved = localStorage.getItem('sayrhub_user_profile') || localStorage.getItem('travelway_user_profile');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_USER;
+  });
   const [cards, setCards] = useState<PaymentCard[]>(INITIAL_CARDS);
   const [tours, setTours] = useState<TourPackage[]>(INITIAL_TOURS);
   const [comboTours, setComboTours] = useState<ComboTour[]>(INITIAL_COMBO_TOURS);
@@ -394,6 +400,8 @@ export default function App() {
         name: tgUser.name || user.name,
         phone: tgUser.phone || user.phone,
         email: tgUser.email || user.email,
+        passportNumber: tgUser.passportNumber || user.passportNumber,
+        passportExpiry: tgUser.passportExpiry || user.passportExpiry,
         telegramId: tgUser.telegramId || '',
         telegramUsername: tgUser.telegramUsername || '',
         cashback: Math.max(user.cashback, tgUser.cashbackBalance || 30),
@@ -418,9 +426,12 @@ export default function App() {
         },
         body: JSON.stringify(updatedUser)
       }).catch((e) => console.warn('MongoDB save user error:', e));
+
+      showToast(`Xush kelibsiz, ${updatedUser.name}! SayrHub'ga kirdingiz 🎉`, 'success');
+    } else {
+      showToast(`Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi 🎉`, 'success');
     }
 
-    showToast(`Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi 🎉`, 'success');
     setCurrentTab('search');
   };
 

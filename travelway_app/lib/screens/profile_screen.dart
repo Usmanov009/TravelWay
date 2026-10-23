@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _savedCardsCount = 0;
   bool _isLoading = true;
 
-  static const String botUsername = 'mytravelwaybot';
+  static const String botUsername = 'sayrhub_bot';
 
   @override
   void initState() {
@@ -108,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @mytravelwaybot orqali bog\'laning.')),
+          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot orqali bog\'laning.')),
         );
       }
     }
@@ -263,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icon(Icons.verified, size: 14, color: AppTheme.accentGreen),
             SizedBox(width: 6),
             Text(
-              'Rasmiy bot: @mytravelwaybot',
+              'Rasmiy bot: @sayrhub_bot',
               style: TextStyle(fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
             ),
           ],
