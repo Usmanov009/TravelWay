@@ -1,4 +1,10 @@
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowRight, Smartphone, AlertCircle } from 'lucide-react';
 
 interface AdminLoginPageProps {
   onLoginSuccess: (adminRole?: string, adminUser?: any) => void;
@@ -68,15 +74,15 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
 
   return (
     <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans relative overflow-hidden select-none">
-      {/* Background Soft Accents */}
+      {/* Background Ambient Glows */}
       <div className="absolute top-1/4 -left-20 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Login Card */}
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative z-10">
+      {/* Admin Login Block (shadcn blocks login-04 style) */}
+      <Card className="w-full max-w-md bg-slate-900/90 border-slate-800 text-slate-100 rounded-3xl shadow-2xl relative z-10 backdrop-blur-md overflow-hidden">
         {/* Header Branding */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0038E2] overflow-hidden shadow-lg shadow-sky-500/20 mb-3 relative ring-2 ring-white/10">
+        <CardHeader className="text-center pt-8 pb-4 px-6 space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0038E2] overflow-hidden shadow-lg shadow-sky-500/20 mx-auto relative ring-2 ring-white/10">
             <img
               src="/logo.png"
               alt="SayrHub"
@@ -87,103 +93,111 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             />
             <span className="text-white font-black text-2xl tracking-wider absolute pointer-events-none">SH</span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">SayrHub Admin</h1>
-          <p className="text-xs text-slate-400 mt-1">Boshqaruv tizimiga xavfsiz kirish</p>
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/60 border border-sky-800/50 text-[11px] font-semibold text-sky-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-            <span>Himoyalangan Tizim (SSL / Protected)</span>
-          </div>
-        </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-5 p-3 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Login yoki Email
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
-                👤
-              </span>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
-                autoComplete="username"
-                autoFocus
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition font-medium"
-              />
-            </div>
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-black text-white tracking-tight">SayrHub Admin</CardTitle>
+            <CardDescription className="text-xs text-slate-400">Boshqaruv tizimiga xavfsiz kirish</CardDescription>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Parol
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 text-sm">
-                🔒
-              </span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="admin123"
-                autoComplete="current-password"
-                className="w-full pl-10 pr-10 py-2.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition text-xs"
-                title={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
-              >
-                {showPassword ? '🙈' : '👁️'}
-              </button>
-            </div>
+            <Badge variant="outline" className="px-3 py-1 rounded-full bg-sky-950/60 border-sky-800/50 text-[11px] font-semibold text-sky-400 gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+              <span>Himoyalangan Tizim (SSL / Protected)</span>
+            </Badge>
           </div>
+        </CardHeader>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/20 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 tap-bounce"
-          >
-            {isLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Tekshirilmoqda...</span>
-              </>
-            ) : (
-              <>
-                <span>Tizimga Kirish</span>
-                <span className="text-sm">➔</span>
-              </>
-            )}
-          </button>
-        </form>
+        <CardContent className="px-6 py-2 space-y-4">
+          {/* Error Alert */}
+          {error && (
+            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{error}</span>
+            </div>
+          )}
 
-        {/* Back to Client App */}
-        <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-          <button
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-username" className="text-xs font-semibold text-slate-300">
+                Login yoki Email
+              </Label>
+              <div className="relative">
+                <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Input
+                  id="admin-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="admin"
+                  autoComplete="username"
+                  autoFocus
+                  className="pl-9 h-11 bg-slate-800/80 border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus-visible:border-sky-500 focus-visible:ring-sky-500/20 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-password" className="text-xs font-semibold text-slate-300">
+                Parol
+              </Label>
+              <div className="relative">
+                <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Input
+                  id="admin-password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="admin123"
+                  autoComplete="current-password"
+                  className="pl-9 pr-9 h-11 bg-slate-800/80 border-slate-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus-visible:border-sky-500 focus-visible:ring-sky-500/20 font-mono"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 text-slate-400 hover:text-white hover:bg-slate-800/60"
+                  title={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-11 rounded-xl font-bold text-xs bg-sky-600 hover:bg-sky-500 text-white shadow-md shadow-sky-600/20 transition-all gap-2 cursor-pointer mt-2"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Tekshirilmoqda...</span>
+                </div>
+              ) : (
+                <>
+                  <span>Tizimga Kirish</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+
+        <CardFooter className="px-6 pb-6 pt-3 flex flex-col space-y-2 border-t border-slate-800/80 mt-2">
+          <Button
+            variant="ghost"
+            size="sm"
             type="button"
             onClick={onExitToApp}
-            className="text-xs text-slate-400 hover:text-sky-400 transition flex items-center justify-center gap-1.5 mx-auto tap-bounce font-medium"
+            className="text-xs text-slate-400 hover:text-sky-400 hover:bg-slate-800/50 gap-2 h-9 rounded-xl w-full"
           >
-            <span className="material-symbols-outlined text-[16px]">smartphone</span>
+            <Smartphone className="w-4 h-4" />
             <span>Mobil ilovaga qaytish</span>
-          </button>
-        </div>
-      </div>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

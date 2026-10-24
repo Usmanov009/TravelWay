@@ -29,6 +29,9 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const isProd = process.env.NODE_ENV === 'production';
 
+// Trust reverse proxy (Render, Cloudflare, etc.) for correct client IP detection and rate-limiting
+app.set('trust proxy', 1);
+
 // 1. Security Headers
 app.use(
   helmet({
