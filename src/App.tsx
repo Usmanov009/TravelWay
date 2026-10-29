@@ -61,6 +61,31 @@ export default function App() {
   const [hotDeals, setHotDeals] = useState<any[]>(INITIAL_HOT_SALES);
   const [isRefreshingHotDeals, setIsRefreshingHotDeals] = useState<boolean>(false);
 
+  // Agency Commission Rate State (persisted & synced with backend)
+  const [agencyCommissionRate, setAgencyCommissionRate] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission');
+      if (saved) return Number(saved);
+    } catch (e) {}
+    return 8;
+  });
+
+  // Sync agency commission rate from backend on mount
+  useEffect(() => {
+    fetch('/api/admin/commission')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && typeof data.commissionRate === 'number') {
+          setAgencyCommissionRate(data.commissionRate);
+          try {
+            localStorage.setItem('sayrhub_agency_commission', String(data.commissionRate));
+            localStorage.setItem('travelway_agency_commission', String(data.commissionRate));
+          } catch (e) {}
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Desktop Admin Panel State
   const [isAdminMode, setIsAdminMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -829,6 +854,92 @@ export default function App() {
     }).catch((e) => console.warn('Delete staff on backend error:', e));
   };
 
+  const handleUpdateCommissionRate = async (newRate: number) => {
+    const cleanRate = Math.max(0, Math.min(100, Number(newRate) || 0));
+    setAgencyCommissionRate(cleanRate);
+
+    try {
+      localStorage.setItem('sayrhub_agency_commission', String(cleanRate));
+      localStorage.setItem('travelway_agency_commission', String(cleanRate));
+    } catch (e) {}
+
+    // 1. Recalculate prices across tours with percent markup
+    setTours((prevTours) =>
+      prevTours.map((t) => {
+        if (t.markupType === 'percent' || !t.markupType) {
+          const cost = t.originalCostPrice || Math.round(t.price / (1 + (t.markupValue || 8) / 100));
+          const newPrice = Math.round(cost * (1 + cleanRate / 100));
+          return {
+            ...t,
+            originalCostPrice: cost,
+            price: newPrice,
+            markupType: 'percent' as const,
+            markupValue: cleanRate
+          };
+        }
+        return t;
+      })
+    );
+
+    // 2. Recalculate prices across hotels
+    setHotels((prevHotels) =>
+      prevHotels.map((h) => {
+        if (h.markupType === 'percent' || !h.markupType) {
+          const cost = h.originalCostPrice || Math.round(h.totalPrice / (1 + (h.markupValue || 8) / 100));
+          const newTotal = Math.round(cost * (1 + cleanRate / 100));
+          const nights = h.nightsCount || 7;
+          return {
+            ...h,
+            originalCostPrice: cost,
+            totalPrice: newTotal,
+            pricePerNight: Math.round(newTotal / nights),
+            markupType: 'percent' as const,
+            markupValue: cleanRate
+          };
+        }
+        return h;
+      })
+    );
+
+    // 3. Recalculate prices across flights
+    setFlights((prevFlights) =>
+      prevFlights.map((f) => {
+        if (f.markupType === 'percent' || !f.markupType) {
+          const cost = f.originalCostPrice || Math.round(f.price / (1 + (f.markupValue || 8) / 100));
+          const newPrice = Math.round(cost * (1 + cleanRate / 100));
+          return {
+            ...f,
+            originalCostPrice: cost,
+            price: newPrice,
+            markupType: 'percent' as const,
+            markupValue: cleanRate
+          };
+        }
+        return f;
+      })
+    );
+
+    // 4. Send to backend
+    try {
+      let token = '';
+      try {
+        token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+      } catch (e) {}
+
+      await fetch('/api/admin/commission', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ commissionRate: cleanRate })
+      });
+      showToast(`Agentlik komissiyasi ${cleanRate}% qilib saqlandi va barcha narxlarga qo'llanildi! 💼`, 'success');
+    } catch (err) {
+      console.warn('Could not sync commission to server:', err);
+    }
+  };
+
   const handleSavePassport = (passportNumber: string, passportExpiry: string) => {
     setUser((prev) => ({ ...prev, passportNumber, passportExpiry }));
     setIsEditPassportOpen(false);
@@ -931,6 +1042,8 @@ export default function App() {
         onUpdateStaff={handleUpdateStaff}
         onRemoveStaff={handleRemoveStaff}
         onShowToast={showToast}
+        agencyCommissionRate={agencyCommissionRate}
+        onUpdateCommissionRate={handleUpdateCommissionRate}
       />
     );
   }
@@ -1031,6 +1144,7 @@ export default function App() {
                 onBookCombo={handleBookCombo}
                 onBookFlight={handleBookFlight}
                 onBookHotel={handleBookHotel}
+                agencyCommissionRate={agencyCommissionRate}
               />
             )}
 

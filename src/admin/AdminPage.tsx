@@ -48,6 +48,8 @@ interface AdminPageProps {
   onUpdateStaff: (staff: AdminUser) => void;
   onRemoveStaff: (staffId: string) => void;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
+  agencyCommissionRate?: number;
+  onUpdateCommissionRate?: (rate: number) => void;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = ({
@@ -81,7 +83,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onAddStaff,
   onUpdateStaff,
   onRemoveStaff,
-  onShowToast
+  onShowToast,
+  agencyCommissionRate = 8,
+  onUpdateCommissionRate
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
@@ -202,6 +206,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onUpdateBookingStatus={onUpdateBookingStatus}
               onSimulatePriceDrop={onSimulatePriceDrop}
               onQuickAddTour={handleQuickAddTour}
+              agencyCommissionRate={agencyCommissionRate}
+              onUpdateCommissionRate={onUpdateCommissionRate}
             />
           )}
 
@@ -215,6 +221,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onDeleteTour={onDeleteTour}
               onShowToast={onShowToast}
               globalSearch={searchTerm}
+              agencyCommissionRate={agencyCommissionRate}
+              onUpdateCommissionRate={onUpdateCommissionRate}
             />
           )}
 
@@ -241,6 +249,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onDeleteFlight={onDeleteFlight}
               onShowToast={onShowToast}
               globalSearch={searchTerm}
+              agencyCommissionRate={agencyCommissionRate}
+              onUpdateCommissionRate={onUpdateCommissionRate}
             />
           )}
 
@@ -254,6 +264,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               onDeleteHotel={onDeleteHotel}
               onShowToast={onShowToast}
               globalSearch={searchTerm}
+              agencyCommissionRate={agencyCommissionRate}
+              onUpdateCommissionRate={onUpdateCommissionRate}
             />
           )}
 
@@ -309,6 +321,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               currentRole={currentRole}
               currentAdmin={currentAdmin}
               onShowToast={onShowToast}
+              agencyCommissionRate={agencyCommissionRate}
+              onUpdateCommissionRate={onUpdateCommissionRate}
             />
           )}
         </main>

@@ -12,6 +12,8 @@ interface AdminToursManagerProps {
   onDeleteTour: (tourId: string) => void;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
+  agencyCommissionRate?: number;
+  onUpdateCommissionRate?: (rate: number) => void;
 }
 
 export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
@@ -22,7 +24,9 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
   onUpdateTour,
   onDeleteTour,
   onShowToast,
-  globalSearch = ''
+  globalSearch = '',
+  agencyCommissionRate = 8,
+  onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
 
@@ -248,9 +252,32 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Kompas Tour Live (1:1)</span>
             </span>
+
+            {/* Active Agency Commission Pill */}
+            <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-200 text-[11px] px-3 py-1 rounded-full font-bold">
+              <span>💼 Komissiya:</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{agencyCommissionRate}%</span>
+              {onUpdateCommissionRate && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = prompt("Yangi umumiy agentlik komissiyasi foizini kiriting (0 - 100%):", String(agencyCommissionRate));
+                    if (input !== null) {
+                      const val = Number(input);
+                      if (!isNaN(val) && val >= 0 && val <= 100) {
+                        onUpdateCommissionRate(val);
+                      }
+                    }
+                  }}
+                  className="ml-1 text-[10px] underline hover:text-amber-900 dark:hover:text-amber-100 cursor-pointer"
+                >
+                  O'zgartirish ✏️
+                </button>
+              )}
+            </div>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            online.uz.kompastour.com va SayrHub tizimidagi barcha faol turpaketlar
+            online.uz.kompastour.com va SayrHub tizimidagi barcha faol turpaketlar • Komissiya: {agencyCommissionRate}%
           </p>
         </div>
 
@@ -691,9 +718,11 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
           originalCostPrice={markupModalTour.originalCostPrice || Math.round(markupModalTour.price / 1.08)}
           currentPrice={markupModalTour.price}
           currentMarkupType={markupModalTour.markupType || 'percent'}
-          currentMarkupValue={markupModalTour.markupValue || 8}
+          currentMarkupValue={markupModalTour.markupValue || agencyCommissionRate}
           tourOperator={markupModalTour.tourOperator || 'Kompas Tour'}
           agencyName={markupModalTour.agencyName || 'SayrHub'}
+          agencyCommissionRate={agencyCommissionRate}
+          onApplyToAllCommission={onUpdateCommissionRate}
           onSave={(newPrice, markupType, markupVal) => {
             handleSaveMarkup(newPrice, markupType, markupVal);
           }}

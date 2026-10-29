@@ -5,16 +5,21 @@ interface AdminSettingsProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
+  agencyCommissionRate?: number;
+  onUpdateCommissionRate?: (rate: number) => void;
 }
 
 export const AdminSettings: React.FC<AdminSettingsProps> = ({
   currentRole,
   currentAdmin,
-  onShowToast
+  onShowToast,
+  agencyCommissionRate,
+  onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
   const [kompasUrl, setKompasUrl] = useState('https://online.uz.kompastour.com/search_tour');
   const [commissionRate, setCommissionRate] = useState<number>(() => {
+    if (agencyCommissionRate !== undefined) return agencyCommissionRate;
     try {
       const saved = localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission');
       if (saved) return Number(saved);
@@ -23,6 +28,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   });
   const [tgBotUsername, setTgBotUsername] = useState('@sayrhub_bot');
   const [isSavingCommission, setIsSavingCommission] = useState(false);
+
+  useEffect(() => {
+    if (agencyCommissionRate !== undefined) {
+      setCommissionRate(agencyCommissionRate);
+    }
+  }, [agencyCommissionRate]);
 
   // Sync commission from backend
   useEffect(() => {
@@ -54,6 +65,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         localStorage.setItem('travelway_agency_commission', String(cleanCommission));
       } catch (e) {}
 
+      // Immediately propagate to all items and prices across the app
+      if (onUpdateCommissionRate) {
+        onUpdateCommissionRate(cleanCommission);
+      }
+
       let token = '';
       try {
         token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
@@ -69,9 +85,9 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       });
 
       if (isMainAdmin) {
-        onShowToast(`Tizim sozlamalari va agentlik komissiyasi (${cleanCommission}%) muvaffaqiyatli saqlandi! ⚙️`, 'success');
+        onShowToast(`Tizim sozlamalari va agentlik komissiyasi (${cleanCommission}%) saqlandi va barcha narxlarga qo'llanildi! ⚙️`, 'success');
       } else {
-        onShowToast(`Agentlik komissiyasi (${cleanCommission}%) muvaffaqiyatli saqlandi! 💼`, 'success');
+        onShowToast(`Agentlik komissiyasi (${cleanCommission}%) saqlandi va barcha narxlarga qo'llanildi! 💼`, 'success');
       }
     } catch (err) {
       onShowToast("Sozlamalarni saqlashda xatolik yuz berdi", 'error');

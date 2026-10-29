@@ -203,8 +203,71 @@ class TourDetailScreen extends StatelessWidget {
                               style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
                             ),
                             Text(
-                              tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi',
+                              '${tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi'} (+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%)',
                               style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.accentGreen),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Price Transparency Card
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceDark,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.borderDark),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Asl turoperator narxi:', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                            Text(
+                              '\$${tour.originalCostPrice ?? (tour.price / (1 + tour.markupValue / 100)).round()}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Text('💼 Agentlik xizmat komissiyasi ', style: TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600)),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primary.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text('+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%', style: const TextStyle(color: AppTheme.primary, fontSize: 9, fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '+\$${tour.price - (tour.originalCostPrice ?? (tour.price / (1 + tour.markupValue / 100)).round())}',
+                              style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 6),
+                          child: Divider(color: AppTheme.borderDark, height: 1),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Mijoz uchun to\'liq narx:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.textMuted)),
+                            Text(
+                              '\$${tour.price}',
+                              style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.w900, fontSize: 14),
                             ),
                           ],
                         ),

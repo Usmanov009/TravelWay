@@ -1,3 +1,5 @@
+import { getAgencyCommissionRate } from './agencySettings.js';
+
 // Destination and city mappings for online.uz.kompastour.com
 export const DEPARTURE_MAP: Record<string, string> = {
   'Toshkent': '26',
@@ -356,8 +358,9 @@ export async function queryKompasTour(params: Record<string, string>): Promise<a
       const hotelId = hotelIdMatch ? hotelIdMatch[1] : String(i + 1);
 
       const netCost = price;
-      // Default 8% agency markup
-      const customerPrice = Math.round(netCost * 1.08);
+      // Dynamic agency commission from system settings
+      const commissionRate = getAgencyCommissionRate();
+      const customerPrice = Math.round(netCost * (1 + commissionRate / 100));
 
       parsedTours.push({
         id: `kompas-live-${params.stateInc}-${hotelId}-${i}`,
@@ -373,7 +376,7 @@ export async function queryKompasTour(params: Record<string, string>): Promise<a
         oldPrice: Math.round(customerPrice * 1.15),
         originalCostPrice: netCost,
         markupType: 'percent',
-        markupValue: 8,
+        markupValue: commissionRate,
         tourOperator: 'Kompas Tour',
         agencyName: 'SayrHub',
         operatorBadge: 'Kompas Tour Rasmiy',
@@ -422,7 +425,8 @@ export async function queryKompasHotels(params: Record<string, string>): Promise
     // Calculate hotel-only cost (~60% of full tour package containing flight)
     const netTotal = Math.round((tour.originalCostPrice || tour.price) * 0.65);
     const netPerNight = Math.round(netTotal / nights);
-    const customerTotal = Math.round(netTotal * 1.08);
+    const commissionRate = getAgencyCommissionRate();
+    const customerTotal = Math.round(netTotal * (1 + commissionRate / 100));
     const customerPerNight = Math.round(customerTotal / nights);
 
     hotels.push({
@@ -456,7 +460,7 @@ export async function queryKompasHotels(params: Record<string, string>): Promise
       saved: false,
       originalCostPrice: netTotal,
       markupType: 'percent',
-      markupValue: 8,
+      markupValue: commissionRate,
       tourOperator: 'Kompas Tour',
       agencyName: 'SayrHub',
       operatorBadge: 'Kompas Tour Rasmiy'
@@ -588,9 +592,17 @@ export async function queryKompasFlights(params: Record<string, string>): Promis
     }
   ];
 
+  const commissionRate = getAgencyCommissionRate();
+  const flightsWithCommission = baseCharterFlights.map(f => ({
+    ...f,
+    price: Math.round(f.originalCostPrice * (1 + commissionRate / 100)),
+    markupType: 'percent',
+    markupValue: commissionRate
+  }));
+
   if (toCountry !== 'ALL' && toCountry) {
-    return baseCharterFlights.filter(f => f.country.toLowerCase().includes(toCountry.toLowerCase()));
+    return flightsWithCommission.filter(f => f.country.toLowerCase().includes(toCountry.toLowerCase()));
   }
 
-  return baseCharterFlights;
+  return flightsWithCommission;
 }

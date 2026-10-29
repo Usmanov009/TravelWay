@@ -849,7 +849,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           const Icon(Icons.shield_outlined, size: 12, color: AppTheme.accentGreen),
                           const SizedBox(width: 4),
                           Text(
-                            tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi',
+                            '${tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi'} (+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%)',
                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
                           ),
                         ],

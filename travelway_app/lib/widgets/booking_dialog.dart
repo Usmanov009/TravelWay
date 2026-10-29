@@ -184,7 +184,7 @@ class _BookingDialogState extends State<BookingDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text('🏢 ${widget.tour.tourOperator.isNotEmpty ? widget.tour.tourOperator : "Kompas Tour"}', style: const TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-                              Text('🛡️ ${widget.tour.agencyName.isNotEmpty ? widget.tour.agencyName : "SayrHub"}', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                              Text('🛡️ ${widget.tour.agencyName.isNotEmpty ? widget.tour.agencyName : "SayrHub"} (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%)', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ],
@@ -405,6 +405,14 @@ class _BookingDialogState extends State<BookingDialog> {
                         ],
                       ),
                     ],
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('💼 Agentlik xizmati (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%):', style: const TextStyle(fontSize: 11, color: AppTheme.primary)),
+                        const Text('Narxga kiritilgan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                      ],
+                    ),
                     const Divider(color: AppTheme.borderDark, height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

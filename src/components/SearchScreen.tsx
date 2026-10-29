@@ -40,6 +40,7 @@ interface SearchScreenProps {
   comboTours?: ComboTour[];
   flights?: FlightTicket[];
   hotels?: HotelOnly[];
+  agencyCommissionRate?: number;
 }
 
 // Kompas Tour (online.uz.kompastour.com) Constants
@@ -265,7 +266,8 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   onBookHotel,
   comboTours = INITIAL_COMBO_TOURS,
   flights = INITIAL_FLIGHTS,
-  hotels = INITIAL_HOTELS_ONLY
+  hotels = INITIAL_HOTELS_ONLY,
+  agencyCommissionRate = 8
 }) => {
   // Service Mode State ('tours' | 'combo' | 'flights' | 'hotels')
   const [serviceMode, setServiceMode] = useState<SearchServiceMode>('tours');
@@ -1479,6 +1481,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                                 ? `${formatPrice(tour.price * totalTravelers)} jami (${totalTravelers} kishi)`
                                 : "1 kishi uchun to'liq narx")}
                         </span>
+                        <span className="text-[10px] block mt-0.5 font-bold text-emerald-600 dark:text-emerald-400">
+                          Komissiya: +{tour.markupValue || agencyCommissionRate}% kiritilgan
+                        </span>
                       </div>
                     </div>
 
@@ -1498,7 +1503,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                         <span className="truncate">{tour.tourOperator || (tour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}</span>
                       </div>
                       <div className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">
-                        <span>🛡️ {tour.agencyName || 'SayrHub Agentligi'}</span>
+                        <span>🛡️ {tour.agencyName || 'SayrHub'}: +{tour.markupValue || agencyCommissionRate}%</span>
                       </div>
                     </div>
                   </div>

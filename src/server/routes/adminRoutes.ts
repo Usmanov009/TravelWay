@@ -213,21 +213,22 @@ router.delete('/staff/:id', authenticateToken, requireRole('main_admin'), async 
 });
 
 // ==========================================
-// 3. AGENCY COMMISSION (EDITABLE BY ALL ADMINS)
+// 3. AGENCY COMMISSION (EDITABLE BY ALL ADMINS & PERSISTED)
 // ==========================================
-let agencyCommissionRate: number = 8;
+import { getAgencyCommissionRate, setAgencyCommissionRate } from '../services/agencySettings.js';
 
 router.get('/commission', (req, res) => {
-  res.json({ success: true, commissionRate: agencyCommissionRate });
+  const currentRate = getAgencyCommissionRate();
+  res.json({ success: true, commissionRate: currentRate });
 });
 
-router.post('/commission', authenticateToken, requireRole('main_admin', 'tour_admin'), (req: AuthRequest, res) => {
+router.post('/commission', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
   try {
     const { commissionRate } = req.body;
     const num = Number(commissionRate);
     if (!isNaN(num) && num >= 0 && num <= 100) {
-      agencyCommissionRate = num;
-      return res.json({ success: true, commissionRate: agencyCommissionRate });
+      const savedRate = await setAgencyCommissionRate(num, req.user?.username || 'admin');
+      return res.json({ success: true, commissionRate: savedRate });
     }
     res.status(400).json({ success: false, error: "Komissiya foizi 0 dan 100 gacha bo'lishi kerak" });
   } catch (err: any) {

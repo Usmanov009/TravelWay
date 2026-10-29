@@ -19,6 +19,8 @@ interface PriceMarkupModalProps {
   onSave: (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => void;
   tourOperator?: string;
   agencyName?: string;
+  agencyCommissionRate?: number;
+  onApplyToAllCommission?: (rate: number) => void;
 }
 
 export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
@@ -33,7 +35,9 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
   currentMarkupValue,
   onSave,
   tourOperator = 'Kompas Tour',
-  agencyName = 'SayrHub'
+  agencyName = 'SayrHub',
+  agencyCommissionRate = 8,
+  onApplyToAllCommission
 }) => {
   const [markupType, setMarkupType] = useState<'percent' | 'manual'>(currentMarkupType);
   const [percentValue, setPercentValue] = useState<number>(() => {
@@ -261,6 +265,26 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Apply as global agency commission button */}
+              {onApplyToAllCommission && (
+                <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    Tizimdagi umumiy komissiya: <b>{agencyCommissionRate}%</b>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Ushbu ${percentValue}% komissiyani barcha katalogdagi turlar, mehmonxonalar va reyslarga qo'llansinmi?`)) {
+                        onApplyToAllCommission(percentValue);
+                      }
+                    }}
+                    className="text-sky-600 dark:text-sky-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>⚡ Barchasiga {percentValue}% qo'llash</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-2">

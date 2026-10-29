@@ -128,11 +128,22 @@ AdminStaffSchema.pre('save', async function () {
   }
 });
 
+// Agency Settings Schema
+const AgencySettingsSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true, default: 'global_settings' },
+  agencyCommissionRate: { type: Number, default: 8 },
+  agencyName: { type: String, default: 'SayrHub' },
+  tourOperator: { type: String, default: 'Kompas Tour' },
+  updatedBy: String,
+  updatedAt: { type: Date, default: Date.now },
+}, { timestamps: true });
+
 export const TourModel = mongoose.models.Tour || mongoose.model('Tour', TourSchema);
 export const BookingModel = mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
 export const PriceAlertModel = mongoose.models.PriceAlert || mongoose.model('PriceAlert', PriceAlertSchema);
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 export const AdminStaffModel = mongoose.models.AdminStaff || mongoose.model('AdminStaff', AdminStaffSchema);
+export const AgencySettingsModel = mongoose.models.AgencySettings || mongoose.model('AgencySettings', AgencySettingsSchema);
 
 let isConnected = false;
 
@@ -148,6 +159,14 @@ export async function connectDB() {
     });
     isConnected = !!conn.connections[0].readyState;
     console.log(`✅ MongoDB Connected to database: ${conn.connection.name}`);
+
+    // Load agency settings
+    try {
+      const { initAgencySettings } = await import('./src/server/services/agencySettings.js');
+      await initAgencySettings();
+    } catch (e: any) {
+      console.warn('⚠️ Error initializing agency settings from DB:', e.message);
+    }
 
     // Auto-seed initial tours and bookings if empty
     const tourCount = await TourModel.countDocuments();

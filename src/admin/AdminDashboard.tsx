@@ -16,6 +16,8 @@ interface AdminDashboardProps {
   onUpdateBookingStatus: (bookingId: string, status: Booking['status']) => void;
   onSimulatePriceDrop: (tourId: string, price: number) => void;
   onQuickAddTour: () => void;
+  agencyCommissionRate?: number;
+  onUpdateCommissionRate?: (rate: number) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -31,7 +33,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSelectTab,
   onUpdateBookingStatus,
   onSimulatePriceDrop,
-  onQuickAddTour
+  onQuickAddTour,
+  agencyCommissionRate = 8,
+  onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
 
@@ -223,62 +227,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Card 4: Users for Main Admin OR Agency Commission for Tour Admin */}
-        {isMainAdmin ? (
-          <div
-            onClick={() => onSelectTab('users')}
-            className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-indigo-400/60 dark:hover:border-indigo-500/60 transition-all cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
-                Mijozlar Bazasi
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span className="material-symbols-outlined text-[22px]">group</span>
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900 dark:text-white">{usersCount}</span>
-              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                {priceAlerts.length} ta narx signali
-              </span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>Telegram & Web</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
-                Faol foydalanuvchilar
-              </span>
+        {/* Card 4: Agentlik Komissiyasi (Persisted & Editable by all admins) */}
+        <div
+          className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-emerald-400/60 dark:hover:border-emerald-500/60 transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+              Agentlik Komissiyasi
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span className="material-symbols-outlined text-[22px]">percent</span>
             </div>
           </div>
-        ) : (
-          <div
-            onClick={() => onSelectTab('settings')}
-            className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-emerald-400/60 dark:hover:border-emerald-500/60 transition-all cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
-                Agentlik Komissiyasi
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <span className="material-symbols-outlined text-[22px]">percent</span>
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
+          <div className="mt-3 flex items-baseline justify-between">
+            <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                {typeof window !== 'undefined' ? (localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission') || '8') : '8'}%
+                {agencyCommissionRate}%
               </span>
               <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                Faol foiz
+                Katalog ustamasi
               </span>
             </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span>O'zgartirish huquqi bor</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                Sozlamalarga o'tish →
-              </span>
-            </div>
+            {onUpdateCommissionRate && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const input = prompt("Yangi agentlik komissiyasi foizini kiriting (0 - 100%):", String(agencyCommissionRate));
+                  if (input !== null) {
+                    const num = Number(input);
+                    if (!isNaN(num) && num >= 0 && num <= 100) {
+                      onUpdateCommissionRate(num);
+                    }
+                  }
+                }}
+                className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-100 transition tap-bounce cursor-pointer"
+              >
+                O'zgartirish ✏️
+              </button>
+            )}
           </div>
-        )}
+          <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Barcha narxlarga ta'sir qiladi</span>
+            <span
+              onClick={() => onSelectTab('settings')}
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 hover:underline cursor-pointer"
+            >
+              Sozlamalar →
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* 3. ANALYTICS ROW: SALES DYNAMICS & TOP DESTINATIONS */}
