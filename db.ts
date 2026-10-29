@@ -162,6 +162,24 @@ export async function connectDB() {
         console.warn(' Auto-seed warning:', seedErr.message);
       }
     }
+
+    // Auto-seed initial Tour Admin staff if empty
+    const staffCount = await AdminStaffModel.countDocuments();
+    if (staffCount === 0) {
+      try {
+        const { DEFAULT_TOUR_ADMIN } = await import('./src/admin/adminMockData.js');
+        if (DEFAULT_TOUR_ADMIN) {
+          const defaultStaff = {
+            ...DEFAULT_TOUR_ADMIN,
+            password: await bcrypt.hash(DEFAULT_TOUR_ADMIN.password || 'tour123', 10)
+          };
+          await AdminStaffModel.create(defaultStaff);
+          console.log('✅ Seeded default Tour Admin (tour_admin / tour123) into MongoDB');
+        }
+      } catch (seedErr: any) {
+        console.warn(' Auto-seed staff warning:', seedErr.message);
+      }
+    }
   } catch (error: any) {
     console.error(' MongoDB Connection Error:', error.message);
   }

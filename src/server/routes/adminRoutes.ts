@@ -60,7 +60,47 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  // 2. Check Tour Admins in MongoDB
+  // 2. Default Tour Admin check (instant fallback without DB latency)
+  const isDefaultTourUser = (
+    inputUser === 'tour_admin' || 
+    inputUser === 'turadmin' || 
+    inputUser === 'tour' || 
+    inputUser === 'tour@sayrhub.uz' || 
+    inputUser === 'operator'
+  );
+  const isDefaultTourPass = (inputPass === 'tour123' || inputPass === 'admin123');
+
+  if (isDefaultTourUser && isDefaultTourPass) {
+    const tourAdminUser = {
+      id: 'staff-tour-1',
+      name: 'Azizbek Rahimov',
+      username: 'tour_admin',
+      role: 'tour_admin' as const,
+      roleTitle: 'Tur Admin (Operatsion)',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      email: 'tour@sayrhub.uz',
+      phone: '+998 90 123 45 67',
+      assignedDestinations: ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv'],
+      canManageUsers: false,
+      canManageStaff: false,
+      canDeleteTours: false,
+      canEditFinancials: false,
+      canManageBookings: true,
+      canManageCatalog: true,
+      status: 'active' as const
+    };
+
+    const token = generateToken(tourAdminUser, '7d');
+
+    return res.json({
+      success: true,
+      role: 'tour_admin',
+      adminUser: tourAdminUser,
+      token
+    });
+  }
+
+  // 3. Check Tour Admins in MongoDB
   try {
     const staff = await AdminStaffModel.findOne({
       $or: [

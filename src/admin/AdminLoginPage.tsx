@@ -75,9 +75,42 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           try {
             sessionStorage.setItem('sayrhub_admin_auth', 'true');
             sessionStorage.setItem('travelway_admin_auth', 'true');
+            sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
+            sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
           } catch (e) {}
           onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
           onLoginSuccess('main_admin', fallbackAdmin);
+          return;
+        }
+
+        // Fallback for default tour admin
+        if ((cleanUser === 'tour_admin' || cleanUser === 'turadmin' || cleanUser === 'tour' || cleanUser === 'tour@sayrhub.uz' || cleanUser === 'operator') && (cleanPass === 'tour123' || cleanPass === 'admin123')) {
+          const fallbackTourAdmin = {
+            id: 'staff-tour-1',
+            name: 'Azizbek Rahimov',
+            username: 'tour_admin',
+            role: 'tour_admin',
+            roleTitle: 'Tur Admin (Operatsion)',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+            email: 'tour@sayrhub.uz',
+            phone: '+998 90 123 45 67',
+            assignedDestinations: ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv'],
+            canManageUsers: false,
+            canManageStaff: false,
+            canDeleteTours: false,
+            canEditFinancials: false,
+            canManageBookings: true,
+            canManageCatalog: true,
+            status: 'active'
+          };
+          try {
+            sessionStorage.setItem('sayrhub_admin_auth', 'true');
+            sessionStorage.setItem('travelway_admin_auth', 'true');
+            sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackTourAdmin));
+            sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackTourAdmin));
+          } catch (e) {}
+          onShowToast("Tur Admin paneli: Azizbek Rahimov! 🧳", 'success');
+          onLoginSuccess('tour_admin', fallbackTourAdmin);
           return;
         }
         setError(data.error || "Login yoki parol noto'g'ri!");
@@ -95,9 +128,40 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         try {
           sessionStorage.setItem('sayrhub_admin_auth', 'true');
           sessionStorage.setItem('travelway_admin_auth', 'true');
+          sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
+          sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
         } catch (e) {}
         onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
         onLoginSuccess('main_admin', fallbackAdmin);
+        return;
+      }
+      if ((cleanUser === 'tour_admin' || cleanUser === 'turadmin' || cleanUser === 'tour' || cleanUser === 'tour@sayrhub.uz' || cleanUser === 'operator') && (cleanPass === 'tour123' || cleanPass === 'admin123')) {
+        const fallbackTourAdmin = {
+          id: 'staff-tour-1',
+          name: 'Azizbek Rahimov',
+          username: 'tour_admin',
+          role: 'tour_admin',
+          roleTitle: 'Tur Admin (Operatsion)',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+          email: 'tour@sayrhub.uz',
+          phone: '+998 90 123 45 67',
+          assignedDestinations: ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv'],
+          canManageUsers: false,
+          canManageStaff: false,
+          canDeleteTours: false,
+          canEditFinancials: false,
+          canManageBookings: true,
+          canManageCatalog: true,
+          status: 'active'
+        };
+        try {
+          sessionStorage.setItem('sayrhub_admin_auth', 'true');
+          sessionStorage.setItem('travelway_admin_auth', 'true');
+          sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackTourAdmin));
+          sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackTourAdmin));
+        } catch (e) {}
+        onShowToast("Tur Admin paneli: Azizbek Rahimov! 🧳", 'success');
+        onLoginSuccess('tour_admin', fallbackTourAdmin);
         return;
       }
       setError("Server bilan aloqa o'rnatib bo'lmadi. Iltimos, keyinroq qaytadan urinib ko'ring.");
@@ -200,19 +264,42 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             </div>
 
             {/* Quick Demo/Default Credentials Autofill */}
-            <div className="flex items-center justify-between text-[11px] px-1 text-slate-400">
-              <span>Standart login:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPassword('admin123');
-                  setError(null);
-                }}
-                className="text-sky-400 hover:text-sky-300 font-mono bg-sky-950/60 hover:bg-sky-900/60 px-2.5 py-1 rounded-md border border-sky-800/60 transition-colors cursor-pointer"
-              >
-                admin / admin123 ⚡
-              </button>
+            <div className="space-y-1.5 pt-1">
+              <div className="text-[11px] font-semibold text-slate-400 flex items-center justify-between">
+                <span>Tezkor tanlash (Demo / Sinov):</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsername('admin');
+                    setPassword('admin123');
+                    setError(null);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 px-2.5 rounded-xl border transition-all cursor-pointer ${
+                    username === 'admin'
+                      ? 'bg-amber-950/80 border-amber-600/80 text-amber-300 ring-1 ring-amber-500/30'
+                      : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/60 text-slate-300'
+                  }`}
+                >
+                  <span>👑 Bosh Admin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUsername('tour_admin');
+                    setPassword('tour123');
+                    setError(null);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 px-2.5 rounded-xl border transition-all cursor-pointer ${
+                    username === 'tour_admin'
+                      ? 'bg-sky-950/80 border-sky-600/80 text-sky-300 ring-1 ring-sky-500/30'
+                      : 'bg-slate-800/60 hover:bg-slate-800 border-slate-700/60 text-slate-300'
+                  }`}
+                >
+                  <span>🧳 Tur Admin</span>
+                </button>
+              </div>
             </div>
 
             <Button

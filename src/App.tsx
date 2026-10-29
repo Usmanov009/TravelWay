@@ -76,7 +76,16 @@ export default function App() {
       return false;
     }
   });
-  const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>('main_admin');
+  const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>(() => {
+    try {
+      const saved = sessionStorage.getItem('sayrhub_active_admin_user') || sessionStorage.getItem('travelway_active_admin_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.role === 'tour_admin' || parsed?.role === 'main_admin') return parsed.role;
+      }
+    } catch (e) {}
+    return 'main_admin';
+  });
   const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser | null>(() => {
     try {
       const saved = sessionStorage.getItem('sayrhub_active_admin_user') || sessionStorage.getItem('travelway_active_admin_user');
