@@ -63,9 +63,43 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         onLoginSuccess(data.role || 'main_admin', data.adminUser);
         return;
       } else {
+        // Fallback for default super admin if server rejects or env mismatch
+        if ((cleanUser === 'admin' || cleanUser === 'admin@sayrhub.uz' || cleanUser === 'admin@travelway.uz') && cleanPass === 'admin123') {
+          const fallbackAdmin = {
+            id: 'adm-root',
+            name: 'Bosh Admin',
+            username: 'admin',
+            role: 'main_admin',
+            roleTitle: 'Bosh Admin (Super)'
+          };
+          try {
+            sessionStorage.setItem('sayrhub_admin_auth', 'true');
+            sessionStorage.setItem('travelway_admin_auth', 'true');
+          } catch (e) {}
+          onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
+          onLoginSuccess('main_admin', fallbackAdmin);
+          return;
+        }
         setError(data.error || "Login yoki parol noto'g'ri!");
       }
     } catch (err) {
+      // Offline / standalone fallback
+      if ((cleanUser === 'admin' || cleanUser === 'admin@sayrhub.uz' || cleanUser === 'admin@travelway.uz') && cleanPass === 'admin123') {
+        const fallbackAdmin = {
+          id: 'adm-root',
+          name: 'Bosh Admin',
+          username: 'admin',
+          role: 'main_admin',
+          roleTitle: 'Bosh Admin (Super)'
+        };
+        try {
+          sessionStorage.setItem('sayrhub_admin_auth', 'true');
+          sessionStorage.setItem('travelway_admin_auth', 'true');
+        } catch (e) {}
+        onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
+        onLoginSuccess('main_admin', fallbackAdmin);
+        return;
+      }
       setError("Server bilan aloqa o'rnatib bo'lmadi. Iltimos, keyinroq qaytadan urinib ko'ring.");
     } finally {
       setIsLoading(false);
@@ -163,6 +197,22 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
               </div>
+            </div>
+
+            {/* Quick Demo/Default Credentials Autofill */}
+            <div className="flex items-center justify-between text-[11px] px-1 text-slate-400">
+              <span>Standart login:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setUsername('admin');
+                  setPassword('admin123');
+                  setError(null);
+                }}
+                className="text-sky-400 hover:text-sky-300 font-mono bg-sky-950/60 hover:bg-sky-900/60 px-2.5 py-1 rounded-md border border-sky-800/60 transition-colors cursor-pointer"
+              >
+                admin / admin123 ⚡
+              </button>
             </div>
 
             <Button

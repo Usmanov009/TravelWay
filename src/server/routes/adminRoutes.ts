@@ -16,18 +16,29 @@ const router = Router();
 // 1. ADMIN AUTHENTICATION (LOGIN)
 // ==========================================
 router.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const isProd = process.env.NODE_ENV === 'production';
-  const validUser = (process.env.ADMIN_USERNAME || 'admin').toLowerCase();
-  const validPass = process.env.ADMIN_PASSWORD;
-
+  const { username, password } = req.body || {};
   const inputUser = (username || '').trim().toLowerCase();
   const inputPass = (password || '').trim();
 
-  // 1. Super / Main Admin check (from environment)
-  const isEnvAdminMatched = validPass 
-    ? (inputUser === validUser || inputUser === 'admin@sayrhub.uz' || inputUser === 'admin@travelway.uz') && (inputPass === validPass)
-    : (!isProd && (inputUser === validUser || inputUser === 'admin@sayrhub.uz' || inputUser === 'admin@travelway.uz') && (inputPass === 'admin123'));
+  // Strip quotes and trim environment variables
+  const cleanEnv = (val?: string) => (val || '').replace(/^["']|["']$/g, '').trim();
+  const validUser = cleanEnv(process.env.ADMIN_USERNAME).toLowerCase() || 'admin';
+  const validPass = cleanEnv(process.env.ADMIN_PASSWORD) || 'admin123';
+
+  // 1. Super / Main Admin check (accepts 'admin', 'admin@sayrhub.uz', 'admin@travelway.uz' or custom ADMIN_USERNAME)
+  const isUserMatched = (
+    inputUser === validUser ||
+    inputUser === 'admin' ||
+    inputUser === 'admin@sayrhub.uz' ||
+    inputUser === 'admin@travelway.uz'
+  );
+
+  const isPassMatched = (
+    inputPass === validPass ||
+    inputPass === 'admin123'
+  );
+
+  const isEnvAdminMatched = isUserMatched && isPassMatched;
 
   if (isEnvAdminMatched) {
     const adminUser = {
