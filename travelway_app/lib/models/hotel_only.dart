@@ -11,6 +11,11 @@ class HotelOnly {
   final String img;
   final double rating;
   final String roomType;
+  final int? originalCostPrice;
+  final String markupType;
+  final num markupValue;
+  final String tourOperator;
+  final String agencyName;
 
   HotelOnly({
     required this.id,
@@ -25,6 +30,11 @@ class HotelOnly {
     required this.img,
     required this.rating,
     required this.roomType,
+    this.originalCostPrice,
+    this.markupType = 'percent',
+    this.markupValue = 8,
+    this.tourOperator = 'Kompas Tour',
+    this.agencyName = 'SayrHub',
   });
 
   factory HotelOnly.fromJson(Map<String, dynamic> json) {
@@ -41,6 +51,11 @@ class HotelOnly {
       img: json['img']?.toString() ?? '',
       rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : 9.0,
       roomType: json['roomType']?.toString() ?? 'Standard Room',
+      originalCostPrice: (json['originalCostPrice'] is num) ? (json['originalCostPrice'] as num).toInt() : null,
+      markupType: json['markupType']?.toString() ?? 'percent',
+      markupValue: (json['markupValue'] is num) ? (json['markupValue'] as num) : 8,
+      tourOperator: json['tourOperator']?.toString() ?? 'Kompas Tour',
+      agencyName: json['agencyName']?.toString() ?? 'SayrHub',
     );
   }
 }

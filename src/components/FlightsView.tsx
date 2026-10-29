@@ -364,6 +364,22 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                 <span className="font-semibold uppercase">{flight.cabinClass} toifasi</span>
               </div>
 
+              {/* Operator & Agency Badges */}
+              <div
+                className="flex items-center justify-between text-[10px] px-2.5 py-1 rounded-xl border"
+                style={{
+                  backgroundColor: 'var(--tw-subtle)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <span className="font-semibold text-sky-600 dark:text-sky-400 truncate">
+                  🏢 {flight.tourOperator || 'Kompas Tour Blok'}
+                </span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                  🛡️ {flight.agencyName || 'SayrHub Agentligi'}
+                </span>
+              </div>
+
               {/* Price & Actions */}
               <div className="pt-1 flex items-center justify-between gap-2 border-t" style={{ borderColor: 'var(--tw-border)' }}>
                 <div>

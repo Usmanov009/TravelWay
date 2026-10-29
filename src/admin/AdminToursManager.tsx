@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
+import { PriceMarkupModal } from './PriceMarkupModal';
 
 interface AdminToursManagerProps {
   currentRole: AdminRole;
@@ -29,6 +30,11 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
   const [search, setSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
   const [selectedStars, setSelectedStars] = useState('ALL');
+  const [selectedDeparture, setSelectedDeparture] = useState('26'); // 26 = Toshkent, 917 = Samarqand
+
+  // Live Sync & Markup Modal State
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
+  const [markupModalTour, setMarkupModalTour] = useState<TourPackage | null>(null);
 
   // Modal State for Add / Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -155,6 +161,51 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
     setIsModalOpen(false);
   };
 
+  const handleLiveKompasSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
+      if (selectedDeparture) params.set('departure', selectedDeparture);
+      if (search.trim()) params.set('q', search.trim());
+
+      const res = await fetch(`/api/kompas/search?${params.toString()}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
+        data.tours.forEach((newT: TourPackage) => {
+          onUpdateTour(newT);
+        });
+        onShowToast(`Kompas Tour tizimidan ${data.tours.length} ta turpaket jonli yuklandi! 🔄`, 'success');
+      } else {
+        onShowToast("Kompas Tour tizimidan ma'lumot olib bo'lmadi yoki turpaketlar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Kompas Tour bilan aloqa xatosi: " + (e?.message || 'Tarmoq xatosi'), 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
+  const handleSaveMarkup = (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
+    if (!markupModalTour) return;
+
+    const originalCost = markupModalTour.originalCostPrice || Math.round(markupModalTour.price / 1.08);
+    const updatedTour: TourPackage = {
+      ...markupModalTour,
+      price: newPrice,
+      originalCostPrice: originalCost,
+      markupType,
+      markupValue,
+      tourOperator: markupModalTour.tourOperator || 'Kompas Tour',
+      agencyName: markupModalTour.agencyName || 'SayrHub',
+      operatorBadge: 'Kompas Tour Rasmiy'
+    };
+
+    onUpdateTour(updatedTour);
+    onShowToast(`"${updatedTour.title}" narxi $${newPrice} qilib belgilandi! Mobil ilovada yangilandi. ✨`, 'success');
+    setMarkupModalTour(null);
+  };
+
   const handleDelete = (tourId: string, title: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Tur paketlarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -189,21 +240,41 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
       {/* 1. Header and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>🏖️</span> Turpaketlar Katalogi ({tours.length})
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>🏖️</span> Turpaketlar Katalogi ({tours.length})
+            </h2>
+            <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Kompas Tour Live (1:1)</span>
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Kompas Tour va SayrHub tizimidagi barcha faol turpaketlar
+            online.uz.kompastour.com va SayrHub tizimidagi barcha faol turpaketlar
           </p>
         </div>
 
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce shrink-0"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>Yangi Turpaket Qo'shish</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleLiveKompasSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour onlayn tizimidan eng so'nggi jonli narxlar va turlarni yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Kompasdan yuklanmoqda...' : 'Kompasdan Jonli Yuklash 🔄'}</span>
+          </button>
+
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Yangi Turpaket</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Country Filter Pills & Search Bar */}
@@ -214,7 +285,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             <button
               key={c}
               onClick={() => setSelectedCountry(c)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 selectedCountry === c
                   ? 'bg-sky-600 text-white shadow-2xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -223,6 +294,31 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
               {c === 'ALL' ? 'Barcha Davlatlar' : c}
             </button>
           ))}
+        </div>
+
+        {/* Departure City Selector */}
+        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Uchish shahri:</span>
+          <div className="flex items-center gap-1">
+            {[
+              { code: '26', name: 'Toshkent (TAS)' },
+              { code: '917', name: 'Samarqand (SKD)' },
+              { code: '913', name: 'Buxoro (BHK)' }
+            ].map((dep) => (
+              <button
+                key={dep.code}
+                type="button"
+                onClick={() => setSelectedDeparture(dep.code)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  selectedDeparture === dep.code
+                    ? 'bg-sky-600 text-white shadow-2xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {dep.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -324,18 +420,41 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                       <p className="text-[11px] text-slate-400 truncate max-w-[180px]">{tour.flight}</p>
                     </td>
                     <td className="py-3.5 px-3">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-sm font-bold text-sky-600 dark:text-sky-400">${tour.price}</span>
-                        {tour.oldPrice && (
-                          <span className="text-[11px] line-through text-slate-400">
-                            ${tour.oldPrice}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-slate-400">Asl (Kompas):</span>
+                          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                            ${tour.originalCostPrice || Math.round(tour.price / 1.08)}
                           </span>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            {tour.markupType === 'manual' ? "Qo'lda:" : "Ustama:"}
+                          </span>
+                          <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            {tour.markupType === 'manual'
+                              ? `$${tour.price}`
+                              : `+${tour.markupValue || 8}%`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="text-[10px] font-extrabold text-sky-600 dark:text-sky-400">Mijozga:</span>
+                          <span className="text-sm font-black font-mono text-sky-600 dark:text-sky-400">
+                            ${tour.price}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Kafolatlangan</span>
                     </td>
                     <td className="py-3.5 pr-5 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setMarkupModalTour(tour)}
+                          className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1 text-xs font-bold cursor-pointer"
+                          title="Narxni sozlash (% ustama yoki qo'lda kiritish)"
+                        >
+                          <span>💵</span>
+                          <span className="text-[11px]">Narx</span>
+                        </button>
                         <button
                           onClick={() => handleDuplicateTour(tour)}
                           className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 text-slate-600 dark:text-slate-300 transition-colors"
@@ -559,6 +678,26 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* 5. PRICE & MARKUP MODAL (% yoki qo'lda) */}
+      {markupModalTour && (
+        <PriceMarkupModal
+          isOpen={!!markupModalTour}
+          onClose={() => setMarkupModalTour(null)}
+          itemTitle={markupModalTour.title}
+          itemSubtitle={`${markupModalTour.resort || ''}, ${markupModalTour.country || ''} (${markupModalTour.nights})`}
+          itemImage={markupModalTour.img}
+          originalCostPrice={markupModalTour.originalCostPrice || Math.round(markupModalTour.price / 1.08)}
+          currentPrice={markupModalTour.price}
+          currentMarkupType={markupModalTour.markupType || 'percent'}
+          currentMarkupValue={markupModalTour.markupValue || 8}
+          tourOperator={markupModalTour.tourOperator || 'Kompas Tour'}
+          agencyName={markupModalTour.agencyName || 'SayrHub'}
+          onSave={(newPrice, markupType, markupVal) => {
+            handleSaveMarkup(newPrice, markupType, markupVal);
+          }}
+        />
       )}
     </div>
   );

@@ -161,6 +161,58 @@ class TourDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
+                  // Operator & Agency Guarantee Block
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.primary.withOpacity(0.25)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.corporate_fare, color: AppTheme.primary, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Bosh Turoperator:',
+                                style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+                              ),
+                              Text(
+                                tour.tourOperator.isNotEmpty ? tour.tourOperator : 'Kompas Tour',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              'Bronlash Agentligi:',
+                              style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+                            ),
+                            Text(
+                              tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi',
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.accentGreen),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
                   // Flight Information
                   const Text('Parvoz va Tashuvchi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),

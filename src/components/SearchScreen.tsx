@@ -1490,6 +1490,17 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       </div>
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">Transfer ✓ Sug'urta ✓</span>
                     </div>
+
+                    {/* Tour Operator & Agency Trust Info */}
+                    <div className="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
+                      <div className="flex items-center gap-1.5 font-semibold truncate">
+                        <span className="text-xs">🏢</span>
+                        <span className="truncate">{tour.tourOperator || (tour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}</span>
+                      </div>
+                      <div className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">
+                        <span>🛡️ {tour.agencyName || 'SayrHub Agentligi'}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 

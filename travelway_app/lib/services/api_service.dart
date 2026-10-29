@@ -151,7 +151,7 @@ class ApiService {
     return [];
   }
 
-  // 6. Flights
+  // 6. Flights (Live Kompas & DB)
   Future<List<FlightTicket>> getFlights({String from = '', String to = '', String airline = ''}) async {
     try {
       final qParams = <String, String>{};
@@ -159,9 +159,21 @@ class ApiService {
       if (to.isNotEmpty) qParams['to'] = to;
       if (airline.isNotEmpty) qParams['airline'] = airline;
 
-      final uri = Uri.parse('$_baseUrl/api/flights/search').replace(queryParameters: qParams);
-      final res = await http.get(uri).timeout(const Duration(seconds: 6));
+      // Try live Kompas charter allocations first
+      final kompasUri = Uri.parse('$_baseUrl/api/kompas/flights').replace(queryParameters: qParams);
+      final res = await http.get(kompasUri).timeout(const Duration(seconds: 8));
 
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        if (data['success'] == true && data['flights'] is List && (data['flights'] as List).isNotEmpty) {
+          return (data['flights'] as List).map((f) => FlightTicket.fromJson(f)).toList();
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/flights/search');
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         if (data['success'] == true && data['flights'] is List) {
@@ -174,7 +186,7 @@ class ApiService {
     return [];
   }
 
-  // 7. Hotels Only
+  // 7. Hotels Only (Live Kompas & DB)
   Future<List<HotelOnly>> getHotelsOnly({String country = '', String resort = '', String query = ''}) async {
     try {
       final qParams = <String, String>{};
@@ -182,9 +194,21 @@ class ApiService {
       if (resort.isNotEmpty) qParams['resort'] = resort;
       if (query.isNotEmpty) qParams['q'] = query;
 
-      final uri = Uri.parse('$_baseUrl/api/hotels/search').replace(queryParameters: qParams);
-      final res = await http.get(uri).timeout(const Duration(seconds: 6));
+      // Try live Kompas hotel offerings first
+      final kompasUri = Uri.parse('$_baseUrl/api/kompas/hotels').replace(queryParameters: qParams);
+      final res = await http.get(kompasUri).timeout(const Duration(seconds: 8));
 
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        if (data['success'] == true && data['hotels'] is List && (data['hotels'] as List).isNotEmpty) {
+          return (data['hotels'] as List).map((h) => HotelOnly.fromJson(h)).toList();
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/hotels/search');
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         if (data['success'] == true && data['hotels'] is List) {

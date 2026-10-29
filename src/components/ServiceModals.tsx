@@ -438,6 +438,36 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   {selectedFlight.kompasFlightCode} • E-TICKET VOUCHER
                 </span>
               </div>
+
+              {/* Operator and Agency Trust Block */}
+              <div
+                className="p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs"
+                style={{
+                  backgroundColor: 'var(--tw-subtle)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl">✈️</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                      Charter Blok Egasi
+                    </span>
+                    <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
+                      {selectedFlight.tourOperator || 'Kompas Tour Chipta'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                    Chipta Agentligi
+                  </span>
+                  <span className="font-black text-emerald-600 dark:text-emerald-400">
+                    🛡️ {selectedFlight.agencyName || 'SayrHub Agentligi'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Price & Booking Footer */}
@@ -620,6 +650,36 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   <span>{selectedHotel.address}</span>
                 </div>
               )}
+
+              {/* Operator and Agency Trust Block */}
+              <div
+                className="p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs"
+                style={{
+                  backgroundColor: 'var(--tw-subtle)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl">🏨</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                      Asosiy Turoperator
+                    </span>
+                    <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
+                      {selectedHotel.tourOperator || 'Kompas Tour'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                    Rasmiy Hamkor Agentlik
+                  </span>
+                  <span className="font-black text-emerald-600 dark:text-emerald-400">
+                    🛡️ {selectedHotel.agencyName || 'SayrHub Agentligi'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Footer & Actions */}

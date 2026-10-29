@@ -133,6 +133,12 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
                   </span>
                   <span className="font-semibold text-primary">Jonli Narx</span>
                 </div>
+
+                {/* Operator & Agency Badges */}
+                <div className="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
+                  <span className="font-semibold truncate">🏢 Kompas Tour Live</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">🛡️ SayrHub Agentligi</span>
+                </div>
               </CardContent>
             </div>
 

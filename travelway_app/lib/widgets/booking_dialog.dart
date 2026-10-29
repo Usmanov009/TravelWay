@@ -179,6 +179,14 @@ class _BookingDialogState extends State<BookingDialog> {
                           Text(widget.tour.location, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                           const SizedBox(height: 2),
                           Text('\$$_totalPrice • ${widget.tour.nights}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                          const SizedBox(height: 3),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('🏢 ${widget.tour.tourOperator.isNotEmpty ? widget.tour.tourOperator : "Kompas Tour"}', style: const TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                              Text('🛡️ ${widget.tour.agencyName.isNotEmpty ? widget.tour.agencyName : "SayrHub"}', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
                         ],
                       ),
                     ),

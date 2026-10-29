@@ -41,6 +41,13 @@ export interface TourPackage {
   inclusions?: string[];
   lat?: number;
   lng?: number;
+  // Operator & Pricing Markup fields (Kompas Tour & Admin)
+  originalCostPrice?: number; // Asl Kompas Tour narxi ($)
+  markupType?: 'percent' | 'manual'; // '% da' yoki 'qo\'lda'
+  markupValue?: number; // Masalan 8 (+8%) yoki 750 ($750)
+  tourOperator?: string; // e.g. 'Kompas Tour'
+  agencyName?: string; // e.g. 'SayrHub' / 'TravelWay'
+  operatorBadge?: string; // e.g. 'Kompas Tour Rasmiy'
 }
 
 export interface Booking {
@@ -198,6 +205,11 @@ export interface FlightTicket {
   oldPrice?: number;
   isCharter: boolean;
   kompasFlightCode: string;
+  originalCostPrice?: number;
+  markupType?: 'percent' | 'manual';
+  markupValue?: number;
+  tourOperator?: string;
+  agencyName?: string;
 }
 
 export interface HotelOnly {
@@ -223,5 +235,10 @@ export interface HotelOnly {
   kompasHotelCode: string;
   kompasOnlineUrl?: string;
   saved?: boolean;
+  originalCostPrice?: number;
+  markupType?: 'percent' | 'manual';
+  markupValue?: number;
+  tourOperator?: string;
+  agencyName?: string;
 }
 

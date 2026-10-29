@@ -603,6 +603,36 @@ export const Modals: React.FC<ModalsProps> = ({
               </div>
             </div>
 
+            {/* Operator and Agency Trust Block */}
+            <div
+              className="p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs"
+              style={{
+                backgroundColor: 'var(--tw-subtle)',
+                borderColor: 'var(--tw-border)'
+              }}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xl">🏢</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                    Bosh Turoperator
+                  </span>
+                  <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
+                    {tourDetails.tourOperator || (tourDetails.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
+                  Bronlash Agentligi
+                </span>
+                <span className="font-black text-emerald-600 dark:text-emerald-400">
+                  🛡️ {tourDetails.agencyName || 'SayrHub Agentligi'}
+                </span>
+              </div>
+            </div>
+
             {/* Price & Action */}
             <div
               className="p-3.5 rounded-2xl border flex items-center justify-between gap-2"
@@ -1112,6 +1142,19 @@ export const Modals: React.FC<ModalsProps> = ({
                     <div className="flex justify-between items-center text-xs text-emerald-500">
                       <span>Charter & Aeroport yig'imlari:</span>
                       <span className="font-bold">Kiritilgan (0$)</span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
+                      <span style={{ color: 'var(--tw-text-sub)' }}>🏢 Turoperator:</span>
+                      <span className="font-bold text-sky-600 dark:text-sky-400">
+                        {checkoutTour.tourOperator || (checkoutTour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span style={{ color: 'var(--tw-text-sub)' }}>🛡️ Bronlash Agentligi:</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        {checkoutTour.agencyName || 'SayrHub Agentligi'}
+                      </span>
                     </div>
 
                     <div className="border-t pt-2 flex justify-between items-end" style={{ borderColor: 'var(--tw-border)' }}>

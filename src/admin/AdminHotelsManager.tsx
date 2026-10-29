@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HotelOnly } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
+import { PriceMarkupModal } from './PriceMarkupModal';
 
 interface AdminHotelsManagerProps {
   currentRole: AdminRole;
@@ -26,6 +27,8 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
   const isMainAdmin = currentRole === 'main_admin';
   const [search, setSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
+  const [markupModalHotel, setMarkupModalHotel] = useState<HotelOnly | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHotel, setEditingHotel] = useState<HotelOnly | null>(null);
 
@@ -130,6 +133,52 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
     setIsModalOpen(false);
   };
 
+  const handleLiveKompasHotelsSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
+      if (search.trim()) params.set('q', search.trim());
+
+      const res = await fetch(`/api/kompas/hotels?${params.toString()}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
+        data.hotels.forEach((h: HotelOnly) => {
+          onUpdateHotel(h);
+        });
+        onShowToast(`Kompas Tour onlayn tizimidan ${data.hotels.length} ta mehmonxona jonli yuklandi! 🏨`, 'success');
+      } else {
+        onShowToast("Kompas Tour tizimidan mehmonxonalar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Kompas Tour bilan aloqa xatosi", 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
+  const handleSaveMarkup = (newTotalPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
+    if (!markupModalHotel) return;
+    const nights = markupModalHotel.nightsCount || 7;
+    const perNight = Math.round(newTotalPrice / nights);
+    const originalCost = markupModalHotel.originalCostPrice || Math.round(newTotalPrice / 1.08);
+
+    const updated: HotelOnly = {
+      ...markupModalHotel,
+      totalPrice: newTotalPrice,
+      pricePerNight: perNight,
+      originalCostPrice: originalCost,
+      markupType,
+      markupValue,
+      tourOperator: markupModalHotel.tourOperator || 'Kompas Tour',
+      agencyName: markupModalHotel.agencyName || 'SayrHub'
+    };
+
+    onUpdateHotel(updated);
+    onShowToast(`"${updated.name}" narxi $${newTotalPrice} ($${perNight}/kecha) qilib belgilandi! ✨`, 'success');
+    setMarkupModalHotel(null);
+  };
+
   const handleDelete = (id: string, name: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Mehmonxonalarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -159,21 +208,41 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
       {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>🏨</span> Mehmonxonalar Boshqaruvi ({hotels.length})
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>🏨</span> Mehmonxonalar Boshqaruvi ({hotels.length})
+            </h2>
+            <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Kompas Live</span>
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Faqat mehmonxona (hotel-only) bron qilish xizmati katalogi
+            Kompas Tour va SayrHub tizimidagi barcha faol mehmonxonalar
           </p>
         </div>
 
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>Yangi Mehmonxona Qo'shish</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleLiveKompasHotelsSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour onlayn tizimidan eng so'nggi mehmonxona narxlarini yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompasdan Jonli Yuklash 🔄'}</span>
+          </button>
+
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Yangi Mehmonxona</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Filters */}
@@ -271,13 +340,41 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                       </span>
                     </td>
                     <td className="py-3.5 px-3">
-                      <span className="text-sm font-bold font-mono text-sky-600 dark:text-sky-400">
-                        ${h.totalPrice || h.pricePerNight * (h.nightsCount || 7)}
-                      </span>
-                      <p className="text-[10px] text-slate-400">{h.nightsCount || 7} kecha uchun</p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-slate-400">Asl (Kompas):</span>
+                          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                            ${h.originalCostPrice || Math.round((h.totalPrice || h.pricePerNight * (h.nightsCount || 7)) / 1.08)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            {h.markupType === 'manual' ? "Qo'lda:" : "Ustama:"}
+                          </span>
+                          <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            {h.markupType === 'manual'
+                              ? `$${h.totalPrice}`
+                              : `+${h.markupValue || 8}%`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="text-[10px] font-extrabold text-sky-600 dark:text-sky-400">Mijozga:</span>
+                          <span className="text-sm font-black font-mono text-sky-600 dark:text-sky-400">
+                            ${h.totalPrice || h.pricePerNight * (h.nightsCount || 7)}
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3.5 pr-5 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setMarkupModalHotel(h)}
+                          className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1 text-xs font-bold cursor-pointer"
+                          title="Narxni sozlash (% ustama yoki qo'lda kiritish)"
+                        >
+                          <span>💵</span>
+                          <span className="text-[11px]">Narx</span>
+                        </button>
                         <button
                           onClick={() => handleDuplicateHotel(h)}
                           className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 text-slate-600 dark:text-slate-300 transition-colors"
@@ -473,6 +570,26 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* PRICE & MARKUP MODAL */}
+      {markupModalHotel && (
+        <PriceMarkupModal
+          isOpen={!!markupModalHotel}
+          onClose={() => setMarkupModalHotel(null)}
+          itemTitle={markupModalHotel.name}
+          itemSubtitle={`${markupModalHotel.resort}, ${markupModalHotel.country} (${markupModalHotel.nightsCount || 7} kecha)`}
+          itemImage={markupModalHotel.img}
+          originalCostPrice={markupModalHotel.originalCostPrice || Math.round((markupModalHotel.totalPrice || markupModalHotel.pricePerNight * 7) / 1.08)}
+          currentPrice={markupModalHotel.totalPrice || markupModalHotel.pricePerNight * (markupModalHotel.nightsCount || 7)}
+          currentMarkupType={markupModalHotel.markupType || 'percent'}
+          currentMarkupValue={markupModalHotel.markupValue || 8}
+          tourOperator={markupModalHotel.tourOperator || 'Kompas Tour'}
+          agencyName={markupModalHotel.agencyName || 'SayrHub'}
+          onSave={(newPrice, markupType, markupVal) => {
+            handleSaveMarkup(newPrice, markupType, markupVal);
+          }}
+        />
       )}
     </div>
   );

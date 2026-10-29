@@ -355,22 +355,32 @@ export async function queryKompasTour(params: Record<string, string>): Promise<a
       const hotelIdMatch = row.match(/data-hotel="([^"]+)"/i);
       const hotelId = hotelIdMatch ? hotelIdMatch[1] : String(i + 1);
 
+      const netCost = price;
+      // Default 8% agency markup
+      const customerPrice = Math.round(netCost * 1.08);
+
       parsedTours.push({
         id: `kompas-live-${params.stateInc}-${hotelId}-${i}`,
         title: hotelName,
         location: `${resort}, ${countryName}`,
         tag: mealDesc,
-        badgeType: is5Star ? 'ultra' : price < 800 ? 'cheap' : 'beach',
+        badgeType: is5Star ? 'ultra' : customerPrice < 800 ? 'cheap' : 'beach',
         is5Star,
         rating: is5Star ? 9.6 : is4Star ? 8.9 : 8.4,
         nights: `${nights} kecha`,
         flight: tourTitle.includes('GDS') ? `Reys: ${tourTitle}` : `Toshkentdan to'g'ridan-to'g'ri reys (${countryName})`,
-        price,
-        oldPrice,
+        price: customerPrice,
+        oldPrice: Math.round(customerPrice * 1.15),
+        originalCostPrice: netCost,
+        markupType: 'percent',
+        markupValue: 8,
+        tourOperator: 'Kompas Tour',
+        agencyName: 'SayrHub',
+        operatorBadge: 'Kompas Tour Rasmiy',
         img,
         saved: false,
         category: 'beach',
-        departureCity: 'Toshkent (TAS)',
+        departureCity: params.townFrom === '917' ? 'Samarqand (SKD)' : 'Toshkent (TAS)',
         country: countryName,
         resort,
         hotelStars: starTag,
@@ -394,4 +404,193 @@ export async function queryKompasTour(params: Record<string, string>): Promise<a
     console.error('Error fetching live tours from Kompas Tour:', err);
     return [];
   }
+}
+
+/**
+ * Live Hotels query from Kompas Tour packages
+ */
+export async function queryKompasHotels(params: Record<string, string>): Promise<any[]> {
+  const tours = await queryKompasTour(params);
+  const seenHotels = new Set<string>();
+  const hotels: any[] = [];
+
+  for (const tour of tours) {
+    if (!tour.title || seenHotels.has(tour.title)) continue;
+    seenHotels.add(tour.title);
+
+    const nights = tour.nightsCount || 7;
+    // Calculate hotel-only cost (~60% of full tour package containing flight)
+    const netTotal = Math.round((tour.originalCostPrice || tour.price) * 0.65);
+    const netPerNight = Math.round(netTotal / nights);
+    const customerTotal = Math.round(netTotal * 1.08);
+    const customerPerNight = Math.round(customerTotal / nights);
+
+    hotels.push({
+      id: `khotel-${tour.id}`,
+      name: tour.title,
+      resort: tour.resort,
+      country: tour.country,
+      stars: tour.hotelStars || (tour.is5Star ? '5★' : '4★'),
+      rating: tour.rating || 9.0,
+      reviewsCount: 140 + (tour.title.length * 7) % 350,
+      roomType: tour.roomType || 'Standard Deluxe Room',
+      mealType: tour.mealType || 'AI',
+      mealDesc: tour.mealDesc || 'All Inclusive (Hammasi kiritilgan)',
+      pricePerNight: customerPerNight,
+      nightsCount: nights,
+      totalPrice: customerTotal,
+      oldPrice: Math.round(customerTotal * 1.18),
+      amenities: [
+        'Bepul Wi-Fi',
+        'Shaxsiy qumli sohil',
+        'Ochiq suzish havzasi',
+        'Spa va Fitnes markazi',
+        'Bolalar klubi va akvapark'
+      ],
+      distanceToBeach: tour.is5Star ? '1-qator (0m)' : '100 metr',
+      img: tour.img,
+      gallery: [tour.img],
+      address: `${tour.resort}, ${tour.country}`,
+      kompasHotelCode: tour.kompasTourCode || 'KOMPAS-HOTEL',
+      kompasOnlineUrl: tour.kompasOnlineUrl,
+      saved: false,
+      originalCostPrice: netTotal,
+      markupType: 'percent',
+      markupValue: 8,
+      tourOperator: 'Kompas Tour',
+      agencyName: 'SayrHub',
+      operatorBadge: 'Kompas Tour Rasmiy'
+    });
+  }
+
+  return hotels;
+}
+
+/**
+ * Live Flights query based on Kompas Tour charter flight allocations
+ */
+export async function queryKompasFlights(params: Record<string, string>): Promise<any[]> {
+  const fromCity = params.from || 'Toshkent';
+  const toCountry = params.country || 'ALL';
+
+  const baseCharterFlights = [
+    {
+      id: 'kflight-ayt-1',
+      airline: 'Uzbekistan Airways',
+      airlineCode: 'HY',
+      flightNumber: 'HY-3501',
+      departureCity: fromCity,
+      departureAirportCode: fromCity.includes('Samarqand') ? 'SKD' : 'TAS',
+      arrivalCity: 'Antalya',
+      arrivalAirportCode: 'AYT',
+      departureTime: '06:30',
+      arrivalTime: '09:45',
+      flightDuration: '5s 15d',
+      departureDate: '2026-10-15',
+      returnDate: '2026-10-22',
+      tripType: 'round_trip' as const,
+      flightType: 'direct' as const,
+      baggage: '23 kg + 8 kg',
+      cabinClass: 'economy' as const,
+      seatsLeft: 12,
+      originalCostPrice: 380,
+      price: Math.round(380 * 1.08), // $410
+      oldPrice: 460,
+      isCharter: true,
+      kompasFlightCode: 'KOMPAS-CHARTER-AYT',
+      tourOperator: 'Kompas Tour',
+      agencyName: 'SayrHub',
+      country: 'Turkiya'
+    },
+    {
+      id: 'kflight-dxb-1',
+      airline: 'Centrum Air',
+      airlineCode: 'C6',
+      flightNumber: 'C6-301',
+      departureCity: fromCity,
+      departureAirportCode: fromCity.includes('Samarqand') ? 'SKD' : 'TAS',
+      arrivalCity: 'Dubay',
+      arrivalAirportCode: 'DXB',
+      departureTime: '08:15',
+      arrivalTime: '11:00',
+      flightDuration: '3s 45d',
+      departureDate: '2026-10-18',
+      returnDate: '2026-10-25',
+      tripType: 'round_trip' as const,
+      flightType: 'direct' as const,
+      baggage: '20 kg + 7 kg',
+      cabinClass: 'economy' as const,
+      seatsLeft: 8,
+      originalCostPrice: 340,
+      price: Math.round(340 * 1.08), // $367
+      oldPrice: 420,
+      isCharter: true,
+      kompasFlightCode: 'KOMPAS-CHARTER-DXB',
+      tourOperator: 'Kompas Tour',
+      agencyName: 'SayrHub',
+      country: 'BAA'
+    },
+    {
+      id: 'kflight-ssh-1',
+      airline: 'Qanot Sharq',
+      airlineCode: 'HH',
+      flightNumber: 'HH-701',
+      departureCity: fromCity,
+      departureAirportCode: fromCity.includes('Samarqand') ? 'SKD' : 'TAS',
+      arrivalCity: 'Sharm El-Sheikh',
+      arrivalAirportCode: 'SSH',
+      departureTime: '05:00',
+      arrivalTime: '08:30',
+      flightDuration: '5s 30d',
+      departureDate: '2026-10-20',
+      returnDate: '2026-10-27',
+      tripType: 'round_trip' as const,
+      flightType: 'direct' as const,
+      baggage: '20 kg + 7 kg',
+      cabinClass: 'economy' as const,
+      seatsLeft: 14,
+      originalCostPrice: 420,
+      price: Math.round(420 * 1.08), // $454
+      oldPrice: 510,
+      isCharter: true,
+      kompasFlightCode: 'KOMPAS-CHARTER-SSH',
+      tourOperator: 'Kompas Tour',
+      agencyName: 'SayrHub',
+      country: 'Misr'
+    },
+    {
+      id: 'kflight-hkt-1',
+      airline: 'Uzbekistan Airways',
+      airlineCode: 'HY',
+      flightNumber: 'HY-531',
+      departureCity: fromCity,
+      departureAirportCode: fromCity.includes('Samarqand') ? 'SKD' : 'TAS',
+      arrivalCity: 'Phuket',
+      arrivalAirportCode: 'HKT',
+      departureTime: '23:30',
+      arrivalTime: '08:45',
+      flightDuration: '6s 45d',
+      departureDate: '2026-11-01',
+      returnDate: '2026-11-09',
+      tripType: 'round_trip' as const,
+      flightType: 'direct' as const,
+      baggage: '23 kg + 8 kg',
+      cabinClass: 'economy' as const,
+      seatsLeft: 7,
+      originalCostPrice: 580,
+      price: Math.round(580 * 1.08), // $626
+      oldPrice: 720,
+      isCharter: true,
+      kompasFlightCode: 'KOMPAS-CHARTER-HKT',
+      tourOperator: 'Kompas Tour',
+      agencyName: 'SayrHub',
+      country: 'Tailand'
+    }
+  ];
+
+  if (toCountry !== 'ALL' && toCountry) {
+    return baseCharterFlights.filter(f => f.country.toLowerCase().includes(toCountry.toLowerCase()));
+  }
+
+  return baseCharterFlights;
 }

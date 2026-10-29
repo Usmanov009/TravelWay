@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FlightTicket } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
+import { PriceMarkupModal } from './PriceMarkupModal';
 
 interface AdminFlightsManagerProps {
   currentRole: AdminRole;
@@ -26,6 +27,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   const isMainAdmin = currentRole === 'main_admin';
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'CHARTER' | 'REGULAR'>('ALL');
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
+  const [markupModalFlight, setMarkupModalFlight] = useState<FlightTicket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFlight, setEditingFlight] = useState<FlightTicket | null>(null);
 
@@ -146,6 +149,45 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
     setIsModalOpen(false);
   };
 
+  const handleLiveKompasFlightsSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const res = await fetch('/api/kompas/flights?from=Toshkent');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.flights) && data.flights.length > 0) {
+        data.flights.forEach((fl: FlightTicket) => {
+          onUpdateFlight(fl);
+        });
+        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar yuklandi! ✈️`, 'success');
+      } else {
+        onShowToast("Reyslar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Reyslarni yuklashda xatolik yuz berdi", 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
+  const handleSaveMarkup = (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
+    if (!markupModalFlight) return;
+    const originalCost = markupModalFlight.originalCostPrice || Math.round(newPrice / 1.08);
+
+    const updated: FlightTicket = {
+      ...markupModalFlight,
+      price: newPrice,
+      originalCostPrice: originalCost,
+      markupType,
+      markupValue,
+      tourOperator: markupModalFlight.tourOperator || 'Kompas Tour',
+      agencyName: markupModalFlight.agencyName || 'SayrHub'
+    };
+
+    onUpdateFlight(updated);
+    onShowToast(`"${updated.flightNumber}" reysi narxi $${newPrice} qilib belgilandi! ✨`, 'success');
+    setMarkupModalFlight(null);
+  };
+
   const handleDelete = (id: string, flightNumber: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Reyslarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -180,21 +222,41 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>✈️</span> Aviachiptalar & Charter Reyslar ({flights.length})
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>✈️</span> Aviachiptalar & Charter Reyslar ({flights.length})
+            </h2>
+            <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Kompas Charter Live</span>
+            </span>
+          </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Charter va doimiy GDS reyslariga aviachiptalar savdosi va o'rinlar nazorati
           </p>
         </div>
 
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>Yangi Reys Qo'shish</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={handleLiveKompasFlightsSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour charter reyslarini jonli yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompas Reyslarini Yuklash 🔄'}</span>
+          </button>
+
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Yangi Reys</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Filter Pills & Search */}
@@ -308,10 +370,41 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                       )}
                     </td>
                     <td className="py-3.5 px-3">
-                      <span className="text-sm font-bold font-mono text-sky-600 dark:text-sky-400">${f.price}</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-slate-400">Asl (Kompas):</span>
+                          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                            ${f.originalCostPrice || Math.round(f.price / 1.08)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            {f.markupType === 'manual' ? "Qo'lda:" : "Ustama:"}
+                          </span>
+                          <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            {f.markupType === 'manual'
+                              ? `$${f.price}`
+                              : `+${f.markupValue || 8}%`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span className="text-[10px] font-extrabold text-sky-600 dark:text-sky-400">Mijozga:</span>
+                          <span className="text-sm font-black font-mono text-sky-600 dark:text-sky-400">
+                            ${f.price}
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3.5 pr-5 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setMarkupModalFlight(f)}
+                          className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1 text-xs font-bold cursor-pointer"
+                          title="Narxni sozlash (% ustama yoki qo'lda kiritish)"
+                        >
+                          <span>💵</span>
+                          <span className="text-[11px]">Narx</span>
+                        </button>
                         <button
                           onClick={() => handleDuplicateFlight(f)}
                           className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 text-slate-600 dark:text-slate-300 transition-colors"
@@ -519,6 +612,25 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* PRICE & MARKUP MODAL */}
+      {markupModalFlight && (
+        <PriceMarkupModal
+          isOpen={!!markupModalFlight}
+          onClose={() => setMarkupModalFlight(null)}
+          itemTitle={`${markupModalFlight.airline} (${markupModalFlight.flightNumber})`}
+          itemSubtitle={`${markupModalFlight.departureCity} (${markupModalFlight.departureAirportCode}) ➔ ${markupModalFlight.arrivalCity} (${markupModalFlight.arrivalAirportCode})`}
+          originalCostPrice={markupModalFlight.originalCostPrice || Math.round(markupModalFlight.price / 1.08)}
+          currentPrice={markupModalFlight.price}
+          currentMarkupType={markupModalFlight.markupType || 'percent'}
+          currentMarkupValue={markupModalFlight.markupValue || 8}
+          tourOperator={markupModalFlight.tourOperator || 'Kompas Tour'}
+          agencyName={markupModalFlight.agencyName || 'SayrHub'}
+          onSave={(newPrice, markupType, markupVal) => {
+            handleSaveMarkup(newPrice, markupType, markupVal);
+          }}
+        />
       )}
     </div>
   );

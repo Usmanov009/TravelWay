@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { queryKompasTour, DEPARTURE_MAP, COUNTRY_TO_STATEINC } from '../services/kompasService.js';
+import { queryKompasTour, queryKompasHotels, queryKompasFlights, DEPARTURE_MAP, COUNTRY_TO_STATEINC } from '../services/kompasService.js';
 
 const router = Router();
 
@@ -110,7 +110,53 @@ router.get('/hot', async (req, res) => {
   }
 });
 
-// 3. STATUS CHECK: /api/kompas/status
+// 3. LIVE HOTELS: /api/kompas/hotels
+router.get('/hotels', async (req, res) => {
+  try {
+    const departure = String(req.query.departure || '26');
+    const country = String(req.query.country || 'TR').toUpperCase();
+    const resortFilter = String(req.query.resort || '').trim();
+    const townFrom = DEPARTURE_MAP[departure] || '26';
+    const stateInc = COUNTRY_TO_STATEINC[country] || '17';
+
+    let hotels = await queryKompasHotels({ townFrom, stateInc });
+    if (resortFilter && resortFilter !== 'Barcha kurortlar') {
+      hotels = hotels.filter(h => h.resort.toLowerCase().includes(resortFilter.toLowerCase()));
+    }
+
+    res.json({
+      success: true,
+      source: 'online.uz.kompastour.com (Mehmonxonalar)',
+      live: true,
+      count: hotels.length,
+      hotels
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, hotels: [] });
+  }
+});
+
+// 4. LIVE FLIGHTS: /api/kompas/flights
+router.get('/flights', async (req, res) => {
+  try {
+    const from = String(req.query.from || 'Toshkent');
+    const country = String(req.query.country || 'ALL');
+
+    const flights = await queryKompasFlights({ from, country });
+
+    res.json({
+      success: true,
+      source: 'online.uz.kompastour.com (Charter & GDS)',
+      live: true,
+      count: flights.length,
+      flights
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, flights: [] });
+  }
+});
+
+// 5. STATUS CHECK: /api/kompas/status
 router.get('/status', async (req, res) => {
   try {
     const check = await fetch('https://online.uz.kompastour.com/search_tour', { method: 'HEAD' });

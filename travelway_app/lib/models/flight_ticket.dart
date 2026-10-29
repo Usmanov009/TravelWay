@@ -16,6 +16,11 @@ class FlightTicket {
   final String baggage;
   final String airplane;
   final int availableSeats;
+  final int? originalCostPrice;
+  final String markupType;
+  final num markupValue;
+  final String tourOperator;
+  final String agencyName;
 
   FlightTicket({
     required this.id,
@@ -35,6 +40,11 @@ class FlightTicket {
     this.baggage = '20 kg',
     this.airplane = 'Airbus A321neo',
     this.availableSeats = 9,
+    this.originalCostPrice,
+    this.markupType = 'percent',
+    this.markupValue = 8,
+    this.tourOperator = 'Kompas Tour Blok',
+    this.agencyName = 'SayrHub',
   });
 
   factory FlightTicket.fromJson(Map<String, dynamic> json) {
@@ -56,6 +66,11 @@ class FlightTicket {
       baggage: json['baggage']?.toString() ?? '20 kg',
       airplane: json['airplane']?.toString() ?? 'Airbus A320',
       availableSeats: (json['availableSeats'] is num) ? (json['availableSeats'] as num).toInt() : 6,
+      originalCostPrice: (json['originalCostPrice'] is num) ? (json['originalCostPrice'] as num).toInt() : null,
+      markupType: json['markupType']?.toString() ?? 'percent',
+      markupValue: (json['markupValue'] is num) ? (json['markupValue'] as num) : 8,
+      tourOperator: json['tourOperator']?.toString() ?? 'Kompas Tour Blok',
+      agencyName: json['agencyName']?.toString() ?? 'SayrHub',
     );
   }
 }

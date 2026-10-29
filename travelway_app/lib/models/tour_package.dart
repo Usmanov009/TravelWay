@@ -26,6 +26,12 @@ class TourPackage {
   final String kompasTourCode;
   final String kompasOnlineUrl;
   final bool isLiveKompas;
+  final int? originalCostPrice;
+  final String markupType;
+  final num markupValue;
+  final String tourOperator;
+  final String agencyName;
+  final String operatorBadge;
   final double? lat;
   final double? lng;
 
@@ -57,6 +63,12 @@ class TourPackage {
     this.kompasTourCode = '',
     this.kompasOnlineUrl = '',
     this.isLiveKompas = true,
+    this.originalCostPrice,
+    this.markupType = 'percent',
+    this.markupValue = 8,
+    this.tourOperator = 'Kompas Tour',
+    this.agencyName = 'SayrHub',
+    this.operatorBadge = '🟢 Kompas Tour Live (1:1)',
     this.lat,
     this.lng,
   });
@@ -90,6 +102,12 @@ class TourPackage {
       kompasTourCode: json['kompasTourCode']?.toString() ?? '',
       kompasOnlineUrl: json['kompasOnlineUrl']?.toString() ?? '',
       isLiveKompas: json['isLiveKompas'] == true,
+      originalCostPrice: (json['originalCostPrice'] is num) ? (json['originalCostPrice'] as num).toInt() : null,
+      markupType: json['markupType']?.toString() ?? 'percent',
+      markupValue: (json['markupValue'] is num) ? (json['markupValue'] as num) : 8,
+      tourOperator: json['tourOperator']?.toString() ?? 'Kompas Tour',
+      agencyName: json['agencyName']?.toString() ?? 'SayrHub',
+      operatorBadge: json['operatorBadge']?.toString() ?? '🟢 Kompas Tour Live (1:1)',
       lat: (json['lat'] is num) ? (json['lat'] as num).toDouble() : null,
       lng: (json['lng'] is num) ? (json['lng'] as num).toDouble() : null,
     );
@@ -124,6 +142,12 @@ class TourPackage {
       'kompasTourCode': kompasTourCode,
       'kompasOnlineUrl': kompasOnlineUrl,
       'isLiveKompas': isLiveKompas,
+      'originalCostPrice': originalCostPrice,
+      'markupType': markupType,
+      'markupValue': markupValue,
+      'tourOperator': tourOperator,
+      'agencyName': agencyName,
+      'operatorBadge': operatorBadge,
       'lat': lat,
       'lng': lng,
     };
@@ -158,6 +182,12 @@ class TourPackage {
       kompasTourCode: kompasTourCode,
       kompasOnlineUrl: kompasOnlineUrl,
       isLiveKompas: isLiveKompas,
+      originalCostPrice: originalCostPrice,
+      markupType: markupType,
+      markupValue: markupValue,
+      tourOperator: tourOperator,
+      agencyName: agencyName,
+      operatorBadge: operatorBadge,
       lat: lat,
       lng: lng,
     );

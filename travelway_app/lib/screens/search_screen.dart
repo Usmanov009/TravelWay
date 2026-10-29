@@ -819,6 +819,44 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                 ),
+
+                // Tour Operator & Agency Trust Info
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.corporate_fare, size: 13, color: AppTheme.primary),
+                          const SizedBox(width: 4),
+                          Text(
+                            tour.tourOperator.isNotEmpty ? tour.tourOperator : 'Kompas Tour',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.primary),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.shield_outlined, size: 12, color: AppTheme.accentGreen),
+                          const SizedBox(width: 4),
+                          Text(
+                            tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
 
                 // Pricing Row
