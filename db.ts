@@ -53,6 +53,7 @@ const BookingSchema = new mongoose.Schema({
   travelerName: String,
   travelerPhone: String,
   travelerPassport: String,
+  travelerId: String, // Links booking to a registered user (tcId / JWT sub)
   type: { type: String, default: 'active' },
   startDate: String,
   endDate: String,

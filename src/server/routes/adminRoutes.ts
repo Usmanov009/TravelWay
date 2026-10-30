@@ -9,6 +9,7 @@ import {
   optionalAuth,
   AuthRequest 
 } from '../auth.js';
+import { getAgencyCommissionRate, setAgencyCommissionRate } from '../services/agencySettings.js';
 
 const router = Router();
 
@@ -215,7 +216,6 @@ router.delete('/staff/:id', authenticateToken, requireRole('main_admin'), async 
 // ==========================================
 // 3. AGENCY COMMISSION (EDITABLE BY ALL ADMINS & PERSISTED)
 // ==========================================
-import { getAgencyCommissionRate, setAgencyCommissionRate } from '../services/agencySettings.js';
 
 router.get('/commission', (req, res) => {
   const currentRate = getAgencyCommissionRate();

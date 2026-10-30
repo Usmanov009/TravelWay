@@ -35,25 +35,6 @@ router.get('/tours', async (req, res) => {
   }
 });
 
-// ==========================================
-// 1. TOURS ENDPOINTS (FIXES MISSING ENDPOINTS)
-// ==========================================
-router.get('/tours', async (req, res) => {
-  try {
-    const isDBReady = getDBStatus().connected;
-    if (!isDBReady) {
-      return res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
-    }
-    const dbTours = await TourModel.find().maxTimeMS(2500).sort({ createdAt: -1 });
-    if (!dbTours || dbTours.length === 0) {
-      return res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
-    }
-    res.json({ success: true, count: dbTours.length, tours: dbTours });
-  } catch (err: any) {
-    res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
-  }
-});
-
 router.post('/tours', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
   try {
     const tourData = req.body;
@@ -277,7 +258,6 @@ router.delete('/price-alerts/:id', async (req, res) => {
   }
 });
 
-// ==========================================
 // ==========================================
 // 4. USERS ENDPOINTS (PROTECTED)
 // ==========================================

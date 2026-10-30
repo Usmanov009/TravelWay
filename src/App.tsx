@@ -676,6 +676,17 @@ export default function App() {
     showToast(`"${hotel.name}" mehmonxonasi muvaffaqiyatli band qilindi!`, 'success');
   };
 
+  const getAuthHeaders = () => {
+    let token = '';
+    try {
+      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+    } catch (e) {}
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+  };
+
   const handleCancelBooking = (bookingId: string) => {
     const target = bookings.find((b) => b.id === bookingId);
     if (target) {
@@ -723,17 +734,6 @@ export default function App() {
     setBookings((prev) => prev.filter((b) => b.id !== bookingId));
     deleteBookingFromDB(bookingId);
     showToast("Buyurtma tarixdan o'chirildi.", 'info');
-  };
-
-  const getAuthHeaders = () => {
-    let token = '';
-    try {
-      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-    } catch (e) {}
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
   };
 
   // ADMIN OPERATIONS (CRUD FOR TOURS, COMBOS, FLIGHTS, HOTELS, BOOKINGS, STAFF)
