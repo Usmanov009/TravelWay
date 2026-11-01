@@ -425,7 +425,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
   // Filter parsing logic
   const filteredTours = useMemo(() => {
-    const currentPool = liveTours.length > 0 ? liveTours : tours;
+    const currentPool = tours;
     return currentPool.filter((tour) => {
       // 1. Departure City
       if (departureCity && tour.departureCity && !tour.isLiveKompas) {
@@ -1369,7 +1369,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             className="text-[10px] sm:text-xs"
             style={{ color: 'var(--tw-text-sub)' }}
           >
-            Valyuta: <strong style={{ color: 'var(--tw-text-main)' }}>{currency}</strong> • Jonli 1:1 Kompas
+            Valyuta: <strong style={{ color: 'var(--tw-text-main)' }}>{currency}</strong>
           </span>
         </div>
 
@@ -1393,15 +1393,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       <Badge variant="default" className="text-[9px] font-extrabold px-2 py-0.5 uppercase tracking-wider shadow-xs">
                         {tour.mealType || tour.tag}
                       </Badge>
-                      <Badge variant="outline" className="bg-black/60 backdrop-blur-md text-emerald-300 text-[9px] font-mono font-bold px-2 py-0.5 border-emerald-500/30">
-                        {tour.kompasTourCode || 'TW-UZ'}
-                      </Badge>
-                      {tour.isLiveKompas && (
-                        <Badge variant="secondary" className="bg-emerald-600 text-white text-[8px] font-black px-2 py-0.5 flex items-center gap-1 shadow-xs border border-white/20">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                          <span>Jonli 1:1 Narx</span>
-                        </Badge>
-                      )}
+
                     </div>
 
                     {/* Price Alert Bell */}
@@ -1473,17 +1465,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                           {formatPrice(tour.price)}
                         </p>
                         <span className="text-[10px] block mt-0.5 font-medium text-muted-foreground">
-                          {tour.isLiveKompas
-                            ? (adultsCount > 1 
-                                ? `${formatPrice(Math.round(tour.price / adultsCount))} / kishi (${totalTravelers} kishi jami)`
-                                : "1 kishi uchun to'liq narx")
-                            : (totalTravelers > 1
-                                ? `${formatPrice(tour.price * totalTravelers)} jami (${totalTravelers} kishi)`
-                                : "1 kishi uchun to'liq narx")}
+                          {totalTravelers > 1
+                            ? `${formatPrice(tour.price * totalTravelers)} jami (${totalTravelers} kishi)`
+                            : "1 kishi uchun to'liq narx"}
                         </span>
-                        <span className="text-[10px] block mt-0.5 font-bold text-emerald-600 dark:text-emerald-400">
-                          Komissiya: +{tour.markupValue || agencyCommissionRate}% kiritilgan
-                        </span>
+
                       </div>
                     </div>
 
@@ -1496,34 +1482,18 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">Transfer ✓ Sug'urta ✓</span>
                     </div>
 
-                    {/* Tour Operator & Agency Trust Info */}
-                    <div className="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
-                      <div className="flex items-center gap-1.5 font-semibold truncate">
-                        <span className="text-xs">🏢</span>
-                        <span className="truncate">{tour.tourOperator || (tour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}</span>
-                      </div>
-                      <div className="flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">
-                        <span>🛡️ {tour.agencyName || 'SayrHub'}: +{tour.markupValue || agencyCommissionRate}%</span>
-                      </div>
+                    {/* Agency Trust Info */}
+                    <div className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20 font-semibold">
+                      <span className="text-xs">🏢</span>
+                      <span>SayrHub</span>
+                      <span className="text-sky-400 dark:text-sky-500 ml-auto shrink-0">✓ Rasmiy Operator</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
                 <div className="p-4 pt-0 flex items-center gap-2">
-                  {tour.kompasOnlineUrl && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                      className="h-9 px-2.5 rounded-xl"
-                      title="Rasmiy tizimda ochish"
-                    >
-                      <a href={tour.kompasOnlineUrl} target="_blank" rel="noreferrer">
-                        🌐
-                      </a>
-                    </Button>
-                  )}
+
 
                   <Button
                     variant="outline"

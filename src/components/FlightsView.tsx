@@ -74,7 +74,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
               To'g'ridan-to'g'ri Aviachiptalar
             </h3>
             <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-              Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o'rinlar va rasmiy 1:1 narxlar.
+              Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o'rinlar.
             </p>
           </div>
           <span className="text-3xl">🎫</span>
@@ -302,9 +302,6 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">
-                    1:1 Chipta Narxi
-                  </span>
                   <span className="text-[9px] block text-amber-500 font-bold mt-0.5">
                     🔥 {flight.seatsLeft} ta joy qoldi
                   </span>
@@ -364,20 +361,16 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                 <span className="font-semibold uppercase">{flight.cabinClass} toifasi</span>
               </div>
 
-              {/* Operator & Agency Badges */}
+              {/* Agency Badge */}
               <div
-                className="flex items-center justify-between text-[10px] px-2.5 py-1 rounded-xl border"
+                className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-xl border font-semibold text-sky-600 dark:text-sky-400"
                 style={{
                   backgroundColor: 'var(--tw-subtle)',
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span className="font-semibold text-sky-600 dark:text-sky-400 truncate">
-                  🏢 {flight.tourOperator || 'Kompas Tour Blok'}
-                </span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                  🛡️ {flight.agencyName || 'SayrHub Agentligi'}
-                </span>
+                <span>🏢 SayrHub</span>
+                <span className="ml-auto text-emerald-600 dark:text-emerald-400">✓ Rasmiy Operator</span>
               </div>
 
               {/* Price & Actions */}

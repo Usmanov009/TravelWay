@@ -3,7 +3,7 @@ import { HotSale } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, ExternalLink, Zap } from 'lucide-react';
+import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, Zap } from 'lucide-react';
 
 interface HotDealsScreenProps {
   hotDeals: HotSale[];
@@ -63,7 +63,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-            <span className="font-semibold">Jonli rasmiy Kompas turlari</span>
+            <span className="font-semibold">SayrHub Qaynoq Takliflari</span>
           </div>
           {onRefreshHotDeals && (
             <Button
@@ -131,36 +131,23 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
                   <span className="truncate max-w-[210px] flex items-center gap-1">
                     <Plane className="w-3.5 h-3.5 text-primary" /> {deal.flight}
                   </span>
-                  <span className="font-semibold text-primary">Jonli Narx</span>
+                  <span className="font-semibold text-primary">SayrHub</span>
                 </div>
 
                 {/* Operator & Agency Badges */}
                 <div className="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
-                  <span className="font-semibold truncate">🏢 Kompas Tour Live</span>
+                  <span className="font-semibold truncate">🏢 SayrHub</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">🛡️ SayrHub Agentligi</span>
                 </div>
               </CardContent>
             </div>
 
-            <div className="p-4 pt-0 grid grid-cols-2 gap-2">
-              {deal.kompasOnlineUrl && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="rounded-xl font-semibold text-xs h-9"
-                >
-                  <a href={deal.kompasOnlineUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-1">
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Saytda</span>
-                  </a>
-                </Button>
-              )}
+            <div className="p-4 pt-0 grid grid-cols-1 gap-2">
               <Button
                 variant="default"
                 size="sm"
                 onClick={() => onBookHotDeal(deal)}
-                className={`${deal.kompasOnlineUrl ? '' : 'col-span-2'} rounded-xl font-bold text-xs h-9`}
+                className="rounded-xl font-bold text-xs h-9"
               >
                 Band qilish
               </Button>

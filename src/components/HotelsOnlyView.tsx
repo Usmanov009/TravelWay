@@ -66,7 +66,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
               <span>🏨 Faqat Mehmonxona</span>
               <span>•</span>
-              <span>1:1 Rasmiy Narxlar</span>
+              <span>SayrHub</span>
             </div>
             <h3 className="text-base font-black leading-tight" style={{ color: 'var(--tw-text-main)' }}>
               Mehmonxona Bron Qilish
@@ -258,9 +258,6 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
                   <span className="bg-indigo-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
                     {hotel.stars}
                   </span>
-                  <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/20">
-                    1:1 Narx
-                  </span>
                 </div>
 
                 <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white">
@@ -316,20 +313,16 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
                   ))}
                 </div>
 
-                {/* Operator & Agency Badges */}
+                {/* Agency Badge */}
                 <div
-                  className="flex items-center justify-between text-[10px] px-2.5 py-1 rounded-xl border"
+                  className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-xl border font-semibold text-sky-600 dark:text-sky-400"
                   style={{
                     backgroundColor: 'var(--tw-subtle)',
                     borderColor: 'var(--tw-border)'
                   }}
                 >
-                  <span className="font-semibold text-sky-600 dark:text-sky-400 truncate">
-                    🏢 {hotel.tourOperator || 'Kompas Tour'}
-                  </span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                    🛡️ {hotel.agencyName || 'SayrHub Agentligi'}
-                  </span>
+                  <span>🏢 SayrHub</span>
+                  <span className="ml-auto text-emerald-600 dark:text-emerald-400">✓ Rasmiy Operator</span>
                 </div>
 
                 {/* Price & Actions */}

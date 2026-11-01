@@ -64,9 +64,6 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                   Combo Paket
                 </span>
-                <span className="bg-emerald-600/90 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                  1:1 Rasmiy Narx
-                </span>
               </div>
 
               <div className="absolute bottom-3 left-4 right-4">
@@ -228,7 +225,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
             >
               <div>
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>
-                  1:1 Jami Combo narxi:
+                  Jami Combo narxi:
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-black" style={{ color: 'var(--tw-accent)' }}>
@@ -245,7 +242,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="flex items-center gap-2">
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! SayrHub orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price} (1:1 Rasmiy Narx)\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
+                    `Assalomu alaykum! SayrHub orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price}\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -454,7 +451,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       Charter Blok Egasi
                     </span>
                     <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
-                      {selectedFlight.tourOperator || 'Kompas Tour Chipta'}
+                      {selectedFlight.tourOperator || 'SayrHub'}
                     </span>
                   </div>
                 </div>
@@ -480,7 +477,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
             >
               <div>
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>
-                  1:1 Rasmiy chipta narxi:
+                  Chipta narxi:
                 </span>
                 <div className="flex items-baseline gap-1.5">
                   <span className="text-2xl font-black text-sky-500">
@@ -564,9 +561,6 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="absolute top-3 left-3 flex items-center gap-1.5">
                 <span className="bg-indigo-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                   🏨 Faqat Mehmonxona
-                </span>
-                <span className="bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-white/20">
-                  1:1 Rasmiy Narx
                 </span>
               </div>
 
@@ -666,7 +660,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       Asosiy Turoperator
                     </span>
                     <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
-                      {selectedHotel.tourOperator || 'Kompas Tour'}
+                      {selectedHotel.tourOperator || 'SayrHub'}
                     </span>
                   </div>
                 </div>
