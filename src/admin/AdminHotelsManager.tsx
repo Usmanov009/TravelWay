@@ -31,6 +31,11 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
   const isMainAdmin = currentRole === 'main_admin';
   const [search, setSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
+  const [selectedStars, setSelectedStars] = useState('ALL');
+  const [selectedMeal, setSelectedMeal] = useState('ALL');
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(99999);
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'KOMPAS' | 'ADMIN'>('ALL');
   const [isLiveSyncing, setIsLiveSyncing] = useState(false);
   const [markupModalHotel, setMarkupModalHotel] = useState<HotelOnly | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -201,11 +206,30 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
       !effectiveSearch ||
       h.name.toLowerCase().includes(effectiveSearch) ||
       h.resort.toLowerCase().includes(effectiveSearch) ||
-      h.country.toLowerCase().includes(effectiveSearch);
+      h.country.toLowerCase().includes(effectiveSearch) ||
+      (h.kompasHotelCode && h.kompasHotelCode.toLowerCase().includes(effectiveSearch));
 
     const matchCountry = selectedCountry === 'ALL' || h.country === selectedCountry;
-    return matchSearch && matchCountry;
+    const matchStars = selectedStars === 'ALL' || (h.stars && h.stars.includes(selectedStars));
+    const matchMeal = selectedMeal === 'ALL' || h.mealType === selectedMeal;
+    const matchPrice = h.totalPrice >= minPrice && h.totalPrice <= maxPrice;
+    const matchSource =
+      sourceFilter === 'ALL' ||
+      (sourceFilter === 'KOMPAS' && !!h.kompasHotelCode) ||
+      (sourceFilter === 'ADMIN' && !h.kompasHotelCode);
+
+    return matchSearch && matchCountry && matchStars && matchMeal && matchPrice && matchSource;
   });
+
+  const resetFilters = () => {
+    setSelectedCountry('ALL');
+    setSelectedStars('ALL');
+    setSelectedMeal('ALL');
+    setMinPrice(0);
+    setMaxPrice(99999);
+    setSourceFilter('ALL');
+    setSearch('');
+  };
 
   return (
     <div className="space-y-6">
@@ -273,42 +297,175 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
       </div>
 
       {/* 2. Filters */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {['ALL', 'Turkiya', 'BAA', 'Misr', 'Maldiv', 'Tailand'].map((c) => (
-            <button
-              key={c}
-              onClick={() => setSelectedCountry(c)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                selectedCountry === c
-                  ? 'bg-sky-600 text-white shadow-2xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              {c === 'ALL' ? 'Barcha Davlatlar' : c}
-            </button>
-          ))}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-3">
+        {/* Header and Reset */}
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Mehmonxonalar Filtrlari
+            </span>
+            <span className="text-[10px] bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full font-bold">
+              {filtered.length} ta natija
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="text-[11px] text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>🔄</span> Filtrlarni tozalash
+          </button>
         </div>
 
-        <div className="relative w-full sm:max-w-xs">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
-            search
+        {/* Country Pills */}
+        <div>
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+            🌍 Davlat:
           </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Mehmonxona, shahar..."
-            className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-            >
-              ✕
-            </button>
-          )}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {['ALL', 'Turkiya', 'BAA', 'Misr', 'Maldiv', 'Tailand', 'Vyetnam'].map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setSelectedCountry(c)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  selectedCountry === c
+                    ? 'bg-sky-600 text-white shadow-2xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {c === 'ALL' ? 'Barcha Davlatlar' : c}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Stars, Meal, and Source Pills */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Stars */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              ⭐ Yulduzlar:
+            </span>
+            <div className="flex items-center gap-1">
+              {[
+                { code: 'ALL', label: 'Barchasi' },
+                { code: '5', label: '5★' },
+                { code: '4', label: '4★' },
+                { code: '3', label: '3★' }
+              ].map((s) => (
+                <button
+                  key={s.code}
+                  type="button"
+                  onClick={() => setSelectedStars(s.code)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    selectedStars === s.code
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Meal Type */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              🍽️ Ovqat:
+            </span>
+            <div className="flex flex-wrap items-center gap-1">
+              {['ALL', 'UAI', 'AI', 'FB', 'HB', 'BB', 'RO'].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setSelectedMeal(m)}
+                  className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                    selectedMeal === m
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Source */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              🏷️ Manba:
+            </span>
+            <div className="flex items-center gap-1">
+              {[
+                { code: 'ALL', label: 'Barchasi' },
+                { code: 'KOMPAS', label: 'Kompas Live' },
+                { code: 'ADMIN', label: 'Admin' }
+              ].map((src) => (
+                <button
+                  key={src.code}
+                  type="button"
+                  onClick={() => setSourceFilter(src.code as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    sourceFilter === src.code
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {src.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Price Range */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative w-full sm:max-w-md">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+              search
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Mehmonxona, kurort yoki shahar..."
+              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-full sm:w-auto">
+            <span className="font-semibold shrink-0">💵 Jami narx ($):</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              value={minPrice === 0 ? '' : minPrice}
+              onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
+              className="w-18 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+            <span>—</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="Max"
+              value={maxPrice === 99999 ? '' : maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value) || 99999)}
+              className="w-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+          </div>
         </div>
       </div>
 

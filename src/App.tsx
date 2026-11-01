@@ -746,7 +746,15 @@ export default function App() {
     }).catch((e) => console.warn('MongoDB tour save error:', e));
   };
   const handleUpdateTour = (tour: TourPackage) => {
-    setTours((prev) => prev.map((t) => t.id === tour.id ? tour : t));
+    setTours((prev) => {
+      const idx = prev.findIndex((t) => t.id === tour.id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = tour;
+        return next;
+      }
+      return [tour, ...prev];
+    });
     fetch('/api/db/tours', {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -765,7 +773,15 @@ export default function App() {
     setComboTours((prev) => [combo, ...prev]);
   };
   const handleUpdateComboTour = (combo: ComboTour) => {
-    setComboTours((prev) => prev.map((c) => c.id === combo.id ? combo : c));
+    setComboTours((prev) => {
+      const idx = prev.findIndex((c) => c.id === combo.id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = combo;
+        return next;
+      }
+      return [combo, ...prev];
+    });
   };
   const handleDeleteComboTour = (comboId: string) => {
     setComboTours((prev) => prev.filter((c) => c.id !== comboId));
@@ -775,7 +791,15 @@ export default function App() {
     setFlights((prev) => [flight, ...prev]);
   };
   const handleUpdateFlight = (flight: FlightTicket) => {
-    setFlights((prev) => prev.map((f) => f.id === flight.id ? flight : f));
+    setFlights((prev) => {
+      const idx = prev.findIndex((f) => f.id === flight.id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = flight;
+        return next;
+      }
+      return [flight, ...prev];
+    });
   };
   const handleDeleteFlight = (flightId: string) => {
     setFlights((prev) => prev.filter((f) => f.id !== flightId));
@@ -785,7 +809,15 @@ export default function App() {
     setHotels((prev) => [hotel, ...prev]);
   };
   const handleUpdateHotel = (hotel: HotelOnly) => {
-    setHotels((prev) => prev.map((h) => h.id === hotel.id ? hotel : h));
+    setHotels((prev) => {
+      const idx = prev.findIndex((h) => h.id === hotel.id);
+      if (idx !== -1) {
+        const next = [...prev];
+        next[idx] = hotel;
+        return next;
+      }
+      return [hotel, ...prev];
+    });
   };
   const handleDeleteHotel = (hotelId: string) => {
     setHotels((prev) => prev.filter((h) => h.id !== hotelId));

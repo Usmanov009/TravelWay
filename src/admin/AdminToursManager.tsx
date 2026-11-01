@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
+import { KOMPAS_COUNTRIES, KOMPAS_DEPARTURE_CITIES } from '../components/SearchScreen';
 
 interface AdminToursManagerProps {
   currentRole: AdminRole;
@@ -30,11 +31,36 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
 
-  // Filters
+  // Filters (matching user-facing SearchScreen)
   const [search, setSearch] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('ALL');
+  const [selectedResort, setSelectedResort] = useState('Barcha kurortlar');
+  const [selectedDeparture, setSelectedDeparture] = useState('26'); // 26 = Toshkent
+  const [selectedMeal, setSelectedMeal] = useState('ALL');
   const [selectedStars, setSelectedStars] = useState('ALL');
-  const [selectedDeparture, setSelectedDeparture] = useState('26'); // 26 = Toshkent, 917 = Samarqand
+  const [nightsFilter, setNightsFilter] = useState('ALL');
+  const [adultsCount, setAdultsCount] = useState(2);
+  const [childrenCount, setChildrenCount] = useState(0);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(99999);
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | 'KOMPAS' | 'ADMIN'>('ALL');
+  const [departureDateFilter, setDepartureDateFilter] = useState(() =>
+    new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10)
+  );
+
+  // Active country object & resorts
+  const currentCountryObj = useMemo(() => {
+    return KOMPAS_COUNTRIES.find((c) => c.code === selectedCountry) || KOMPAS_COUNTRIES[0];
+  }, [selectedCountry]);
+
+  const availableResorts = useMemo(() => {
+    return currentCountryObj.resorts;
+  }, [currentCountryObj]);
+
+  const handleCountrySelect = (code: string) => {
+    setSelectedCountry(code);
+    setSelectedResort('Barcha kurortlar');
+  };
 
   // Live Sync & Markup Modal State
   const [isLiveSyncing, setIsLiveSyncing] = useState(false);
@@ -168,9 +194,33 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
   const handleLiveKompasSync = async () => {
     setIsLiveSyncing(true);
     try {
+      let nights_from = '5';
+      let nights_till = '14';
+      if (nightsFilter && nightsFilter !== 'ALL') {
+        if (nightsFilter === '5-6') {
+          nights_from = '5';
+          nights_till = '6';
+        } else if (nightsFilter === '7-8') {
+          nights_from = '7';
+          nights_till = '8';
+        } else if (nightsFilter === '9-11') {
+          nights_from = '9';
+          nights_till = '11';
+        } else if (nightsFilter === '12+') {
+          nights_from = '12';
+          nights_till = '21';
+        }
+      }
+
       const params = new URLSearchParams();
       if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
       if (selectedDeparture) params.set('departure', selectedDeparture);
+      if (selectedResort && selectedResort !== 'Barcha kurortlar') params.set('resort', selectedResort);
+      if (departureDateFilter) params.set('checkin_beg', departureDateFilter.replace(/-/g, ''));
+      params.set('nights_from', nights_from);
+      params.set('nights_till', nights_till);
+      params.set('adult', String(adultsCount));
+      params.set('child', String(childrenCount));
       if (search.trim()) params.set('q', search.trim());
 
       const res = await fetch(`/api/kompas/search?${params.toString()}`);
@@ -179,7 +229,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
         data.tours.forEach((newT: TourPackage) => {
           onUpdateTour(newT);
         });
-        onShowToast(`Kompas Tour tizimidan ${data.tours.length} ta turpaket jonli yuklandi! 🔄`, 'success');
+        onShowToast(`Kompas Tour tizimidan ${data.tours.length} ta turpaket admin panelga jonli olib kirildi! 🔄`, 'success');
       } else {
         onShowToast("Kompas Tour tizimidan ma'lumot olib bo'lmadi yoki turpaketlar topilmadi", 'info');
       }
@@ -223,21 +273,76 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
 
   const effectiveSearch = (search || globalSearch).trim().toLowerCase();
 
-  // Filtered tours
+  // Filtered tours with comprehensive filters
   const filteredTours = tours.filter((t) => {
     const matchSearch =
       !effectiveSearch ||
       t.title.toLowerCase().includes(effectiveSearch) ||
       t.location.toLowerCase().includes(effectiveSearch) ||
       (t.airline && t.airline.toLowerCase().includes(effectiveSearch)) ||
-      (t.resort && t.resort.toLowerCase().includes(effectiveSearch));
-    const matchCountry = selectedCountry === 'ALL' || t.country === selectedCountry;
+      (t.resort && t.resort.toLowerCase().includes(effectiveSearch)) ||
+      (t.kompasTourCode && t.kompasTourCode.toLowerCase().includes(effectiveSearch));
+
+    // Match country
+    const matchCountry =
+      selectedCountry === 'ALL' ||
+      t.country === selectedCountry ||
+      (currentCountryObj && (
+        t.country?.toLowerCase() === currentCountryObj.name.toLowerCase() ||
+        t.location?.toLowerCase().includes(currentCountryObj.name.toLowerCase())
+      ));
+
+    // Match resort
+    const matchResort =
+      selectedResort === 'Barcha kurortlar' ||
+      !selectedResort ||
+      (t.resort && t.resort.toLowerCase().includes(selectedResort.toLowerCase())) ||
+      t.location.toLowerCase().includes(selectedResort.toLowerCase());
+
+    // Match stars
     const matchStars =
       selectedStars === 'ALL' || (t.hotelStars && t.hotelStars.includes(selectedStars));
-    return matchSearch && matchCountry && matchStars;
+
+    // Match meal
+    const matchMeal =
+      selectedMeal === 'ALL' || t.mealType === selectedMeal;
+
+    // Match nights
+    const matchNights = nightsFilter === 'ALL' || (() => {
+      const n = t.nightsCount || (parseInt(t.nights || '0', 10) || 7);
+      if (nightsFilter === '5-6') return n >= 5 && n <= 6;
+      if (nightsFilter === '7-8') return n >= 7 && n <= 8;
+      if (nightsFilter === '9-11') return n >= 9 && n <= 11;
+      if (nightsFilter === '12+') return n >= 12;
+      return true;
+    })();
+
+    // Match price
+    const matchPrice = t.price >= minPrice && t.price <= maxPrice;
+
+    // Match source
+    const matchSource =
+      sourceFilter === 'ALL' ||
+      (sourceFilter === 'KOMPAS' && (t.isLiveKompas || !!t.kompasTourCode)) ||
+      (sourceFilter === 'ADMIN' && !t.isLiveKompas && !t.kompasTourCode);
+
+    return matchSearch && matchCountry && matchResort && matchStars && matchMeal && matchNights && matchPrice && matchSource;
   });
 
-  const countriesList = ['ALL', 'Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv', 'Vyetnam'];
+  const resetFilters = () => {
+    setSelectedCountry('ALL');
+    setSelectedResort('Barcha kurortlar');
+    setSelectedDeparture('26');
+    setSelectedMeal('ALL');
+    setSelectedStars('ALL');
+    setNightsFilter('ALL');
+    setAdultsCount(2);
+    setChildrenCount(0);
+    setMinPrice(0);
+    setMaxPrice(99999);
+    setSourceFilter('ALL');
+    setSearch('');
+  };
 
   return (
     <div className="space-y-6">
@@ -304,52 +409,263 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
         </div>
       </div>
 
-      {/* 2. Country Filter Pills & Search Bar */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-3">
-        {/* Country Pills */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {countriesList.map((c) => (
-            <button
-              key={c}
-              onClick={() => setSelectedCountry(c)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                selectedCountry === c
-                  ? 'bg-sky-600 text-white shadow-2xs'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              {c === 'ALL' ? 'Barcha Davlatlar' : c}
-            </button>
-          ))}
+      {/* 2. Advanced User-Style Filter Form & Kompas Live Search */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-4">
+        {/* Filter Header */}
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🔎</span>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Qidiruv va Saralash Filtrlari
+            </span>
+            <span className="text-[10px] bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full font-bold">
+              {filteredTours.length} ta natija
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="text-[11px] text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>🔄</span> Filtrlarni tozalash
+          </button>
         </div>
 
-        {/* Departure City Selector */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Uchish shahri:</span>
-          <div className="flex items-center gap-1">
-            {[
-              { code: '26', name: 'Toshkent (TAS)' },
-              { code: '917', name: 'Samarqand (SKD)' },
-              { code: '913', name: 'Buxoro (BHK)' }
-            ].map((dep) => (
+        {/* 1. Country Selection Pills */}
+        <div>
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5 uppercase tracking-wider">
+            🌍 Boriladigan Davlat:
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {KOMPAS_COUNTRIES.map((c) => (
               <button
-                key={dep.code}
+                key={c.code}
                 type="button"
-                onClick={() => setSelectedDeparture(dep.code)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  selectedDeparture === dep.code
+                onClick={() => handleCountrySelect(c.code)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  selectedCountry === c.code
                     ? 'bg-sky-600 text-white shadow-2xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
-                {dep.name}
+                <span>{c.flag}</span>
+                <span>{c.name}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="relative w-full sm:max-w-md">
+        {/* 2. Departure City, Resort, and Departure Date */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Departure City */}
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              ✈️ Uchish shahri:
+            </label>
+            <select
+              value={selectedDeparture}
+              onChange={(e) => setSelectedDeparture(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            >
+              <option value="26">Toshkent (TAS)</option>
+              <option value="917">Samarqand (SKD)</option>
+              <option value="915">Namangan (NMA)</option>
+              <option value="916">Farg'ona (FEG)</option>
+              <option value="913">Buxoro (BHK)</option>
+              <option value="918">Urganch (UGC)</option>
+            </select>
+          </div>
+
+          {/* Resort */}
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              🏖️ Kurort / Shahar:
+            </label>
+            <select
+              value={selectedResort}
+              onChange={(e) => setSelectedResort(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            >
+              {availableResorts.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Departure Date */}
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              📅 Jo'nab ketish sanasi:
+            </label>
+            <input
+              type="date"
+              value={departureDateFilter}
+              onChange={(e) => setDepartureDateFilter(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+          </div>
+        </div>
+
+        {/* 3. Nights and Travelers */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Nights filter */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              🌙 Kechalar soni:
+            </span>
+            <div className="flex flex-wrap items-center gap-1">
+              {['ALL', '5-6', '7-8', '9-11', '12+'].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setNightsFilter(n)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    nightsFilter === n
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {n === 'ALL' ? 'Barchasi' : `${n} kecha`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Adults count */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              👤 Kattalar soni:
+            </span>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5, 6].map((cnt) => (
+                <button
+                  key={cnt}
+                  type="button"
+                  onClick={() => setAdultsCount(cnt)}
+                  className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    adultsCount === cnt
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {cnt}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Children count */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              🧒 Bolalar soni:
+            </span>
+            <div className="flex items-center gap-1">
+              {[0, 1, 2, 3, 4].map((cnt) => (
+                <button
+                  key={cnt}
+                  type="button"
+                  onClick={() => setChildrenCount(cnt)}
+                  className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    childrenCount === cnt
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {cnt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 4. Meal Type, Hotel Stars & Tour Source */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Meal Type */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              🍽️ Ovqatlanish turi:
+            </span>
+            <div className="flex flex-wrap items-center gap-1">
+              {['ALL', 'UAI', 'AI', 'FB', 'HB', 'BB', 'RO'].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setSelectedMeal(m)}
+                  className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                    selectedMeal === m
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Hotel Stars */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              ⭐ Yulduzlar:
+            </span>
+            <div className="flex items-center gap-1">
+              {[
+                { code: 'ALL', label: 'Barchasi' },
+                { code: '5', label: '5★' },
+                { code: '4', label: '4★' },
+                { code: '3', label: '3★' }
+              ].map((s) => (
+                <button
+                  key={s.code}
+                  type="button"
+                  onClick={() => setSelectedStars(s.code)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    selectedStars === s.code
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tour Source Filter */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+              🏷️ Tur manbasi:
+            </span>
+            <div className="flex items-center gap-1">
+              {[
+                { code: 'ALL', label: 'Barchasi' },
+                { code: 'KOMPAS', label: 'Kompas Live' },
+                { code: 'ADMIN', label: 'Admin' }
+              ].map((src) => (
+                <button
+                  key={src.code}
+                  type="button"
+                  onClick={() => setSourceFilter(src.code as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    sourceFilter === src.code
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {src.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 5. Search Bar, Price Range and Live Kompas Sync Button */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          {/* Search Input */}
+          <div className="relative w-full lg:max-w-md">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
               search
             </span>
@@ -357,11 +673,12 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Mehmonxona, kurort yoki aviakompaniya..."
+              placeholder="Mehmonxona, kurort yoki kod bo'yicha qidirish..."
               className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
             />
             {search && (
               <button
+                type="button"
                 onClick={() => setSearch('')}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
               >
@@ -370,19 +687,45 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            <span className="text-xs font-medium text-slate-400">Yulduzlar:</span>
-            <select
-              value={selectedStars}
-              onChange={(e) => setSelectedStars(e.target.value)}
-              className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
-            >
-              <option value="ALL">Barchasi</option>
-              <option value="5">5★ Deluxe</option>
-              <option value="4">4★ Standart</option>
-              <option value="3">3★ Qulay</option>
-            </select>
+          {/* Price Range */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-full lg:w-auto">
+            <span className="font-semibold shrink-0">💵 Narx ($):</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              value={minPrice === 0 ? '' : minPrice}
+              onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
+              className="w-18 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+            <span>—</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="Max"
+              value={maxPrice === 99999 ? '' : maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value) || 99999)}
+              className="w-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
           </div>
+
+          {/* Kompas Live Sync Button */}
+          <button
+            type="button"
+            onClick={handleLiveKompasSync}
+            disabled={isLiveSyncing}
+            className="w-full lg:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer shrink-0"
+            title="Tanlangan filtrlarga asosan Kompas Tour onlayn tizimidan jonli turlarni katalogga olib kirish"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>
+              {isLiveSyncing
+                ? 'Kompasdan yuklanmoqda...'
+                : 'Kompasdan Jonli Olib Kirish 🔄'}
+            </span>
+          </button>
         </div>
       </div>
 

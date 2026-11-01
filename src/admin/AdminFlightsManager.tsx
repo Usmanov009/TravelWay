@@ -31,6 +31,11 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   const isMainAdmin = currentRole === 'main_admin';
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'CHARTER' | 'REGULAR'>('ALL');
+  const [selectedDepCity, setSelectedDepCity] = useState('ALL');
+  const [selectedArrCity, setSelectedArrCity] = useState('ALL');
+  const [selectedAirline, setSelectedAirline] = useState('ALL');
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(99999);
   const [isLiveSyncing, setIsLiveSyncing] = useState(false);
   const [markupModalFlight, setMarkupModalFlight] = useState<FlightTicket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -156,13 +161,14 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   const handleLiveKompasFlightsSync = async () => {
     setIsLiveSyncing(true);
     try {
-      const res = await fetch('/api/kompas/flights?from=Toshkent');
+      const fromParam = selectedDepCity !== 'ALL' ? selectedDepCity : 'Toshkent';
+      const res = await fetch(`/api/kompas/flights?from=${encodeURIComponent(fromParam)}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.flights) && data.flights.length > 0) {
         data.flights.forEach((fl: FlightTicket) => {
           onUpdateFlight(fl);
         });
-        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar yuklandi! ✈️`, 'success');
+        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar jonli yuklandi! ✈️`, 'success');
       } else {
         onShowToast("Reyslar topilmadi", 'info');
       }
@@ -211,15 +217,31 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       f.flightNumber.toLowerCase().includes(effectiveSearch) ||
       f.airline.toLowerCase().includes(effectiveSearch) ||
       f.arrivalCity.toLowerCase().includes(effectiveSearch) ||
-      f.departureCity.toLowerCase().includes(effectiveSearch);
+      f.departureCity.toLowerCase().includes(effectiveSearch) ||
+      (f.kompasFlightCode && f.kompasFlightCode.toLowerCase().includes(effectiveSearch));
 
     const matchType =
       filterType === 'ALL' ||
       (filterType === 'CHARTER' && f.isCharter) ||
       (filterType === 'REGULAR' && !f.isCharter);
 
-    return matchSearch && matchType;
+    const matchDep = selectedDepCity === 'ALL' || f.departureCity.toLowerCase().includes(selectedDepCity.toLowerCase());
+    const matchArr = selectedArrCity === 'ALL' || f.arrivalCity.toLowerCase().includes(selectedArrCity.toLowerCase());
+    const matchAirline = selectedAirline === 'ALL' || f.airline.toLowerCase().includes(selectedAirline.toLowerCase());
+    const matchPrice = f.price >= minPrice && f.price <= maxPrice;
+
+    return matchSearch && matchType && matchDep && matchArr && matchAirline && matchPrice;
   });
+
+  const resetFilters = () => {
+    setFilterType('ALL');
+    setSelectedDepCity('ALL');
+    setSelectedArrCity('ALL');
+    setSelectedAirline('ALL');
+    setMinPrice(0);
+    setMaxPrice(99999);
+    setSearch('');
+  };
 
   return (
     <div className="space-y-6">
@@ -287,59 +309,138 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       </div>
 
       {/* 2. Filter Pills & Search */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-3">
+        {/* Header and Reset */}
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Aviachiptalar Filtrlari
+            </span>
+            <span className="text-[10px] bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full font-bold">
+              {filtered.length} ta natija
+            </span>
+          </div>
+
           <button
-            onClick={() => setFilterType('ALL')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              filterType === 'ALL'
-                ? 'bg-sky-600 text-white shadow-2xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+            type="button"
+            onClick={resetFilters}
+            className="text-[11px] text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
           >
-            Barcha Reyslar
-          </button>
-          <button
-            onClick={() => setFilterType('CHARTER')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              filterType === 'CHARTER'
-                ? 'bg-sky-600 text-white shadow-2xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            Faqat Charter
-          </button>
-          <button
-            onClick={() => setFilterType('REGULAR')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              filterType === 'REGULAR'
-                ? 'bg-sky-600 text-white shadow-2xs'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
-          >
-            Doimiy Reyslar
+            <span>🔄</span> Filtrlarni tozalash
           </button>
         </div>
 
-        <div className="relative w-full sm:max-w-xs">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
-            search
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Reys raqami, aviakompaniya yoki shahar..."
-            className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+        {/* Flight Type and Departure / Arrival Cities */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Flight Type */}
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              ✈️ Reys turi:
+            </span>
+            <div className="flex items-center gap-1">
+              {[
+                { code: 'ALL', label: 'Barchasi' },
+                { code: 'CHARTER', label: 'Charter' },
+                { code: 'REGULAR', label: 'Doimiy' }
+              ].map((t) => (
+                <button
+                  key={t.code}
+                  type="button"
+                  onClick={() => setFilterType(t.code as any)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    filterType === t.code
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Departure City */}
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              🛫 Uchish shahri:
+            </label>
+            <select
+              value={selectedDepCity}
+              onChange={(e) => setSelectedDepCity(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
             >
-              ✕
-            </button>
-          )}
+              <option value="ALL">Barchasi</option>
+              <option value="Toshkent">Toshkent (TAS)</option>
+              <option value="Samarqand">Samarqand (SKD)</option>
+              <option value="Namangan">Namangan (NMA)</option>
+              <option value="Buxoro">Buxoro (BHK)</option>
+            </select>
+          </div>
+
+          {/* Arrival City */}
+          <div>
+            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
+              🛬 Qo'nish shahri / Kurort:
+            </label>
+            <select
+              value={selectedArrCity}
+              onChange={(e) => setSelectedArrCity(e.target.value)}
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            >
+              <option value="ALL">Barcha shaharlar</option>
+              <option value="Antalya">Antalya (AYT)</option>
+              <option value="Istanbul">Istanbul (IST)</option>
+              <option value="Dubay">Dubay (DXB)</option>
+              <option value="Sharm">Sharm El-Sheikh (SSH)</option>
+              <option value="Phuket">Phuket (HKT)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Search, Airline, and Price Range */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="relative w-full sm:max-w-md">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+              search
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Reys raqami, aviakompaniya yoki shahar..."
+              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-full sm:w-auto">
+            <span className="font-semibold shrink-0">💵 Narx ($):</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="0"
+              value={minPrice === 0 ? '' : minPrice}
+              onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
+              className="w-18 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+            <span>—</span>
+            <input
+              type="number"
+              min={0}
+              placeholder="Max"
+              value={maxPrice === 99999 ? '' : maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value) || 99999)}
+              className="w-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+            />
+          </div>
         </div>
       </div>
 
