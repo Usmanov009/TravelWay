@@ -547,6 +547,34 @@ export const Modals: React.FC<ModalsProps> = ({
               <SingleTourMap tour={tourDetails} height="190px" />
             </div>
 
+            {/* Uchish / Jo'nab ketish sanasi - faqat olib kirilgan tur paket ichida ko'rinadi */}
+            {tourDetails.departureDate && (
+              <div
+                className="p-3 rounded-2xl border flex items-center justify-between"
+                style={{
+                  backgroundColor: 'var(--tw-subtle)',
+                  borderColor: 'var(--tw-border)'
+                }}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">📅</span>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--tw-text-sub)' }}>
+                      Uchish / Jo'nab ketish sanasi
+                    </span>
+                    <p className="font-extrabold text-xs sm:text-sm" style={{ color: 'var(--tw-accent)' }}>
+                      {tourDetails.departureDate}
+                    </p>
+                  </div>
+                </div>
+                {(tourDetails.isLiveKompas || !!tourDetails.kompasTourCode) && (
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                    ✓ Olib kirilgan paket
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Inclusions Cards */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div

@@ -3,6 +3,7 @@ import { TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
 import { KOMPAS_COUNTRIES, KOMPAS_DEPARTURE_CITIES } from '../components/SearchScreen';
+import { CountrySelectCombobox } from '../components/CountrySelectCombobox';
 
 interface AdminToursManagerProps {
   currentRole: AdminRole;
@@ -437,24 +438,18 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
           </button>
         </div>
 
-        {/* 1. Davlat, Tur Toifasi (Type), Kurort, va Uchish shahri - qulay SELECT */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Davlat Select */}
+        {/* 1. Davlat (Select va Type), Tur Toifasi (Type), Kurort, va Uchish shahri */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+          {/* Davlat Combobox (Select ham, Type ham) */}
           <div>
-            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
-              🌍 Boriladigan Davlat:
-            </label>
-            <select
-              value={selectedCountry}
-              onChange={(e) => handleCountrySelect(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
-            >
-              {KOMPAS_COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.flag} {c.name}
-                </option>
-              ))}
-            </select>
+            <CountrySelectCombobox
+              id="admin-country-combobox"
+              countries={KOMPAS_COUNTRIES}
+              selectedCode={selectedCountry}
+              onSelectCountry={handleCountrySelect}
+              label="🌍 Borish Davlati (Select / Type):"
+              placeholder="Davlatni qidirish..."
+            />
           </div>
 
           {/* Tur Toifasi (Type) Select */}
@@ -465,7 +460,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500 h-[42px]"
             >
               <option value="ALL">Barcha Turlar (Hammasi)</option>
               <option value="beach">🏖️ Plyaj (Beach)</option>
@@ -485,7 +480,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             <select
               value={selectedResort}
               onChange={(e) => setSelectedResort(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500 h-[42px]"
             >
               {availableResorts.map((r) => (
                 <option key={r} value={r}>
@@ -503,7 +498,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             <select
               value={selectedDeparture}
               onChange={(e) => setSelectedDeparture(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500 h-[42px]"
             >
               <option value="26">Toshkent (TAS)</option>
               <option value="917">Samarqand (SKD)</option>
@@ -777,8 +772,8 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                             <span className="text-[11px] text-slate-400 font-mono">
                               {tour.kompasTourCode || `#${tour.id.slice(0, 8)}`}
                             </span>
-                            {tour.departureDate && (
-                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200/70 dark:border-emerald-800/50 flex items-center gap-1">
+                            {(tour.isLiveKompas || !!tour.kompasTourCode) && tour.departureDate && (
+                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded border border-emerald-200/70 dark:border-emerald-800/50 flex items-center gap-1" title="Kompasdan olib kirilgan sana">
                                 <span>📅</span> {tour.departureDate}
                               </span>
                             )}
@@ -799,9 +794,9 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                     <td className="py-3.5 px-3">
                       <p className="font-bold text-slate-900 dark:text-white text-xs">{tour.airline || 'Uzbekistan Airways'}</p>
                       <p className="text-[11px] text-slate-400 truncate max-w-[180px]">{tour.flight}</p>
-                      {tour.departureDate && (
-                        <p className="text-[11px] font-semibold text-sky-600 dark:text-sky-400 flex items-center gap-1 mt-0.5">
-                          <span>📅 Parvoz:</span> <strong className="font-bold">{tour.departureDate}</strong>
+                      {(tour.isLiveKompas || !!tour.kompasTourCode) && tour.departureDate && (
+                        <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5" title="Kompasdan olib kirilgan reys sanasi">
+                          <span>📅 Olib kirilgan sana:</span> <strong className="font-bold">{tour.departureDate}</strong>
                         </p>
                       )}
                     </td>

@@ -278,8 +278,8 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   // Kompas Tour Filter States
   const [departureCity, setDepartureCity] = useState<string>('Toshkent (TAS)');
   const [countryCode, setCountryCode] = useState<string>('TR');
+  const [selectedType, setSelectedType] = useState<string>('ALL'); // Tour Type / Category
   const [selectedResort, setSelectedResort] = useState<string>('Barcha kurortlar');
-  const [departureDate, setDepartureDate] = useState<string>(() => new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10));
   const [nightsFilter, setNightsFilter] = useState<string>('ALL'); // 'ALL' | '5-6' | '7-8' | '9-11' | '12+'
   const [adultsCount, setAdultsCount] = useState<number>(2);
   const [childrenCount, setChildrenCount] = useState<number>(0);
@@ -329,8 +329,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     targetQuery = searchQuery,
     targetNights = nightsFilter,
     targetAdults = adultsCount,
-    targetChildren = childrenCount,
-    targetDate = departureDate
+    targetChildren = childrenCount
   ) => {
     setIsLoading(true);
     try {
@@ -370,9 +369,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
         nights_from,
         nights_till
       });
-      if (targetDate) {
-        params.set('checkin_beg', targetDate.replace(/-/g, ''));
-      }
       if (targetResort && targetResort !== 'Barcha kurortlar') params.set('resort', targetResort);
       if (targetQuery.trim()) params.set('q', targetQuery.trim());
 
@@ -391,18 +387,18 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [adultsCount, childrenCount, countryCode, selectedResort, departureCity, searchQuery, nightsFilter, departureDate, onShowToast]);
+  }, [adultsCount, childrenCount, countryCode, selectedResort, departureCity, searchQuery, nightsFilter, onShowToast]);
 
   // Initial load live fetch
   useEffect(() => {
-    executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+    executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount);
   }, [countryCode]);
 
   // Handle Country Change
   const handleCountryChange = (newCode: string) => {
     setCountryCode(newCode);
     setSelectedResort('Barcha kurortlar');
-    executeLiveSearch(newCode, 'Barcha kurortlar', departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+    executeLiveSearch(newCode, 'Barcha kurortlar', departureCity, searchQuery, nightsFilter, adultsCount, childrenCount);
   };
 
   // Trigger search with micro-loader
@@ -526,6 +522,15 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
         if (!matchTitle && !matchLoc && !matchTag && !matchCode) return false;
       }
 
+      // 10. Tour Type / Category
+      if (selectedType !== 'ALL') {
+        const typeLow = selectedType.toLowerCase();
+        const matchBadge = tour.badgeType && tour.badgeType.toLowerCase() === typeLow;
+        const matchCategory = tour.category && tour.category.toLowerCase().includes(typeLow);
+        const matchTag = tour.tag && tour.tag.toLowerCase().includes(typeLow);
+        if (!matchBadge && !matchCategory && !matchTag) return false;
+      }
+
       return true;
     });
   }, [
@@ -533,6 +538,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     tours,
     departureCity,
     countryCode,
+    selectedType,
     currentCountry,
     selectedResort,
     selectedMeal,
@@ -552,6 +558,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (countryCode !== 'ALL') count++;
+    if (selectedType !== 'ALL') count++;
     if (selectedResort !== 'Barcha kurortlar') count++;
     if (selectedMeal !== 'ALL') count++;
     if (selectedStars !== 'ALL') count++;
@@ -559,10 +566,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
     if (nightsFilter && nightsFilter !== 'ALL' && nightsFilter !== '') count++;
     if (minPrice > 300 || maxPrice < 2000) count++;
     return count;
-  }, [countryCode, selectedResort, selectedMeal, selectedStars, selectedAirline, nightsFilter, minPrice, maxPrice]);
+  }, [countryCode, selectedType, selectedResort, selectedMeal, selectedStars, selectedAirline, nightsFilter, minPrice, maxPrice]);
 
   const handleResetFilters = () => {
     setCountryCode('ALL');
+    setSelectedType('ALL');
     setSelectedResort('Barcha kurortlar');
     setSelectedMeal('ALL');
     setSelectedStars('ALL');
@@ -821,7 +829,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             />
           </div>
 
-          {/* Second row: Resort & Dates */}
+          {/* Second row: Resort & Tour Type (Sana olib tashlandi, Tur Toifasi Select qo'shildi) */}
           <div className="grid grid-cols-2 gap-2.5">
             {/* Курорт (Kurort) */}
             <div
@@ -859,7 +867,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               </select>
             </div>
 
-            {/* Даты вылета (Uchish sanasi) */}
+            {/* Tur Toifasi (Type) */}
             <div
               className="p-2.5 rounded-2xl border transition-colors"
               style={{
@@ -868,22 +876,27 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               }}
             >
               <label
+                htmlFor="search-tour-type"
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                📅 Uchish sanasi (Дата вылета)
+                🏷️ Tur Toifasi (Type)
               </label>
-              <input
-                id="kompas-date"
-                type="date"
-                value={departureDate}
-                onChange={(e) => {
-                  setDepartureDate(e.target.value);
-                  executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, e.target.value);
-                }}
+              <select
+                id="search-tour-type"
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
                 className="w-full bg-transparent text-xs font-extrabold border-0 p-0 focus:ring-0 cursor-pointer"
                 style={{ color: 'var(--tw-text-main)' }}
-              />
+              >
+                <option value="ALL" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Barcha Turlar (Hammasi)</option>
+                <option value="beach" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🏖️ Plyaj (Beach)</option>
+                <option value="luxury" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>💎 Premium / Deluxe</option>
+                <option value="ultra" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>✨ Ultra All Inclusive</option>
+                <option value="family" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>👨‍👩‍👦 Oilaviy (Family)</option>
+                <option value="culture" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🏛️ Madaniy / Tarixiy</option>
+                <option value="cheap" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🔥 Hamyonbop / Qaynoq</option>
+              </select>
             </div>
           </div>
 
@@ -910,7 +923,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                     type="button"
                     onClick={() => {
                       setNightsFilter('ALL');
-                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, 'ALL', adultsCount, childrenCount, departureDate);
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, 'ALL', adultsCount, childrenCount);
                     }}
                     className="text-[10px] text-slate-400 hover:text-white tap-bounce"
                     title="Barcha kunlarga qaytarish"
@@ -934,11 +947,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount);
                     }
                   }}
                   onBlur={() => {
-                    executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount, departureDate);
+                    executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, childrenCount);
                   }}
                   className="w-full bg-transparent text-xs font-extrabold border-0 p-0 focus:ring-0"
                   style={{ color: 'var(--tw-text-main)' }}
@@ -962,7 +975,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       const cur = parseInt(nightsFilter, 10);
                       const next = isNaN(cur) || cur <= 1 ? 1 : cur - 1;
                       setNightsFilter(String(next));
-                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount, departureDate);
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount);
                     }}
                     className="w-5 h-5 rounded flex items-center justify-center text-xs font-black tap-bounce transition"
                     style={{
@@ -979,7 +992,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       const cur = parseInt(nightsFilter, 10);
                       const next = isNaN(cur) ? 7 : cur + 1;
                       setNightsFilter(String(next));
-                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount, departureDate);
+                      executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, String(next), adultsCount, childrenCount);
                     }}
                     className="w-5 h-5 rounded flex items-center justify-center text-xs font-black tap-bounce transition"
                     style={{
@@ -1023,7 +1036,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                         type="button"
                         onClick={() => {
                           setAdultsCount(num);
-                          executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, num, childrenCount, departureDate);
+                          executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, num, childrenCount);
                         }}
                         className={`w-5 h-5 rounded text-[10px] font-bold tap-bounce transition ${
                           adultsCount === num ? 'shadow-xs' : ''
@@ -1055,7 +1068,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       type="button"
                       onClick={() => {
                         setChildrenCount(num);
-                        executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, num, departureDate);
+                        executeLiveSearch(countryCode, selectedResort, departureCity, searchQuery, nightsFilter, adultsCount, num);
                       }}
                       className="w-4 h-4 rounded text-[9px] font-bold tap-bounce"
                       style={{
@@ -1306,6 +1319,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               >
                 <span>{currentCountry.flag}</span>
                 <span>{currentCountry.name}</span>
+              </span>
+            )}
+            {selectedType !== 'ALL' && (
+              <span className="px-2 py-0.5 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 text-[10px] font-bold shrink-0">
+                🏷️ {selectedType === 'beach' ? 'Plyaj' : selectedType === 'luxury' ? 'Premium' : selectedType === 'ultra' ? 'Ultra All Inclusive' : selectedType === 'family' ? 'Oilaviy' : selectedType === 'culture' ? 'Madaniy' : 'Hamyonbop'}
               </span>
             )}
             {nightsFilter && nightsFilter !== 'ALL' && (
