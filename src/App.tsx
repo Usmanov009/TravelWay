@@ -20,6 +20,7 @@ import { Modals } from './components/Modals';
 import { TelegramAuthModal } from './components/TelegramAuthModal';
 import { FlutterCodeViewer } from './components/FlutterCodeViewer';
 import { PriceAlertModal } from './components/PriceAlertModal';
+import { TourBookingPage } from './components/TourBookingPage';
 import { AdminPage } from './admin/AdminPage';
 import { AdminLoginPage } from './admin/AdminLoginPage';
 import { AdminRole, AdminUser } from './admin/adminTypes';
@@ -1146,136 +1147,156 @@ export default function App() {
         </div>
       ) : (
         <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative">
-          {currentTab === 'auth' && (
-            <div className="max-w-md mx-auto py-2 sm:py-6">
-              <AuthScreen
-                currentLang={currentLang}
-                onSelectLang={(lang) => {
-                  setCurrentLang(lang);
-                  showToast(`Ilova tili ${lang} ga o'zgartirildi`, 'info');
-                }}
-                onBack={() => setCurrentTab('search')}
-                onOpenSupport={() => setIsSupportOpen(true)}
-                onRequestOtp={handleRequestOtp}
-                onOpenSocial={(p) => setSocialProvider(p)}
-                onTelegramAuth={handleTelegramAuth}
-                onAuthSuccess={(msg) => {
-                  showToast(msg, 'success');
-                  setCurrentTab('search');
-                }}
-                onShowToast={showToast}
-              />
-            </div>
+          {checkoutTour ? (
+            <TourBookingPage
+              tour={checkoutTour}
+              initialAdults={checkoutAdults}
+              initialChildren={checkoutChildren}
+              initialTravelers={checkoutTravelers}
+              currentName={user.name}
+              currentPhone={user.phone}
+              currentPassport={user.passportNumber}
+              onBack={() => setCheckoutTour(null)}
+              onConfirmBooking={handleConfirmBooking}
+              onShowToast={showToast}
+              onOpenPriceAlert={(tour) => setActivePriceAlertTour(tour)}
+            />
+          ) : (
+            <>
+              {currentTab === 'auth' && (
+                <div className="max-w-md mx-auto py-2 sm:py-6">
+                  <AuthScreen
+                    currentLang={currentLang}
+                    onSelectLang={(lang) => {
+                      setCurrentLang(lang);
+                      showToast(`Ilova tili ${lang} ga o'zgartirildi`, 'info');
+                    }}
+                    onBack={() => setCurrentTab('search')}
+                    onOpenSupport={() => setIsSupportOpen(true)}
+                    onRequestOtp={handleRequestOtp}
+                    onOpenSocial={(p) => setSocialProvider(p)}
+                    onTelegramAuth={handleTelegramAuth}
+                    onAuthSuccess={(msg) => {
+                      showToast(msg, 'success');
+                      setCurrentTab('search');
+                    }}
+                    onShowToast={showToast}
+                  />
+                </div>
+              )}
+
+              {currentTab === 'search' && (
+                <SearchScreen
+                  tours={tours}
+                  comboTours={comboTours}
+                  flights={flights}
+                  hotels={hotels}
+                  onToggleSave={handleToggleSaveTour}
+                  onOpenTourDetails={(tour) => setTourDetails(tour)}
+                  onQuickBook={(tour, count, adults, children) => {
+                    setCheckoutTravelers(count || 2);
+                    setCheckoutAdults(adults !== undefined ? adults : 2);
+                    setCheckoutChildren(children !== undefined ? children : 0);
+                    setCheckoutTour(tour);
+                  }}
+                  onShowToast={showToast}
+                  priceAlerts={priceAlerts}
+                  onSavePriceAlert={handleSavePriceAlert}
+                  onDeletePriceAlert={handleDeletePriceAlert}
+                  onSimulatePriceDrop={handleSimulatePriceDrop}
+                  onBookCombo={handleBookCombo}
+                  onBookFlight={handleBookFlight}
+                  onBookHotel={handleBookHotel}
+                  agencyCommissionRate={agencyCommissionRate}
+                />
+              )}
+
+              {currentTab === 'explore' && (
+                <ExploreScreen
+                  exploreItems={INITIAL_EXPLORE_VIBES}
+                  onSelectVibeItem={(dest) => {
+                    showToast(`${dest} tanlandi!`, 'info');
+                    setCurrentTab('search');
+                  }}
+                />
+              )}
+
+              {currentTab === 'hot' && (
+                <HotDealsScreen
+                  hotDeals={hotDeals}
+                  onBookHotDeal={handleBookHotDeal}
+                  onRefreshHotDeals={fetchLiveHotDeals}
+                  isRefreshing={isRefreshingHotDeals}
+                />
+              )}
+
+              {currentTab === 'trips' && (
+                <TripsScreen
+                  bookings={bookings}
+                  savedTours={savedToursList}
+                  onOpenTourModal={(tour) => setTourDetails(tour)}
+                  onDownloadVoucher={(id, b) => setActiveVoucherBooking(b)}
+                  onCancelBooking={handleCancelBooking}
+                  onRemoveBooking={handleRemoveBooking}
+                  onRemoveSaved={(id) => handleToggleSaveTour(id)}
+                  onNavigateToSearch={() => setCurrentTab('search')}
+                />
+              )}
+
+              {currentTab === 'profile' && (
+                <ProfileScreen
+                  user={user}
+                  cards={cards}
+                  tripsCount={bookings.length}
+                  savedCount={savedToursList.length}
+                  currentLang={currentLang}
+                  themeMode={themeMode}
+                  notificationsEnabled={notificationsEnabled}
+                  onOpenEditProfile={() => setIsEditProfileOpen(true)}
+                  onEditPassport={() => setIsEditPassportOpen(true)}
+                  onOpenAddCard={() => setIsAddCardOpen(true)}
+                  onSetPrimaryCard={(cardId) => {
+                    setCards((prev) => prev.map((c) => ({ ...c, isPrimary: c.id === cardId })));
+                    showToast("Asosiy to'lov kartasi yangilandi", 'info');
+                  }}
+                  onDeleteCard={(cardId) => {
+                    if (cards.length <= 1) {
+                      showToast("Kamida 1 ta faol karta qolishi kerak!", 'error');
+                      return;
+                    }
+                    setCards((prev) => prev.filter((c) => c.id !== cardId));
+                    showToast("Karta o'chirildi", 'info');
+                  }}
+                  onSelectLang={(lang) => {
+                    setCurrentLang(lang);
+                    showToast(`Til o'zgartirildi: ${lang}`, 'info');
+                  }}
+                  onSelectTheme={(theme) => {
+                    setThemeMode(theme);
+                    showToast(`${theme === 'light' ? 'Kunduzgi' : theme === 'dark' ? 'Tungi' : 'Avtomatik'} rejim yoqildi`, 'info');
+                  }}
+                  onToggleNotifications={() => {
+                    setNotificationsEnabled(!notificationsEnabled);
+                    showToast(notificationsEnabled ? "Push bildirishnomalar o'chirildi" : "Push bildirishnomalar yoqildi 🔔", 'info');
+                  }}
+                  onOpenSupport={() => setIsSupportOpen(true)}
+                  onLogout={() => setIsLogoutConfirmOpen(true)}
+                  onShowToast={showToast}
+                />
+              )}
+            </>
           )}
+        </main>
+      )}
 
-            {currentTab === 'search' && (
-              <SearchScreen
-                tours={tours}
-                comboTours={comboTours}
-                flights={flights}
-                hotels={hotels}
-                onToggleSave={handleToggleSaveTour}
-                onOpenTourDetails={(tour) => setTourDetails(tour)}
-                onQuickBook={(tour, count, adults, children) => {
-                  setCheckoutTravelers(count || 2);
-                  setCheckoutAdults(adults !== undefined ? adults : 2);
-                  setCheckoutChildren(children !== undefined ? children : 0);
-                  setCheckoutTour(tour);
-                }}
-                onShowToast={showToast}
-                priceAlerts={priceAlerts}
-                onSavePriceAlert={handleSavePriceAlert}
-                onDeletePriceAlert={handleDeletePriceAlert}
-                onSimulatePriceDrop={handleSimulatePriceDrop}
-                onBookCombo={handleBookCombo}
-                onBookFlight={handleBookFlight}
-                onBookHotel={handleBookHotel}
-                agencyCommissionRate={agencyCommissionRate}
-              />
-            )}
-
-            {currentTab === 'explore' && (
-              <ExploreScreen
-                exploreItems={INITIAL_EXPLORE_VIBES}
-                onSelectVibeItem={(dest) => {
-                  showToast(`${dest} tanlandi!`, 'info');
-                  setCurrentTab('search');
-                }}
-              />
-            )}
-
-            {currentTab === 'hot' && (
-              <HotDealsScreen
-                hotDeals={hotDeals}
-                onBookHotDeal={handleBookHotDeal}
-                onRefreshHotDeals={fetchLiveHotDeals}
-                isRefreshing={isRefreshingHotDeals}
-              />
-            )}
-
-            {currentTab === 'trips' && (
-              <TripsScreen
-                bookings={bookings}
-                savedTours={savedToursList}
-                onOpenTourModal={(tour) => setTourDetails(tour)}
-                onDownloadVoucher={(id, b) => setActiveVoucherBooking(b)}
-                onCancelBooking={handleCancelBooking}
-                onRemoveBooking={handleRemoveBooking}
-                onRemoveSaved={(id) => handleToggleSaveTour(id)}
-                onNavigateToSearch={() => setCurrentTab('search')}
-              />
-            )}
-
-            {currentTab === 'profile' && (
-              <ProfileScreen
-                user={user}
-                cards={cards}
-                tripsCount={bookings.length}
-                savedCount={savedToursList.length}
-                currentLang={currentLang}
-                themeMode={themeMode}
-                notificationsEnabled={notificationsEnabled}
-                onOpenEditProfile={() => setIsEditProfileOpen(true)}
-                onEditPassport={() => setIsEditPassportOpen(true)}
-                onOpenAddCard={() => setIsAddCardOpen(true)}
-                onSetPrimaryCard={(cardId) => {
-                  setCards((prev) => prev.map((c) => ({ ...c, isPrimary: c.id === cardId })));
-                  showToast("Asosiy to'lov kartasi yangilandi", 'info');
-                }}
-                onDeleteCard={(cardId) => {
-                  if (cards.length <= 1) {
-                    showToast("Kamida 1 ta faol karta qolishi kerak!", 'error');
-                    return;
-                  }
-                  setCards((prev) => prev.filter((c) => c.id !== cardId));
-                  showToast("Karta o'chirildi", 'info');
-                }}
-                onSelectLang={(lang) => {
-                  setCurrentLang(lang);
-                  showToast(`Til o'zgartirildi: ${lang}`, 'info');
-                }}
-                onSelectTheme={(theme) => {
-                  setThemeMode(theme);
-                  showToast(`${theme === 'light' ? 'Kunduzgi' : theme === 'dark' ? 'Tungi' : 'Avtomatik'} rejim yoqildi`, 'info');
-                }}
-                onToggleNotifications={() => {
-                  setNotificationsEnabled(!notificationsEnabled);
-                  showToast(notificationsEnabled ? "Push bildirishnomalar o'chirildi" : "Push bildirishnomalar yoqildi 🔔", 'info');
-                }}
-                onOpenSupport={() => setIsSupportOpen(true)}
-                onLogout={() => setIsLogoutConfirmOpen(true)}
-                onShowToast={showToast}
-              />
-            )}
-          </main>
-        )}
-
-        {/* Mobile-Only Bottom Navigation Dock */}
+      {/* Mobile-Only Bottom Navigation Dock (Hidden during dedicated checkout page) */}
+      {!checkoutTour && (
         <BottomNav
           currentTab={currentTab}
           onTabSelect={(tab) => setCurrentTab(tab)}
           activeTripsCount={bookings.length}
         />
+      )}
 
           {/* Interactive Modals Overlays */}
           <Modals
@@ -1293,7 +1314,7 @@ export default function App() {
               setCheckoutTour(t);
             }}
             onOpenPriceAlert={(tour) => setActivePriceAlertTour(tour)}
-            checkoutTour={checkoutTour}
+            checkoutTour={null}
             checkoutTravelers={checkoutTravelers}
             checkoutAdults={checkoutAdults}
             checkoutChildren={checkoutChildren}
