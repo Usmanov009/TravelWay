@@ -12,8 +12,6 @@ interface AdminStaffManagerProps {
   globalSearch?: string;
 }
 
-const POPULAR_DESTINATIONS = ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv', 'Xitoy', 'Vyetnam'];
-
 export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   currentRole,
   currentAdmin,
@@ -33,8 +31,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   const [showModalPassword, setShowModalPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('+998 90 ');
-  const [destinations, setDestinations] = useState('Turkiya, Misr');
-  const [canDeleteTours, setCanDeleteTours] = useState(false);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [visiblePasswordStaffId, setVisiblePasswordStaffId] = useState<string | null>(null);
@@ -47,7 +43,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
         </div>
         <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tur Adminlar Boshqaruvi Cheklangan</h3>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Xodimlar, tur adminlar tayinlash va ularga ruxsatnomalar berish faqat
+          Xodimlar va tur adminlar tayinlash faqat
           <b> 👑 Bosh Admin (Super Admin)</b> vakolatiga kiradi.
         </p>
       </div>
@@ -69,8 +65,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
     generateRandomPassword();
     setEmail('');
     setPhone('+998 90 ');
-    setDestinations('Turkiya, Misr');
-    setCanDeleteTours(false);
     setIsModalOpen(true);
   };
 
@@ -80,17 +74,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
     if (clean && (!username || username.startsWith('tur_'))) {
       setUsername(`tur_${clean.slice(0, 10)}`);
     }
-  };
-
-  const toggleDestination = (dest: string) => {
-    const currentList = destinations.split(',').map(d => d.trim()).filter(Boolean);
-    let updated: string[];
-    if (currentList.includes(dest)) {
-      updated = currentList.filter(d => d !== dest);
-    } else {
-      updated = [...currentList, dest];
-    }
-    setDestinations(updated.join(', '));
   };
 
   const copyCredentials = (staff: AdminUser) => {
@@ -132,13 +115,13 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       email: email.trim() || `${cleanUser}@sayrhub.uz`,
       phone: phone.trim() || '+998 90',
       role: 'tour_admin',
-      roleTitle: 'Tur Admin (Operatsion)',
+      roleTitle: 'Tur Admin',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      assignedDestinations: destinations.split(',').map(d => d.trim()).filter(Boolean),
+      assignedDestinations: ['Barcha yo\'nalishlar'],
       canManageUsers: false,
       canManageStaff: false,
-      canDeleteTours,
-      canEditFinancials: false,
+      canDeleteTours: true,
+      canEditFinancials: true,
       canManageBookings: true,
       canManageCatalog: true,
       createdAt: new Date().toISOString().split('T')[0],
@@ -146,8 +129,17 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       status: 'active'
     };
 
+    try {
+      const existingMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+      existingMap[cleanUser] = cleanPass;
+      if (email.trim()) {
+        existingMap[email.trim().toLowerCase()] = cleanPass;
+      }
+      localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(existingMap));
+    } catch (e) {}
+
     onAddStaff(newStaff);
-    onShowToast(`Yangi tur admin "${cleanName}" login: "${cleanUser}" va paroli bilan tayinlandi!`, 'success');
+    onShowToast(`Yangi tur admin "${cleanName}" login: "${cleanUser}" va paroli bilan muvaffaqiyatli tayinlandi!`, 'success');
     setIsModalOpen(false);
   };
 
@@ -316,25 +308,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     </div>
                   </div>
                 </div>
-
-                {/* Destinations */}
-                <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <span className="text-[11px] font-bold text-slate-400 block">Mas'ul Yo'nalishlar:</span>
-                  <div className="flex flex-wrap gap-1">
-                    {staff.assignedDestinations && staff.assignedDestinations.length > 0 ? (
-                      staff.assignedDestinations.map((d) => (
-                        <span
-                          key={d}
-                          className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-md"
-                        >
-                          {d}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-[11px] text-slate-400">Barcha yo'nalishlar</span>
-                    )}
-                  </div>
-                </div>
               </div>
             );
           })}
@@ -438,39 +411,15 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
 
                 <div>
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    Mas'ul Yo'nalishlar (Tanlang):
+                    Email (Ixtiyoriy)
                   </label>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {POPULAR_DESTINATIONS.map((dest) => {
-                      const isSelected = destinations.includes(dest);
-                      return (
-                        <button
-                          key={dest}
-                          type="button"
-                          onClick={() => toggleDestination(dest)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
-                            isSelected
-                              ? 'bg-sky-600 text-white border-sky-600'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-200'
-                          }`}
-                        >
-                          {isSelected ? `✓ ${dest}` : `+ ${dest}`}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={canDeleteTours}
-                      onChange={(e) => setCanDeleteTours(e.target.checked)}
-                      className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
-                    />
-                    <span>Katalogdagi turlarni butunlay o'chirishga ruxsat berish</span>
-                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="xodim@sayrhub.uz"
+                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                  />
                 </div>
               </div>
 

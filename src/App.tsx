@@ -143,10 +143,24 @@ export default function App() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.staff)) {
-          setAdminStaffList(data.staff);
+          let passMap: Record<string, string> = {};
           try {
-            localStorage.setItem('sayrhub_admin_staff', JSON.stringify(data.staff));
-            localStorage.setItem('travelway_admin_staff', JSON.stringify(data.staff));
+            passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+            const localStaff = JSON.parse(localStorage.getItem('sayrhub_admin_staff') || '[]');
+            localStaff.forEach((s: any) => {
+              if (s.username && s.password) passMap[s.username.toLowerCase()] = s.password;
+            });
+          } catch (e) {}
+
+          const mergedStaff = data.staff.map((s: any) => ({
+            ...s,
+            password: s.password || passMap[(s.username || '').toLowerCase()] || ''
+          }));
+
+          setAdminStaffList(mergedStaff);
+          try {
+            localStorage.setItem('sayrhub_admin_staff', JSON.stringify(mergedStaff));
+            localStorage.setItem('travelway_admin_staff', JSON.stringify(mergedStaff));
           } catch (e) {}
         }
       })
