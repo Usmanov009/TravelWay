@@ -1,0 +1,29 @@
+[
+  {
+    "id": "staff-tour-1",
+    "name": "Azizbek Rahimov",
+    "username": "tour_admin",
+    "password": "$2a$10$vU32iLz7qg5vT6Z0c8HZeOUeTfJc5xU2N1E7C4c.XJ3yB8eE9U2qK",
+    "email": "tour@sayrhub.uz",
+    "phone": "+998 90 123 45 67",
+    "role": "tour_admin",
+    "roleTitle": "Tur Admin (Operatsion)",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
+    "assignedDestinations": [
+      "Turkiya",
+      "BAA",
+      "Misr",
+      "Tailand",
+      "Maldiv"
+    ],
+    "canManageUsers": false,
+    "canManageStaff": false,
+    "canDeleteTours": true,
+    "canEditFinancials": true,
+    "canManageBookings": true,
+    "canManageCatalog": true,
+    "createdAt": "2026-01-15",
+    "lastActive": "Hozir faol",
+    "status": "active"
+  }
+]

@@ -132,7 +132,10 @@ export default function App() {
     if (!isAdminAuthenticated) return;
     let token = '';
     try {
-      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+      token = sessionStorage.getItem('sayrhub_admin_token') || 
+              sessionStorage.getItem('travelway_admin_token') ||
+              localStorage.getItem('sayrhub_admin_token') ||
+              localStorage.getItem('travelway_admin_token') || '';
     } catch (e) {}
     if (!token) return;
 
@@ -694,7 +697,10 @@ export default function App() {
   const getAuthHeaders = () => {
     let token = '';
     try {
-      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+      token = sessionStorage.getItem('sayrhub_admin_token') || 
+              sessionStorage.getItem('travelway_admin_token') ||
+              localStorage.getItem('sayrhub_admin_token') ||
+              localStorage.getItem('travelway_admin_token') || '';
     } catch (e) {}
     return {
       'Content-Type': 'application/json',
@@ -851,7 +857,20 @@ export default function App() {
     deleteBookingFromDB(bookingId);
   };
 
-  const handleAddStaff = (staff: AdminUser) => {
+  const handleAddStaff = async (staff: AdminUser) => {
+    // 1. Cache password locally for fallback
+    if (staff.username && staff.password) {
+      try {
+        const passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+        passMap[staff.username.toLowerCase().trim()] = staff.password.trim();
+        if (staff.email) {
+          passMap[staff.email.toLowerCase().trim()] = staff.password.trim();
+        }
+        localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(passMap));
+      } catch (e) {}
+    }
+
+    // 2. Optimistic local update
     setAdminStaffList((prev) => {
       const updated = [staff, ...prev];
       try {
@@ -861,14 +880,38 @@ export default function App() {
       return updated;
     });
 
-    fetch('/api/admin/staff', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(staff)
-    }).catch((e) => console.warn('Sync staff to backend error:', e));
+    // 3. Persist to MongoDB & backend
+    try {
+      const res = await fetch('/api/admin/staff', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(staff)
+      });
+      const data = await res.json();
+      if (data.success && data.staff) {
+        setAdminStaffList((prev) =>
+          prev.map((s) => s.id === staff.id ? { ...staff, ...data.staff, password: staff.password } : s)
+        );
+      } else if (!data.success && data.error) {
+        showToast(data.error, 'error');
+      }
+    } catch (e) {
+      console.warn('Sync staff to backend error:', e);
+    }
   };
 
-  const handleUpdateStaff = (staff: AdminUser) => {
+  const handleUpdateStaff = async (staff: AdminUser) => {
+    if (staff.username && staff.password) {
+      try {
+        const passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+        passMap[staff.username.toLowerCase().trim()] = staff.password.trim();
+        if (staff.email) {
+          passMap[staff.email.toLowerCase().trim()] = staff.password.trim();
+        }
+        localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(passMap));
+      } catch (e) {}
+    }
+
     setAdminStaffList((prev) => {
       const updated = prev.map((s) => s.id === staff.id ? staff : s);
       try {
@@ -878,14 +921,22 @@ export default function App() {
       return updated;
     });
 
-    fetch('/api/admin/staff', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(staff)
-    }).catch((e) => console.warn('Sync staff update to backend error:', e));
+    try {
+      const res = await fetch('/api/admin/staff', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(staff)
+      });
+      const data = await res.json();
+      if (!data.success && data.error) {
+        showToast(data.error, 'error');
+      }
+    } catch (e) {
+      console.warn('Sync staff update to backend error:', e);
+    }
   };
 
-  const handleRemoveStaff = (staffId: string) => {
+  const handleRemoveStaff = async (staffId: string) => {
     setAdminStaffList((prev) => {
       const updated = prev.filter((s) => s.id !== staffId);
       try {
@@ -895,10 +946,18 @@ export default function App() {
       return updated;
     });
 
-    fetch(`/api/admin/staff/${staffId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    }).catch((e) => console.warn('Delete staff on backend error:', e));
+    try {
+      const res = await fetch(`/api/admin/staff/${staffId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      const data = await res.json();
+      if (!data.success && data.error) {
+        showToast(data.error, 'error');
+      }
+    } catch (e) {
+      console.warn('Delete staff on backend error:', e);
+    }
   };
 
   const handleUpdateCommissionRate = async (newRate: number) => {

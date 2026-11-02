@@ -34,12 +34,14 @@ export async function hashPassword(plainText: string): Promise<string> {
  */
 export async function comparePassword(plainText: string, hashedOrPlain: string): Promise<boolean> {
   if (!plainText || !hashedOrPlain) return false;
+  const cleanPlain = plainText.trim();
+  const cleanHashed = hashedOrPlain.trim();
   // If it's a bcrypt hash (starts with $2a$ or $2b$)
-  if (hashedOrPlain.startsWith('$2a$') || hashedOrPlain.startsWith('$2b$')) {
-    return bcrypt.compare(plainText, hashedOrPlain);
+  if (cleanHashed.startsWith('$2a$') || cleanHashed.startsWith('$2b$')) {
+    return bcrypt.compare(cleanPlain, cleanHashed);
   }
   // Fallback for legacy seeded accounts
-  return plainText === hashedOrPlain;
+  return cleanPlain === cleanHashed;
 }
 
 /**

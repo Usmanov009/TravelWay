@@ -102,18 +102,18 @@ const UserSchema = new mongoose.Schema({
 const AdminStaffSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  username: { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-  email: String,
+  email: { type: String, lowercase: true, trim: true },
   phone: String,
   role: { type: String, default: 'tour_admin' },
-  roleTitle: { type: String, default: 'Tur Admin (Operatsion)' },
+  roleTitle: { type: String, default: 'Tur Admin' },
   avatar: String,
   assignedDestinations: [String],
   canManageUsers: { type: Boolean, default: false },
   canManageStaff: { type: Boolean, default: false },
-  canDeleteTours: { type: Boolean, default: false },
-  canEditFinancials: { type: Boolean, default: false },
+  canDeleteTours: { type: Boolean, default: true },
+  canEditFinancials: { type: Boolean, default: true },
   canManageBookings: { type: Boolean, default: true },
   canManageCatalog: { type: Boolean, default: true },
   createdAt: String,
@@ -147,19 +147,25 @@ export const AdminStaffModel = mongoose.models.AdminStaff || mongoose.model('Adm
 export const AgencySettingsModel = mongoose.models.AgencySettings || mongoose.model('AgencySettings', AgencySettingsSchema);
 
 let isConnected = false;
+let reconnectTimer: NodeJS.Timeout | null = null;
 
 export async function connectDB() {
-  if (isConnected) return;
+  if (isConnected && mongoose.connection.readyState === 1) return;
   if (!MONGODB_URI) {
     console.log('ℹ️ MONGODB_URI belgilanmagan — tizim xavfsiz in-memory zaxira rejimida ishlaydi.');
     return;
   }
   try {
     const conn = await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000,
+      serverSelectionTimeoutMS: 5000,
     });
     isConnected = !!conn.connections[0].readyState;
     console.log(`✅ MongoDB Connected to database: ${conn.connection.name}`);
+
+    if (reconnectTimer) {
+      clearInterval(reconnectTimer);
+      reconnectTimer = null;
+    }
 
     // Load agency settings
     try {
@@ -167,6 +173,14 @@ export async function connectDB() {
       await initAgencySettings();
     } catch (e: any) {
       console.warn('⚠️ Error initializing agency settings from DB:', e.message);
+    }
+
+    // Sync admin staff between MongoDB and persistent storage
+    try {
+      const { syncStaffWithMongoDB } = await import('./src/server/services/adminStaffStorage.js');
+      await syncStaffWithMongoDB();
+    } catch (e: any) {
+      console.warn('⚠️ Error syncing admin staff with DB:', e.message);
     }
 
     // Auto-seed initial tours and bookings if empty
@@ -182,26 +196,30 @@ export async function connectDB() {
         console.warn(' Auto-seed warning:', seedErr.message);
       }
     }
-
-    // Auto-seed initial Tour Admin staff if empty
-    const staffCount = await AdminStaffModel.countDocuments();
-    if (staffCount === 0) {
-      try {
-        const { DEFAULT_TOUR_ADMIN } = await import('./src/admin/adminMockData.js');
-        if (DEFAULT_TOUR_ADMIN) {
-          const defaultStaff = {
-            ...DEFAULT_TOUR_ADMIN,
-            password: await bcrypt.hash(DEFAULT_TOUR_ADMIN.password || 'tour123', 10)
-          };
-          await AdminStaffModel.create(defaultStaff);
-          console.log('✅ Seeded default Tour Admin (tour_admin / tour123) into MongoDB');
-        }
-      } catch (seedErr: any) {
-        console.warn(' Auto-seed staff warning:', seedErr.message);
-      }
-    }
   } catch (error: any) {
+    isConnected = false;
     console.error(' MongoDB Connection Error:', error.message);
+
+    // Schedule background reconnect retry
+    if (!reconnectTimer) {
+      reconnectTimer = setInterval(async () => {
+        if ((mongoose.connection.readyState as number) !== 1) {
+          try {
+            await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+            if ((mongoose.connection.readyState as number) === 1) {
+              isConnected = true;
+              console.log('✅ MongoDB background connection established!');
+              if (reconnectTimer) {
+                clearInterval(reconnectTimer);
+                reconnectTimer = null;
+              }
+              const { syncStaffWithMongoDB } = await import('./src/server/services/adminStaffStorage.js');
+              await syncStaffWithMongoDB();
+            }
+          } catch {}
+        }
+      }, 30000);
+    }
   }
 }
 

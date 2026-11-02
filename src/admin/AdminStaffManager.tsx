@@ -77,8 +77,14 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   };
 
   const copyCredentials = (staff: AdminUser) => {
+    let passMap: Record<string, string> = {};
+    try {
+      passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+    } catch (e) {}
+    const uKey = (staff.username || '').toLowerCase();
+    const emKey = (staff.email || '').toLowerCase();
     const loginVal = staff.username || staff.email.split('@')[0];
-    const passVal = staff.password || 'admin123';
+    const passVal = staff.password || passMap[uKey] || passMap[emKey] || 'admin123';
     const textToCopy = `🛫 SayrHub Boshqaruv Paneli (Admin)\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -214,7 +220,13 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
           {filteredStaff.map((staff) => {
             const isMain = staff.role === 'main_admin';
             const displayUser = staff.username || staff.email.split('@')[0];
-            const displayPass = staff.password || 'admin123';
+            let passMap: Record<string, string> = {};
+            try {
+              passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
+            } catch (e) {}
+            const uKey = (staff.username || '').toLowerCase();
+            const emKey = (staff.email || '').toLowerCase();
+            const displayPass = staff.password || passMap[uKey] || passMap[emKey] || 'admin123';
             const isPassVisible = visiblePasswordStaffId === staff.id;
 
             return (

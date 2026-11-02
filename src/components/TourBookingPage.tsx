@@ -697,3 +697,4 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
     </div>
   );
 };
+

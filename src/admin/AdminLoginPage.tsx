@@ -90,12 +90,20 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         return;
       }
       try {
+        const staffToken = 'token_staff_' + (matchedStaff.id || 'tour_admin');
         sessionStorage.setItem('sayrhub_admin_auth', 'true');
         sessionStorage.setItem('travelway_admin_auth', 'true');
-        sessionStorage.setItem('sayrhub_admin_token', 'token_staff_' + matchedStaff.id);
-        sessionStorage.setItem('travelway_admin_token', 'token_staff_' + matchedStaff.id);
+        sessionStorage.setItem('sayrhub_admin_token', staffToken);
+        sessionStorage.setItem('travelway_admin_token', staffToken);
         sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(matchedStaff));
         sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(matchedStaff));
+
+        localStorage.setItem('sayrhub_admin_auth', 'true');
+        localStorage.setItem('travelway_admin_auth', 'true');
+        localStorage.setItem('sayrhub_admin_token', staffToken);
+        localStorage.setItem('travelway_admin_token', staffToken);
+        localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(matchedStaff));
+        localStorage.setItem('travelway_active_admin_user', JSON.stringify(matchedStaff));
       } catch (e) {}
       onShowToast(`Tur Admin paneli: ${matchedStaff.name || 'Xush kelibsiz'}! 🧳`, 'success');
       onLoginSuccess(matchedStaff.role || 'tour_admin', matchedStaff);
@@ -120,6 +128,15 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             if (data.adminUser) {
               sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
               sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
+            }
+
+            localStorage.setItem('sayrhub_admin_token', data.token);
+            localStorage.setItem('travelway_admin_token', data.token);
+            localStorage.setItem('sayrhub_admin_auth', 'true');
+            localStorage.setItem('travelway_admin_auth', 'true');
+            if (data.adminUser) {
+              localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
+              localStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
             }
           } catch (e) {}
         }
@@ -149,6 +166,13 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
             sessionStorage.setItem('travelway_admin_token', 'token_super_root');
             sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
             sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
+
+            localStorage.setItem('sayrhub_admin_auth', 'true');
+            localStorage.setItem('travelway_admin_auth', 'true');
+            localStorage.setItem('sayrhub_admin_token', 'token_super_root');
+            localStorage.setItem('travelway_admin_token', 'token_super_root');
+            localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
+            localStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
           } catch (e) {}
           onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
           onLoginSuccess('main_admin', fallbackAdmin);
@@ -181,6 +205,13 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           sessionStorage.setItem('travelway_admin_token', 'token_super_root');
           sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
           sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
+
+          localStorage.setItem('sayrhub_admin_auth', 'true');
+          localStorage.setItem('travelway_admin_auth', 'true');
+          localStorage.setItem('sayrhub_admin_token', 'token_super_root');
+          localStorage.setItem('travelway_admin_token', 'token_super_root');
+          localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
+          localStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
         } catch (e) {}
         onShowToast("Boshqaruv paneliga xush kelibsiz! 👑", 'success');
         onLoginSuccess('main_admin', fallbackAdmin);
