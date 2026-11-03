@@ -152,11 +152,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
   return (
     <div
-      className={`${
-        adminTheme === 'dark'
-          ? 'dark bg-[#0b0f19] text-slate-100'
-          : 'bg-slate-50 text-slate-900'
-      } min-h-screen flex font-sans antialiased transition-colors duration-200 select-none`}
+      data-theme={adminTheme}
+      className={`${adminTheme === 'dark' ? 'dark' : ''} min-h-screen flex bg-background text-foreground font-sans antialiased transition-colors duration-200 select-none`}
     >
       {/* 1. SIDEBAR */}
       <AdminSidebar

@@ -5,18 +5,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* SayrHub Theme Tokens - Synced with preset b6Z8C2NoO (Maia style, Mauve base, Cyan theme) */
+/* Shared SayrHub shadcn/ui tokens for web and admin surfaces. */
 :root, [data-theme="light"] {
-  /* Kunduzgi rejim (Light Mode) */
-  --tw-canvas: #FAF9FB;        /* Asosiy fon (Background): Mauve och fon */
-  --tw-surface: #FFFFFF;       /* Kardlar va Menyular (Surface): Sof oq */
-  --tw-subtle: #F4F2F5;        /* Oraliq fonlar va yordamchi bloklar */
-  --tw-border: #E5E2E7;        /* Nozik ajratuvchi chiziqlar */
+  --tw-canvas: #FAF9FB;
+  --tw-surface: #FFFFFF;
+  --tw-subtle: #F4F2F5;
+  --tw-border: #E5E2E7;
   --tw-border-hover: #D4CED9;
-  --tw-text-main: #1B181F;     /* Asosiy matn (Text): Mauve to'q kulrang */
-  --tw-text-sub: #6F6978;      /* Ikkilamchi matn */
-  --tw-text-muted: #9993A3;    /* Yordamchi matn */
-  --tw-accent: #0891B2;        /* Tugmalar va Faol ikonkalar (Accent): Cyan 600 */
+  --tw-text-main: #1B181F;
+  --tw-text-sub: #6F6978;
+  --tw-text-muted: #9993A3;
+  --tw-accent: #0891B2;
   --tw-accent-hover: #0E7490;
   --tw-accent-light: rgba(8, 145, 178, 0.12);
   --tw-accent-border: rgba(8, 145, 178, 0.28);
@@ -27,16 +26,15 @@
 }
 
 .dark, [data-theme="dark"] {
-  /* Tungi rejim (Dark Mode) */
-  --tw-canvas: #141217;        /* Asosiy fon (Background): Mauve to'q fon */
-  --tw-surface: #1E1A23;       /* Kardlar va Menyular (Surface): Mauve kard */
-  --tw-subtle: #27222F;        /* Oraliq fonlar va yordamchi bloklar */
-  --tw-border: rgba(255, 255, 255, 0.10);        /* Vizual ajratuvchi nozik chiziqlar */
+  --tw-canvas: #141217;
+  --tw-surface: #1E1A23;
+  --tw-subtle: #27222F;
+  --tw-border: rgba(255, 255, 255, 0.10);
   --tw-border-hover: rgba(255, 255, 255, 0.18);
-  --tw-text-main: #FAF9FB;     /* Asosiy matn (Text): Och mauve-oq */
-  --tw-text-sub: #A39DB0;      /* Ikkilamchi matn */
-  --tw-text-muted: #726C7F;    /* Yordamchi matn */
-  --tw-accent: #06B6D4;        /* Tugmalar va Faol ikonkalar (Accent): Yorqin Cyan */
+  --tw-text-main: #FAF9FB;
+  --tw-text-sub: #A39DB0;
+  --tw-text-muted: #726C7F;
+  --tw-accent: #06B6D4;
   --tw-accent-hover: #22D3EE;
   --tw-accent-light: rgba(6, 182, 212, 0.16);
   --tw-accent-border: rgba(6, 182, 212, 0.35);
@@ -192,8 +190,8 @@
   --popover-foreground: oklch(0.145 0.008 326);
   --primary: oklch(0.52 0.105 223.128);
   --primary-foreground: oklch(0.984 0.019 200.873);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.96 0.003 325.6);
   --muted-foreground: oklch(0.542 0.034 322.5);
   --accent: oklch(0.96 0.003 325.6);
@@ -202,12 +200,12 @@
   --border: oklch(0.922 0.005 325.62);
   --input: oklch(0.922 0.005 325.62);
   --ring: oklch(0.711 0.019 323.02);
-  --chart-1: oklch(0.865 0.012 325.68);
-  --chart-2: oklch(0.542 0.034 322.5);
-  --chart-3: oklch(0.435 0.029 321.78);
-  --chart-4: oklch(0.364 0.029 323.89);
-  --chart-5: oklch(0.263 0.024 320.12);
-  --radius: 0.875rem;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0.008 326);
   --sidebar-primary: oklch(0.609 0.126 221.723);
@@ -237,11 +235,11 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.542 0.034 322.5);
-  --chart-1: oklch(0.865 0.012 325.68);
-  --chart-2: oklch(0.542 0.034 322.5);
-  --chart-3: oklch(0.435 0.029 321.78);
-  --chart-4: oklch(0.364 0.029 323.89);
-  --chart-5: oklch(0.263 0.024 320.12);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.212 0.019 322.12);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.715 0.143 215.221);
@@ -262,6 +260,34 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Keep shared primitives consistent even when a block adds custom radii. */
+[data-slot="button"],
+[data-slot="badge"] {
+  border-radius: calc(var(--radius) - 4px);
+}
+
+[data-slot="input"],
+[data-slot="select-trigger"] {
+  border-radius: calc(var(--radius) - 4px);
+}
+
+[data-slot="card"] {
+  border-radius: calc(var(--radius) + 2px);
+}
+
+[data-slot="dialog-content"] {
+  border-radius: calc(var(--radius) + 2px);
+}
+
+[data-slot="select-content"],
+[data-slot="popover-content"],
+[data-slot="dropdown-menu-content"],
+[data-slot="context-menu-content"],
+[data-slot="sheet-content"],
+[data-slot="drawer-content"] {
+  border-radius: calc(var(--radius) + 2px);
 }
 
 /* Eye-friendly Admin Custom Scrollbar */
