@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDown, Globe2, X } from 'lucide-react';
+import { ChevronDown, Globe2, X } from '@/lib/flaticon-icons';
 import { KompasCountry } from './SearchScreen';
 
 interface CountrySelectComboboxProps {

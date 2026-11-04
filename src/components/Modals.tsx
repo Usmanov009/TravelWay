@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { TourPackage, Booking, PaymentCard } from '../types';
-import { SingleTourMap } from './GoogleTourMap';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -33,7 +32,11 @@ import {
   PartyPopper,
   Phone,
   DoorOpen
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
+
+const SingleTourMap = lazy(() =>
+  import('./GoogleTourMap').then((module) => ({ default: module.SingleTourMap }))
+);
 
 interface ModalsProps {
   // OTP Modal
@@ -556,7 +559,9 @@ export const Modals: React.FC<ModalsProps> = ({
                   {tourDetails.resort || tourDetails.location}
                 </span>
               </div>
-              <SingleTourMap tour={tourDetails} height="190px" />
+              <Suspense fallback={<div className="h-[190px] animate-pulse rounded-xl bg-muted" />}>
+                <SingleTourMap tour={tourDetails} height="190px" />
+              </Suspense>
             </div>
 
             {/* Uchish / Jo'nab ketish sanasi - faqat olib kirilgan tur paket ichida ko'rinadi */}

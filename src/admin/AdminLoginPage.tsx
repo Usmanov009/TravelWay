@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowRight, Smartphone, AlertCircle, Briefcase, Crown } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowRight, Smartphone, AlertCircle, Briefcase, Crown, GalleryVerticalEnd } from '@/lib/flaticon-icons';
 
 interface AdminLoginPageProps {
   onLoginSuccess: (adminRole?: string, adminUser?: any) => void;
@@ -232,27 +232,19 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground flex items-center justify-center p-4 font-sans relative overflow-hidden select-none">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10 font-sans select-none">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <a href="/" className="flex items-center gap-2 self-center font-medium text-foreground">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <GalleryVerticalEnd className="size-4" aria-hidden="true" />
+          </div>
+          SayrHub Admin
+        </a>
 
-      {/* Admin Login Block (shadcn blocks login-04 style) */}
-      <Card className="w-full max-w-md bg-card border-border text-card-foreground rounded-3xl shadow-2xl relative z-10 backdrop-blur-md overflow-hidden">
+      {/* Admin Login Block */}
+      <Card className="w-full bg-card border-border text-card-foreground rounded-2xl shadow-sm overflow-hidden">
         {/* Header Branding */}
         <CardHeader className="text-center pt-8 pb-4 px-6 space-y-3">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary overflow-hidden shadow-lg shadow-primary/20 mx-auto relative ring-2 ring-border">
-            <img
-              src="/logo.png"
-              alt="SayrHub"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <span className="text-primary-foreground font-black text-2xl tracking-wider absolute pointer-events-none">SH</span>
-          </div>
-
           <div className="space-y-1">
             <CardTitle className="text-2xl font-black text-foreground tracking-tight">SayrHub Admin</CardTitle>
             <CardDescription className="text-xs text-muted-foreground">Boshqaruv tizimiga xavfsiz kirish</CardDescription>
@@ -396,6 +388,15 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
           </Button>
         </CardFooter>
       </Card>
+      <a
+        href="https://www.flaticon.com/uicons"
+        target="_blank"
+        rel="noreferrer"
+        className="self-center text-xs text-muted-foreground hover:text-primary hover:underline"
+      >
+        Uicons by Flaticon
+      </a>
+      </div>
     </div>
   );
 };

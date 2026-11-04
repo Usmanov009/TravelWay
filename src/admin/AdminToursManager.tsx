@@ -21,7 +21,7 @@ import {
   Tag,
   UserRound,
   Utensils
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface AdminToursManagerProps {
   currentRole: AdminRole;

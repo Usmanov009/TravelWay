@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FlightTicket } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
-import { Briefcase, DollarSign, Plane, PlaneLanding, PlaneTakeoff, Pencil, RefreshCw } from 'lucide-react';
+import { Briefcase, DollarSign, Plane, PlaneLanding, PlaneTakeoff, Pencil, RefreshCw } from '@/lib/flaticon-icons';
 
 interface AdminFlightsManagerProps {
   currentRole: AdminRole;

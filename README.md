@@ -25,6 +25,10 @@ SayrHub — bu O'zbekiston sayyohlari uchun eng so'nggi charter narxlari, qaynoq
 
 ---
 
+## Icon attribution
+
+The web and mobile applications use UIcons by Flaticon. See the [Flaticon UIcons license and attribution guidance](https://www.flaticon.com/uicons).
+
 ## 🛠 Ishga tushirish bo'yicha qo'llanma
 
 ### 1. Backend serverni ishga tushirish:

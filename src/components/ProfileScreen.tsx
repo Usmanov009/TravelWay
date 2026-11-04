@@ -21,7 +21,7 @@ import {
   ChevronRight,
   Sparkles,
   FileText
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface ProfileScreenProps {
   user: UserProfile;

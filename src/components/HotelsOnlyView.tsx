@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { HotelOnly } from '../types';
-import { BedDouble, Building2, Globe2, Hotel, MapPin, Moon, Palmtree, Search, Utensils } from 'lucide-react';
+import { BedDouble, Building2, Globe2, Hotel, MapPin, Moon, Palmtree, Search, Utensils } from '@/lib/flaticon-icons';
 
 interface HotelsOnlyViewProps {
   hotels: HotelOnly[];

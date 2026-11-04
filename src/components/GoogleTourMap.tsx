@@ -7,7 +7,7 @@ import {
   InfoWindow
 } from '@vis.gl/react-google-maps';
 import { TourPackage } from '../types';
-import { Compass, Gem, Globe2, Landmark, Map as MapIcon, MapPin, Satellite, Waves } from 'lucide-react';
+import { Compass, Gem, Globe2, Landmark, Map as MapIcon, MapPin, Satellite, Waves } from '@/lib/flaticon-icons';
 
 export const DESTINATION_COORDINATES: Record<string, { lat: number; lng: number; beachDistance?: string; airportDistance?: string }> = {
   'kmp-ayt-01': { lat: 36.8486, lng: 31.0967, beachDistance: "0 metr (Birinchi qatorda)", airportDistance: "35 km (AYT)" },

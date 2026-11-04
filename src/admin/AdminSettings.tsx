@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Briefcase, Globe, Package, Plane, Settings } from 'lucide-react';
+import { Briefcase, Globe, Package, Plane, Settings } from '@/lib/flaticon-icons';
 
 interface AdminSettingsProps {
   currentRole: AdminRole;

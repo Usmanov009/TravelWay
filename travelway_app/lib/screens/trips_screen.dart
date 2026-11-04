@@ -6,6 +6,7 @@ import '../providers/app_provider.dart';
 import '../models/booking.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import 'tour_detail_screen.dart';
 
 class TripsScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   ),
                   IconButton(
                     icon: const Icon(
-                      Icons.close,
+                      FlaticonIcons.close,
                       size: 18,
                       color: AppTheme.textSub,
                     ),
@@ -180,7 +181,7 @@ class _TripsScreenState extends State<TripsScreen> {
               Row(
                 children: [
                   const Icon(
-                    Icons.calendar_month,
+                    FlaticonIcons.calendarMonth,
                     size: 14,
                     color: AppTheme.accentSky,
                   ),
@@ -198,7 +199,7 @@ class _TripsScreenState extends State<TripsScreen> {
               Row(
                 children: [
                   const Icon(
-                    Icons.airplanemode_active,
+                    FlaticonIcons.airplanemodeActive,
                     size: 14,
                     color: AppTheme.primary,
                   ),
@@ -268,7 +269,7 @@ class _TripsScreenState extends State<TripsScreen> {
             title: const Row(
               children: [
                 Icon(
-                  Icons.warning_amber_rounded,
+                  FlaticonIcons.warningAmberRounded,
                   color: Colors.redAccent,
                   size: 28,
                 ),
@@ -499,7 +500,7 @@ class _TripsScreenState extends State<TripsScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.receipt_long,
+                                FlaticonIcons.receiptLong,
                                 size: 13,
                                 color: _subTab == 'active'
                                     ? Colors.white
@@ -538,7 +539,7 @@ class _TripsScreenState extends State<TripsScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.block,
+                                FlaticonIcons.block,
                                 size: 13,
                                 color: _subTab == 'cancelled'
                                     ? Colors.white
@@ -577,7 +578,7 @@ class _TripsScreenState extends State<TripsScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.favorite,
+                                FlaticonIcons.favorite,
                                 size: 13,
                                 color: _subTab == 'saved'
                                     ? Colors.white
@@ -643,7 +644,11 @@ class _TripsScreenState extends State<TripsScreen> {
         alignment: Alignment.center,
         child: Column(
           children: [
-            const Icon(Icons.luggage, size: 48, color: AppTheme.primary),
+            const Icon(
+              FlaticonIcons.luggage,
+              size: 48,
+              color: AppTheme.primary,
+            ),
             const SizedBox(height: 12),
             const Text(
               'Sizda hozircha faol buyurtmalar yo\'q',
@@ -756,7 +761,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.location_on,
+                          FlaticonIcons.locationOn,
                           size: 14,
                           color: AppTheme.primary,
                         ),
@@ -776,7 +781,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.calendar_month,
+                          FlaticonIcons.calendarMonth,
                           size: 14,
                           color: AppTheme.accentSky,
                         ),
@@ -796,7 +801,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.people_outline,
+                          FlaticonIcons.peopleOutline,
                           size: 14,
                           color: AppTheme.primary,
                         ),
@@ -817,7 +822,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.person,
+                          FlaticonIcons.person,
                           size: 14,
                           color: AppTheme.textMuted,
                         ),
@@ -868,7 +873,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _showVoucherDetails(context, b),
-                      icon: const Icon(Icons.receipt_long, size: 14),
+                      icon: const Icon(FlaticonIcons.receiptLong, size: 14),
                       label: const Text(
                         'Vaucher',
                         style: TextStyle(fontSize: 11),
@@ -887,7 +892,7 @@ class _TripsScreenState extends State<TripsScreen> {
                       onPressed: () =>
                           _confirmCancelBooking(context, provider, b),
                       icon: const Icon(
-                        Icons.cancel_outlined,
+                        FlaticonIcons.cancelOutlined,
                         size: 14,
                         color: Colors.redAccent,
                       ),
@@ -912,7 +917,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   IconButton(
                     onPressed: () => _shareTelegram(b),
                     icon: const Icon(
-                      Icons.send,
+                      FlaticonIcons.send,
                       size: 18,
                       color: Color(0xFF24A1DE),
                     ),
@@ -948,7 +953,11 @@ class _TripsScreenState extends State<TripsScreen> {
         alignment: Alignment.center,
         child: const Column(
           children: [
-            Icon(Icons.check_circle, size: 48, color: AppTheme.accentGreen),
+            Icon(
+              FlaticonIcons.checkCircle,
+              size: 48,
+              color: AppTheme.accentGreen,
+            ),
             SizedBox(height: 12),
             Text(
               'Bekor qilingan buyurtmalar mavjud emas',
@@ -1011,7 +1020,11 @@ class _TripsScreenState extends State<TripsScreen> {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.close, size: 12, color: Colors.redAccent),
+                        Icon(
+                          FlaticonIcons.close,
+                          size: 12,
+                          color: Colors.redAccent,
+                        ),
                         SizedBox(width: 2),
                         Text(
                           'Bekor qilingan',
@@ -1047,7 +1060,7 @@ class _TripsScreenState extends State<TripsScreen> {
                     Row(
                       children: [
                         Icon(
-                          Icons.payments_outlined,
+                          FlaticonIcons.paymentsOutlined,
                           size: 13,
                           color: AppTheme.accentGreen,
                         ),
@@ -1088,7 +1101,7 @@ class _TripsScreenState extends State<TripsScreen> {
               Row(
                 children: [
                   const Icon(
-                    Icons.location_on_outlined,
+                    FlaticonIcons.locationOnOutlined,
                     size: 13,
                     color: AppTheme.textSub,
                   ),
@@ -1105,7 +1118,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   ),
                   const SizedBox(width: 8),
                   const Icon(
-                    Icons.calendar_today_outlined,
+                    FlaticonIcons.calendarTodayOutlined,
                     size: 12,
                     color: AppTheme.textSub,
                   ),
@@ -1126,7 +1139,7 @@ class _TripsScreenState extends State<TripsScreen> {
               Row(
                 children: [
                   const Icon(
-                    Icons.people_outline,
+                    FlaticonIcons.peopleOutline,
                     size: 14,
                     color: AppTheme.textMain,
                   ),
@@ -1182,7 +1195,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => provider.setTabIndex(0),
-                      icon: const Icon(Icons.refresh, size: 14),
+                      icon: const Icon(FlaticonIcons.refresh, size: 14),
                       label: const Text(
                         'Qayta bron qilish',
                         style: TextStyle(fontSize: 11),
@@ -1199,7 +1212,7 @@ class _TripsScreenState extends State<TripsScreen> {
                   OutlinedButton.icon(
                     onPressed: () => provider.removeBooking(b.id),
                     icon: const Icon(
-                      Icons.delete_outline,
+                      FlaticonIcons.deleteOutline,
                       size: 14,
                       color: Colors.redAccent,
                     ),
@@ -1243,7 +1256,11 @@ class _TripsScreenState extends State<TripsScreen> {
         alignment: Alignment.center,
         child: Column(
           children: [
-            const Icon(Icons.favorite, size: 48, color: Colors.pinkAccent),
+            const Icon(
+              FlaticonIcons.favorite,
+              size: 48,
+              color: Colors.pinkAccent,
+            ),
             const SizedBox(height: 12),
             const Text(
               'Saqlangan turlar yo\'q',
@@ -1341,7 +1358,7 @@ class _TripsScreenState extends State<TripsScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(
-                      Icons.favorite,
+                      FlaticonIcons.favorite,
                       color: Colors.red,
                       size: 20,
                     ),

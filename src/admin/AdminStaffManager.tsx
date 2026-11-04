@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Briefcase, Crown, Shield } from 'lucide-react';
+import { Briefcase, Crown, Shield } from '@/lib/flaticon-icons';
 
 interface AdminStaffManagerProps {
   currentRole: AdminRole;

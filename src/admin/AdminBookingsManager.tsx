@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Booking } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
-import { CheckCircle2, Clock3, ClipboardList, Palmtree, Ticket } from 'lucide-react';
+import { CheckCircle2, Clock3, ClipboardList, Palmtree, Ticket } from '@/lib/flaticon-icons';
 
 interface AdminBookingsManagerProps {
   currentRole: AdminRole;

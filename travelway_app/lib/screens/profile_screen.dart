@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../models/payment_card.dart';
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import '../widgets/notifications_dialog.dart';
 import '../widgets/payment_cards_sheet.dart';
 import '../widgets/telegram_login_sheet.dart';
@@ -38,7 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final prefs = await SharedPreferences.getInstance();
       final loggedIn = prefs.getBool('sayrhub_is_logged_in') ?? false;
       final name = prefs.getString('sayrhub_user_name') ?? 'Alisher Yusupov';
-      final phone = prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67';
+      final phone =
+          prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67';
       final tcId = prefs.getString('sayrhub_user_id') ?? 'TC-882109';
 
       final cardsRaw = prefs.getString('sayrhub_user_payment_cards');
@@ -75,7 +78,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoggedIn = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hisobdan muvaffaqiyatli chiqildi'), duration: Duration(seconds: 1)),
+        const SnackBar(
+          content: Text('Hisobdan muvaffaqiyatli chiqildi'),
+          duration: Duration(seconds: 1),
+        ),
       );
     }
   }
@@ -92,7 +98,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Xush kelibsiz, $name! Tizimga muvaffaqiyatli kirdingiz.'),
+            content: Text(
+              'Xush kelibsiz, $name! Tizimga muvaffaqiyatli kirdingiz.',
+            ),
             backgroundColor: AppTheme.accentGreen,
             duration: const Duration(seconds: 2),
           ),
@@ -108,7 +116,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot orqali bog\'laning.')),
+          const SnackBar(
+            content: Text(
+              'Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot orqali bog\'laning.',
+            ),
+          ),
         );
       }
     }
@@ -145,9 +157,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: AppTheme.bgDark,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
-        child: _isLoggedIn
-            ? _buildLoggedInView(provider)
-            : _buildLoggedOutView(),
+        child: Column(
+          children: [
+            _isLoggedIn ? _buildLoggedInView(provider) : _buildLoggedOutView(),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final opened = await launchUrl(
+                  Uri.parse('https://www.flaticon.com/uicons'),
+                  mode: LaunchMode.externalApplication,
+                );
+                if (!opened && messenger.mounted) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Flaticon havolasini ochib bo‘lmadi'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Uicons by Flaticon'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -181,7 +213,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           child: const Center(
-            child: Icon(Icons.flight_takeoff, size: 44, color: Colors.white),
+            child: Icon(
+              FlaticonIcons.flightTakeoff,
+              size: 44,
+              color: Colors.white,
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -237,7 +273,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.send_rounded, color: Colors.white, size: 22),
+                    Icon(
+                      FlaticonIcons.sendRounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                     SizedBox(width: 12),
                     Text(
                       'Log in (Telegram orqali)',
@@ -260,11 +300,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.verified, size: 14, color: AppTheme.accentGreen),
+            Icon(FlaticonIcons.verified, size: 14, color: AppTheme.accentGreen),
             SizedBox(width: 6),
             Text(
               'Rasmiy bot: @sayrhub_bot',
-              style: TextStyle(fontSize: 12, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.textMuted,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -280,11 +324,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Column(
             children: [
-              _buildBenefitRow(Icons.security, 'Xavfsiz va tezkor', 'Telegram orqali 1 ta bosish bilan oson autentifikatsiya'),
+              _buildBenefitRow(
+                FlaticonIcons.security,
+                'Xavfsiz va tezkor',
+                'Telegram orqali 1 ta bosish bilan oson autentifikatsiya',
+              ),
               const Divider(height: 20, color: AppTheme.borderDark),
-              _buildBenefitRow(Icons.credit_card, 'To\'lov kartalari', 'Uzcard, Humo va Visa kartalari orqali tezkor to\'lov'),
+              _buildBenefitRow(
+                FlaticonIcons.creditCard,
+                'To\'lov kartalari',
+                'Uzcard, Humo va Visa kartalari orqali tezkor to\'lov',
+              ),
               const Divider(height: 20, color: AppTheme.borderDark),
-              _buildBenefitRow(Icons.support_agent, 'Doimiy aloqa', '24/7 operator yordami va vaucherlar xavfsizligi'),
+              _buildBenefitRow(
+                FlaticonIcons.supportAgent,
+                'Doimiy aloqa',
+                '24/7 operator yordami va vaucherlar xavfsizligi',
+              ),
             ],
           ),
         ),
@@ -294,9 +350,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Center(
           child: Column(
             children: [
-              Text('SayrHub Mobile v1.0.0', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+              Text(
+                'SayrHub Mobile v1.0.0',
+                style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
+              ),
               SizedBox(height: 2),
-              Text('Powered by SayrHub Engine', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+              Text(
+                'Powered by SayrHub Engine',
+                style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+              ),
             ],
           ),
         ),
@@ -320,9 +382,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textMain)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: AppTheme.textMain,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle, style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 11, color: AppTheme.textSub),
+              ),
             ],
           ),
         ),
@@ -392,11 +464,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     bottom: 0,
                     right: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppTheme.surfaceDark, width: 1.5),
+                        border: Border.all(
+                          color: AppTheme.surfaceDark,
+                          width: 1.5,
+                        ),
                       ),
                       child: const Text(
                         'PRO',
@@ -432,25 +510,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.verified, size: 16, color: AppTheme.primary),
+                        const Icon(
+                          FlaticonIcons.verified,
+                          size: 16,
+                          color: AppTheme.primary,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 2),
                     Text(
                       _userPhone,
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textSub),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSub,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Row(
                       children: [
                         Text(
                           'ID: #$_userId',
-                          style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppTheme.textMuted),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontFamily: 'monospace',
+                            color: AppTheme.textMuted,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         const Text(
                           '✓ Tasdiqlangan',
-                          style: TextStyle(fontSize: 10, color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.accentGreen,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -470,19 +563,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildStatTile(
               '${provider.bookings.where((b) => b.type == 'active').length} ta',
               'Faol turlar',
-              Icons.luggage_outlined,
+              FlaticonIcons.luggageOutlined,
             ),
             const SizedBox(width: 10),
             _buildStatTile(
               '${provider.alerts.length} ta',
               'Narx signallari',
-              Icons.notifications_active_outlined,
+              FlaticonIcons.notificationsActiveOutlined,
             ),
             const SizedBox(width: 10),
             _buildStatTile(
               '0 mil',
               'Sayohat millari',
-              Icons.flight_takeoff_outlined,
+              FlaticonIcons.flightTakeoffOutlined,
             ),
           ],
         ),
@@ -501,7 +594,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             children: [
               _buildSettingItem(
-                icon: Icons.person_outline,
+                icon: FlaticonIcons.personOutline,
                 title: 'Shaxsiy ma\'lumotlar',
                 subtitle: '$_userName • $_userPhone',
                 onTap: () {
@@ -510,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const Divider(height: 1, indent: 56),
               _buildSettingItem(
-                icon: Icons.badge_outlined,
+                icon: FlaticonIcons.badgeOutlined,
                 title: 'Pasport ma\'lumotlari',
                 subtitle: 'AA 1234567 • O\'zbekiston',
                 onTap: () {
@@ -519,26 +612,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const Divider(height: 1, indent: 56),
               _buildSettingItem(
-                icon: Icons.credit_card_outlined,
+                icon: FlaticonIcons.creditCardOutlined,
                 title: 'To\'lov kartalari',
-                subtitle: _savedCardsCount > 0 ? '$_savedCardsCount ta karta ulangan' : 'Uzcard, Humo, Visa',
+                subtitle: _savedCardsCount > 0
+                    ? '$_savedCardsCount ta karta ulangan'
+                    : 'Uzcard, Humo, Visa',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_savedCardsCount > 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primary.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '$_savedCardsCount ta',
-                          style: const TextStyle(fontSize: 10, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     const SizedBox(width: 6),
-                    const Icon(Icons.arrow_forward_ios, size: 12, color: AppTheme.textMuted),
+                    const Icon(
+                      FlaticonIcons.arrowForwardIos,
+                      size: 12,
+                      color: AppTheme.textMuted,
+                    ),
                   ],
                 ),
                 onTap: _openPaymentCards,
@@ -567,10 +673,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppTheme.subtleDark,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.notifications_none, size: 18, color: AppTheme.textSub),
+                  child: const Icon(
+                    FlaticonIcons.notificationsNone,
+                    size: 18,
+                    color: AppTheme.textSub,
+                  ),
                 ),
-                title: const Text('Bildirishnomalar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textMain)),
-                subtitle: const Text('Barcha bildirishnomalarni ko\'rish', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                title: const Text(
+                  'Bildirishnomalar',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: AppTheme.textMain,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Barcha bildirishnomalarni ko\'rish',
+                  style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -588,7 +708,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Divider(height: 1, indent: 56),
 
               _buildSettingItem(
-                icon: Icons.language,
+                icon: FlaticonIcons.language,
                 title: 'Ilova tili',
                 subtitle: 'O\'zbekcha (UZ)',
                 onTap: () {},
@@ -596,7 +716,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Divider(height: 1, indent: 56),
 
               _buildSettingItem(
-                icon: Icons.support_agent,
+                icon: FlaticonIcons.supportAgent,
                 title: 'Telegram Operator & Yordam',
                 subtitle: '@$botUsername',
                 onTap: _openTelegramSupport,
@@ -611,12 +731,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _logout,
-            icon: const Icon(Icons.logout, size: 16, color: Colors.redAccent),
-            label: const Text('Hisobdan chiqish', style: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.bold)),
+            icon: const Icon(
+              FlaticonIcons.logout,
+              size: 16,
+              color: Colors.redAccent,
+            ),
+            label: const Text(
+              'Hisobdan chiqish',
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.redAccent, width: 1),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
           ),
         ),
@@ -626,9 +759,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Center(
           child: Column(
             children: [
-              Text('SayrHub Mobile v1.0.0', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+              Text(
+                'SayrHub Mobile v1.0.0',
+                style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
+              ),
               SizedBox(height: 2),
-              Text('Powered by SayrHub Engine', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+              Text(
+                'Powered by SayrHub Engine',
+                style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+              ),
             ],
           ),
         ),
@@ -642,7 +781,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Shaxsiy Ma\'lumotlar', style: TextStyle(color: AppTheme.textMain, fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Shaxsiy Ma\'lumotlar',
+          style: TextStyle(
+            color: AppTheme.textMain,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,7 +805,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Yopish', style: TextStyle(color: AppTheme.primary)),
+            child: const Text(
+              'Yopish',
+              style: TextStyle(color: AppTheme.primary),
+            ),
           ),
         ],
       ),
@@ -672,7 +821,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Pasport Ma\'lumotlari', style: TextStyle(color: AppTheme.textMain, fontSize: 16, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Pasport Ma\'lumotlari',
+          style: TextStyle(
+            color: AppTheme.textMain,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -687,7 +843,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Yopish', style: TextStyle(color: AppTheme.primary)),
+            child: const Text(
+              'Yopish',
+              style: TextStyle(color: AppTheme.primary),
+            ),
           ),
         ],
       ),
@@ -698,8 +857,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: AppTheme.textSub, fontSize: 12)),
-        Text(value, style: const TextStyle(color: AppTheme.textMain, fontSize: 12, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(color: AppTheme.textSub, fontSize: 12),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppTheme.textMain,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -719,7 +888,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 6),
             Text(
               value,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textMain,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
@@ -768,9 +941,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Icon(icon, size: 18, color: AppTheme.textSub),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textMain)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
-        trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 12, color: AppTheme.textMuted),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            color: AppTheme.textMain,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 11, color: AppTheme.textSub),
+        ),
+        trailing:
+            trailing ??
+            const Icon(
+              FlaticonIcons.arrowForwardIos,
+              size: 12,
+              color: AppTheme.textMuted,
+            ),
         onTap: onTap,
       ),
     );

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ComboTour } from '../types';
-import { ArrowRightLeft, PartyPopper, Globe2, MapPin, Search, Plane, Moon, ClipboardList, Pin } from 'lucide-react';
+import { ArrowRightLeft, PartyPopper, Globe2, MapPin, Search, Plane, Moon, ClipboardList, Pin } from '@/lib/flaticon-icons';
 
 interface ComboToursViewProps {
   comboTours: ComboTour[];

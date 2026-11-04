@@ -16,7 +16,7 @@ import {
   MapPin,
   Clock,
   Zap
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface PriceAlertModalProps {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
 import { INITIAL_REGISTERED_USERS } from './adminMockData';
-import { Crown, LockKeyhole, UsersRound } from 'lucide-react';
+import { Crown, LockKeyhole, UsersRound } from '@/lib/flaticon-icons';
 
 interface AdminUsersManagerProps {
   currentRole: AdminRole;

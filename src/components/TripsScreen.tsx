@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   ArrowRight,
   CircleDollarSign
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface TripsScreenProps {
   bookings: Booking[];

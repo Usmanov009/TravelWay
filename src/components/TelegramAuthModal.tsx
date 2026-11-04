@@ -14,7 +14,7 @@ import {
   ArrowRight,
   ExternalLink,
   Globe2
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface TelegramAuthModalProps {
   isOpen: boolean;

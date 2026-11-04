@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ComboTour } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Map } from 'lucide-react';
+import { Map } from '@/lib/flaticon-icons';
 
 interface AdminComboManagerProps {
   currentRole: AdminRole;

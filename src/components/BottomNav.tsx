@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabType } from '../types';
 import { Badge } from '@/components/ui/badge';
-import { Search, Compass, Flame, Luggage, User } from 'lucide-react';
+import { Search, Compass, Flame, Luggage, User } from '@/lib/flaticon-icons';
 
 interface BottomNavProps {
   currentTab: TabType;

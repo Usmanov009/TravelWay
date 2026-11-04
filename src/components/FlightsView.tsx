@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { FlightTicket } from '../types';
-import { CalendarDays, Building2, Flame, Luggage, Plane, PlaneLanding, PlaneTakeoff, RotateCw, Ticket } from 'lucide-react';
+import { CalendarDays, Building2, Flame, Luggage, Plane, PlaneLanding, PlaneTakeoff, RotateCw, Ticket } from '@/lib/flaticon-icons';
 
 interface FlightsViewProps {
   flights: FlightTicket[];

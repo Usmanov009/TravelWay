@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import '../widgets/app_header.dart';
 import 'search_screen.dart';
 import 'explore_screen.dart';
@@ -69,22 +70,22 @@ class MainNavigationScreen extends StatelessWidget {
               children: [
                 _buildNavItem(
                   index: 0,
-                  icon: Icons.search,
-                  activeIcon: Icons.search,
+                  icon: FlaticonIcons.search,
+                  activeIcon: FlaticonIcons.search,
                   label: 'Qidiruv',
                   provider: provider,
                 ),
                 _buildNavItem(
                   index: 1,
-                  icon: Icons.explore_outlined,
-                  activeIcon: Icons.explore,
+                  icon: FlaticonIcons.exploreOutlined,
+                  activeIcon: FlaticonIcons.explore,
                   label: 'Kashf etish',
                   provider: provider,
                 ),
                 _buildNavItem(
                   index: 2,
-                  icon: Icons.local_fire_department_outlined,
-                  activeIcon: Icons.local_fire_department,
+                  icon: FlaticonIcons.localFireDepartmentOutlined,
+                  activeIcon: FlaticonIcons.localFireDepartment,
                   label: 'Qaynoq',
                   badgeText: 'HOT',
                   badgeColor: AppTheme.accentRed,
@@ -92,16 +93,16 @@ class MainNavigationScreen extends StatelessWidget {
                 ),
                 _buildNavItem(
                   index: 3,
-                  icon: Icons.luggage_outlined,
-                  activeIcon: Icons.luggage,
+                  icon: FlaticonIcons.luggageOutlined,
+                  activeIcon: FlaticonIcons.luggage,
                   label: 'Turlarim',
                   counter: provider.bookings.length,
                   provider: provider,
                 ),
                 _buildNavItem(
                   index: 4,
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
+                  icon: FlaticonIcons.personOutline,
+                  activeIcon: FlaticonIcons.person,
                   label: 'Profil',
                   provider: provider,
                 ),

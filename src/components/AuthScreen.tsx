@@ -18,13 +18,13 @@ import {
   Tag,
   ChevronDown,
   Check,
-  Plane,
   Gift,
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Globe2
-} from 'lucide-react';
+  Globe2,
+  GalleryVerticalEnd
+} from '@/lib/flaticon-icons';
 
 interface AuthScreenProps {
   currentLang: LanguageCode;
@@ -208,32 +208,17 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         </div>
       </div>
 
+      <a href="/" className="flex items-center gap-2 self-center font-medium text-foreground">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <GalleryVerticalEnd className="size-4" aria-hidden="true" />
+        </div>
+        SayrHub
+      </a>
+
       {/* Main Authentication Block (shadcn blocks login-01 & login-04 style) */}
       <Card className="rounded-3xl border-border bg-card/95 backdrop-blur-md shadow-lg shadow-black/5 overflow-hidden">
         {/* Card Header with Brand Logo & Title */}
         <CardHeader className="text-center pt-7 pb-4 px-6 space-y-3">
-          <div
-            className="relative mx-auto group cursor-pointer"
-            onClick={() => onShowToast("SayrHub — Unutilmas sayohatlar onlayn platformasi", 'info')}
-          >
-            <div className="w-16 h-16 rounded-2xl overflow-hidden bg-primary text-primary-foreground shadow-md shadow-primary/20 flex items-center justify-center relative transition-transform duration-200 group-hover:scale-105 ring-4 ring-primary/10">
-              <img
-                src="/logo.png"
-                alt="SayrHub"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <span className="text-2xl font-black text-primary-foreground tracking-tight absolute pointer-events-none">
-                SH
-              </span>
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-xs ring-2 ring-card">
-              <Plane className="w-2.5 h-2.5" />
-            </div>
-          </div>
-
           <div className="space-y-1">
             <CardTitle className="text-xl sm:text-2xl font-black tracking-tight text-foreground" id="auth-main-title">
               {mode === 'register' ? "SayrHub-da ro'yxatdan o'tish" : "SayrHub hisobiga kirish"}

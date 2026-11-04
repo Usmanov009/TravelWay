@@ -7,6 +7,7 @@ import '../providers/app_provider.dart';
 import '../models/hot_deal.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import '../widgets/booking_dialog.dart';
 
 class HotDealsScreen extends StatefulWidget {
@@ -17,25 +18,39 @@ class HotDealsScreen extends StatefulWidget {
 }
 
 class _HotDealsScreenState extends State<HotDealsScreen> {
-  late Timer _timer;
-  int _secondsLeft = 14400; // 4 hours countdown
+  Timer? _timer;
+  final DateTime _endsAt = DateTime.now().add(const Duration(hours: 4));
+  int _secondsLeft = 14400;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          if (_secondsLeft > 0) _secondsLeft--;
-        });
-      }
-    });
+    _updateCountdown();
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
+  }
+
+  void _updateCountdown() {
+    final remaining = _endsAt.difference(DateTime.now()).inSeconds;
+    if (mounted && remaining != _secondsLeft) {
+      setState(() => _secondsLeft = remaining.clamp(0, 14400).toInt());
+    }
+  }
+
+  void _syncCountdownTimer(bool isActive) {
+    if (isActive && _timer == null) {
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _updateCountdown(),
+      );
+    } else if (!isActive && _timer != null) {
+      _timer?.cancel();
+      _timer = null;
+    }
   }
 
   String _formatTimer(int totalSecs) {
@@ -48,6 +63,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
+    _syncCountdownTimer(provider.currentTabIndex == 2);
 
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
@@ -97,7 +113,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.local_fire_department,
+                                FlaticonIcons.localFireDepartment,
                                 size: 13,
                                 color: Colors.deepOrangeAccent,
                               ),
@@ -209,7 +225,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.refresh,
+                                  FlaticonIcons.refresh,
                                   size: 12,
                                   color: Colors.white,
                                 ),
@@ -250,7 +266,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   child: const Column(
                     children: [
                       Icon(
-                        Icons.local_fire_department,
+                        FlaticonIcons.localFireDepartment,
                         size: 48,
                         color: AppTheme.textMuted,
                       ),
@@ -346,7 +362,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(
-                        Icons.local_fire_department,
+                        FlaticonIcons.localFireDepartment,
                         size: 11,
                         color: Colors.deepOrangeAccent,
                       ),
@@ -382,7 +398,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(
-                        Icons.hourglass_bottom,
+                        FlaticonIcons.hourglassBottom,
                         size: 12,
                         color: Colors.redAccent,
                       ),
@@ -428,7 +444,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           Row(
                             children: [
                               const Icon(
-                                Icons.location_on,
+                                FlaticonIcons.locationOn,
                                 size: 12,
                                 color: AppTheme.primary,
                               ),
@@ -463,7 +479,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.calendar_today,
+                              FlaticonIcons.calendarToday,
                               size: 10,
                               color: Colors.white,
                             ),
@@ -496,7 +512,11 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.bolt, size: 14, color: Colors.amber),
+                        const Icon(
+                          FlaticonIcons.bolt,
+                          size: 14,
+                          color: Colors.amber,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           deal.freeSeats,
@@ -549,7 +569,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.flight,
+                        FlaticonIcons.flight,
                         size: 13,
                         color: AppTheme.accentSky,
                       ),

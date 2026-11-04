@@ -1,6 +1,6 @@
 import React from 'react';
 import { PriceAlert, TourPackage } from '../types';
-import { Bell, MapPin, PartyPopper, Smartphone, Plane, Mail, Zap } from 'lucide-react';
+import { Bell, MapPin, PartyPopper, Smartphone, Plane, Mail, Zap } from '@/lib/flaticon-icons';
 
 interface ActiveAlertsModalProps {
   isOpen: boolean;

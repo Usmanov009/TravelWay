@@ -14,6 +14,7 @@ import { AdminStaffManager } from './AdminStaffManager';
 import { AdminPriceAlertsManager } from './AdminPriceAlertsManager';
 import { AdminSettings } from './AdminSettings';
 import { INITIAL_REGISTERED_USERS } from './adminMockData';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 interface AdminPageProps {
   currentRole: AdminRole;
@@ -89,8 +90,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('sayrhub_admin_theme') || localStorage.getItem('travelway_admin_theme');
@@ -142,20 +141,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setCurrentTab('tours');
   };
 
-  const handleToggleSidebar = () => {
-    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-      setIsMobileSidebarOpen(prev => !prev);
-    } else {
-      setIsSidebarCollapsed(prev => !prev);
-    }
-  };
-
   return (
-    <div
+    <SidebarProvider
       data-theme={adminTheme}
-      className={`${adminTheme === 'dark' ? 'dark' : ''} min-h-screen flex bg-background text-foreground font-sans antialiased transition-colors duration-200 select-none`}
+      className={`${adminTheme === 'dark' ? 'dark' : ''} min-h-svh bg-background text-foreground font-sans antialiased transition-colors duration-200`}
     >
-      {/* 1. SIDEBAR */}
       <AdminSidebar
         currentTab={currentTab}
         onSelectTab={(tab) => setCurrentTab(tab)}
@@ -164,13 +154,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         totalActiveBookings={activeBookingsCount}
         totalAlerts={priceAlerts.length}
         onExitToApp={onExitToApp}
-        isCollapsed={isSidebarCollapsed}
-        isMobileOpen={isMobileSidebarOpen}
-        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* 2. MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <SidebarInset className="min-h-svh">
         {/* TOP BAR */}
         <AdminTopNav
           currentRole={currentRole}
@@ -180,8 +166,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           onExitToApp={onExitToApp}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
-          onToggleSidebar={handleToggleSidebar}
-          isSidebarCollapsed={isSidebarCollapsed}
           adminTheme={adminTheme}
           onToggleTheme={toggleAdminTheme}
         />
@@ -323,7 +307,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             />
           )}
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };

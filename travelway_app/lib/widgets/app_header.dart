@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import 'notifications_dialog.dart';
 
 class AppHeader extends StatelessWidget {
@@ -40,10 +42,7 @@ class AppHeader extends StatelessWidget {
           'sub': 'Sozlamalar va shaxsiy kabinet',
         };
       default:
-        return {
-          'title': 'SayrHub',
-          'sub': 'Arzon turlar & Charter reyslar',
-        };
+        return {'title': 'SayrHub', 'sub': 'Arzon turlar & Charter reyslar'};
     }
   }
 
@@ -65,12 +64,20 @@ class AppHeader extends StatelessWidget {
                   color: AppTheme.accentLight,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.qr_code_scanner, color: AppTheme.primary, size: 28),
+                child: const Icon(
+                  FlaticonIcons.qrCodeScanner,
+                  color: AppTheme.primary,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 14),
               const Text(
                 'Pasport & Vaucher QR Skaneri',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textMain),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppTheme.textMain,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -89,7 +96,11 @@ class AppHeader extends StatelessWidget {
                   border: Border.all(color: AppTheme.borderDark),
                 ),
                 child: const Center(
-                  child: Icon(Icons.qr_code_2, size: 100, color: AppTheme.primary),
+                  child: Icon(
+                    FlaticonIcons.qrCode2,
+                    size: 100,
+                    color: AppTheme.primary,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -186,11 +197,17 @@ class AppHeader extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 1.5,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.accentLight,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppTheme.primary.withOpacity(0.3), width: 0.8),
+                          border: Border.all(
+                            color: AppTheme.primary.withOpacity(0.3),
+                            width: 0.8,
+                          ),
                         ),
                         child: const Text(
                           'TRAVEL',
@@ -233,7 +250,11 @@ class AppHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: AppTheme.borderDark),
                     ),
-                    child: const Icon(Icons.qr_code_scanner, size: 16, color: AppTheme.textSub),
+                    child: const Icon(
+                      FlaticonIcons.qrCodeScanner,
+                      size: 16,
+                      color: AppTheme.textSub,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -254,7 +275,11 @@ class AppHeader extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        const Icon(Icons.notifications_none, size: 17, color: AppTheme.textSub),
+                        const Icon(
+                          FlaticonIcons.notificationsNone,
+                          size: 17,
+                          color: AppTheme.textSub,
+                        ),
                         Positioned(
                           top: 6,
                           right: 6,
@@ -293,7 +318,7 @@ class AppHeader extends StatelessWidget {
                       ),
                       child: const Center(
                         child: Icon(
-                          Icons.person_outline,
+                          FlaticonIcons.personOutline,
                           color: AppTheme.primary,
                           size: 18,
                         ),

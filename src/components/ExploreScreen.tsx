@@ -3,7 +3,7 @@ import { ExploreVibe } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Palmtree, Landmark, Mountain, Crown, ArrowRight, Compass } from 'lucide-react';
+import { Sparkles, Palmtree, Landmark, Mountain, Crown, ArrowRight, Compass } from '@/lib/flaticon-icons';
 
 interface ExploreScreenProps {
   exploreItems: ExploreVibe[];

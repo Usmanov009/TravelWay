@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { TabType, LanguageCode, ThemeMode, TourPackage, Booking, PaymentCard, UserProfile, ToastMessage, PriceAlert, ComboTour, FlightTicket, HotelOnly } from './types';
 import {
   INITIAL_USER,
@@ -10,23 +10,54 @@ import {
 } from './data/mockData';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
-import { AuthScreen } from './components/AuthScreen';
 import { SearchScreen } from './components/SearchScreen';
-import { ExploreScreen } from './components/ExploreScreen';
-import { HotDealsScreen } from './components/HotDealsScreen';
-import { TripsScreen } from './components/TripsScreen';
-import { ProfileScreen } from './components/ProfileScreen';
-import { Modals } from './components/Modals';
-import { TelegramAuthModal } from './components/TelegramAuthModal';
-import { FlutterCodeViewer } from './components/FlutterCodeViewer';
-import { PriceAlertModal } from './components/PriceAlertModal';
-import { TourBookingPage } from './components/TourBookingPage';
-import { AdminPage } from './admin/AdminPage';
-import { AdminLoginPage } from './admin/AdminLoginPage';
 import { AdminRole, AdminUser } from './admin/adminTypes';
 import { INITIAL_ADMIN_STAFF } from './admin/adminMockData';
 import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from './data/extraServicesData';
-import { AlertTriangle, Bell, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Bell, CheckCircle2 } from '@/lib/flaticon-icons';
+
+const FlutterCodeViewer = lazy(() =>
+  import('./components/FlutterCodeViewer').then((module) => ({
+    default: module.FlutterCodeViewer
+  }))
+);
+const AuthScreen = lazy(() =>
+  import('./components/AuthScreen').then((module) => ({ default: module.AuthScreen }))
+);
+const ExploreScreen = lazy(() =>
+  import('./components/ExploreScreen').then((module) => ({ default: module.ExploreScreen }))
+);
+const HotDealsScreen = lazy(() =>
+  import('./components/HotDealsScreen').then((module) => ({ default: module.HotDealsScreen }))
+);
+const TripsScreen = lazy(() =>
+  import('./components/TripsScreen').then((module) => ({ default: module.TripsScreen }))
+);
+const ProfileScreen = lazy(() =>
+  import('./components/ProfileScreen').then((module) => ({ default: module.ProfileScreen }))
+);
+const TourBookingPage = lazy(() =>
+  import('./components/TourBookingPage').then((module) => ({ default: module.TourBookingPage }))
+);
+const Modals = lazy(() =>
+  import('./components/Modals').then((module) => ({ default: module.Modals }))
+);
+const TelegramAuthModal = lazy(() =>
+  import('./components/TelegramAuthModal').then((module) => ({
+    default: module.TelegramAuthModal
+  }))
+);
+const PriceAlertModal = lazy(() =>
+  import('./components/PriceAlertModal').then((module) => ({
+    default: module.PriceAlertModal
+  }))
+);
+const AdminLoginPage = lazy(() =>
+  import('./admin/AdminLoginPage').then((module) => ({ default: module.AdminLoginPage }))
+);
+const AdminPage = lazy(() =>
+  import('./admin/AdminPage').then((module) => ({ default: module.AdminPage }))
+);
 
 export default function App() {
   // Navigation & Screen state
@@ -1091,6 +1122,7 @@ export default function App() {
   if (isAdminMode) {
     if (!isAdminAuthenticated) {
       return (
+        <Suspense fallback={<div className="min-h-svh animate-pulse bg-muted" />}>
         <AdminLoginPage
           onLoginSuccess={(role, adminData) => {
             try {
@@ -1110,10 +1142,12 @@ export default function App() {
           onExitToApp={handleExitAdmin}
           onShowToast={showToast}
         />
+        </Suspense>
       );
     }
 
     return (
+      <Suspense fallback={<div className="min-h-svh animate-pulse bg-muted" />}>
       <AdminPage
         currentRole={currentAdminRole}
         currentAdminUser={currentAdminUser}
@@ -1152,6 +1186,7 @@ export default function App() {
         agencyCommissionRate={agencyCommissionRate}
         onUpdateCommissionRate={handleUpdateCommissionRate}
       />
+      </Suspense>
     );
   }
 
@@ -1199,14 +1234,17 @@ export default function App() {
       {showFlutterCode ? (
         <div className="flex-1 w-full max-w-4xl mx-auto p-4 flex items-center justify-center">
           <div className="w-full h-[820px] max-h-[90vh]">
-            <FlutterCodeViewer
-              onClose={() => setShowFlutterCode(false)}
-              onShowToast={showToast}
-            />
+            <Suspense fallback={<div className="h-full animate-pulse rounded-2xl bg-muted" />}>
+              <FlutterCodeViewer
+                onClose={() => setShowFlutterCode(false)}
+                onShowToast={showToast}
+              />
+            </Suspense>
           </div>
         </div>
       ) : (
         <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 relative">
+          <Suspense fallback={<div className="min-h-[60vh] animate-pulse rounded-2xl bg-muted" />}>
           {checkoutTour ? (
             <TourBookingPage
               tour={checkoutTour}
@@ -1346,6 +1384,7 @@ export default function App() {
               )}
             </>
           )}
+          </Suspense>
         </main>
       )}
 
@@ -1357,8 +1396,31 @@ export default function App() {
           activeTripsCount={bookings.length}
         />
       )}
+      <footer className="border-t border-border py-2 text-center text-[10px] text-muted-foreground">
+        <a
+          href="https://www.flaticon.com/uicons"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:text-primary hover:underline"
+        >
+          Uicons by Flaticon
+        </a>
+      </footer>
 
           {/* Interactive Modals Overlays */}
+          {(isOtpOpen ||
+            socialProvider !== null ||
+            tourDetails !== null ||
+            successBooking !== null ||
+            isQrOpen ||
+            isSupportOpen ||
+            isEditProfileOpen ||
+            isEditPassportOpen ||
+            cancelBookingTarget !== null ||
+            isLogoutConfirmOpen ||
+            isAddCardOpen ||
+            activeVoucherBooking !== null) && (
+          <Suspense fallback={null}>
           <Modals
             isOtpOpen={isOtpOpen}
             otpPhone={otpPhone}
@@ -1419,9 +1481,11 @@ export default function App() {
             onCloseVoucherPreview={() => setActiveVoucherBooking(null)}
             onShowToast={showToast}
           />
+          </Suspense>
+          )}
 
           {/* Global Price Alert Modal (accessible from Tour Details) */}
-          <PriceAlertModal
+          {activePriceAlertTour && <Suspense fallback={null}><PriceAlertModal
             isOpen={Boolean(activePriceAlertTour)}
             tour={activePriceAlertTour}
             existingAlert={priceAlerts.find((a) => a.tourId === activePriceAlertTour?.id)}
@@ -1430,15 +1494,15 @@ export default function App() {
             onSaveAlert={handleSavePriceAlert}
             onDeleteAlert={handleDeletePriceAlert}
             onSimulatePriceDrop={handleSimulatePriceDrop}
-          />
+          /></Suspense>}
 
           {/* Telegram Auth & Registration Modal */}
-          <TelegramAuthModal
+          {isTelegramAuthOpen && <Suspense fallback={null}><TelegramAuthModal
             isOpen={isTelegramAuthOpen}
             onClose={() => setIsTelegramAuthOpen(false)}
             onSuccess={handleTelegramAuthSuccess}
             onShowToast={showToast}
-          />
+          /></Suspense>}
 
           {/* In-app Toast Messages Overlay */}
           <div className="fixed top-16 inset-x-4 z-50 pointer-events-none flex flex-col items-center gap-2">

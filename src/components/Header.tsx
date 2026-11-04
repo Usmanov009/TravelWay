@@ -15,7 +15,7 @@ import {
   Bell,
   ShieldCheck,
   CheckCircle2
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface HeaderProps {
   currentTab: TabType;

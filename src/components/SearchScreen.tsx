@@ -1,8 +1,6 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useMemo, useEffect, useCallback } from 'react';
 import { TourPackage, PriceAlert, SearchServiceMode, ComboTour, FlightTicket, HotelOnly } from '../types';
-import { PriceAlertModal } from './PriceAlertModal';
 import { ActiveAlertsModal } from './ActiveAlertsModal';
-import { AllToursInteractiveMap } from './GoogleTourMap';
 import { ComboToursView } from './ComboToursView';
 import { FlightsView } from './FlightsView';
 import { HotelsOnlyView } from './HotelsOnlyView';
@@ -17,7 +15,16 @@ import {
   BedDouble, Bell, Building2, Compass, Gem, Globe2, Heart, Hotel, Info, MapPin,
   MapPinned, Moon, Plane, PlaneTakeoff, RotateCw, Search, ShieldCheck, Sparkles,
   Tag, Utensils, Users, Waves
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
+
+const AllToursInteractiveMap = lazy(() =>
+  import('./GoogleTourMap').then((module) => ({
+    default: module.AllToursInteractiveMap
+  }))
+);
+const PriceAlertModal = lazy(() =>
+  import('./PriceAlertModal').then((module) => ({ default: module.PriceAlertModal }))
+);
 
 interface SearchScreenProps {
   tours: TourPackage[];
@@ -1520,6 +1527,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
       {/* 5. PRICE ALERT MODAL */}
       {selectedAlertTour && (
+        <Suspense fallback={null}>
         <PriceAlertModal
           isOpen={!!selectedAlertTour}
           tour={selectedAlertTour}
@@ -1543,6 +1551,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             }
           }}
         />
+        </Suspense>
       )}
 
       {/* 6. ACTIVE ALERTS LIST MODAL */}
@@ -1582,15 +1591,17 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               borderColor: 'var(--tw-border)'
             }}
           >
-            <AllToursInteractiveMap
-              tours={displayTours.length > 0 ? displayTours : tours}
-              selectedCountry={currentCountry.code === 'ALL' ? undefined : currentCountry.name}
-              onSelectTour={(tour) => {
-                setIsMapModalOpen(false);
-                onOpenTourDetails(tour);
-              }}
-              onClose={() => setIsMapModalOpen(false)}
-            />
+            <Suspense fallback={<div className="h-full animate-pulse bg-muted" />}>
+              <AllToursInteractiveMap
+                tours={displayTours.length > 0 ? displayTours : tours}
+                selectedCountry={currentCountry.code === 'ALL' ? undefined : currentCountry.name}
+                onSelectTour={(tour) => {
+                  setIsMapModalOpen(false);
+                  onOpenTourDetails(tour);
+                }}
+                onClose={() => setIsMapModalOpen(false)}
+              />
+            </Suspense>
           </div>
         </div>
       )}

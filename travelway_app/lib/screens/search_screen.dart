@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import '../widgets/booking_dialog.dart';
 import '../widgets/price_alert_dialog.dart';
 import 'tour_detail_screen.dart';
@@ -108,7 +109,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   const SizedBox(height: 14),
                   const Row(
                     children: [
-                      Icon(Icons.public, size: 20, color: AppTheme.primary),
+                      Icon(
+                        FlaticonIcons.public,
+                        size: 20,
+                        color: AppTheme.primary,
+                      ),
                       SizedBox(width: 8),
                       Text(
                         'Davlatni tanlang yoki qidiring',
@@ -135,7 +140,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         fontSize: 13,
                       ),
                       prefixIcon: const Icon(
-                        Icons.search,
+                        FlaticonIcons.search,
                         color: AppTheme.primary,
                         size: 20,
                       ),
@@ -185,7 +190,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             vertical: 2,
                           ),
                           leading: const Icon(
-                            Icons.public,
+                            FlaticonIcons.public,
                             size: 22,
                             color: AppTheme.primary,
                           ),
@@ -203,7 +208,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                           trailing: isSel
                               ? const Icon(
-                                  Icons.check_circle,
+                                  FlaticonIcons.checkCircle,
                                   color: AppTheme.primary,
                                   size: 18,
                                 )
@@ -264,7 +269,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Row(
                       children: [
                         Icon(
-                          Icons.auto_awesome,
+                          FlaticonIcons.autoAwesome,
                           color: Colors.white70,
                           size: 15,
                         ),
@@ -312,16 +317,20 @@ class _SearchScreenState extends State<SearchScreen> {
                   children: [
                     _buildSegmentButton(
                       'packages',
-                      Icons.beach_access,
+                      FlaticonIcons.beachAccess,
                       'Paketlar',
                     ),
-                    _buildSegmentButton('combo', Icons.sync, 'Combo'),
+                    _buildSegmentButton('combo', FlaticonIcons.sync, 'Combo'),
                     _buildSegmentButton(
                       'flights',
-                      Icons.flight_takeoff,
+                      FlaticonIcons.flightTakeoff,
                       'Biletlar',
                     ),
-                    _buildSegmentButton('hotels', Icons.hotel, 'Mehmonxona'),
+                    _buildSegmentButton(
+                      'hotels',
+                      FlaticonIcons.hotel,
+                      'Mehmonxona',
+                    ),
                   ],
                 ),
               ),
@@ -404,7 +413,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const Row(
                           children: [
                             Icon(
-                              Icons.flight_takeoff,
+                              FlaticonIcons.flightTakeoff,
                               size: 14,
                               color: AppTheme.textSub,
                             ),
@@ -463,7 +472,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         const Row(
                           children: [
                             Icon(
-                              Icons.nights_stay,
+                              FlaticonIcons.nightsStay,
                               size: 14,
                               color: AppTheme.textSub,
                             ),
@@ -596,7 +605,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.public, size: 14, color: AppTheme.textSub),
+                      Icon(
+                        FlaticonIcons.public,
+                        size: 14,
+                        color: AppTheme.textSub,
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Borish mamlakati (Select & Qidiruv)',
@@ -636,7 +649,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.public,
+                        FlaticonIcons.public,
                         size: 18,
                         color: AppTheme.primary,
                       ),
@@ -655,13 +668,13 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                       const Icon(
-                        Icons.search,
+                        FlaticonIcons.search,
                         size: 16,
                         color: AppTheme.textSub,
                       ),
                       const SizedBox(width: 4),
                       const Icon(
-                        Icons.arrow_drop_down,
+                        FlaticonIcons.arrowDropDown,
                         size: 18,
                         color: AppTheme.textSub,
                       ),
@@ -701,7 +714,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.public,
+                              FlaticonIcons.public,
                               size: 14,
                               color: AppTheme.primary,
                             ),
@@ -730,13 +743,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 decoration: InputDecoration(
                   hintText: 'Shahar yoki mehmonxona qidirish...',
                   prefixIcon: const Icon(
-                    Icons.search,
+                    FlaticonIcons.search,
                     size: 18,
                     color: AppTheme.textMuted,
                   ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
+                          icon: const Icon(FlaticonIcons.clear, size: 16),
                           onPressed: () {
                             _searchController.clear();
                             provider.setSearchQuery('');
@@ -774,7 +787,11 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.verified, size: 12, color: AppTheme.accentGreen),
+                  Icon(
+                    FlaticonIcons.verified,
+                    size: 12,
+                    color: AppTheme.accentGreen,
+                  ),
                   SizedBox(width: 4),
                   Text(
                     'Rasmiy Turpaketlar',
@@ -814,7 +831,11 @@ class _SearchScreenState extends State<SearchScreen> {
             alignment: Alignment.center,
             child: const Column(
               children: [
-                Icon(Icons.travel_explore, size: 48, color: AppTheme.textMuted),
+                Icon(
+                  FlaticonIcons.travelExplore,
+                  size: 48,
+                  color: AppTheme.textMuted,
+                ),
                 SizedBox(height: 10),
                 Text(
                   'Ushbu filtr bo\'yicha turlar topilmadi',
@@ -875,7 +896,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   color: AppTheme.subtleDark,
                   child: const Center(
                     child: Icon(
-                      Icons.apartment,
+                      FlaticonIcons.apartment,
                       size: 40,
                       color: AppTheme.textMuted,
                     ),
@@ -961,7 +982,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified, size: 10, color: Colors.white),
+                          Icon(
+                            FlaticonIcons.verified,
+                            size: 10,
+                            color: Colors.white,
+                          ),
                           SizedBox(width: 2),
                           Text(
                             'Kafolatlangan',
@@ -997,7 +1022,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       border: Border.all(color: Colors.white30),
                     ),
                     child: const Icon(
-                      Icons.notifications_active_outlined,
+                      FlaticonIcons.notificationsActiveOutlined,
                       size: 16,
                       color: Colors.amber,
                     ),
@@ -1019,7 +1044,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       border: Border.all(color: Colors.white30),
                     ),
                     child: Icon(
-                      isFav ? Icons.favorite : Icons.favorite_border,
+                      isFav
+                          ? FlaticonIcons.favorite
+                          : FlaticonIcons.favoriteBorder,
                       size: 16,
                       color: isFav ? AppTheme.accent : Colors.white,
                     ),
@@ -1054,7 +1081,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           Row(
                             children: [
                               const Icon(
-                                Icons.location_on,
+                                FlaticonIcons.locationOn,
                                 size: 12,
                                 color: AppTheme.primary,
                               ),
@@ -1079,7 +1106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       children: List.generate(
                         5,
                         (i) => const Icon(
-                          Icons.star,
+                          FlaticonIcons.star,
                           size: 12,
                           color: Colors.amber,
                         ),
@@ -1110,7 +1137,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Row(
                     children: [
                       const Icon(
-                        Icons.flight_takeoff,
+                        FlaticonIcons.flightTakeoff,
                         size: 14,
                         color: AppTheme.accentSky,
                       ),
@@ -1159,7 +1186,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.corporate_fare,
+                            FlaticonIcons.corporateFare,
                             size: 13,
                             color: AppTheme.primary,
                           ),
@@ -1180,7 +1207,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.shield_outlined,
+                            FlaticonIcons.shieldOutlined,
                             size: 12,
                             color: AppTheme.accentGreen,
                           ),
@@ -1393,7 +1420,7 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.sync, size: 14, color: Colors.amber),
+                  Icon(FlaticonIcons.sync, size: 14, color: Colors.amber),
                   SizedBox(width: 4),
                   Text(
                     'Multi-City • Eksklyuziv Paketlar',
@@ -1457,7 +1484,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       fontSize: 12,
                     ),
                     prefixIcon: const Icon(
-                      Icons.search,
+                      FlaticonIcons.search,
                       size: 18,
                       color: AppTheme.primary,
                     ),
@@ -1468,7 +1495,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               setState(() {});
                             },
                             child: const Icon(
-                              Icons.close,
+                              FlaticonIcons.close,
                               size: 16,
                               color: AppTheme.textSub,
                             ),
@@ -1578,7 +1605,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Column(
               children: [
                 const Icon(
-                  Icons.hub_outlined,
+                  FlaticonIcons.hubOutlined,
                   size: 44,
                   color: AppTheme.textMuted,
                 ),
@@ -1804,7 +1831,11 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.flight, size: 14, color: AppTheme.accentSky),
+                  Icon(
+                    FlaticonIcons.flight,
+                    size: 14,
+                    color: AppTheme.accentSky,
+                  ),
                   SizedBox(width: 4),
                   Text(
                     'Aviabiletlar • Charter & GDS Bloklar',
@@ -1857,7 +1888,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Row(
                         children: [
                           const Icon(
-                            Icons.flight,
+                            FlaticonIcons.flight,
                             color: AppTheme.accentSky,
                             size: 18,
                           ),
@@ -1917,7 +1948,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ],
                       ),
                       const Icon(
-                        Icons.arrow_forward,
+                        FlaticonIcons.arrowForward,
                         size: 16,
                         color: AppTheme.textMuted,
                       ),
@@ -1952,7 +1983,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Row(
                         children: [
                           const Icon(
-                            Icons.luggage,
+                            FlaticonIcons.luggage,
                             size: 14,
                             color: AppTheme.textMuted,
                           ),
@@ -2054,7 +2085,7 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.hotel, size: 14, color: Colors.amber),
+                  Icon(FlaticonIcons.hotel, size: 14, color: Colors.amber),
                   SizedBox(width: 4),
                   Text(
                     'Faqat Mehmonxona • Qulay Tariflar',

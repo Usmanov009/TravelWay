@@ -5,6 +5,7 @@ import '../models/tour_package.dart';
 import '../models/price_alert.dart';
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class PriceAlertDialog extends StatefulWidget {
   final TourPackage tour;
@@ -70,7 +71,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
           content: Row(
             children: [
               const Icon(
-                Icons.notifications_active,
+                FlaticonIcons.notificationsActive,
                 color: AppTheme.accentGold,
                 size: 20,
               ),
@@ -106,7 +107,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.notifications_active_outlined,
+                        FlaticonIcons.notificationsActiveOutlined,
                         color: AppTheme.accentGold,
                         size: 20,
                       ),
@@ -125,7 +126,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 18),
+                  icon: const Icon(FlaticonIcons.close, size: 18),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   onPressed: () => Navigator.of(context).pop(),
@@ -152,7 +153,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'Xabardor qilish uchun telefon',
-                prefixIcon: Icon(Icons.phone_outlined, size: 18),
+                prefixIcon: Icon(FlaticonIcons.phoneOutlined, size: 18),
               ),
             ),
             const SizedBox(height: 20),
@@ -175,7 +176,10 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                     : const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.notifications_active_outlined, size: 16),
+                          Icon(
+                            FlaticonIcons.notificationsActiveOutlined,
+                            size: 16,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Signalni faollashtirish',

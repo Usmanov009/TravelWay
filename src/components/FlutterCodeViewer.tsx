@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Lightbulb } from 'lucide-react';
+import { Heart, Lightbulb } from '@/lib/flaticon-icons';
 
 interface FlutterCodeViewerProps {
   onClose: () => void;
@@ -18,6 +18,7 @@ export const FlutterCodeViewer: React.FC<FlutterCodeViewerProps> = ({
 // SayrHub App — Flutter main.dart
 // ==========================================
 import 'package:flutter/material.dart';
+import 'utils/flaticon_icons.dart';
 import 'screens/auth_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/explore_screen.dart';
@@ -90,11 +91,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           selectedFontSize: 11,
           unselectedFontSize: 11,
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Qidiruv'),
-            BottomNavigationBarItem(icon: Icon(Icons.explore_outlined), label: 'Kashf etish'),
-            BottomNavigationBarItem(icon: Icon(Icons.local_fire_department), label: 'Qaynoq'),
-            BottomNavigationBarItem(icon: Icon(Icons.luggage_outlined), label: 'Turlarim'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
+            BottomNavigationBarItem(icon: Icon(FlaticonIcons.search), label: 'Qidiruv'),
+            BottomNavigationBarItem(icon: Icon(FlaticonIcons.exploreOutlined), label: 'Kashf etish'),
+            BottomNavigationBarItem(icon: Icon(FlaticonIcons.localFireDepartment), label: 'Qaynoq'),
+            BottomNavigationBarItem(icon: Icon(FlaticonIcons.luggageOutlined), label: 'Turlarim'),
+            BottomNavigationBarItem(icon: Icon(FlaticonIcons.personOutline), label: 'Profil'),
           ],
         ),
       ),
@@ -143,13 +144,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           color: const Color(0xFFFF5B00).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.sms, color: Color(0xFFFF5B00)),
+                        child: const Icon(FlaticonIcons.send, color: Color(0xFFFF5B00)),
                       ),
                       const SizedBox(width: 10),
                       const Text('Tasdiqlash kodi', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(FlaticonIcons.close)),
                 ],
               ),
               const SizedBox(height: 16),
@@ -197,7 +198,7 @@ class _AuthScreenState extends State<AuthScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () {}),
+        leading: IconButton(icon: const Icon(FlaticonIcons.arrowBack), onPressed: () {}),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 8),
@@ -209,7 +210,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: const Row(
               children: [
                 Text('UZ'),
-                Icon(Icons.arrow_drop_down, size: 16),
+                Icon(FlaticonIcons.arrowDropDown, size: 16),
               ],
             ),
           ),
@@ -300,7 +301,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       decoration: const InputDecoration(border: InputBorder.none, hintText: '90 123-45-67'),
                     ),
                   ),
-                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                  const Icon(FlaticonIcons.checkCircle, color: Colors.green, size: 18),
                 ],
               ),
             ),
@@ -329,7 +330,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               onPressed: _signInWithGoogle,
-              icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+              icon: const Icon(FlaticonIcons.personOutline, color: Colors.white),
               label: const Text('Google orqali tezkor kirish', style: TextStyle(color: Colors.white)),
             ),
           ],

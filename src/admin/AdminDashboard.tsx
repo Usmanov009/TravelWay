@@ -4,7 +4,7 @@ import { AdminRole, AdminUser } from './adminTypes';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, Pencil, Plane, TrendingUp } from 'lucide-react';
+import { ClipboardList, Pencil, Plane, TrendingUp } from '@/lib/flaticon-icons';
 
 interface AdminDashboardProps {
   currentRole: AdminRole;

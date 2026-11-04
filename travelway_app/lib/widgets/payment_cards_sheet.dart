@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/payment_card.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class PaymentCardsSheet extends StatefulWidget {
   const PaymentCardsSheet({super.key});
@@ -181,7 +182,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
-                        Icons.credit_card,
+                        FlaticonIcons.creditCard,
                         color: AppTheme.primary,
                         size: 20,
                       ),
@@ -210,7 +211,10 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textSub),
+                  icon: const Icon(
+                    FlaticonIcons.close,
+                    color: AppTheme.textSub,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -238,7 +242,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
-                              Icons.credit_card_off_outlined,
+                              FlaticonIcons.creditCardOffOutlined,
                               size: 48,
                               color: AppTheme.textMuted,
                             ),
@@ -264,7 +268,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                           const SizedBox(height: 20),
                           ElevatedButton.icon(
                             onPressed: _openAddCardDialog,
-                            icon: const Icon(Icons.add, size: 18),
+                            icon: const Icon(FlaticonIcons.add, size: 18),
                             label: const Text('Karta qo\'shish'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primary,
@@ -359,7 +363,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                                   ),
                                   child: const Center(
                                     child: Icon(
-                                      Icons.memory,
+                                      FlaticonIcons.memory,
                                       size: 18,
                                       color: Colors.black87,
                                     ),
@@ -367,7 +371,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                                 ),
                                 const SizedBox(width: 8),
                                 const Icon(
-                                  Icons.wifi,
+                                  FlaticonIcons.wifi,
                                   size: 16,
                                   color: Colors.white54,
                                 ),
@@ -477,7 +481,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                                         child: const Row(
                                           children: [
                                             Icon(
-                                              Icons.check_circle,
+                                              FlaticonIcons.checkCircle,
                                               size: 12,
                                               color: AppTheme.accentGold,
                                             ),
@@ -507,7 +511,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                                           ),
                                         ),
                                         child: const Icon(
-                                          Icons.delete_outline,
+                                          FlaticonIcons.deleteOutline,
                                           size: 16,
                                           color: Colors.redAccent,
                                         ),
@@ -532,7 +536,7 @@ class _PaymentCardsSheetState extends State<PaymentCardsSheet> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _openAddCardDialog,
-                  icon: const Icon(Icons.add, size: 18),
+                  icon: const Icon(FlaticonIcons.add, size: 18),
                   label: const Text('Yangi to\'lov kartasi qo\'shish'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
@@ -657,7 +661,10 @@ class _AddCardSheetState extends State<_AddCardSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textSub),
+                  icon: const Icon(
+                    FlaticonIcons.close,
+                    color: AppTheme.textSub,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -693,7 +700,7 @@ class _AddCardSheetState extends State<_AddCardSheet> {
                 filled: true,
                 fillColor: AppTheme.subtleDark,
                 prefixIcon: const Icon(
-                  Icons.credit_card,
+                  FlaticonIcons.creditCard,
                   size: 18,
                   color: AppTheme.primary,
                 ),

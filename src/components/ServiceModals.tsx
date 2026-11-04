@@ -4,7 +4,7 @@ import {
   BedDouble, Building2, CalendarDays, CheckCircle2, Compass, Flame, Hotel,
   Luggage, MapPin, MessageCircle, Pin, Plane, ShieldCheck, Sparkles, Ticket,
   Utensils, Waves
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface ServiceModalsProps {
   selectedComboTour: ComboTour | null;

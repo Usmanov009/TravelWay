@@ -2,6 +2,21 @@ import React from 'react';
 import { AdminRole, AdminTab, AdminUser } from './adminTypes';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar
+} from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
   Compass,
@@ -13,11 +28,11 @@ import {
   Users,
   ShieldCheck,
   Sliders,
-  X,
   Smartphone,
+  GalleryVerticalEnd,
   Crown,
   Briefcase
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface AdminSidebarProps {
   currentTab: AdminTab;
@@ -27,9 +42,6 @@ interface AdminSidebarProps {
   totalActiveBookings: number;
   totalAlerts: number;
   onExitToApp: () => void;
-  isCollapsed?: boolean;
-  isMobileOpen?: boolean;
-  onCloseMobile?: () => void;
 }
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({
@@ -39,12 +51,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   currentAdmin,
   totalActiveBookings,
   totalAlerts,
-  onExitToApp,
-  isCollapsed = false,
-  isMobileOpen = false,
-  onCloseMobile
+  onExitToApp
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
+  const { setOpenMobile } = useSidebar();
 
   interface NavItem {
     id: AdminTab;
@@ -101,151 +111,81 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const handleItemClick = (id: AdminTab) => {
     onSelectTab(id);
-    if (onCloseMobile) {
-      onCloseMobile();
-    }
+    setOpenMobile(false);
   };
 
   return (
-    <>
-      {/* Mobile Backdrop */}
-      {isMobileOpen && (
-        <div
-          onClick={onCloseMobile}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
-        />
-      )}
-
-      <aside
-        className={`fixed lg:sticky top-0 h-screen z-50 lg:z-40 flex flex-col shrink-0 select-none transition-all duration-300 bg-card border-r border-border text-card-foreground shadow-sm lg:shadow-none ${
-          isMobileOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0'
-        } ${isCollapsed ? 'lg:w-20' : 'lg:w-72'}`}
-      >
-        {/* Brand Header */}
-        <div className="h-[70px] px-5 border-b border-border flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-primary flex items-center justify-center text-primary-foreground shadow-sm shrink-0 relative">
-              <img
-                src="/logo.png"
-                alt="SayrHub"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              <span className="font-black text-lg tracking-wider absolute pointer-events-none">SH</span>
-            </div>
-            {(!isCollapsed || isMobileOpen) && (
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-foreground text-base tracking-tight truncate">
-                    SayrHub
-                  </span>
-                  <Badge variant="secondary" className="text-[10px] uppercase font-bold text-primary px-1.5 py-0 h-4">
-                    Admin
-                  </Badge>
+    <Sidebar collapsible="offcanvas">
+      <SidebarHeader className="border-b border-sidebar-border">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton render={<a href="/" />} size="lg">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <GalleryVerticalEnd className="size-4" aria-hidden="true" />
                 </div>
-                <p className="text-[11px] text-muted-foreground font-medium truncate">
-                  Boshqaruv Tizimi
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Close button for mobile drawer */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onCloseMobile}
-            className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground"
-            type="button"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Navigation Items Grouped by Category */}
-        <div className="flex-1 px-3 py-3 overflow-y-auto custom-scrollbar space-y-4">
-          {visibleNavGroups.map((group, gIdx) => (
-            <div key={gIdx} className="space-y-1">
-              {(!isCollapsed || isMobileOpen) && (
-                <div className="px-3.5 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                  {group.title}
+                <div className="flex min-w-0 flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">SayrHub Admin</span>
+                  <span className="text-xs text-muted-foreground">Boshqaruv tizimi</span>
                 </div>
-              )}
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentTab === item.id;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={isActive ? 'default' : 'ghost'}
-                    onClick={() => handleItemClick(item.id)}
-                    title={isCollapsed && !isMobileOpen ? item.label : undefined}
-                    className={`w-full ${
-                      isCollapsed && !isMobileOpen ? 'justify-center px-0' : 'justify-between px-3.5'
-                    } h-10 rounded-xl font-semibold text-xs transition-all my-0.5 cursor-pointer`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Icon className="w-4 h-4 shrink-0" />
-                      {(!isCollapsed || isMobileOpen) && (
-                        <span className="truncate">{item.label}</span>
-                      )}
-                    </div>
-
-                    {(!isCollapsed || isMobileOpen) && typeof item.badge === 'number' && item.badge > 0 && (
-                      <Badge
-                        variant={isActive ? 'secondary' : 'default'}
-                        className="text-[10px] font-bold px-1.5 py-0 h-4 rounded-full"
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        {visibleNavGroups.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton
+                        isActive={currentTab === item.id}
+                        tooltip={item.label}
+                        onClick={() => handleItemClick(item.id)}
                       >
-                        {item.badge}
-                      </Badge>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom Profile / Status Card */}
-        {(!isCollapsed || isMobileOpen) && (
-          <div className="p-3 border-t border-border shrink-0">
-            <div className="p-3 rounded-2xl bg-muted/40 border border-border">
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  <img
-                    src={currentAdmin.avatar}
-                    alt={currentAdmin.name}
-                    className="w-10 h-10 rounded-xl object-cover border border-border"
-                  />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-background" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="text-xs font-bold text-foreground truncate">
-                    {currentAdmin.name}
-                  </h4>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Badge variant={isMainAdmin ? 'default' : 'secondary'} className="text-[10px] font-semibold px-1.5 py-0 h-4">
-                      {isMainAdmin ? <><Crown aria-hidden="true" className="mr-1 h-3 w-3" /> Bosh Admin</> : <><Briefcase aria-hidden="true" className="mr-1 h-3 w-3" /> Tur Admin</>}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onExitToApp}
-                className="mt-2.5 w-full h-8 text-[11px] font-semibold gap-1.5 rounded-xl border-border bg-card"
-              >
-                <Smartphone className="w-3.5 h-3.5 text-primary" />
-                <span>Mobil Ilovani Ko'rish</span>
-              </Button>
-            </div>
+                        <Icon aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                      {typeof item.badge === 'number' && item.badge > 0 && (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <Avatar>
+            <AvatarImage src={currentAdmin.avatar} alt={currentAdmin.name} />
+            <AvatarFallback>{currentAdmin.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{currentAdmin.name}</p>
+            <Badge variant={isMainAdmin ? 'default' : 'secondary'} className="mt-1 text-[10px]">
+              {isMainAdmin ? <><Crown aria-hidden="true" className="mr-1 size-3" /> Bosh Admin</> : <><Briefcase aria-hidden="true" className="mr-1 size-3" /> Tur Admin</>}
+            </Badge>
           </div>
-        )}
-      </aside>
-    </>
+        </div>
+        <Button variant="outline" onClick={onExitToApp} className="w-full justify-start gap-2">
+          <Smartphone className="size-4 text-primary" aria-hidden="true" />
+          <span>Ilovani ko'rish</span>
+        </Button>
+        <a
+          href="https://www.flaticon.com/uicons"
+          target="_blank"
+          rel="noreferrer"
+          className="px-2 text-xs text-muted-foreground hover:text-primary hover:underline"
+        >
+          Uicons by Flaticon
+        </a>
+      </SidebarFooter>
+    </Sidebar>
   );
 };

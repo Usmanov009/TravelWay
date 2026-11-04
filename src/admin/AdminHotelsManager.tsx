@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HotelOnly } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
-import { Briefcase, DollarSign, Globe, Hotel, Pencil, RefreshCw, Star, Tag, Utensils } from 'lucide-react';
+import { Briefcase, DollarSign, Globe, Hotel, Pencil, RefreshCw, Star, Tag, Utensils } from '@/lib/flaticon-icons';
 
 interface AdminHotelsManagerProps {
   currentRole: AdminRole;

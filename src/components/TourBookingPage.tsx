@@ -33,7 +33,7 @@ import {
   HeartHandshake,
   Bus,
   Hotel
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
 
 interface TourBookingPageProps {
   tour: TourPackage;

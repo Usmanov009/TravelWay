@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 import '../widgets/booking_dialog.dart';
 import '../widgets/price_alert_dialog.dart';
 
@@ -29,7 +30,7 @@ class TourDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.arrow_back,
+                  FlaticonIcons.arrowBack,
                   color: Colors.white,
                   size: 20,
                 ),
@@ -45,7 +46,7 @@ class TourDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
-                    Icons.notifications_active_outlined,
+                    FlaticonIcons.notificationsActiveOutlined,
                     color: AppTheme.accentGold,
                     size: 20,
                   ),
@@ -70,7 +71,7 @@ class TourDetailScreen extends StatelessWidget {
                       color: AppTheme.surfaceDark,
                       child: const Center(
                         child: Icon(
-                          Icons.hotel,
+                          FlaticonIcons.hotel,
                           size: 48,
                           color: AppTheme.textMuted,
                         ),
@@ -133,7 +134,7 @@ class TourDetailScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(
-                                Icons.star,
+                                FlaticonIcons.star,
                                 color: AppTheme.accentGold,
                                 size: 14,
                               ),
@@ -163,7 +164,7 @@ class TourDetailScreen extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.verified,
+                                FlaticonIcons.verified,
                                 color: AppTheme.accentGreen,
                                 size: 14,
                               ),
@@ -205,7 +206,7 @@ class TourDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(
-                        Icons.location_on,
+                        FlaticonIcons.locationOn,
                         color: AppTheme.primary,
                         size: 16,
                       ),
@@ -225,19 +226,19 @@ class TourDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       _buildInfoTile(
-                        Icons.nights_stay_outlined,
+                        FlaticonIcons.nightsStayOutlined,
                         'Davomiyligi',
                         tour.nights,
                       ),
                       const SizedBox(width: 10),
                       _buildInfoTile(
-                        Icons.flight_takeoff,
+                        FlaticonIcons.flightTakeoff,
                         'Aviaparvoz',
                         tour.airline,
                       ),
                       const SizedBox(width: 10),
                       _buildInfoTile(
-                        Icons.restaurant_outlined,
+                        FlaticonIcons.restaurantOutlined,
                         'Ovqatlanish',
                         tour.mealType,
                       ),
@@ -264,7 +265,7 @@ class TourDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.corporate_fare,
+                            FlaticonIcons.corporateFare,
                             color: AppTheme.primary,
                             size: 22,
                           ),
@@ -359,7 +360,7 @@ class TourDetailScreen extends StatelessWidget {
                             Row(
                               children: [
                                 const Icon(
-                                  Icons.work_outline,
+                                  FlaticonIcons.workOutline,
                                   size: 13,
                                   color: AppTheme.primary,
                                 ),
@@ -456,7 +457,7 @@ class TourDetailScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
-                                Icons.airplanemode_active,
+                                FlaticonIcons.airplanemodeActive,
                                 color: AppTheme.primary,
                                 size: 20,
                               ),
@@ -683,7 +684,7 @@ class TourDetailScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(
-            Icons.check_circle_rounded,
+            FlaticonIcons.checkCircleRounded,
             color: AppTheme.accentGreen,
             size: 16,
           ),

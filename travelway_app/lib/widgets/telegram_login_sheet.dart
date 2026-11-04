@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class TelegramLoginSheet extends StatefulWidget {
   final void Function(String name, String phone, String tcId) onLoginSuccess;
@@ -318,8 +319,8 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                         ),
                         child: Icon(
                           _isProfileStep
-                              ? Icons.badge_outlined
-                              : Icons.send_rounded,
+                              ? FlaticonIcons.badgeOutlined
+                              : FlaticonIcons.sendRounded,
                           color: const Color(0xFF229ED9),
                           size: 20,
                         ),
@@ -352,7 +353,10 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppTheme.textSub),
+                    icon: const Icon(
+                      FlaticonIcons.close,
+                      color: AppTheme.textSub,
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -383,7 +387,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                       child: Row(
                         children: [
                           const Icon(
-                            Icons.check_circle_rounded,
+                            FlaticonIcons.checkCircleRounded,
                             color: AppTheme.accentGreen,
                             size: 20,
                           ),
@@ -456,7 +460,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                         filled: true,
                         fillColor: AppTheme.subtleDark,
                         prefixIcon: const Icon(
-                          Icons.person_outline,
+                          FlaticonIcons.personOutline,
                           size: 18,
                           color: AppTheme.primary,
                         ),
@@ -489,7 +493,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                         filled: true,
                         fillColor: AppTheme.subtleDark,
                         prefixIcon: const Icon(
-                          Icons.badge_outlined,
+                          FlaticonIcons.badgeOutlined,
                           size: 18,
                           color: AppTheme.primary,
                         ),
@@ -541,7 +545,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                         filled: true,
                         fillColor: AppTheme.subtleDark,
                         prefixIcon: const Icon(
-                          Icons.flight_takeoff,
+                          FlaticonIcons.flightTakeoff,
                           size: 18,
                           color: AppTheme.primary,
                         ),
@@ -585,7 +589,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                                     ),
                                   ),
                                   SizedBox(width: 6),
-                                  Icon(Icons.rocket_launch, size: 16),
+                                  Icon(FlaticonIcons.rocketLaunch, size: 16),
                                 ],
                               ),
                       ),
@@ -602,11 +606,11 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                 unselectedLabelColor: AppTheme.textMuted,
                 tabs: const [
                   Tab(
-                    icon: Icon(Icons.security, size: 16),
+                    icon: Icon(FlaticonIcons.security, size: 16),
                     text: 'Telegram Bot',
                   ),
                   Tab(
-                    icon: Icon(Icons.person_add_outlined, size: 16),
+                    icon: Icon(FlaticonIcons.personAddOutlined, size: 16),
                     text: 'Ma\'lumot kiritish',
                   ),
                 ],
@@ -635,7 +639,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                             child: Row(
                               children: [
                                 const Icon(
-                                  Icons.info_outline,
+                                  FlaticonIcons.infoOutline,
                                   color: Color(0xFF229ED9),
                                   size: 20,
                                 ),
@@ -660,7 +664,10 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: _openTelegramBot,
-                              icon: const Icon(Icons.open_in_new, size: 16),
+                              icon: const Icon(
+                                FlaticonIcons.openInNew,
+                                size: 16,
+                              ),
                               label: const Text(
                                 'Telegram Botni ochish (@sayrhub_bot)',
                               ),
@@ -780,7 +787,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                               filled: true,
                               fillColor: AppTheme.subtleDark,
                               prefixIcon: const Icon(
-                                Icons.person_outline,
+                                FlaticonIcons.personOutline,
                                 size: 18,
                                 color: AppTheme.primary,
                               ),
@@ -816,7 +823,7 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                               filled: true,
                               fillColor: AppTheme.subtleDark,
                               prefixIcon: const Icon(
-                                Icons.phone_outlined,
+                                FlaticonIcons.phoneOutlined,
                                 size: 18,
                                 color: AppTheme.primary,
                               ),

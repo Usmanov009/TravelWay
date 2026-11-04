@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../models/explore_vibe.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -16,15 +17,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
   String _activeVibe = 'all';
 
   final List<Map<String, Object>> _categories = const [
-    {'id': 'all', 'label': 'Hammasi', 'icon': Icons.auto_awesome},
-    {'id': 'beach', 'label': 'Plyaj & Dengiz', 'icon': Icons.beach_access},
+    {'id': 'all', 'label': 'Hammasi', 'icon': FlaticonIcons.autoAwesome},
+    {
+      'id': 'beach',
+      'label': 'Plyaj & Dengiz',
+      'icon': FlaticonIcons.beachAccess,
+    },
     {
       'id': 'culture',
       'label': 'Tarix & Madaniyat',
-      'icon': Icons.account_balance,
+      'icon': FlaticonIcons.accountBalance,
     },
-    {'id': 'mountain', 'label': "Tog'lar", 'icon': Icons.terrain},
-    {'id': 'luxury', 'label': 'Hashamat', 'icon': Icons.diamond},
+    {'id': 'mountain', 'label': "Tog'lar", 'icon': FlaticonIcons.terrain},
+    {'id': 'luxury', 'label': 'Hashamat', 'icon': FlaticonIcons.diamond},
   ];
 
   @override
@@ -212,7 +217,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             errorBuilder: (_, __, ___) => Container(
                               color: AppTheme.subtleDark,
                               child: const Icon(
-                                Icons.image,
+                                FlaticonIcons.image,
                                 color: AppTheme.textMuted,
                               ),
                             ),

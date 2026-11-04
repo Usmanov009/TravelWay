@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
-  Menu,
   Search,
   Plus,
   Smartphone,
@@ -13,7 +12,8 @@ import {
   X,
   Crown,
   Luggage
-} from 'lucide-react';
+} from '@/lib/flaticon-icons';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 interface AdminTopNavProps {
   currentRole: AdminRole;
@@ -23,8 +23,6 @@ interface AdminTopNavProps {
   onExitToApp: () => void;
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  onToggleSidebar?: () => void;
-  isSidebarCollapsed?: boolean;
   adminTheme?: 'light' | 'dark';
   onToggleTheme?: () => void;
 }
@@ -37,8 +35,6 @@ export const AdminTopNav: React.FC<AdminTopNavProps> = ({
   onExitToApp,
   searchTerm,
   onSearchChange,
-  onToggleSidebar,
-  isSidebarCollapsed = false,
   adminTheme = 'light',
   onToggleTheme
 }) => {
@@ -48,18 +44,7 @@ export const AdminTopNav: React.FC<AdminTopNavProps> = ({
     <header className="h-[70px] bg-card/95 backdrop-blur-md border-b border-border px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 transition-colors">
       {/* 1. Left: Hamburger & Search Input */}
       <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-lg">
-        {onToggleSidebar && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleSidebar}
-            className="w-10 h-10 rounded-xl text-foreground"
-            title={isSidebarCollapsed ? "Menyuni kengaytirish" : "Menyuni ixchamlashtirish"}
-            type="button"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-        )}
+        <SidebarTrigger className="size-10 rounded-xl text-foreground" />
 
         <div className="relative w-full max-w-md">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />

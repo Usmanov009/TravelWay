@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -35,7 +36,7 @@ class AdminScreen extends StatelessWidget {
                       child: _buildStatCard(
                         'Buyurtmalar',
                         '${provider.bookings.length}',
-                        Icons.shopping_bag_outlined,
+                        FlaticonIcons.shoppingBagOutlined,
                         AppTheme.primary,
                       ),
                     ),
@@ -44,7 +45,7 @@ class AdminScreen extends StatelessWidget {
                       child: _buildStatCard(
                         'Narx Signallari',
                         '${provider.alerts.length}',
-                        Icons.notifications_active_outlined,
+                        FlaticonIcons.notificationsActiveOutlined,
                         AppTheme.accentGold,
                       ),
                     ),
@@ -53,7 +54,7 @@ class AdminScreen extends StatelessWidget {
                       child: _buildStatCard(
                         'Kompas Tizimi',
                         provider.isKompasOnline ? 'Faol' : 'Kutilmoqda',
-                        Icons.wifi,
+                        FlaticonIcons.wifi,
                         AppTheme.accentGreen,
                       ),
                     ),
@@ -182,7 +183,7 @@ class AdminScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
-                          Icons.person,
+                          FlaticonIcons.person,
                           color: AppTheme.primary,
                           size: 20,
                         ),

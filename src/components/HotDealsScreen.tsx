@@ -3,7 +3,7 @@ import { HotSale } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, Zap, Building2, ShieldCheck } from 'lucide-react';
+import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, Zap, Building2, ShieldCheck } from '@/lib/flaticon-icons';
 
 interface HotDealsScreenProps {
   hotDeals: HotSale[];

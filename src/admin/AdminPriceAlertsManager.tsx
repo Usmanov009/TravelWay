@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PriceAlert, TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Bell, Flame, Send } from 'lucide-react';
+import { Bell, Flame, Send } from '@/lib/flaticon-icons';
 
 interface AdminPriceAlertsManagerProps {
   currentRole: AdminRole;

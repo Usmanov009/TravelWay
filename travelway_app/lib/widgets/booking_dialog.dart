@@ -5,6 +5,7 @@ import '../models/tour_package.dart';
 import '../models/booking.dart';
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class BookingDialog extends StatefulWidget {
   final TourPackage tour;
@@ -102,7 +103,11 @@ class _BookingDialogState extends State<BookingDialog> {
           ),
           title: const Row(
             children: [
-              Icon(Icons.check_circle, color: AppTheme.accentGreen, size: 28),
+              Icon(
+                FlaticonIcons.checkCircle,
+                color: AppTheme.accentGreen,
+                size: 28,
+              ),
               SizedBox(width: 10),
               Text(
                 'Muvaffaqiyatli bron qilindi!',
@@ -169,7 +174,7 @@ class _BookingDialogState extends State<BookingDialog> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 20),
+                    icon: const Icon(FlaticonIcons.close, size: 20),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -195,7 +200,7 @@ class _BookingDialogState extends State<BookingDialog> {
                           width: 56,
                           height: 56,
                           color: Colors.grey[800],
-                          child: const Icon(Icons.hotel),
+                          child: const Icon(FlaticonIcons.hotel),
                         ),
                       ),
                     ),
@@ -237,7 +242,7 @@ class _BookingDialogState extends State<BookingDialog> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
-                                    Icons.business,
+                                    FlaticonIcons.business,
                                     size: 12,
                                     color: AppTheme.primary,
                                   ),
@@ -258,7 +263,7 @@ class _BookingDialogState extends State<BookingDialog> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
-                                    Icons.shield_outlined,
+                                    FlaticonIcons.shieldOutlined,
                                     size: 12,
                                     color: AppTheme.accentGreen,
                                   ),
@@ -335,7 +340,7 @@ class _BookingDialogState extends State<BookingDialog> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.person_outline, size: 14),
+                              Icon(FlaticonIcons.personOutline, size: 14),
                               SizedBox(width: 4),
                               Text(
                                 'Katta odamlar',
@@ -455,7 +460,7 @@ class _BookingDialogState extends State<BookingDialog> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.child_care, size: 14),
+                              Icon(FlaticonIcons.childCare, size: 14),
                               SizedBox(width: 4),
                               Text(
                                 'Yosh bolalar',
@@ -564,7 +569,7 @@ class _BookingDialogState extends State<BookingDialog> {
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Ism va Familiya',
-                  prefixIcon: Icon(Icons.person_outline, size: 18),
+                  prefixIcon: Icon(FlaticonIcons.personOutline, size: 18),
                 ),
               ),
               const SizedBox(height: 10),
@@ -573,7 +578,7 @@ class _BookingDialogState extends State<BookingDialog> {
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Telefon raqam',
-                  prefixIcon: Icon(Icons.phone_outlined, size: 18),
+                  prefixIcon: Icon(FlaticonIcons.phoneOutlined, size: 18),
                 ),
               ),
               const SizedBox(height: 10),
@@ -581,7 +586,7 @@ class _BookingDialogState extends State<BookingDialog> {
                 controller: _passportController,
                 decoration: const InputDecoration(
                   labelText: 'Pasport seriya va raqam',
-                  prefixIcon: Icon(Icons.badge_outlined, size: 18),
+                  prefixIcon: Icon(FlaticonIcons.badgeOutlined, size: 18),
                 ),
               ),
 
@@ -650,7 +655,7 @@ class _BookingDialogState extends State<BookingDialog> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.work_outline,
+                              FlaticonIcons.workOutline,
                               size: 13,
                               color: AppTheme.primary,
                             ),
@@ -747,7 +752,7 @@ class _BookingDialogState extends State<BookingDialog> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _isSubmitting ? null : _submitBooking,
-                  icon: const Icon(Icons.calendar_month, size: 18),
+                  icon: const Icon(FlaticonIcons.calendarMonth, size: 18),
                   label: _isSubmitting
                       ? const SizedBox(
                           width: 20,

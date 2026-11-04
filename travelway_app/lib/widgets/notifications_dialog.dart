@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../utils/app_theme.dart';
+import '../utils/flaticon_icons.dart';
 
 class NotificationItem {
   final String id;
@@ -47,7 +49,7 @@ class _NotificationsModalState extends State<NotificationsModal> {
       message: 'Ushbu haftada Maldiv va Dubay yo\'nalishlaridagi barcha lyuks mehmonxonalarga maxsus narxlar e\'lon qilindi.',
       time: '15 daqiqa oldin',
       category: 'Chegirma',
-      icon: Icons.local_fire_department,
+      icon: FlaticonIcons.localFireDepartment,
       iconColor: AppTheme.accentRed,
       isRead: false,
     ),
@@ -57,7 +59,7 @@ class _NotificationsModalState extends State<NotificationsModal> {
       message: 'Fukuk va Pxuket orollariga to\'g\'ridan-to\'g\'ri qulay charter reyslar ochildi. Bron qilishga ulgurib qoling!',
       time: 'Bugun, 09:45',
       category: 'Parvozlar',
-      icon: Icons.flight_takeoff,
+      icon: FlaticonIcons.flightTakeoff,
       iconColor: AppTheme.accentSky,
       isRead: false,
     ),
@@ -67,7 +69,7 @@ class _NotificationsModalState extends State<NotificationsModal> {
       message: '@sayrhub_bot orqali telefon raqamingizni tasdiqlang va hisobingizga bir zumda kiring.',
       time: 'Kecha, 18:20',
       category: 'Tizim',
-      icon: Icons.send_rounded,
+      icon: FlaticonIcons.sendRounded,
       iconColor: AppTheme.primary,
       isRead: true,
     ),
@@ -77,7 +79,7 @@ class _NotificationsModalState extends State<NotificationsModal> {
       message: 'Turkiya sohillariga eng qulay All Inclusive paketlar va 5* mehmonxonalar uchun erta band qilish ochildi.',
       time: '3 kun oldin',
       category: 'Tavsiya',
-      icon: Icons.beach_access,
+      icon: FlaticonIcons.beachAccess,
       iconColor: AppTheme.accentGold,
       isRead: true,
     ),
@@ -144,7 +146,11 @@ class _NotificationsModalState extends State<NotificationsModal> {
                         color: AppTheme.primary.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.notifications_active, color: AppTheme.primary, size: 20),
+                      child: const Icon(
+                        FlaticonIcons.notificationsActive,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Column(
@@ -159,10 +165,14 @@ class _NotificationsModalState extends State<NotificationsModal> {
                           ),
                         ),
                         Text(
-                          unreadCount > 0 ? '$unreadCount ta yangi xabar' : 'Barchasi ko\'rildi',
+                          unreadCount > 0
+                              ? '$unreadCount ta yangi xabar'
+                              : 'Barchasi ko\'rildi',
                           style: TextStyle(
                             fontSize: 11,
-                            color: unreadCount > 0 ? AppTheme.accentSky : AppTheme.textSub,
+                            color: unreadCount > 0
+                                ? AppTheme.accentSky
+                                : AppTheme.textSub,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -176,17 +186,28 @@ class _NotificationsModalState extends State<NotificationsModal> {
                       TextButton(
                         onPressed: _markAllAsRead,
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: const Text(
                           'O\'qilgan',
-                          style: TextStyle(fontSize: 12, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: AppTheme.textSub, size: 20),
+                      icon: const Icon(
+                        FlaticonIcons.close,
+                        color: AppTheme.textSub,
+                        size: 20,
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -209,23 +230,37 @@ class _NotificationsModalState extends State<NotificationsModal> {
                             color: AppTheme.subtleDark,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.notifications_none, size: 40, color: AppTheme.textMuted),
+                          child: const Icon(
+                            FlaticonIcons.notificationsNone,
+                            size: 40,
+                            color: AppTheme.textMuted,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         const Text(
                           'Hozircha bildirishnomalar yo\'q',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.textMain),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: AppTheme.textMain,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         const Text(
                           'Eng so\'nggi chegirmalar va yangiliklar shu yerda chiqadi',
-                          style: TextStyle(fontSize: 12, color: AppTheme.textSub),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSub,
+                          ),
                         ),
                       ],
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     itemCount: _notifications.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
@@ -240,7 +275,11 @@ class _NotificationsModalState extends State<NotificationsModal> {
                             color: AppTheme.accentRed.withOpacity(0.8),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(Icons.delete_outline, color: Colors.white, size: 22),
+                          child: const Icon(
+                            FlaticonIcons.deleteOutline,
+                            color: Colors.white,
+                            size: 22,
+                          ),
                         ),
                         onDismissed: (_) {
                           setState(() {
@@ -256,10 +295,14 @@ class _NotificationsModalState extends State<NotificationsModal> {
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: item.isRead ? AppTheme.subtleDark : AppTheme.subtleDark.withOpacity(0.8),
+                              color: item.isRead
+                                  ? AppTheme.subtleDark
+                                  : AppTheme.subtleDark.withOpacity(0.8),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: item.isRead ? AppTheme.borderDark : AppTheme.primary.withOpacity(0.4),
+                                color: item.isRead
+                                    ? AppTheme.borderDark
+                                    : AppTheme.primary.withOpacity(0.4),
                                 width: item.isRead ? 1 : 1.5,
                               ),
                             ),
@@ -274,23 +317,35 @@ class _NotificationsModalState extends State<NotificationsModal> {
                                     color: item.iconColor.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Icon(item.icon, color: item.iconColor, size: 20),
+                                  child: Icon(
+                                    item.icon,
+                                    color: item.iconColor,
+                                    size: 20,
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
 
                                 // Texts
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 7,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
-                                              color: item.iconColor.withOpacity(0.15),
-                                              borderRadius: BorderRadius.circular(6),
+                                              color: item.iconColor.withOpacity(
+                                                0.15,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
                                             ),
                                             child: Text(
                                               item.category,
@@ -305,17 +360,21 @@ class _NotificationsModalState extends State<NotificationsModal> {
                                             children: [
                                               Text(
                                                 item.time,
-                                                style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: AppTheme.textMuted,
+                                                ),
                                               ),
                                               if (!item.isRead) ...[
                                                 const SizedBox(width: 6),
                                                 Container(
                                                   width: 6,
                                                   height: 6,
-                                                  decoration: const BoxDecoration(
-                                                    color: AppTheme.primary,
-                                                    shape: BoxShape.circle,
-                                                  ),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: AppTheme.primary,
+                                                        shape: BoxShape.circle,
+                                                      ),
                                                 ),
                                               ],
                                             ],
@@ -328,13 +387,19 @@ class _NotificationsModalState extends State<NotificationsModal> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: item.isRead ? AppTheme.textMain : Colors.white,
+                                          color: item.isRead
+                                              ? AppTheme.textMain
+                                              : Colors.white,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         item.message,
-                                        style: const TextStyle(fontSize: 11, color: AppTheme.textSub, height: 1.3),
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppTheme.textSub,
+                                          height: 1.3,
+                                        ),
                                       ),
                                     ],
                                   ),
