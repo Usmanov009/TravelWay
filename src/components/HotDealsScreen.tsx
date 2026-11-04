@@ -3,7 +3,7 @@ import { HotSale } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, Zap } from 'lucide-react';
+import { Flame, Clock, MapPin, Calendar, Plane, RefreshCw, Zap, Building2, ShieldCheck } from 'lucide-react';
 
 interface HotDealsScreenProps {
   hotDeals: HotSale[];
@@ -37,14 +37,14 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
   return (
     <div className="space-y-4 pb-20 select-none">
       {/* Flash Deals Header Banner */}
-      <Card className="p-5 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 border-none text-white shadow-md relative overflow-hidden">
+      <Card className="p-5 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 border-none text-white shadow-md relative overflow-hidden">
         <div className="flex items-center justify-between mb-2">
           <Badge variant="outline" className="bg-black/30 border-white/20 text-white font-bold gap-1 text-[10px] uppercase">
-            <Flame className="w-3.5 h-3.5 text-yellow-300" />
+            <Flame className="w-3.5 h-3.5 text-violet-100" />
             Cheklangan vaqtli takliflar
           </Badge>
           <div className="flex items-center gap-1.5 font-mono text-xs bg-black/40 px-2.5 py-1 rounded-lg border border-white/20">
-            <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             <Clock className="w-3.5 h-3.5 text-white/80" />
             <span id="flash-timer">{formatTimer(secondsLeft)}</span>
           </div>
@@ -89,7 +89,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
                 <img src={deal.img} alt={deal.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/60" />
                 
-                <Badge variant="destructive" className="absolute top-3 left-3 font-extrabold text-[10px] px-2 py-0.5 gap-1">
+                <Badge className="absolute top-3 left-3 gap-1 bg-indigo-600 font-extrabold text-[10px] text-white hover:bg-indigo-600">
                   <Flame className="w-3 h-3" />
                   {deal.discount} FLASH
                 </Badge>
@@ -123,7 +123,7 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
                   </span>
                   <div className="text-right">
                     <span className="text-xs line-through text-muted-foreground mr-1.5">{deal.oldPrice}</span>
-                    <span className="text-lg font-black text-destructive">{deal.price}</span>
+                    <span className="text-lg font-black text-primary">{deal.price}</span>
                   </div>
                 </div>
 
@@ -136,8 +136,8 @@ export const HotDealsScreen: React.FC<HotDealsScreenProps> = ({
 
                 {/* Operator & Agency Badges */}
                 <div className="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
-                  <span className="font-semibold truncate">🏢 SayrHub</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]">🛡️ SayrHub Agentligi</span>
+                  <span className="font-semibold truncate inline-flex items-center gap-1"><Building2 className="w-3 h-3" /> SayrHub</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px] inline-flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> SayrHub Agentligi</span>
                 </div>
               </CardContent>
             </div>

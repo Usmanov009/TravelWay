@@ -22,7 +22,8 @@ import {
   Gift,
   ArrowRight,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  Globe2
 } from 'lucide-react';
 
 interface AuthScreenProps {
@@ -102,7 +103,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       setIsSubmitting(false);
 
       if (mode === 'register') {
-        onAuthSuccess(`Xush kelibsiz, ${regFullName || 'Foydalanuvchi'}! $30 sayohat vaucheri balansingizga qo'shildi! 🎉`);
+        onAuthSuccess(`Xush kelibsiz, ${regFullName || 'Foydalanuvchi'}! $30 sayohat vaucheri balansingizga qo'shildi!`);
         return;
       }
 
@@ -116,17 +117,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         onAuthSuccess(`${email || 'Foydalanuvchi'} hisobiga muvaffaqiyatli kirildi!`);
       }
     }, 650);
-  };
-
-  const getLangFlag = (code: LanguageCode) => {
-    switch (code) {
-      case 'UZ':
-        return '🇺🇿';
-      case 'RU':
-        return '🇷🇺';
-      case 'EN':
-        return '🇬🇧';
-    }
   };
 
   return (
@@ -157,7 +147,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
               className="rounded-xl h-9 px-3 gap-1.5 text-xs font-semibold border-border bg-card hover:bg-muted"
             >
-              <span className="text-sm">{getLangFlag(currentLang)}</span>
+              <Globe2 className="w-3.5 h-3.5 text-muted-foreground" />
               <span>{currentLang}</span>
               <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
             </Button>
@@ -176,7 +166,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     setIsLangMenuOpen(false);
                   }}
                 >
-                  🇺🇿 O'zbek
+                  <span className="inline-flex items-center gap-2"><Globe2 className="w-3.5 h-3.5" /> O'zbek</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -187,7 +177,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     setIsLangMenuOpen(false);
                   }}
                 >
-                  🇷🇺 Русский
+                  <span className="inline-flex items-center gap-2"><Globe2 className="w-3.5 h-3.5" /> Русский</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -198,7 +188,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     setIsLangMenuOpen(false);
                   }}
                 >
-                  🇬🇧 English
+                  <span className="inline-flex items-center gap-2"><Globe2 className="w-3.5 h-3.5" /> English</span>
                 </Button>
               </div>
             )}
@@ -367,7 +357,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1.5 px-3 h-10 bg-muted/70 rounded-xl text-xs font-bold text-foreground shrink-0 border border-border">
-                      <span>🇺🇿</span>
+                      <Globe2 className="w-3.5 h-3.5" />
                       <span>+998</span>
                     </div>
                     <Input

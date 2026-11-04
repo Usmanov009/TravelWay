@@ -12,7 +12,8 @@ import {
   FileText,
   Sparkles,
   ArrowRight,
-  ExternalLink
+  ExternalLink,
+  Globe2
 } from 'lucide-react';
 
 interface TelegramAuthModalProps {
@@ -275,7 +276,7 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
     } catch (e) {}
 
     setIsSubmittingProfile(false);
-    onShowToast(`Xush kelibsiz, ${trimmedFirst}! Ro'yxatdan o'tish muvaffaqiyatli yakunlandi! 🎉`, 'success');
+    onShowToast(`Xush kelibsiz, ${trimmedFirst}! Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!`, 'success');
     onSuccess(completeUser);
     onClose();
   };
@@ -474,7 +475,7 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
               </label>
               <div className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-muted/40 flex items-center justify-between font-mono text-xs font-bold">
                 <div className="flex items-center gap-2">
-                  <span>🇺🇿</span>
+                  <Globe2 className="w-4 h-4 text-muted-foreground" />
                   <span>{formatPhoneDisplay(verifiedUserData?.phone || '')}</span>
                 </div>
                 <Badge variant="secondary" className="text-[10px] text-emerald-600 bg-emerald-500/10">

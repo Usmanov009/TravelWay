@@ -85,9 +85,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Desktop Navigation Tabs (Visible on md and larger) */}
+        {/* Center: Desktop navigation tabs */}
         {onTabSelect && (
-          <nav className="hidden md:flex items-center gap-1 p-1 rounded-2xl bg-muted/60 border border-border/80">
+          <nav className="hidden lg:flex items-center gap-1 p-1 rounded-2xl bg-muted/60 border border-border/80">
             <Button
               variant={currentTab === 'search' ? 'default' : 'ghost'}
               size="sm"

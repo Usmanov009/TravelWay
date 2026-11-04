@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/app_header.dart';
@@ -25,7 +26,7 @@ class MainNavigationScreen extends StatelessWidget {
     final provider = Provider.of<AppProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.bgDark,
+      backgroundColor: AppTheme.bgLight,
       body: Column(
         children: [
           // 1. Unified App Header (Exact Web Match)
@@ -46,11 +47,18 @@ class MainNavigationScreen extends StatelessWidget {
 
       // 3. Web-Aligned 5-Tab Bottom Navigation Bar
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppTheme.surfaceDark,
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceLight,
           border: Border(
-            top: BorderSide(color: AppTheme.borderDark, width: 1),
+            top: BorderSide(color: AppTheme.borderLight, width: 1),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         child: SafeArea(
           top: false,
@@ -118,11 +126,11 @@ class MainNavigationScreen extends StatelessWidget {
     final isSelected = provider.currentTabIndex == index;
 
     return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+      child: InkWell(
         onTap: () => provider.setTabIndex(index),
+        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -130,10 +138,21 @@ class MainNavigationScreen extends StatelessWidget {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  Icon(
-                    isSelected ? activeIcon : icon,
-                    size: 22,
-                    color: isSelected ? AppTheme.primary : AppTheme.textMuted,
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    width: 48,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppTheme.primary.withOpacity(0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isSelected ? activeIcon : icon,
+                      size: 20,
+                      color: isSelected ? AppTheme.primary : AppTheme.textMuted,
+                    ),
                   ),
 
                   // Pill Badge (e.g. HOT)
@@ -142,7 +161,10 @@ class MainNavigationScreen extends StatelessWidget {
                       top: -5,
                       right: -8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
                           color: badgeColor ?? AppTheme.accentRed,
                           borderRadius: BorderRadius.circular(6),
@@ -169,7 +191,10 @@ class MainNavigationScreen extends StatelessWidget {
                           color: AppTheme.primary,
                           shape: BoxShape.circle,
                         ),
-                        constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                        constraints: const BoxConstraints(
+                          minWidth: 14,
+                          minHeight: 14,
+                        ),
                         child: Text(
                           '$counter',
                           style: const TextStyle(
@@ -183,26 +208,13 @@ class MainNavigationScreen extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 2),
-
-              // Label
+              const SizedBox(height: 3),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? AppTheme.primary : AppTheme.textMuted,
-                ),
-              ),
-
-              // Web-Style Active Dot Indicator
-              const SizedBox(height: 2),
-              Container(
-                width: 4,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.primary : Colors.transparent,
-                  shape: BoxShape.circle,
                 ),
               ),
             ],

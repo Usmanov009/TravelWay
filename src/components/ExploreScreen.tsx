@@ -31,20 +31,25 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
   return (
     <div className="space-y-4 pb-20 select-none">
       {/* SayrHub Vibes Banner */}
-      <Card className="p-5 border-border bg-card shadow-xs">
-        <div className="flex items-center gap-2 mb-2">
-          <Badge variant="secondary" className="gap-1 font-semibold text-primary">
+      <Card className="relative overflow-hidden border-indigo-200/70 bg-gradient-to-br from-indigo-50 via-card to-violet-50 shadow-sm dark:border-indigo-400/20 dark:from-indigo-950/50 dark:to-violet-950/30">
+        <CardContent className="relative p-5 sm:p-7">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-10 -top-20 size-56 rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative">
+        <div className="mb-2 flex items-center gap-2">
+          <Badge variant="secondary" className="gap-1 border border-indigo-200/70 bg-background/80 font-semibold text-primary dark:border-indigo-400/20">
             <Compass className="w-3.5 h-3.5" />
             SayrHub Vibes
           </Badge>
           <span className="text-xs text-muted-foreground">Kayfiyatga mos yo'nalishlar</span>
         </div>
-        <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           Qayerga dam olishga boramiz?
         </h2>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
-          Vizasiz mamlakatlar, iliq dengiz sohillari va eng qiziqarli shahar turlari sizni kutmoqda.
+          Vizasiz manzillar, iliq sohillar va yangi taassurotlar sizni kutmoqda.
         </p>
+        </div>
+        </CardContent>
       </Card>
 
       {/* Vibe Categories */}

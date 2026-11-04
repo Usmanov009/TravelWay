@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { ChevronDown, Globe2, X } from 'lucide-react';
 import { KompasCountry } from './SearchScreen';
 
 interface CountrySelectComboboxProps {
@@ -14,7 +15,7 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
   countries,
   selectedCode,
   onSelectCountry,
-  label = '🌍 Borish mamlakati (Страна)',
+  label = 'Borish mamlakati (Страна)',
   id = 'country-select-combobox',
   placeholder = 'Davlat nomini yozing...'
 }) => {
@@ -40,15 +41,7 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
     );
   }, [countries, query]);
 
-  // Dynamic flag in input: reflects current match while typing or selected country
-  const currentDisplayFlag = useMemo(() => {
-    if (isOpen && query.trim()) {
-      const topMatch = filteredCountries[0];
-      if (topMatch) return topMatch.flag;
-    }
-    return selectedCountry ? selectedCountry.flag : '🌍';
-  }, [isOpen, query, filteredCountries, selectedCountry]);
-
+  // Keep the selected country name in the input while switching dropdown options.
   // Sync query text when selectedCountry changes and dropdown is closed
   useEffect(() => {
     if (!isOpen) {
@@ -165,23 +158,22 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
             className="text-[10px] text-slate-400 hover:text-white tap-bounce"
             title="Barchasiga qaytarish"
           >
-            Barchasi ✕
+            Barchasi <X className="inline w-3 h-3" />
           </button>
         )}
       </div>
 
-      {/* Select + Type Input Field with Flag in front of the name */}
+      {/* Select + Type Input Field */}
       <div className="flex items-center gap-1.5 cursor-pointer">
-        {/* Davlat bayrog'i doimo nomining oldida */}
         <span
-          className="text-base select-none shrink-0"
+          className="select-none shrink-0"
           title={selectedCountry?.name}
           onClick={() => {
             setIsOpen((prev) => !prev);
             inputRef.current?.focus();
           }}
         >
-          {currentDisplayFlag}
+          <Globe2 className="w-4 h-4 text-muted-foreground" />
         </span>
 
         {/* Typeable Input */}
@@ -216,11 +208,11 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
           }}
           title={isOpen ? 'Yopish' : 'Ro‘yxatni ko‘rish'}
         >
-          ▾
+          <ChevronDown className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Dropdown Menu (Selectable items with flag in front of name) */}
+      {/* Dropdown Menu */}
       {isOpen && (
         <div
           className="absolute left-0 right-0 top-full mt-1.5 z-50 rounded-2xl border shadow-xl overflow-hidden animate-fadeIn"
@@ -280,9 +272,8 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
                       color: isSelected ? 'var(--tw-accent)' : 'var(--tw-text-main)'
                     }}
                   >
-                    {/* Davlat bayrog'i nomining oldida */}
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-base shrink-0">{c.flag}</span>
+                      <Globe2 className="w-4 h-4 shrink-0 text-muted-foreground" />
                       <span
                         className={`truncate ${
                           isSelected ? 'font-black' : 'font-semibold'

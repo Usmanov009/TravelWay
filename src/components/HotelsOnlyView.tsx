@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { HotelOnly } from '../types';
+import { BedDouble, Building2, Globe2, Hotel, MapPin, Moon, Palmtree, Search, Utensils } from 'lucide-react';
 
 interface HotelsOnlyViewProps {
   hotels: HotelOnly[];
@@ -20,15 +21,15 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
   const [nightsCount, setNightsCount] = useState<number>(7);
 
   const countryOptions = [
-    { name: 'Barchasi', flag: '🌍' },
-    { name: 'Turkiya', flag: '🇹🇷' },
-    { name: 'BAA', flag: '🇦🇪' },
-    { name: 'Misr', flag: '🇪🇬' },
-    { name: 'Tailand', flag: '🇹🇭' },
-    { name: 'Maldiv', flag: '🇲🇻' },
-    { name: 'Vetnam', flag: '🇻🇳' },
-    { name: 'Indoneziya', flag: '🇮🇩' },
-    { name: 'Gruziya', flag: '🇬🇪' }
+    'Barchasi',
+    'Turkiya',
+    'BAA',
+    'Misr',
+    'Tailand',
+    'Maldiv',
+    'Vetnam',
+    'Indoneziya',
+    'Gruziya'
   ];
 
   const mealOptions = [
@@ -64,7 +65,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
-              <span>🏨 Faqat Mehmonxona</span>
+              <span className="inline-flex items-center gap-1"><Hotel className="w-3 h-3" /> Faqat Mehmonxona</span>
               <span>•</span>
               <span>SayrHub</span>
             </div>
@@ -75,7 +76,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
               Aviabiletsiz, faqat mehmonxonada qolish. Luxury 5* Deluxe kurortlar, Ultra All Inclusive va xususiy plyajli mehmonxonalar.
             </p>
           </div>
-          <span className="text-3xl">🌴</span>
+          <Palmtree className="w-8 h-8 text-emerald-600" />
         </div>
       </div>
 
@@ -94,20 +95,20 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             Davlat / Kurort bo'yicha:
           </span>
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-            {countryOptions.map((c) => (
+            {countryOptions.map((country) => (
               <button
-                key={c.name}
+                key={country}
                 type="button"
-                onClick={() => setSelectedCountry(c.name)}
+                onClick={() => setSelectedCountry(country)}
                 className="px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition tap-bounce border flex items-center gap-1.5"
                 style={{
-                  backgroundColor: selectedCountry === c.name ? 'var(--tw-accent)' : 'var(--tw-subtle)',
-                  color: selectedCountry === c.name ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
-                  borderColor: selectedCountry === c.name ? 'var(--tw-accent)' : 'var(--tw-border)'
+                  backgroundColor: selectedCountry === country ? 'var(--tw-accent)' : 'var(--tw-subtle)',
+                  color: selectedCountry === country ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)',
+                  borderColor: selectedCountry === country ? 'var(--tw-accent)' : 'var(--tw-border)'
                 }}
               >
-                <span>{c.flag}</span>
-                <span>{c.name === 'Barchasi' ? 'Barcha mehmonxonalar' : c.name}</span>
+                <Globe2 className="w-3.5 h-3.5" />
+                <span>{country === 'Barchasi' ? 'Barcha mehmonxonalar' : country}</span>
               </button>
             ))}
           </div>
@@ -122,7 +123,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
               borderColor: 'var(--tw-border)'
             }}
           >
-            <span className="text-xs">🔍</span>
+            <Search className="w-3.5 h-3.5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Mehmonxona nomi yoki kurort..."
@@ -151,7 +152,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              🍽️ Ovqatlanish turi:
+              <span className="inline-flex items-center gap-1"><Utensils className="w-3 h-3" /> Ovqatlanish turi:</span>
             </label>
             <select
               value={selectedMeal}
@@ -175,7 +176,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
         {/* Nights Selector with Typeable input and quick preset buttons */}
         <div className="flex items-center justify-between text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
           <div className="flex items-center gap-2">
-            <span style={{ color: 'var(--tw-text-sub)' }}>🌙 Tunlar soni:</span>
+            <span className="inline-flex items-center gap-1" style={{ color: 'var(--tw-text-sub)' }}><Moon className="w-3 h-3" /> Tunlar soni:</span>
             <div
               className="flex items-center gap-1 px-2 py-0.5 rounded-lg border transition-colors"
               style={{
@@ -281,17 +282,17 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
                     {hotel.name}
                   </h4>
                   <p className="text-[11px] font-medium mt-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-                    📍 {hotel.resort}, {hotel.country}
+                    <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {hotel.resort}, {hotel.country}</span>
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between text-xs pt-0.5">
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    🛏 {hotel.roomType}
+                    <span className="inline-flex items-center gap-1"><BedDouble className="w-3 h-3" /> {hotel.roomType}</span>
                   </span>
                   {hotel.distanceToBeach && (
                     <span className="text-[10px] text-sky-500 font-medium">
-                      🏖️ {hotel.distanceToBeach}
+                      <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {hotel.distanceToBeach}</span>
                     </span>
                   )}
                 </div>
@@ -321,7 +322,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
                     borderColor: 'var(--tw-border)'
                   }}
                 >
-                  <span>🏢 SayrHub</span>
+                  <span className="inline-flex items-center gap-1"><Building2 className="w-3 h-3" /> SayrHub</span>
                   <span className="ml-auto text-emerald-600 dark:text-emerald-400">✓ Rasmiy Operator</span>
                 </div>
 
@@ -354,7 +355,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
                         color: 'var(--tw-text-main)'
                       }}
                     >
-                      🏨 Vaucher
+                      <span className="inline-flex items-center gap-1"><Hotel className="w-3 h-3" /> Vaucher</span>
                     </button>
 
                     <button

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Heart, Lightbulb } from 'lucide-react';
 
 interface FlutterCodeViewerProps {
   onClose: () => void;
@@ -207,7 +208,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
             child: const Row(
               children: [
-                Text('🇺🇿 UZ'),
+                Text('UZ'),
                 Icon(Icons.arrow_drop_down, size: 16),
               ],
             ),
@@ -291,7 +292,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               child: Row(
                 children: [
-                  const Text('🇺🇿 +998 ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('+998 ', style: TextStyle(fontWeight: FontWeight.bold)),
                   Expanded(
                     child: TextField(
                       controller: _phoneController,
@@ -547,7 +548,7 @@ class HotDealsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0C1322),
-      appBar: AppBar(title: const Text('Qaynoq Takliflar 🔥'), backgroundColor: const Color(0xFF0C1322)),
+      appBar: AppBar(title: const Text('Qaynoq Takliflar'), backgroundColor: const Color(0xFF0C1322)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -589,7 +590,7 @@ class HotDealsScreen extends StatelessWidget {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(flutterCodes[activeFile]);
     setCopied(true);
-    onShowToast('Flutter Dart kodi buferga nusxalandi! 📋', 'success');
+    onShowToast('Flutter Dart kodi buferga nusxalandi!', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -599,7 +600,7 @@ class HotDealsScreen extends StatelessWidget {
       <div className="bg-[#111c30] p-3 border-b border-[#1c2c47] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">
-            💙
+            <Heart className="w-4 h-4 fill-current" />
           </div>
           <div>
             <h3 className="text-xs font-bold text-white">Flutter / Dart Ekran Kodlari</h3>
@@ -656,7 +657,7 @@ class HotDealsScreen extends StatelessWidget {
 
       {/* Bottom helper */}
       <div className="p-2.5 bg-[#0f172a] border-t border-[#18263f] text-[11px] text-slate-400 flex items-center justify-between">
-        <span>💡 Flutter loyihangizda foydalanish: <code className="text-[#ff5b00]">flutter create sayrhub</code></span>
+        <span className="inline-flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5" /> Flutter loyihangizda foydalanish: <code className="text-[#ff5b00]">flutter create sayrhub</code></span>
         <button
           className="text-[#ff5b00] hover:underline font-semibold"
           onClick={handleCopyCode}

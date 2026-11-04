@@ -1,5 +1,10 @@
 import React from 'react';
 import { ComboTour, FlightTicket, HotelOnly } from '../types';
+import {
+  BedDouble, Building2, CalendarDays, CheckCircle2, Compass, Flame, Hotel,
+  Luggage, MapPin, MessageCircle, Pin, Plane, ShieldCheck, Sparkles, Ticket,
+  Utensils, Waves
+} from 'lucide-react';
 
 interface ServiceModalsProps {
   selectedComboTour: ComboTour | null;
@@ -74,7 +79,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   {selectedComboTour.title}
                 </h3>
                 <p className="text-white/80 text-[11px] font-medium mt-0.5">
-                  📍 {selectedComboTour.routeSummary}
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {selectedComboTour.routeSummary}</span>
                 </p>
               </div>
             </div>
@@ -115,7 +120,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               {/* Hotels in each stop */}
               <div className="space-y-2">
                 <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--tw-text-main)' }}>
-                  🏨 Marshrutdagi mehmonxonalar
+                  <span className="inline-flex items-center gap-1"><Hotel className="w-3 h-3" /> Marshrutdagi mehmonxonalar</span>
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {selectedComboTour.hotels.map((hotel, idx) => (
@@ -159,7 +164,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 }}
               >
                 <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--tw-text-main)' }}>
-                  ✅ Narxga kiritilgan xizmatlar
+                  <span className="inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Narxga kiritilgan xizmatlar</span>
                 </h4>
                 <ul className="text-xs space-y-1.5" style={{ color: 'var(--tw-text-sub)' }}>
                   <li className="flex items-center gap-2">
@@ -186,7 +191,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               {/* Day-by-Day Itinerary */}
               <div className="space-y-2">
                 <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--tw-text-main)' }}>
-                  📅 Kun tartibi va dastur (Itinerary)
+                  <span className="inline-flex items-center gap-1"><CalendarDays className="w-3 h-3" /> Kun tartibi va dastur (Itinerary)</span>
                 </h4>
                 <div className="space-y-2">
                   {selectedComboTour.itinerary.map((step) => (
@@ -242,13 +247,13 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="flex items-center gap-2">
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! SayrHub orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\n🌴 Tur: ${selectedComboTour.title}\n📍 Marshrut: ${selectedComboTour.routeSummary}\n🌙 Muddat: ${selectedComboTour.nightsSplit}\n💵 Narx: $${selectedComboTour.price}\n🆔 Kod: ${selectedComboTour.kompasTourCode}`
+                    `Assalomu alaykum! SayrHub orqali ushbu COMBO turpaket haqida so'ramoqchiman:\n\nTur: ${selectedComboTour.title}\nMarshrut: ${selectedComboTour.routeSummary}\nMuddat: ${selectedComboTour.nightsSplit}\nNarx: $${selectedComboTour.price}\nKod: ${selectedComboTour.kompasTourCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-2.5 px-3 bg-[#24A1DE] hover:bg-[#208fbf] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 tap-bounce"
                 >
-                  <span>💬</span>
+                  <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Operatorga</span>
                 </a>
 
@@ -259,7 +264,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       onBookCombo(selectedComboTour);
                     }
                     onCloseComboTour();
-                    onShowToast("Combo tur muvaffaqiyatli bron qilindi va 'Mening turlarim' bo'limiga saqlandi! 🎒", "success");
+                    onShowToast("Combo tur muvaffaqiyatli bron qilindi va 'Mening turlarim' bo'limiga saqlandi!", "success");
                   }}
                   className="py-2.5 px-4 font-bold text-xs rounded-xl flex items-center gap-1.5 tap-bounce shadow-md"
                   style={{
@@ -267,7 +272,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     color: 'var(--tw-accent-contrast)'
                   }}
                 >
-                  <span>📌</span>
+                  <Pin className="w-4 h-4" />
                   <span>Bron Qilish</span>
                 </button>
               </div>
@@ -298,7 +303,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   Elektron Aviachipta & Vaucher
                 </span>
                 <h3 className="text-base font-black flex items-center gap-2 mt-0.5">
-                  <span>✈️</span>
+                  <Plane className="w-4 h-4" />
                   <span>{selectedFlight.airline}</span>
                 </h3>
               </div>
@@ -339,7 +344,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   </span>
                   <div className="flex items-center gap-1 my-1">
                     <span className="w-8 h-0.5 bg-sky-500/50"></span>
-                    <span className="text-sky-500 text-xs">✈</span>
+                    <Plane className="w-3 h-3 text-sky-500" />
                     <span className="w-8 h-0.5 bg-sky-500/50"></span>
                   </div>
                   <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">
@@ -385,7 +390,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 <div>
                   <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Bagaj me'yori:</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    🧳 {selectedFlight.baggage}
+                    <span className="inline-flex items-center gap-1"><Luggage className="w-3 h-3" /> {selectedFlight.baggage}</span>
                   </span>
                 </div>
 
@@ -406,7 +411,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 <div>
                   <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Bo'sh o'rinlar:</span>
                   <span className="font-bold text-amber-500">
-                    🔥 {selectedFlight.seatsLeft} ta joy qoldi
+                    <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3" /> {selectedFlight.seatsLeft} ta joy qoldi</span>
                   </span>
                 </div>
               </div>
@@ -445,7 +450,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xl">✈️</span>
+                  <Plane className="w-5 h-5" />
                   <div className="min-w-0">
                     <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
                       Charter Blok Egasi
@@ -461,7 +466,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     Chipta Agentligi
                   </span>
                   <span className="font-black text-emerald-600 dark:text-emerald-400">
-                    🛡️ {selectedFlight.agencyName || 'SayrHub Agentligi'}
+                    <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> {selectedFlight.agencyName || 'SayrHub Agentligi'}</span>
                   </span>
                 </div>
               </div>
@@ -492,13 +497,13 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="flex items-center gap-2">
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! Ushbu aviabiletni band qilmoqchiman:\n\n✈️ Reys: ${selectedFlight.airline} (${selectedFlight.flightNumber})\n🛫 Yo'nalish: ${selectedFlight.departureCity} (${selectedFlight.departureAirportCode}) ➔ ${selectedFlight.arrivalCity} (${selectedFlight.arrivalAirportCode})\n📅 Sana: ${selectedFlight.departureDate} (${selectedFlight.departureTime})\n🧳 Bagaj: ${selectedFlight.baggage}\n💵 Narx: $${selectedFlight.price}\n🆔 Kod: ${selectedFlight.kompasFlightCode}`
+                    `Assalomu alaykum! Ushbu aviabiletni band qilmoqchiman:\n\nReys: ${selectedFlight.airline} (${selectedFlight.flightNumber})\nYo'nalish: ${selectedFlight.departureCity} (${selectedFlight.departureAirportCode}) ➔ ${selectedFlight.arrivalCity} (${selectedFlight.arrivalAirportCode})\nSana: ${selectedFlight.departureDate} (${selectedFlight.departureTime})\nBagaj: ${selectedFlight.baggage}\nNarx: $${selectedFlight.price}\nKod: ${selectedFlight.kompasFlightCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-2.5 px-3 bg-[#24A1DE] hover:bg-[#208fbf] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 tap-bounce"
                 >
-                  <span>💬</span>
+                  <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Operator</span>
                 </a>
 
@@ -509,7 +514,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       onBookFlight(selectedFlight);
                     }
                     onCloseFlight();
-                    onShowToast("Aviabilet muvaffaqiyatli band qilindi va 'Mening turlarim' ga qo'shildi! ✈️", "success");
+                    onShowToast("Aviabilet muvaffaqiyatli band qilindi va 'Mening turlarim' ga qo'shildi!", "success");
                   }}
                   className="py-2.5 px-4 font-bold text-xs rounded-xl flex items-center gap-1.5 tap-bounce shadow-md"
                   style={{
@@ -517,7 +522,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     color: 'var(--tw-accent-contrast)'
                   }}
                 >
-                  <span>🎫</span>
+                  <Ticket className="w-5 h-5" />
                   <span>Chiptani Olish</span>
                 </button>
               </div>
@@ -560,7 +565,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
 
               <div className="absolute top-3 left-3 flex items-center gap-1.5">
                 <span className="bg-indigo-600 text-white font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                  🏨 Faqat Mehmonxona
+                  <span className="inline-flex items-center gap-1"><Hotel className="w-3 h-3" /> Faqat Mehmonxona</span>
                 </span>
               </div>
 
@@ -577,7 +582,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   {selectedHotel.name}
                 </h3>
                 <p className="text-white/80 text-[11px] font-medium mt-0.5">
-                  📍 {selectedHotel.resort}, {selectedHotel.country}
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {selectedHotel.resort}, {selectedHotel.country}</span>
                 </p>
               </div>
             </div>
@@ -596,7 +601,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                   <div>
                     <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Tanlangan xona toifasi:</span>
                     <span className="text-xs font-extrabold" style={{ color: 'var(--tw-text-main)' }}>
-                      🛏 {selectedHotel.roomType}
+                      <span className="inline-flex items-center gap-1"><BedDouble className="w-3 h-3" /> {selectedHotel.roomType}</span>
                     </span>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
@@ -605,12 +610,12 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 </div>
 
                 <div className="text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)', color: 'var(--tw-text-sub)' }}>
-                  🍽️ <strong style={{ color: 'var(--tw-text-main)' }}>Ovqatlanish:</strong> {selectedHotel.mealDesc}
+                  <Utensils className="w-3 h-3 inline mr-1" /><strong style={{ color: 'var(--tw-text-main)' }}>Ovqatlanish:</strong> {selectedHotel.mealDesc}
                 </div>
 
                 {selectedHotel.distanceToBeach && (
                   <div className="text-xs text-sky-500 font-medium">
-                    🏖️ {selectedHotel.distanceToBeach}
+                    <span className="inline-flex items-center gap-1"><Waves className="w-3 h-3" /> {selectedHotel.distanceToBeach}</span>
                   </div>
                 )}
               </div>
@@ -618,7 +623,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               {/* Amenities */}
               <div className="space-y-2">
                 <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--tw-text-main)' }}>
-                  ✨ Mehmonxona qulayliklari
+                  <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Mehmonxona qulayliklari</span>
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedHotel.amenities.map((amenity, idx) => (
@@ -654,7 +659,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xl">🏨</span>
+                  <Building2 className="w-5 h-5" />
                   <div className="min-w-0">
                     <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
                       Asosiy Turoperator
@@ -670,7 +675,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     Rasmiy Hamkor Agentlik
                   </span>
                   <span className="font-black text-emerald-600 dark:text-emerald-400">
-                    🛡️ {selectedHotel.agencyName || 'SayrHub Agentligi'}
+                    <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> {selectedHotel.agencyName || 'SayrHub Agentligi'}</span>
                   </span>
                 </div>
               </div>
@@ -703,13 +708,13 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
               <div className="flex items-center gap-2">
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                    `Assalomu alaykum! SayrHub orqali ushbu MEHMONXONA bo'yicha ma'lumot olmoqchiman:\n\n🏨 Mehmonxona: ${selectedHotel.name}\n📍 Manzil: ${selectedHotel.resort}, ${selectedHotel.country}\n🛏 Xona: ${selectedHotel.roomType}\n🍽 Ovqat: ${selectedHotel.mealDesc}\n🌙 Muddat: ${selectedHotel.nightsCount} kecha\n💵 Narx: $${selectedHotel.totalPrice} ($${selectedHotel.pricePerNight}/kecha)\n🆔 Kod: ${selectedHotel.kompasHotelCode}`
+                    `Assalomu alaykum! SayrHub orqali ushbu MEHMONXONA bo'yicha ma'lumot olmoqchiman:\n\nMehmonxona: ${selectedHotel.name}\nManzil: ${selectedHotel.resort}, ${selectedHotel.country}\nXona: ${selectedHotel.roomType}\nOvqat: ${selectedHotel.mealDesc}\nMuddat: ${selectedHotel.nightsCount} kecha\nNarx: $${selectedHotel.totalPrice} ($${selectedHotel.pricePerNight}/kecha)\nKod: ${selectedHotel.kompasHotelCode}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-2.5 px-3 bg-[#24A1DE] hover:bg-[#208fbf] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 tap-bounce"
                 >
-                  <span>💬</span>
+                  <MessageCircle className="w-4 h-4" />
                   <span className="hidden sm:inline">Operator</span>
                 </a>
 
@@ -720,7 +725,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                       onBookHotel(selectedHotel);
                     }
                     onCloseHotel();
-                    onShowToast("Mehmonxona muvaffaqiyatli bron qilindi va 'Mening turlarim' ga saqlandi! 🏨", "success");
+                    onShowToast("Mehmonxona muvaffaqiyatli bron qilindi va 'Mening turlarim' ga saqlandi!", "success");
                   }}
                   className="py-2.5 px-4 font-bold text-xs rounded-xl flex items-center gap-1.5 tap-bounce shadow-md"
                   style={{
@@ -728,7 +733,7 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                     color: 'var(--tw-accent-contrast)'
                   }}
                 >
-                  <span>🏨</span>
+                  <Hotel className="w-4 h-4" />
                   <span>Bron Qilish</span>
                 </button>
               </div>

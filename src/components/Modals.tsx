@@ -20,7 +20,19 @@ import {
   CreditCard,
   User,
   QrCode,
-  AlertTriangle
+  AlertTriangle,
+  KeyRound,
+  Globe2,
+  BriefcaseBusiness,
+  Building2,
+  Bus,
+  Hotel,
+  Users,
+  Baby,
+  FileText,
+  PartyPopper,
+  Phone,
+  DoorOpen
 } from 'lucide-react';
 
 interface ModalsProps {
@@ -302,7 +314,7 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xs">🔑</span>
+                <KeyRound className="w-3.5 h-3.5 text-primary" />
                 <span className="text-[11px]" style={{ color: 'var(--tw-text-main)' }}>
                   Test SMS kodi: <b className="font-mono" style={{ color: 'var(--tw-accent)' }}>7788</b>
                 </span>
@@ -397,7 +409,7 @@ export const Modals: React.FC<ModalsProps> = ({
           >
             <div className="flex items-center justify-between pb-1 border-b" style={{ borderColor: 'var(--tw-border)' }}>
               <div className="flex items-center gap-2">
-                <span className="text-base">🌐</span>
+                <Globe2 className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>
                   Google akkauntini tanlang
                 </h3>
@@ -455,7 +467,7 @@ export const Modals: React.FC<ModalsProps> = ({
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-xs">
-                    💼
+                    <BriefcaseBusiness className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>Jasur R. (Korporativ)</h4>
@@ -529,7 +541,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 ★ {tourDetails.rating} A'lo
               </div>
               <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[11px] text-white">
-                📍 {tourDetails.location}
+                <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {tourDetails.location}</span>
               </div>
             </div>
 
@@ -537,7 +549,7 @@ export const Modals: React.FC<ModalsProps> = ({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                  <span>📍</span>
+                  <MapPin className="w-3.5 h-3.5" />
                   <span>Joylashuv va Xarita (Google Maps)</span>
                 </span>
                 <span className="text-[10px] font-medium" style={{ color: 'var(--tw-accent)' }}>
@@ -557,7 +569,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">📅</span>
+                  <Calendar className="w-5 h-5 text-primary" />
                   <div>
                     <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: 'var(--tw-text-sub)' }}>
                       Uchish / Jo'nab ketish sanasi
@@ -584,7 +596,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span className="text-base">✈️</span>
+                <Plane className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>To'g'ridan-to'g'ri reys</p>
                   <p className="font-bold text-[11px] truncate" style={{ color: 'var(--tw-text-main)' }}>{tourDetails.flight}</p>
@@ -597,7 +609,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span className="text-base">🏨</span>
+                <Hotel className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Yashash muddati</p>
                   <p className="font-bold text-[11px]" style={{ color: 'var(--tw-text-main)' }}>{tourDetails.nights} / 8 kun</p>
@@ -610,7 +622,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span className="text-base">🚌</span>
+                <Bus className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Transfer xizmati</p>
                   <p className="font-bold text-[11px]" style={{ color: 'var(--tw-text-main)' }}>Aeroport — Mehmonxona</p>
@@ -623,7 +635,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span className="text-base">🛡️</span>
+                <ShieldCheck className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Tibbiy sug'urta</p>
                   <p className="font-bold text-emerald-500 text-[11px]">$30,000 qoplama</p>
@@ -640,7 +652,7 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-xl">🏢</span>
+                <Building2 className="w-5 h-5 text-primary" />
                 <div className="min-w-0">
                   <span className="text-[10px] uppercase font-bold block" style={{ color: 'var(--tw-text-sub)' }}>
                     Bosh Turoperator
@@ -656,7 +668,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   Bronlash Agentligi
                 </span>
                 <span className="font-black text-emerald-600 dark:text-emerald-400">
-                  🛡️ {tourDetails.agencyName || 'SayrHub Agentligi'}
+                  <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> {tourDetails.agencyName || 'SayrHub Agentligi'}</span>
                 </span>
               </div>
             </div>
@@ -677,7 +689,7 @@ export const Modals: React.FC<ModalsProps> = ({
               </div>
               <div className="flex items-center justify-between text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold">
                 <span className="flex items-center gap-1">
-                  <span>💼 Agentlik xizmati</span>
+                  <span className="inline-flex items-center gap-1"><BriefcaseBusiness className="w-3 h-3" /> Agentlik xizmati</span>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 border border-cyan-500/30">
                     +{tourDetails.markupValue || 8}%
                   </span>
@@ -732,7 +744,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     type="button"
                     title="Narx tushishiga signal o'rnatish"
                   >
-                    <span>🔔</span>
+                    <Bell className="w-4 h-4" />
                     <span className="hidden sm:inline">Signal</span>
                   </button>
                 )}
@@ -816,7 +828,7 @@ export const Modals: React.FC<ModalsProps> = ({
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                  <span>👥</span> Sayohatchilar tarkibi va soni:
+                  <Users className="w-4 h-4" /> Sayohatchilar tarkibi va soni:
                 </span>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
                   Jami: {adultsCount + childrenCount} kishi
@@ -833,7 +845,7 @@ export const Modals: React.FC<ModalsProps> = ({
               >
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>🧑 Katta odamlar</span>
+                    <span className="text-xs font-bold flex items-center gap-1" style={{ color: 'var(--tw-text-main)' }}><User className="w-3.5 h-3.5" /> Katta odamlar</span>
                     <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400">12+ yosh</span>
                   </div>
                   <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>To'liq tarif bo'yicha</span>
@@ -897,7 +909,7 @@ export const Modals: React.FC<ModalsProps> = ({
               >
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>👶 Yosh bolalar</span>
+                    <span className="text-xs font-bold flex items-center gap-1" style={{ color: 'var(--tw-text-main)' }}><Baby className="w-3.5 h-3.5" /> Yosh bolalar</span>
                     <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">0-11 yosh</span>
                   </div>
                   <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">50% maxsus chegirma</span>
@@ -959,7 +971,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   color: 'var(--tw-text-sub)'
                 }}
               >
-                <span>👥 Sayohatchilar hisobi:</span>
+                <span className="inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Sayohatchilar hisobi:</span>
                 <span className="font-bold" style={{ color: 'var(--tw-text-main)' }}>
                   {adultsCount} ta katta odam{childrenCount > 0 ? `, ${childrenCount} ta yosh bola` : ''}
                 </span>
@@ -975,7 +987,7 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <h4 className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                <span>📝</span> Asosiy sayohatchi ma'lumotlari:
+                <FileText className="w-3.5 h-3.5" /> Asosiy sayohatchi ma'lumotlari:
               </h4>
 
               <div className="space-y-2 text-[11px]">
@@ -1045,7 +1057,7 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <h4 className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                <span>✈️</span> Parvoz va Transport Spesifikatsiyasi
+                <Plane className="w-3.5 h-3.5" /> Parvoz va Transport Spesifikatsiyasi
               </h4>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div
@@ -1082,7 +1094,7 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <h4 className="text-xs font-bold flex items-center gap-1.5" style={{ color: 'var(--tw-text-main)' }}>
-                <span>🏨</span> Mehmonxona va Ovqatlanish
+                <Hotel className="w-3.5 h-3.5" /> Mehmonxona va Ovqatlanish
               </h4>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div
@@ -1206,20 +1218,20 @@ export const Modals: React.FC<ModalsProps> = ({
                     </div>
 
                     <div className="flex justify-between items-center text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
-                      <span style={{ color: 'var(--tw-text-sub)' }}>🏢 Turoperator:</span>
+                      <span className="inline-flex items-center gap-1" style={{ color: 'var(--tw-text-sub)' }}><Building2 className="w-3 h-3" /> Turoperator:</span>
                       <span className="font-bold text-sky-600 dark:text-sky-400">
                         {checkoutTour.tourOperator || (checkoutTour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span style={{ color: 'var(--tw-text-sub)' }}>🛡️ Bronlash Agentligi:</span>
+                      <span className="inline-flex items-center gap-1" style={{ color: 'var(--tw-text-sub)' }}><ShieldCheck className="w-3 h-3" /> Bronlash Agentligi:</span>
                       <span className="font-bold text-emerald-600 dark:text-emerald-400">
                         {checkoutTour.agencyName || 'SayrHub Agentligi'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs text-cyan-600 dark:text-cyan-400">
                       <span className="flex items-center gap-1">
-                        <span>💼 Agentlik xizmati:</span>
+                        <span className="inline-flex items-center gap-1"><BriefcaseBusiness className="w-3 h-3" /> Agentlik xizmati:</span>
                         <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-cyan-500/10 border border-cyan-500/30">
                           +{checkoutTour.markupValue || 8}%
                         </span>
@@ -1265,7 +1277,7 @@ export const Modals: React.FC<ModalsProps> = ({
                           adultsCount: adultsCount,
                           childrenCount: childrenCount
                         });
-                        onShowToast(`"${checkoutTour.title}" turi muvaffaqiyatli bron qilindi! 🎉`, 'success');
+                        onShowToast(`"${checkoutTour.title}" turi muvaffaqiyatli bron qilindi!`, 'success');
                       }}
                       className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 tap-bounce transition cursor-pointer active:scale-98"
                     >
@@ -1280,7 +1292,7 @@ export const Modals: React.FC<ModalsProps> = ({
                         onClick={() => {
                           const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nSayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nSayyoh: ${bookingTravelerName}\nTel: ${bookingPhone}\nPasport: ${bookingPassport}\nJonli Narx: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-UZ'}`;
                           navigator.clipboard.writeText(smeta);
-                          onShowToast("Tur smetasi va hisob-kitobi buferga nusxalandi! 📋", "success");
+                          onShowToast("Tur smetasi va hisob-kitobi buferga nusxalandi!", "success");
                         }}
                         className="py-2.5 border text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 tap-bounce transition"
                         style={{
@@ -1289,13 +1301,13 @@ export const Modals: React.FC<ModalsProps> = ({
                           color: 'var(--tw-text-main)'
                         }}
                       >
-                        <span>📋</span>
+                        <FileText className="w-3.5 h-3.5" />
                         <span>Smetani Nusxalash</span>
                       </button>
 
                       <a
                         href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${checkoutTour.title}\n📍 Manzil: ${checkoutTour.location}\n✈️ Reys: ${checkoutTour.flight}\n🌙 Muddat: ${checkoutTour.nights}\n👥 Sayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\n👤 Sayyoh: ${bookingTravelerName}\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
+                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nMuddat: ${checkoutTour.nights}\nSayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nSayyoh: ${bookingTravelerName}\nNarx: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -1305,7 +1317,7 @@ export const Modals: React.FC<ModalsProps> = ({
                           borderColor: 'var(--tw-border)'
                         }}
                       >
-                        <span>💬</span>
+                        <MessageSquare className="w-3.5 h-3.5" />
                         <span>Operatorga Yozish</span>
                       </a>
                     </div>
@@ -1324,7 +1336,7 @@ export const Modals: React.FC<ModalsProps> = ({
                           color: 'var(--tw-accent)'
                         }}
                       >
-                        <span>🔔</span>
+                        <Bell className="w-3.5 h-3.5" />
                         <span>Ushbu tur narxi tushganda xabar berish (Signal)</span>
                       </button>
                     )}
@@ -1350,7 +1362,7 @@ export const Modals: React.FC<ModalsProps> = ({
             }}
           >
             <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-2xl border border-emerald-500/30 animate-bounce">
-              🎉
+              <PartyPopper className="w-7 h-7" />
             </div>
 
             <div>
@@ -1548,7 +1560,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-base">📞</span>
+                  <Phone className="w-4 h-4" />
                   <span>+998 (71) 200-00-00 (Koll-markaz)</span>
                 </div>
                 <span className="text-emerald-500 text-[10px]">Bepul</span>
@@ -1565,7 +1577,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 type="button"
               >
                 <div className="flex items-center gap-2.5">
-                  <span className="text-base">💬</span>
+                  <MessageSquare className="w-4 h-4" />
                   <span>Telegram Online Operator bilan chat</span>
                 </div>
                 <span className="text-[10px] font-bold" style={{ color: 'var(--tw-accent)' }}>Onlayn</span>
@@ -1837,7 +1849,7 @@ export const Modals: React.FC<ModalsProps> = ({
               >
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Sayohatchilar tarkibi:</span>
                 <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>
-                  👥 {activeVoucherBooking.guestsCount || 1} kishi
+                  <Users className="w-3.5 h-3.5 mr-1 inline" />{activeVoucherBooking.guestsCount || 1} kishi
                   {activeVoucherBooking.adultsCount ? ` (${activeVoucherBooking.adultsCount} katta${activeVoucherBooking.childrenCount ? `, ${activeVoucherBooking.childrenCount} bola` : ''})` : ''}
                 </span>
               </div>
@@ -1862,7 +1874,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   color: 'var(--tw-accent-contrast)'
                 }}
                 onClick={() => {
-                  onShowToast(`📄 ${activeVoucherBooking.voucherId} vaucheri PDF holatida yuklab olindi!`, 'success');
+                  onShowToast(`${activeVoucherBooking.voucherId} vaucheri PDF holatida yuklab olindi!`, 'success');
                   onCloseVoucherPreview();
                 }}
                 type="button"
@@ -1900,7 +1912,7 @@ export const Modals: React.FC<ModalsProps> = ({
             }}
           >
             <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/20 text-rose-500 flex items-center justify-center text-xl border border-rose-500/30">
-              ⚠️
+              <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
               <h3 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Turni bekor qilasizmi?</h3>
@@ -2003,7 +2015,7 @@ export const Modals: React.FC<ModalsProps> = ({
           >
             <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--tw-border)' }}>
               <div className="flex items-center gap-2">
-                <span className="text-lg">🛂</span>
+                <FileText className="w-5 h-5 text-primary" />
                 <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>Zagran Pasport Ma'lumotlari</h3>
               </div>
               <button
@@ -2096,7 +2108,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 color: 'var(--tw-accent)'
               }}
             >
-              🚪
+              <DoorOpen className="w-6 h-6" />
             </div>
             <div>
               <h3 className="text-base font-bold" style={{ color: 'var(--tw-text-main)' }}>Akkauntdan chiqish</h3>

@@ -15,7 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTripsCount
 }) => {
   return (
-    <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-lg transition-colors select-none">
+    <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-background/95 backdrop-blur-md border-t border-border shadow-lg transition-colors select-none">
       <nav className="px-2 pt-2 pb-1 flex items-center justify-around" data-purpose="mobile-bottom-nav">
         {/* 1. Qidiruv */}
         <button

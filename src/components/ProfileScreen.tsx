@@ -336,9 +336,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
-            { code: 'UZ' as LanguageCode, label: "O'zbek tili", flag: '🇺🇿' },
-            { code: 'RU' as LanguageCode, label: 'Русский', flag: '🇷🇺' },
-            { code: 'EN' as LanguageCode, label: 'English', flag: '🇬🇧' }
+            { code: 'UZ' as LanguageCode, label: "O'zbek tili" },
+            { code: 'RU' as LanguageCode, label: 'Русский' },
+            { code: 'EN' as LanguageCode, label: 'English' }
           ].map((item) => {
             const isSelected = currentLang === item.code;
             return (
@@ -350,7 +350,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 className="justify-between rounded-xl h-10 px-3 cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{item.flag}</span>
+                  <Globe className="w-4 h-4 text-muted-foreground" />
                   <span className="text-xs font-semibold">{item.label}</span>
                 </div>
                 {isSelected && <CheckCircle2 className="w-4 h-4" />}

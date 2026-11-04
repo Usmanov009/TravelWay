@@ -1,5 +1,6 @@
 import React from 'react';
 import { PriceAlert, TourPackage } from '../types';
+import { Bell, MapPin, PartyPopper, Smartphone, Plane, Mail, Zap } from 'lucide-react';
 
 interface ActiveAlertsModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
                 color: 'var(--tw-accent)'
               }}
             >
-              <span className="text-base">🔔</span>
+              <Bell className="w-4 h-4" />
             </div>
             <div>
               <h3 className="text-sm font-extrabold" style={{ color: 'var(--tw-text-main)' }}>Mening Narx Signallarim</h3>
@@ -87,12 +88,12 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
                 color: 'var(--tw-accent)'
               }}
             >
-              🔔
+              <Bell className="w-5 h-5" />
             </div>
             <div className="space-y-1">
               <h4 className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>Faol narx signallari yo'q</h4>
               <p className="text-[11px] max-w-[240px] mx-auto" style={{ color: 'var(--tw-text-sub)' }}>
-                Qidiruv natijalaridagi istalgan tur kartasidagi <b>qo'ng'iroqcha (🔔)</b> belgisini bosib, narx
+                Qidiruv natijalaridagi istalgan tur kartasidagi <b>qo'ng'iroqcha</b> belgisini bosib, narx
                 tushishiga obuna bo'ling!
               </p>
             </div>
@@ -129,12 +130,12 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
                             color: 'var(--tw-accent)'
                           }}
                         >
-                          {isThresholdMet ? '🎉 Narx Tushdi!' : 'Kuzatuvda'}
+                          {isThresholdMet ? <span className="flex items-center gap-1"><PartyPopper className="w-3 h-3" /> Narx Tushdi!</span> : 'Kuzatuvda'}
                         </span>
                         <span className="text-[9px] font-mono" style={{ color: 'var(--tw-text-sub)' }}>{alert.createdAt}</span>
                       </div>
                       <h4 className="text-xs font-bold truncate mt-0.5" style={{ color: 'var(--tw-text-main)' }}>{alert.tourTitle}</h4>
-                      <p className="text-[10px] truncate" style={{ color: 'var(--tw-text-sub)' }}>📍 {alert.tourLocation}</p>
+                      <p className="text-[10px] truncate flex items-center gap-1" style={{ color: 'var(--tw-text-sub)' }}><MapPin className="w-3 h-3 shrink-0" /> {alert.tourLocation}</p>
 
                       <div className="flex items-center gap-2 mt-1.5 text-xs">
                         <div>
@@ -184,17 +185,17 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
                           color: 'var(--tw-accent)'
                         }}
                       >
-                        📱 Push
+                        <><Smartphone className="w-3 h-3 inline mr-0.5" />Push</>
                       </span>
                     )}
                     {alert.notifyViaTelegram && (
                       <span className="bg-sky-500/15 text-sky-500 px-1.5 py-0.2 rounded font-semibold">
-                        ✈️ Telegram
+                        <><Plane className="w-3 h-3 inline mr-0.5" />Telegram</>
                       </span>
                     )}
                     {alert.userEmail && (
                       <span className="bg-purple-500/15 text-purple-500 px-1.5 py-0.2 rounded font-semibold truncate max-w-[120px]">
-                        ✉️ {alert.userEmail}
+                        <><Mail className="w-3 h-3 inline mr-0.5" />{alert.userEmail}</>
                       </span>
                     )}
                   </div>
@@ -211,7 +212,7 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
                         color: 'var(--tw-accent)'
                       }}
                     >
-                      <span>⚡️ Sinash (-$10)</span>
+                      <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Sinash (-$10)</span>
                     </button>
                     {currentTour && (
                       <button

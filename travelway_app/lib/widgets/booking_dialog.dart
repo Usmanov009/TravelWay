@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/tour_package.dart';
 import '../models/booking.dart';
 import '../providers/app_provider.dart';
@@ -24,9 +25,12 @@ class _BookingDialogState extends State<BookingDialog> {
   int _adultsCount = 2;
   int _childrenCount = 0;
 
-  int get _perAdult => widget.tour.isLiveKompas ? (widget.tour.price / 2).round() : widget.tour.price;
+  int get _perAdult => widget.tour.isLiveKompas
+      ? (widget.tour.price / 2).round()
+      : widget.tour.price;
   int get _perChild => (_perAdult * 0.5).round();
-  int get _totalPrice => (_adultsCount * _perAdult) + (_childrenCount * _perChild);
+  int get _totalPrice =>
+      (_adultsCount * _perAdult) + (_childrenCount * _perChild);
   int get _totalGuests => _adultsCount + _childrenCount;
 
   @override
@@ -38,9 +42,12 @@ class _BookingDialogState extends State<BookingDialog> {
   }
 
   Future<void> _submitBooking() async {
-    if (_nameController.text.trim().isEmpty || _phoneController.text.trim().isEmpty) {
+    if (_nameController.text.trim().isEmpty ||
+        _phoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, ism va telefon raqamingizni kiriting')),
+        const SnackBar(
+          content: Text('Iltimos, ism va telefon raqamingizni kiriting'),
+        ),
       );
       return;
     }
@@ -48,7 +55,8 @@ class _BookingDialogState extends State<BookingDialog> {
     setState(() => _isSubmitting = true);
 
     final provider = Provider.of<AppProvider>(context, listen: false);
-    final voucherCode = 'VCH-TR-${DateTime.now().millisecondsSinceEpoch % 100000}';
+    final voucherCode =
+        'VCH-TR-${DateTime.now().millisecondsSinceEpoch % 100000}';
     final bookingId = 'BK-${DateTime.now().millisecondsSinceEpoch % 1000000}';
 
     final priceStr = _childrenCount > 0
@@ -59,7 +67,9 @@ class _BookingDialogState extends State<BookingDialog> {
       id: bookingId,
       tourTitle: widget.tour.title,
       dest: widget.tour.location,
-      dates: widget.tour.departureDate.isNotEmpty ? widget.tour.departureDate : 'Kelgusi hafta',
+      dates: widget.tour.departureDate.isNotEmpty
+          ? widget.tour.departureDate
+          : 'Kelgusi hafta',
       status: 'Tasdiqlangan',
       voucherId: voucherCode,
       price: priceStr,
@@ -87,25 +97,41 @@ class _BookingDialogState extends State<BookingDialog> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppTheme.surfaceDark,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Row(
             children: [
               Icon(Icons.check_circle, color: AppTheme.accentGreen, size: 28),
               SizedBox(width: 10),
-              Text('Muvaffaqiyatli bron qilindi!', style: TextStyle(fontSize: 16)),
+              Text(
+                'Muvaffaqiyatli bron qilindi!',
+                style: TextStyle(fontSize: 16),
+              ),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Vaucher raqamingiz: $voucherCode', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary)),
+              Text(
+                'Vaucher raqamingiz: $voucherCode',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primary,
+                ),
+              ),
               const SizedBox(height: 8),
               Text('Mehmonxona: ${widget.tour.title}'),
-              Text('Sayohatchilar: $_totalGuests kishi ($_adultsCount katta, $_childrenCount bola)'),
+              Text(
+                'Sayohatchilar: $_totalGuests kishi ($_adultsCount katta, $_childrenCount bola)',
+              ),
               Text('Jami narx: \$$_totalPrice (${widget.tour.nights})'),
               const SizedBox(height: 8),
-              const Text('Vaucher "Turlarim" bo\'limiga qo\'shildi va tizimda ro\'yxatga olindi.', style: TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+              const Text(
+                'Vaucher "Turlarim" bo\'limiga qo\'shildi va tizimda ro\'yxatga olindi.',
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+              ),
             ],
           ),
           actions: [
@@ -138,7 +164,10 @@ class _BookingDialogState extends State<BookingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Turni Bron Qilish', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Turni Bron Qilish',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     onPressed: () => Navigator.of(context).pop(),
@@ -175,16 +204,75 @@ class _BookingDialogState extends State<BookingDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.tour.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text(widget.tour.location, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                          Text(
+                            widget.tour.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            widget.tour.location,
+                            style: const TextStyle(
+                              color: AppTheme.textMuted,
+                              fontSize: 11,
+                            ),
+                          ),
                           const SizedBox(height: 2),
-                          Text('\$$_totalPrice • ${widget.tour.nights}', style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(
+                            '\$$_totalPrice • ${widget.tour.nights}',
+                            style: const TextStyle(
+                              color: AppTheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                           const SizedBox(height: 3),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('🏢 ${widget.tour.tourOperator.isNotEmpty ? widget.tour.tourOperator : "Kompas Tour"}', style: const TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-                              Text('🛡️ ${widget.tour.agencyName.isNotEmpty ? widget.tour.agencyName : "SayrHub"} (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%)', style: const TextStyle(color: AppTheme.accentGreen, fontSize: 10, fontWeight: FontWeight.bold)),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.business,
+                                    size: 12,
+                                    color: AppTheme.primary,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    widget.tour.tourOperator.isNotEmpty
+                                        ? widget.tour.tourOperator
+                                        : "Kompas Tour",
+                                    style: const TextStyle(
+                                      color: AppTheme.primary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.shield_outlined,
+                                    size: 12,
+                                    color: AppTheme.accentGreen,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    '${widget.tour.agencyName.isNotEmpty ? widget.tour.agencyName : "SayrHub"} (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%)',
+                                    style: const TextStyle(
+                                      color: AppTheme.accentGreen,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ],
@@ -199,15 +287,30 @@ class _BookingDialogState extends State<BookingDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Sayohatchilar tarkibi va soni', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  const Text(
+                    'Sayohatchilar tarkibi va soni',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.accentGreen.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppTheme.accentGreen.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppTheme.accentGreen.withOpacity(0.3),
+                      ),
                     ),
-                    child: Text('Jami: $_totalGuests kishi', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                    child: Text(
+                      'Jami: $_totalGuests kishi',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.accentGreen,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -215,7 +318,10 @@ class _BookingDialogState extends State<BookingDialog> {
 
               // Katta odamlar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.subtleDark,
                   borderRadius: BorderRadius.circular(12),
@@ -227,9 +333,27 @@ class _BookingDialogState extends State<BookingDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('🧑 Katta odamlar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline, size: 14),
+                              SizedBox(width: 4),
+                              Text(
+                                'Katta odamlar',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                           SizedBox(height: 2),
-                          Text('12 yoshdan yuqori', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                          Text(
+                            '12 yoshdan yuqori',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -243,13 +367,27 @@ class _BookingDialogState extends State<BookingDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           InkWell(
-                            onTap: () => setState(() => _adultsCount = (_adultsCount - 1).clamp(1, 10)),
-                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                            onTap: () => setState(
+                              () => _adultsCount = (_adultsCount - 1).clamp(
+                                1,
+                                10,
+                              ),
+                            ),
+                            borderRadius: const BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                            ),
                             child: Container(
                               width: 32,
                               height: 32,
                               alignment: Alignment.center,
-                              child: const Text('-', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                              child: const Text(
+                                '-',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textMain,
+                                ),
+                              ),
                             ),
                           ),
                           Container(
@@ -258,17 +396,35 @@ class _BookingDialogState extends State<BookingDialog> {
                             alignment: Alignment.center,
                             child: Text(
                               '$_adultsCount',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: AppTheme.primary,
+                              ),
                             ),
                           ),
                           InkWell(
-                            onTap: () => setState(() => _adultsCount = (_adultsCount + 1).clamp(1, 10)),
-                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
+                            onTap: () => setState(
+                              () => _adultsCount = (_adultsCount + 1).clamp(
+                                1,
+                                10,
+                              ),
+                            ),
+                            borderRadius: const BorderRadius.horizontal(
+                              right: Radius.circular(10),
+                            ),
                             child: Container(
                               width: 32,
                               height: 32,
                               alignment: Alignment.center,
-                              child: const Text('+', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                              child: const Text(
+                                '+',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -282,7 +438,10 @@ class _BookingDialogState extends State<BookingDialog> {
 
               // Yosh bolalar
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.subtleDark,
                   borderRadius: BorderRadius.circular(12),
@@ -294,9 +453,27 @@ class _BookingDialogState extends State<BookingDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('👶 Yosh bolalar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Icon(Icons.child_care, size: 14),
+                              SizedBox(width: 4),
+                              Text(
+                                'Yosh bolalar',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                           SizedBox(height: 2),
-                          Text('0-11 yosh (50% chegirma)', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen)),
+                          Text(
+                            '0-11 yosh (50% chegirma)',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.accentGreen,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -310,13 +487,27 @@ class _BookingDialogState extends State<BookingDialog> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           InkWell(
-                            onTap: () => setState(() => _childrenCount = (_childrenCount - 1).clamp(0, 6)),
-                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                            onTap: () => setState(
+                              () => _childrenCount = (_childrenCount - 1).clamp(
+                                0,
+                                6,
+                              ),
+                            ),
+                            borderRadius: const BorderRadius.horizontal(
+                              left: Radius.circular(10),
+                            ),
                             child: Container(
                               width: 32,
                               height: 32,
                               alignment: Alignment.center,
-                              child: const Text('-', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+                              child: const Text(
+                                '-',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textMain,
+                                ),
+                              ),
                             ),
                           ),
                           Container(
@@ -325,17 +516,35 @@ class _BookingDialogState extends State<BookingDialog> {
                             alignment: Alignment.center,
                             child: Text(
                               '$_childrenCount',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.accentGreen),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: AppTheme.accentGreen,
+                              ),
                             ),
                           ),
                           InkWell(
-                            onTap: () => setState(() => _childrenCount = (_childrenCount + 1).clamp(0, 6)),
-                            borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
+                            onTap: () => setState(
+                              () => _childrenCount = (_childrenCount + 1).clamp(
+                                0,
+                                6,
+                              ),
+                            ),
+                            borderRadius: const BorderRadius.horizontal(
+                              right: Radius.circular(10),
+                            ),
                             child: Container(
                               width: 32,
                               height: 32,
                               alignment: Alignment.center,
-                              child: const Text('+', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                              child: const Text(
+                                '+',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.accentGreen,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -346,7 +555,10 @@ class _BookingDialogState extends State<BookingDialog> {
               ),
 
               const SizedBox(height: 16),
-              const Text('Asosiy sayohatchi ma\'lumotlari', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              const Text(
+                'Asosiy sayohatchi ma\'lumotlari',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
@@ -388,9 +600,21 @@ class _BookingDialogState extends State<BookingDialog> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text('Katta odamlar ($_adultsCount kishi):', style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                          child: Text(
+                            'Katta odamlar ($_adultsCount kishi):',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSub,
+                            ),
+                          ),
                         ),
-                        Text('\$${_adultsCount * _perAdult}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text(
+                          '\$${_adultsCount * _perAdult}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     if (_childrenCount > 0) ...[
@@ -399,9 +623,22 @@ class _BookingDialogState extends State<BookingDialog> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text('Yosh bolalar ($_childrenCount bola - 50%):', style: const TextStyle(fontSize: 11, color: AppTheme.accentGreen)),
+                            child: Text(
+                              'Yosh bolalar ($_childrenCount bola - 50%):',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.accentGreen,
+                              ),
+                            ),
                           ),
-                          Text('\$${_childrenCount * _perChild}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.accentGreen)),
+                          Text(
+                            '\$${_childrenCount * _perChild}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGreen,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -409,16 +646,53 @@ class _BookingDialogState extends State<BookingDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('💼 Agentlik xizmati (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%):', style: const TextStyle(fontSize: 11, color: AppTheme.primary)),
-                        const Text('Narxga kiritilgan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.work_outline,
+                              size: 13,
+                              color: AppTheme.primary,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              'Agentlik xizmati (+${widget.tour.markupValue.toStringAsFixed(widget.tour.markupValue.truncateToDouble() == widget.tour.markupValue ? 0 : 1)}%):',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Text(
+                          'Narxga kiritilgan',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
+                        ),
                       ],
                     ),
                     const Divider(color: AppTheme.borderDark, height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Jami to\'lov summasi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                        Text('\$$_totalPrice', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                        const Text(
+                          'Jami to\'lov summasi:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          '\$$_totalPrice',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -426,7 +700,10 @@ class _BookingDialogState extends State<BookingDialog> {
               ),
 
               const SizedBox(height: 14),
-              const Text('To\'lov usuli', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+              const Text(
+                'To\'lov usuli',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: ['Humo/Uzcard', 'Payme', 'Click', 'Visa'].map((m) {
@@ -438,16 +715,24 @@ class _BookingDialogState extends State<BookingDialog> {
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSel ? AppTheme.primary.withOpacity(0.15) : AppTheme.cardDark,
+                          color: isSel
+                              ? AppTheme.primary.withOpacity(0.15)
+                              : AppTheme.cardDark,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: isSel ? AppTheme.primary : AppTheme.borderDark),
+                          border: Border.all(
+                            color: isSel
+                                ? AppTheme.primary
+                                : AppTheme.borderDark,
+                          ),
                         ),
                         child: Center(
                           child: Text(
                             m,
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSel
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: isSel ? AppTheme.primary : Colors.white70,
                             ),
                           ),
@@ -464,7 +749,14 @@ class _BookingDialogState extends State<BookingDialog> {
                   onPressed: _isSubmitting ? null : _submitBooking,
                   icon: const Icon(Icons.calendar_month, size: 18),
                   label: _isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : Text('Turni Bron Qilish (\$$_totalPrice)'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),

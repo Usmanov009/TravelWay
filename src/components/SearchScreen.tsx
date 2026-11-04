@@ -13,6 +13,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  BedDouble, Bell, Building2, Compass, Gem, Globe2, Heart, Hotel, Info, MapPin,
+  MapPinned, Moon, Plane, PlaneTakeoff, RotateCw, Search, ShieldCheck, Sparkles,
+  Tag, Utensils, Users, Waves
+} from 'lucide-react';
 
 interface SearchScreenProps {
   tours: TourPackage[];
@@ -56,7 +61,6 @@ export const KOMPAS_DEPARTURE_CITIES = [
 export interface KompasCountry {
   code: string;
   name: string;
-  flag: string;
   resorts: string[];
 }
 
@@ -64,163 +68,136 @@ export const KOMPAS_COUNTRIES: KompasCountry[] = [
   {
     code: 'ALL',
     name: 'Barcha mamlakatlar',
-    flag: '🌍',
     resorts: ['Barcha kurortlar']
   },
   {
     code: 'TR',
     name: 'Turkiya',
-    flag: '🇹🇷',
     resorts: ['Barcha kurortlar', 'Antalya', 'Belek', 'Kemer', 'Alanya', 'Bodrum', 'Istanbul']
   },
   {
     code: 'EG',
     name: 'Misr',
-    flag: '🇪🇬',
     resorts: ['Barcha kurortlar', 'Sharm El-Sheikh', 'Hurghada']
   },
   {
     code: 'AE',
     name: 'BAA',
-    flag: '🇦🇪',
     resorts: ['Barcha kurortlar', 'Dubay (Palm)', 'Dubay (JBR/Marina)', 'Ras Al Khaimah']
   },
   {
     code: 'TH',
     name: 'Tailand',
-    flag: '🇹🇭',
     resorts: ['Barcha kurortlar', 'Phuket', 'Pattaya']
   },
   {
     code: 'VN',
     name: 'Vetnam',
-    flag: '🇻🇳',
     resorts: ['Barcha kurortlar', 'Phu Quoc', 'Nha Trang']
   },
   {
     code: 'CN',
     name: 'Xitoy',
-    flag: '🇨🇳',
     resorts: ['Barcha kurortlar', 'Sanya (Hainan)']
   },
   {
     code: 'MV',
     name: 'Maldiv',
-    flag: '🇲🇻',
     resorts: ['Barcha kurortlar', 'Male / Kaafu Atoll']
   },
   {
     code: 'ID',
     name: 'Indoneziya',
-    flag: '🇮🇩',
     resorts: ['Barcha kurortlar', 'Bali']
   },
   {
     code: 'GE',
     name: 'Gruziya',
-    flag: '🇬🇪',
     resorts: ['Barcha kurortlar', 'Batumi', 'Tbilisi']
   },
   {
     code: 'LK',
     name: 'Shri-Lanka',
-    flag: '🇱🇰',
     resorts: ['Barcha kurortlar', 'Kolombo', 'Bentota']
   },
   {
     code: 'MY',
     name: 'Malayziya',
-    flag: '🇲🇾',
     resorts: ['Barcha kurortlar', 'Kuala Lumpur', 'Langkawi']
   },
   {
     code: 'QA',
     name: 'Qatar',
-    flag: '🇶🇦',
     resorts: ['Barcha kurortlar', 'Doha']
   },
   {
     code: 'SA',
     name: 'Saudiya Arabistoni',
-    flag: '🇸🇦',
     resorts: ['Barcha kurortlar', 'Jidda', 'Makka', 'Madina', 'Riyoz']
   },
   {
     code: 'OM',
     name: 'Ummon (Oman)',
-    flag: '🇴🇲',
     resorts: ['Barcha kurortlar', 'Maskat', 'Salala']
   },
   {
     code: 'AZ',
     name: 'Ozarbayjon',
-    flag: '🇦🇿',
     resorts: ['Barcha kurortlar', 'Boku', 'Shahdag']
   },
   {
     code: 'CY',
     name: 'Kipr',
-    flag: '🇨🇾',
     resorts: ['Barcha kurortlar', 'Ayia Napa', 'Larnaka', 'Limassol']
   },
   {
     code: 'ME',
     name: 'Chernogoriya',
-    flag: '🇲🇪',
     resorts: ['Barcha kurortlar', 'Budva', 'Kotor', 'Tivat']
   },
   {
     code: 'IT',
     name: 'Italiya',
-    flag: '🇮🇹',
     resorts: ['Barcha kurortlar', 'Rim', 'Venetsiya', 'Milan']
   },
   {
     code: 'ES',
     name: 'Ispaniya',
-    flag: '🇪🇸',
     resorts: ['Barcha kurortlar', 'Barselona', 'Madrid', 'Mayorka']
   },
   {
     code: 'FR',
     name: 'Fransiya',
-    flag: '🇫🇷',
     resorts: ['Barcha kurortlar', 'Parij', 'Nitsa']
   },
   {
     code: 'CZ',
     name: 'Chexiya',
-    flag: '🇨🇿',
     resorts: ['Barcha kurortlar', 'Praga', 'Karlovi Vari']
   },
   {
     code: 'JP',
     name: 'Yaponiya',
-    flag: '🇯🇵',
     resorts: ['Barcha kurortlar', 'Tokio', 'Kioto', 'Osaka']
   },
   {
     code: 'KR',
     name: 'Janubiy Koreya',
-    flag: '🇰🇷',
     resorts: ['Barcha kurortlar', 'Seul', 'Jeju']
   },
   {
     code: 'SC',
     name: 'Seyshel',
-    flag: '🇸🇨',
     resorts: ['Barcha kurortlar', 'Mae', 'Praslin']
   },
   {
     code: 'MU',
     name: 'Mavrikiy',
-    flag: '🇲🇺',
     resorts: ['Barcha kurortlar', 'Port-Lui']
   },
   {
     code: 'IN',
     name: 'Hindiston (Goa)',
-    flag: '🇮🇳',
     resorts: ['Barcha kurortlar', 'Shimoliy Goa', 'Janubiy Goa']
   }
 ];
@@ -584,99 +561,85 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
   return (
     <div className="space-y-3.5 pb-24 select-none font-sans">
-      {/* 1. SAYRHUB OFFICIAL HEADER BAR */}
-      <Card className="rounded-2xl p-4 border-border bg-card shadow-xs transition-colors">
-        <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-              ✈️
+      <section className="relative isolate overflow-hidden rounded-3xl border border-indigo-200/70 bg-gradient-to-br from-indigo-50 via-background to-violet-50 px-5 py-5 shadow-sm dark:border-indigo-400/20 dark:from-indigo-950/60 dark:via-card dark:to-violet-950/40 sm:px-7 sm:py-7">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-14 -top-20 -z-10 size-64 rounded-full bg-indigo-400/15 blur-3xl" />
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div className="max-w-2xl">
+            <Badge variant="secondary" className="mb-3 gap-1.5 border border-indigo-200/70 bg-white/70 text-indigo-700 dark:border-indigo-400/20 dark:bg-indigo-950/50 dark:text-indigo-200">
+              <Sparkles className="size-3.5" />
+              SayrHub bilan sayohatni boshlang
+            </Badge>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              Keyingi manzilingiz qayer?
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+              Jonli turpaketlar, aviachiptalar va mehmonxonalarni bir joyda taqqoslang.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 rounded-lg border border-border bg-background/80 p-1">
+              {(['USD', 'EUR', 'UZS'] as const).map((curr) => (
+                <Button
+                  key={curr}
+                  type="button"
+                  variant={currency === curr ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrency(curr)}
+                  className="h-7 px-2.5 text-[11px] font-semibold"
+                >
+                  {curr === 'USD' ? '$ USD' : curr === 'EUR' ? '€ EUR' : "so'm"}
+                </Button>
+              ))}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-xs uppercase tracking-wider text-foreground">
-                  SayrHub
-                </span>
-                <Badge variant="secondary" className="text-[9px] font-bold px-1.5 py-0 h-4 uppercase">
-                  Onlayn Qidiruv
-                </Badge>
-              </div>
-              <p className="text-[11px] text-muted-foreground truncate">
-                Arzon turpaketlar, charter reyslar & narx signallari
-              </p>
-            </div>
-          </div>
-
-          {/* Currency Switcher */}
-          <div className="flex items-center gap-1 p-1 rounded-xl border border-border bg-muted/60 shrink-0">
-            {(['USD', 'EUR', 'UZS'] as const).map((curr) => (
-              <Button
-                key={curr}
-                type="button"
-                variant={currency === curr ? 'default' : 'ghost'}
-                size="xs"
-                onClick={() => setCurrency(curr)}
-                className="h-6 px-2 text-[10px] font-bold rounded-lg"
-              >
-                {curr === 'USD' ? '$' : curr === 'EUR' ? '€' : "so'm"}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Live Info and Alerts */}
-        <div className="flex items-center justify-between pt-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-foreground">
-              {displayTours.length} ta mavjud turpaket
-            </span>
-            <span className="text-xs text-muted-foreground">
-              ({departureCity})
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
             <Button
               type="button"
               id="btn-open-google-tour-map"
               variant="outline"
               size="sm"
               onClick={() => setIsMapModalOpen(true)}
-              className="h-8 px-2.5 text-xs font-semibold rounded-xl text-primary gap-1"
+              className="h-9 gap-1.5 bg-background/80"
               title="Mehmonxonalarni Google Xaritasida ko'rish"
             >
-              <span>🗺️</span>
-              <span className="text-[11px]">Xarita</span>
+              <MapPinned className="size-4 text-primary" />
+              Xarita
             </Button>
-
             {priceAlerts && priceAlerts.length > 0 && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setIsActiveAlertsModalOpen(true)}
-                className="h-8 px-2.5 text-xs font-semibold rounded-xl gap-1 text-foreground"
+                className="h-9 gap-1.5 bg-background/80"
                 title="Mening narx signallarim"
               >
-                <span>🔔</span>
-                <Badge variant="default" className="w-4 h-4 p-0 text-[10px] font-bold flex items-center justify-center rounded-full">
+                <Bell className="size-4 text-primary" />
+                <Badge variant="default" className="flex size-5 items-center justify-center p-0 text-[10px]">
                   {priceAlerts.length}
                 </Badge>
-                <span className="text-[11px] hidden sm:inline">Signallar</span>
+                <span className="hidden sm:inline">Signallar</span>
               </Button>
             )}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsFormCollapsed(!isFormCollapsed)}
-              className="h-8 px-2.5 text-xs font-semibold rounded-xl"
-            >
-              <span>{isFormCollapsed ? 'Filtrni ochish ▾' : 'Yig‘ish ▴'}</span>
-            </Button>
           </div>
         </div>
-      </Card>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-indigo-200/60 pt-4 text-sm dark:border-indigo-300/15">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <PlaneTakeoff className="size-4 text-primary" />
+            <span><strong className="font-semibold text-foreground">{displayTours.length} ta</strong> mavjud turpaket</span>
+            <span aria-hidden="true">·</span>
+            <span>{departureCity}</span>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsFormCollapsed(!isFormCollapsed)}
+            className="h-8 gap-1.5 text-primary hover:text-primary"
+          >
+            <Compass className="size-4" />
+            {isFormCollapsed ? 'Qidiruv filtrlarini ochish' : 'Filtrlarni yig‘ish'}
+          </Button>
+        </div>
+      </section>
 
       {/* SERVICE MODE TABS: Turpaketlar | Combo Turlar | Aviabiletlar | Mehmonxonalar */}
       <div className="grid grid-cols-4 gap-1.5 p-1.5 rounded-2xl border border-border bg-muted/60 shadow-xs">
@@ -687,7 +650,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onClick={() => setServiceMode('tours')}
           className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
-          <span className="text-sm">🏖️</span>
+          <Waves className="size-4" />
           <span className="text-[10px] leading-tight font-bold">Turpaketlar</span>
         </Button>
 
@@ -698,7 +661,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onClick={() => setServiceMode('combo')}
           className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
-          <span className="text-sm">🔄</span>
+          <RotateCw className="size-4" />
           <span className="text-[10px] leading-tight font-bold">Combo</span>
         </Button>
 
@@ -709,7 +672,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onClick={() => setServiceMode('flights')}
           className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
-          <span className="text-sm">✈️</span>
+          <Plane className="size-4" />
           <span className="text-[10px] leading-tight font-bold">Biletlar</span>
         </Button>
 
@@ -720,7 +683,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onClick={() => setServiceMode('hotels')}
           className="h-auto py-2 px-1 rounded-xl flex flex-col items-center gap-0.5"
         >
-          <span className="text-sm">🏨</span>
+          <Hotel className="size-4" />
           <span className="text-[10px] leading-tight font-bold">Mehmonxona</span>
         </Button>
       </div>
@@ -794,7 +757,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                🛫 Uchish shahri (Город вылета)
+                <span className="inline-flex items-center gap-1"><PlaneTakeoff className="w-3 h-3" /> Uchish shahri (Город вылета)</span>
               </label>
               <select
                 id="kompas-departure-city"
@@ -824,7 +787,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
               countries={KOMPAS_COUNTRIES}
               selectedCode={countryCode}
               onSelectCountry={handleCountryChange}
-              label="🌍 Borish mamlakati (Страна)"
+              label="Borish mamlakati (Страна)"
               placeholder="Davlat nomini yozing..."
             />
           </div>
@@ -843,7 +806,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                🏖 Kurort (Курорт)
+                <span className="inline-flex items-center gap-1"><Waves className="w-3 h-3" /> Kurort (Курорт)</span>
               </label>
               <select
                 id="kompas-resort"
@@ -880,7 +843,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                🏷️ Tur Toifasi (Type)
+                <span className="inline-flex items-center gap-1"><Tag className="w-3 h-3" /> Tur Toifasi (Type)</span>
               </label>
               <select
                 id="search-tour-type"
@@ -890,12 +853,12 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 style={{ color: 'var(--tw-text-main)' }}
               >
                 <option value="ALL" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Barcha Turlar (Hammasi)</option>
-                <option value="beach" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🏖️ Plyaj (Beach)</option>
-                <option value="luxury" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>💎 Premium / Deluxe</option>
-                <option value="ultra" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>✨ Ultra All Inclusive</option>
-                <option value="family" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>👨‍👩‍👦 Oilaviy (Family)</option>
-                <option value="culture" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🏛️ Madaniy / Tarixiy</option>
-                <option value="cheap" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>🔥 Hamyonbop / Qaynoq</option>
+                <option value="beach" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Plyaj (Beach)</option>
+                <option value="luxury" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Premium / Deluxe</option>
+                <option value="ultra" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Ultra All Inclusive</option>
+                <option value="family" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Oilaviy (Family)</option>
+                <option value="culture" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Madaniy / Tarixiy</option>
+                <option value="cheap" style={{ backgroundColor: 'var(--tw-surface)', color: 'var(--tw-text-main)' }}>Hamyonbop / Qaynoq</option>
               </select>
             </div>
           </div>
@@ -916,7 +879,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   className="text-[10px] block font-semibold cursor-pointer select-none"
                   style={{ color: 'var(--tw-text-sub)' }}
                 >
-                  🌙 Kunlar soni (Kechalar)
+                  <span className="inline-flex items-center gap-1"><Moon className="w-3 h-3" /> Kunlar soni (Kechalar)</span>
                 </label>
                 {nightsFilter && nightsFilter !== 'ALL' && (
                   <button
@@ -1019,7 +982,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                👥 Sayyohlar (Туристы)
+                <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" /> Sayyohlar (Туристы)</span>
               </label>
               <div className="flex items-center justify-between pt-0.5">
                 <div className="flex items-center gap-1">
@@ -1098,7 +1061,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                ⭐️ Toifa (Категория)
+                Toifa (Категория)
               </label>
               <select
                 id="kompas-stars"
@@ -1131,7 +1094,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                🍽 Ovqatlanish (Питание)
+                <span className="inline-flex items-center gap-1"><Utensils className="w-3 h-3" /> Ovqatlanish (Питание)</span>
               </label>
               <select
                 id="kompas-meals"
@@ -1167,7 +1130,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 className="text-[10px] block font-semibold mb-0.5"
                 style={{ color: 'var(--tw-text-sub)' }}
               >
-                ✈️ Aviatashuvchi (Авиакомпания)
+                <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Aviatashuvchi (Авиакомпания)</span>
               </label>
               <select
                 id="kompas-airline"
@@ -1196,7 +1159,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                 borderColor: 'var(--tw-border)'
               }}
             >
-              <span className="text-xs" style={{ color: 'var(--tw-text-sub)' }}>🔍</span>
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
               <div className="flex-1 min-w-0">
                 <label
                   className="text-[10px] block font-semibold leading-none mb-1"
@@ -1246,7 +1209,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   borderColor: countryCode === c.code ? 'var(--tw-accent)' : 'var(--tw-border)'
                 }}
               >
-                <span>{c.flag}</span> <span className="ml-1">{c.name}</span>
+                <Globe2 className="inline w-3 h-3" /> <span className="ml-1">{c.name}</span>
               </button>
             ))}
           </div>
@@ -1317,13 +1280,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   color: 'var(--tw-accent)'
                 }}
               >
-                <span>{currentCountry.flag}</span>
+                <Globe2 className="w-3 h-3" />
                 <span>{currentCountry.name}</span>
               </span>
             )}
             {selectedType !== 'ALL' && (
               <span className="px-2 py-0.5 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 text-[10px] font-bold shrink-0">
-                🏷️ {selectedType === 'beach' ? 'Plyaj' : selectedType === 'luxury' ? 'Premium' : selectedType === 'ultra' ? 'Ultra All Inclusive' : selectedType === 'family' ? 'Oilaviy' : selectedType === 'culture' ? 'Madaniy' : 'Hamyonbop'}
+                <span className="inline-flex items-center gap-1"><Tag className="w-3 h-3" /> {selectedType === 'beach' ? 'Plyaj' : selectedType === 'luxury' ? 'Premium' : selectedType === 'ultra' ? 'Ultra All Inclusive' : selectedType === 'family' ? 'Oilaviy' : selectedType === 'culture' ? 'Madaniy' : 'Hamyonbop'}</span>
               </span>
             )}
             {nightsFilter && nightsFilter !== 'ALL' && (
@@ -1335,7 +1298,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                   color: 'var(--tw-accent)'
                 }}
               >
-                <span>🌙</span>
+                <Moon className="w-3 h-3" />
                 <span>{nightsFilter} kun / kecha</span>
               </span>
             )}
@@ -1368,7 +1331,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       {/* Notice if zero matches */}
       {isNoExactMatch && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3 text-xs text-amber-200 flex items-center gap-2">
-          <span>ℹ️</span>
+          <Info className="w-4 h-4 shrink-0" />
           <span>Tanlangan parametrlar bo'yicha tur paketlar topilmadi. Barcha mavjud takliflar ko'rsatilmoqda:</span>
         </div>
       )}
@@ -1380,7 +1343,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             className="text-xs sm:text-sm font-extrabold uppercase tracking-wider flex items-center gap-1.5"
             style={{ color: 'var(--tw-text-main)' }}
           >
-            <span>{currentCountry.flag}</span>
+            <Globe2 className="w-4 h-4 text-primary" />
             <span>{currentCountry.name} bo'yicha SayrHub turpaketlari ({displayTours.length})</span>
           </span>
           <span
@@ -1429,7 +1392,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       type="button"
                       title={activeAlert ? `Narx signali: < $${activeAlert.targetPrice}` : "Narx tushishiga signal o'rnatish"}
                     >
-                      <span className="text-xs">🔔</span>
+                      <Bell className="w-3.5 h-3.5" />
                       {activeAlert ? (
                         <span className="text-[10px] font-black font-mono leading-none">&lt;${activeAlert.targetPrice}</span>
                       ) : (
@@ -1443,7 +1406,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                       onClick={(e) => onToggleSave(tour.id, e)}
                       type="button"
                     >
-                      {tour.saved ? '❤️' : '🤍'}
+                      <Heart className={`w-4 h-4 ${tour.saved ? 'fill-current text-rose-500' : ''}`} />
                     </button>
 
                     {/* Rating & Nights on banner */}
@@ -1452,7 +1415,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                         ★ {tour.rating} ({tour.hotelStars || '5★'})
                       </span>
                       <span className="text-[10px] text-white bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md">
-                        🌙 {tour.nights}
+                        <span className="inline-flex items-center gap-1"><Moon className="w-3 h-3" /> {tour.nights}</span>
                       </span>
                     </div>
                   </div>
@@ -1465,11 +1428,11 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                           {tour.title}
                         </h4>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          📍 {tour.location}
+                          <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" /> {tour.location}</span>
                         </p>
                         {tour.roomType && (
                           <p className="text-xs font-semibold text-primary mt-0.5">
-                            🛏 {tour.roomType}
+                            <span className="inline-flex items-center gap-1"><BedDouble className="w-3 h-3" /> {tour.roomType}</span>
                           </p>
                         )}
                       </div>
@@ -1494,7 +1457,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
                     {/* Flight & Inclusions bar */}
                     <div className="p-2.5 rounded-xl border border-border bg-muted/40 flex items-center justify-between text-xs text-muted-foreground">
                       <div className="flex items-center gap-1.5 truncate max-w-[210px]">
-                        <span>✈️</span>
+                        <Plane className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate font-medium">{tour.flight}</span>
                       </div>
                       <span className="text-emerald-600 dark:text-emerald-400 font-semibold shrink-0">Transfer ✓ Sug'urta ✓</span>
@@ -1502,7 +1465,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
 
                     {/* Agency Trust Info */}
                     <div className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20 font-semibold">
-                      <span className="text-xs">🏢</span>
+                      <Building2 className="w-3.5 h-3.5" />
                       <span>SayrHub</span>
                       <span className="text-sky-400 dark:text-sky-500 ml-auto shrink-0">✓ Rasmiy Operator</span>
                     </div>

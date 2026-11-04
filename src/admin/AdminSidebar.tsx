@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   Sliders,
   X,
-  Smartphone
+  Smartphone,
+  Crown,
+  Briefcase
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -225,7 +227,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   </h4>
                   <div className="flex items-center gap-1 mt-0.5">
                     <Badge variant={isMainAdmin ? 'default' : 'secondary'} className="text-[10px] font-semibold px-1.5 py-0 h-4">
-                      {isMainAdmin ? '👑 Bosh Admin' : '🧳 Tur Admin'}
+                      {isMainAdmin ? <><Crown aria-hidden="true" className="mr-1 h-3 w-3" /> Bosh Admin</> : <><Briefcase aria-hidden="true" className="mr-1 h-3 w-3" /> Tur Admin</>}
                     </Badge>
                   </div>
                 </div>

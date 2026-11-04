@@ -15,7 +15,8 @@ import {
   Trash2,
   Luggage,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  CircleDollarSign
 } from 'lucide-react';
 
 interface TripsScreenProps {
@@ -240,7 +241,7 @@ export const TripsScreen: React.FC<TripsScreenProps> = ({
                   </div>
 
                   <div className="p-2 rounded-xl text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-between font-semibold">
-                    <span>💸 Mablag' to'liq qaytarilgan (100%)</span>
+                    <span className="inline-flex items-center gap-1"><CircleDollarSign className="w-3.5 h-3.5" /> Mablag' to'liq qaytarilgan (100%)</span>
                     <span>Qaytarildi ✓</span>
                   </div>
 

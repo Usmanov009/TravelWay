@@ -26,6 +26,7 @@ import { AdminLoginPage } from './admin/AdminLoginPage';
 import { AdminRole, AdminUser } from './admin/adminTypes';
 import { INITIAL_ADMIN_STAFF } from './admin/adminMockData';
 import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from './data/extraServicesData';
+import { AlertTriangle, Bell, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   // Navigation & Screen state
@@ -318,7 +319,7 @@ export default function App() {
     });
 
     showToast(
-      `🔔 "${alertData.tourTitle}" uchun narx signali (< $${alertData.targetPrice}) muvaffaqiyatli saqlandi!`,
+      `"${alertData.tourTitle}" uchun narx signali (< $${alertData.targetPrice}) muvaffaqiyatli saqlandi!`,
       'success'
     );
   };
@@ -349,7 +350,7 @@ export default function App() {
 
     setHasUnreadNotifs(true);
     showToast(
-      `🎉 NARX TUSHDI! "${title}" narxi $${simulatedPrice} ga pasaydi (Chegara: < $${alert?.targetPrice || simulatedPrice + 10})!`,
+      `NARX TUSHDI! "${title}" narxi $${simulatedPrice} ga pasaydi (Chegara: < $${alert?.targetPrice || simulatedPrice + 10})!`,
       'success'
     );
   };
@@ -411,7 +412,7 @@ export default function App() {
         if (t.id === tourId) {
           const newSaved = !t.saved;
           showToast(
-            newSaved ? "Turpaket saqlanganlarga qo'shildi ❤️" : "Saqlanganlardan olib tashlandi",
+            newSaved ? "Turpaket saqlanganlarga qo'shildi" : "Saqlanganlardan olib tashlandi",
             newSaved ? 'success' : 'info'
           );
           return { ...t, saved: newSaved };
@@ -479,9 +480,9 @@ export default function App() {
         body: JSON.stringify(updatedUser)
       }).catch((e) => console.warn('MongoDB save user error:', e));
 
-      showToast(`Xush kelibsiz, ${updatedUser.name}! SayrHub'ga kirdingiz 🎉`, 'success');
+      showToast(`Xush kelibsiz, ${updatedUser.name}! SayrHub'ga kirdingiz`, 'success');
     } else {
-      showToast(`Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi 🎉`, 'success');
+      showToast("Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi", 'success');
     }
 
     setCurrentTab('search');
@@ -606,7 +607,7 @@ export default function App() {
 
     setBookings((prev) => [newBooking, ...prev]);
     saveBookingToDB(newBooking);
-    showToast(`🔥 Qaynoq tur "${deal.title}" muvaffaqiyatli band qilindi!`, 'success');
+    showToast(`Qaynoq tur "${deal.title}" muvaffaqiyatli band qilindi!`, 'success');
     setCurrentTab('trips');
   };
 
@@ -1040,7 +1041,7 @@ export default function App() {
         },
         body: JSON.stringify({ commissionRate: cleanRate })
       });
-      showToast(`Agentlik komissiyasi ${cleanRate}% qilib saqlandi va barcha narxlarga qo'llanildi! 💼`, 'success');
+      showToast(`Agentlik komissiyasi ${cleanRate}% qilib saqlandi va barcha narxlarga qo'llanildi!`, 'success');
     } catch (err) {
       console.warn('Could not sync commission to server:', err);
     }
@@ -1072,7 +1073,7 @@ export default function App() {
     };
     setCards((prev) => [...prev, newCard]);
     setIsAddCardOpen(false);
-    showToast("Yangi to'lov kartasi muvaffaqiyatli saqlandi! 💳", 'success');
+    showToast("Yangi to'lov kartasi muvaffaqiyatli saqlandi!", 'success');
   };
 
   const userInitials = (user.name || 'TW')
@@ -1118,7 +1119,7 @@ export default function App() {
         currentAdminUser={currentAdminUser}
         onSwitchRole={(role) => {
           setCurrentAdminRole(role);
-          showToast(`Rol o'zgartirildi: ${role === 'main_admin' ? '👑 Bosh Admin' : '🧳 Tur Admin'}`, 'info');
+          showToast(`Rol o'zgartirildi: ${role === 'main_admin' ? 'Bosh Admin' : 'Tur Admin'}`, 'info');
         }}
         onExitToApp={handleAdminLogout}
         tours={tours}
@@ -1178,8 +1179,8 @@ export default function App() {
           setThemeMode(next);
           showToast(
             next === 'light'
-              ? "Kungi rejim (Light Mode) yoqildi ☀️"
-              : "Tungi rejim (Dark Mode) yoqildi 🌙",
+              ? "Kungi rejim (Light Mode) yoqildi"
+              : "Tungi rejim (Dark Mode) yoqildi",
             'info'
           );
         }}
@@ -1336,7 +1337,7 @@ export default function App() {
                   }}
                   onToggleNotifications={() => {
                     setNotificationsEnabled(!notificationsEnabled);
-                    showToast(notificationsEnabled ? "Push bildirishnomalar o'chirildi" : "Push bildirishnomalar yoqildi 🔔", 'info');
+                    showToast(notificationsEnabled ? "Push bildirishnomalar o'chirildi" : "Push bildirishnomalar yoqildi", 'info');
                   }}
                   onOpenSupport={() => setIsSupportOpen(true)}
                   onLogout={() => setIsLogoutConfirmOpen(true)}
@@ -1452,7 +1453,13 @@ export default function App() {
                     : 'bg-card text-card-foreground border-border'
                 }`}
               >
-                <span>{t.type === 'success' ? '✅' : t.type === 'error' ? '⚠️' : '🔔'}</span>
+                {t.type === 'success' ? (
+                  <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
+                ) : t.type === 'error' ? (
+                  <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
+                ) : (
+                  <Bell className="size-4 shrink-0" aria-hidden="true" />
+                )}
                 <span>{t.text}</span>
               </div>
             ))}

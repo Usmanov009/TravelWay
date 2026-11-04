@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_provider.dart';
 import '../models/hot_deal.dart';
 import '../models/tour_package.dart';
@@ -63,14 +65,14 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFB91C1C), Color(0xFFFF5B00)],
+                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFF5B00).withOpacity(0.3),
+                      color: const Color(0xFF4F46E5).withOpacity(0.22),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                     ),
@@ -83,7 +85,10 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black38,
                             borderRadius: BorderRadius.circular(20),
@@ -91,7 +96,11 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('🔥', style: TextStyle(fontSize: 12)),
+                              Icon(
+                                Icons.local_fire_department,
+                                size: 13,
+                                color: Colors.deepOrangeAccent,
+                              ),
                               SizedBox(width: 4),
                               Text(
                                 'FLASH SALE',
@@ -108,7 +117,10 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
 
                         // Countdown Timer
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black45,
                             borderRadius: BorderRadius.circular(8),
@@ -186,7 +198,10 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                         GestureDetector(
                           onTap: () => provider.loadHotDeals(),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white24,
                               borderRadius: BorderRadius.circular(8),
@@ -200,7 +215,9 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  provider.isLoadingHotDeals ? 'Yuklanmoqda...' : 'Yangilash',
+                                  provider.isLoadingHotDeals
+                                      ? 'Yuklanmoqda...'
+                                      : 'Yangilash',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -222,7 +239,9 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
               if (provider.isLoadingHotDeals)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppTheme.primary),
+                  ),
                 )
               else if (provider.hotDeals.isEmpty)
                 Container(
@@ -230,9 +249,16 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   alignment: Alignment.center,
                   child: const Column(
                     children: [
-                      Icon(Icons.local_fire_department, size: 48, color: AppTheme.textMuted),
+                      Icon(
+                        Icons.local_fire_department,
+                        size: 48,
+                        color: AppTheme.textMuted,
+                      ),
                       SizedBox(height: 10),
-                      Text('Hozircha qaynoq takliflar yo\'q', style: TextStyle(color: AppTheme.textSub, fontSize: 13)),
+                      Text(
+                        'Hozircha qaynoq takliflar yo\'q',
+                        style: TextStyle(color: AppTheme.textSub, fontSize: 13),
+                      ),
                     ],
                   ),
                 )
@@ -280,14 +306,19 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 height: 145,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(height: 145, color: AppTheme.subtleDark),
+                errorBuilder: (_, __, ___) =>
+                    Container(height: 145, color: AppTheme.subtleDark),
               ),
 
               Positioned.fill(
                 child: Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.black54, Colors.transparent, Colors.black87],
+                      colors: [
+                        Colors.black54,
+                        Colors.transparent,
+                        Colors.black87,
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -300,16 +331,25 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 top: 10,
                 left: 10,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red[700],
                     borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 4)],
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black38, blurRadius: 4),
+                    ],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('🔥', style: TextStyle(fontSize: 10)),
+                      const Icon(
+                        Icons.local_fire_department,
+                        size: 11,
+                        color: Colors.deepOrangeAccent,
+                      ),
                       const SizedBox(width: 3),
                       Text(
                         '${deal.discount} FLASH',
@@ -329,20 +369,34 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 top: 10,
                 right: 10,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black87,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.red.withOpacity(0.4)),
                   ),
-                  child: Text(
-                    '⏳ ${deal.timeLeft}',
-                    style: const TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 10,
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.hourglass_bottom,
+                        size: 12,
+                        color: Colors.redAccent,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        deal.timeLeft,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -373,12 +427,19 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(Icons.location_on, size: 12, color: AppTheme.primary),
+                              const Icon(
+                                Icons.location_on,
+                                size: 12,
+                                color: AppTheme.primary,
+                              ),
                               const SizedBox(width: 3),
                               Expanded(
                                 child: Text(
                                   deal.location,
-                                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 10,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -390,14 +451,32 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                     ),
                     if (deal.checkinDate.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.accentGreen.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
-                          '📅 ${deal.checkinDate}',
-                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              deal.checkinDate,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],
@@ -417,11 +496,15 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   children: [
                     Row(
                       children: [
-                        const Text('⚡', style: TextStyle(fontSize: 12)),
+                        const Icon(Icons.bolt, size: 14, color: Colors.amber),
                         const SizedBox(width: 4),
                         Text(
                           deal.freeSeats,
-                          style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.amber,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -454,7 +537,10 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
 
                 // Flight bar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.subtleDark,
                     borderRadius: BorderRadius.circular(8),
@@ -462,12 +548,19 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.flight, size: 13, color: AppTheme.accentSky),
+                      const Icon(
+                        Icons.flight,
+                        size: 13,
+                        color: AppTheme.accentSky,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           deal.flight,
-                          style: const TextStyle(fontSize: 10, color: AppTheme.textSub),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textSub,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -475,7 +568,11 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                       const SizedBox(width: 6),
                       const Text(
                         'Kafolatlangan',
-                        style: TextStyle(color: AppTheme.accentSky, fontSize: 10, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: AppTheme.accentSky,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -496,19 +593,31 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                             nights: '5-7 kecha',
                             flight: deal.flight,
                             price: deal.priceNumeric,
-                            oldPrice: int.tryParse(deal.oldPrice.replaceAll(RegExp(r'\D'), '')) ?? (deal.priceNumeric + 150),
+                            oldPrice:
+                                int.tryParse(
+                                  deal.oldPrice.replaceAll(RegExp(r'\D'), ''),
+                                ) ??
+                                (deal.priceNumeric + 150),
                             img: deal.img,
                             country: deal.location,
                             resort: deal.location,
                             kompasOnlineUrl: deal.kompasOnlineUrl,
                           );
-                          showDialog(context: context, builder: (_) => BookingDialog(tour: tour));
+                          showDialog(
+                            context: context,
+                            builder: (_) => BookingDialog(tour: tour),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                        child: const Text(
+                          'Band qilish',
+                          style: TextStyle(fontSize: 11),
+                        ),
                       ),
                     ),
                   ],

@@ -30,7 +30,9 @@ import {
   ChevronRight,
   Info,
   Lock,
-  HeartHandshake
+  HeartHandshake,
+  Bus,
+  Hotel
 } from 'lucide-react';
 
 interface TourBookingPageProps {
@@ -121,20 +123,20 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
         adultsCount,
         childrenCount
       });
-      onShowToast(`"${tour.title}" turi muvaffaqiyatli bron qilindi! 🎉`, 'success');
+      onShowToast(`"${tour.title}" turi muvaffaqiyatli bron qilindi!`, 'success');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const copySmetaToClipboard = () => {
-    const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI VA SMETASI\n--------------------------------\n🌴 Mehmonxona: ${tour.title}\n📍 Manzil: ${tour.location} (${tour.resort || ''})\n✈️ Reys: ${tour.flightNumber || tour.flight} (${tour.airline || "O'zbekiston Havo Yo'llari"})\n📅 Jo'nash sanasi: ${tour.departureDate || 'Yaqin kunlarda'}\n🌙 Davomiyligi: ${parsedNights} kecha / ${parsedNights + 1} kun\n👥 Sayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\n👤 Buyurtmachi: ${leadName || 'Mijoz'}\n📞 Telefon: ${leadPhone}\n🪪 Pasport: ${leadPassport || 'Kiritilmagan'}\n💰 Yakuniy narx: $${finalPackagePrice} (~${uzsEstimate.toLocaleString()} UZS)\n🆔 Turoperator kodi: ${tour.kompasTourCode || 'SH-UZ-9021'}\n--------------------------------\nSayrHub bilan qulay va xavfsiz sayohat!`;
+    const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI VA SMETASI\n--------------------------------\nMehmonxona: ${tour.title}\nManzil: ${tour.location} (${tour.resort || ''})\nReys: ${tour.flightNumber || tour.flight} (${tour.airline || "O'zbekiston Havo Yo'llari"})\nJo'nash sanasi: ${tour.departureDate || 'Yaqin kunlarda'}\nDavomiyligi: ${parsedNights} kecha / ${parsedNights + 1} kun\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nBuyurtmachi: ${leadName || 'Mijoz'}\nTelefon: ${leadPhone}\nPasport: ${leadPassport || 'Kiritilmagan'}\nYakuniy narx: $${finalPackagePrice} (~${uzsEstimate.toLocaleString()} UZS)\nTuroperator kodi: ${tour.kompasTourCode || 'SH-UZ-9021'}\n--------------------------------\nSayrHub bilan qulay va xavfsiz sayohat!`;
     navigator.clipboard.writeText(smeta);
-    onShowToast("Tur hisob-kitobi va smetasi nusxalandi! 📋", "success");
+    onShowToast("Tur hisob-kitobi va smetasi nusxalandi!", "success");
   };
 
   const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-    `Assalomu alaykum! SayrHub orqali ushbu turni bron qilish bo'yicha savolim bor edi:\n\n🌴 Mehmonxona: ${tour.title}\n📍 Manzil: ${tour.location}\n✈️ Reys: ${tour.flightNumber || tour.flight}\n🌙 Muddat: ${tour.nights}\n👥 Sayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\n👤 Ism: ${leadName}\n💵 Narx: $${finalPackagePrice}\n🆔 Kod: ${tour.kompasTourCode || 'SH-TR'}`
+    `Assalomu alaykum! SayrHub orqali ushbu turni bron qilish bo'yicha savolim bor edi:\n\nMehmonxona: ${tour.title}\nManzil: ${tour.location}\nReys: ${tour.flightNumber || tour.flight}\nMuddat: ${tour.nights}\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nIsm: ${leadName}\nNarx: $${finalPackagePrice}\nKod: ${tour.kompasTourCode || 'SH-TR'}`
   )}`;
 
   return (
@@ -272,7 +274,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
             <div className="p-3 rounded-xl border border-border bg-muted/40 flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-card-foreground">🧑 Katta yoshdagilar</span>
+                  <span className="text-xs font-bold text-card-foreground inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Katta yoshdagilar</span>
                   <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-sky-500/10 text-sky-600 dark:text-sky-400 border-none">
                     12+ yosh
                   </Badge>
@@ -326,7 +328,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
             <div className="p-3 rounded-xl border border-border bg-muted/40 flex items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-card-foreground">👶 Yosh bolalar</span>
+                  <span className="text-xs font-bold text-card-foreground inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Yosh bolalar</span>
                   <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-none">
                     0-11 yosh
                   </Badge>
@@ -520,15 +522,15 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               {[
-                { title: 'To\'g\'ridan-to\'g\'ri aviaparvoz (Borish & Qaytish)', icon: '✈️' },
-                { title: 'Aeroport — Mehmonxona — Aeroport transferi', icon: '🚐' },
-                { title: `${tour.title} mehmonxonasida ${parsedNights} kecha`, icon: '🏨' },
-                { title: `${tour.mealType || 'AI'} — Barcha ovqatlanish va ichimliklar`, icon: '🍽️' },
-                { title: 'Xalqaro tibbiy sug\'urta polisi ($30,000)', icon: '🛡️' },
-                { title: '24/7 SayrHub kuratori va gid hamrohligi', icon: '🧑‍💼' }
+                { title: 'To\'g\'ridan-to\'g\'ri aviaparvoz (Borish & Qaytish)', icon: <Plane className="w-4 h-4 text-primary shrink-0" /> },
+                { title: 'Aeroport — Mehmonxona — Aeroport transferi', icon: <Bus className="w-4 h-4 text-primary shrink-0" /> },
+                { title: `${tour.title} mehmonxonasida ${parsedNights} kecha`, icon: <Hotel className="w-4 h-4 text-primary shrink-0" /> },
+                { title: `${tour.mealType || 'AI'} — Barcha ovqatlanish va ichimliklar`, icon: <Utensils className="w-4 h-4 text-primary shrink-0" /> },
+                { title: 'Xalqaro tibbiy sug\'urta polisi ($30,000)', icon: <ShieldCheck className="w-4 h-4 text-primary shrink-0" /> },
+                { title: '24/7 SayrHub kuratori va gid hamrohligi', icon: <Users className="w-4 h-4 text-primary shrink-0" /> }
               ].map((inc, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-muted/40 border border-border">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  {inc.icon}
                   <span className="text-card-foreground font-medium text-[11px]">{inc.title}</span>
                 </div>
               ))}
@@ -697,4 +699,3 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
     </div>
   );
 };
-

@@ -7,6 +7,7 @@ import {
   InfoWindow
 } from '@vis.gl/react-google-maps';
 import { TourPackage } from '../types';
+import { Compass, Gem, Globe2, Landmark, Map as MapIcon, MapPin, Satellite, Waves } from 'lucide-react';
 
 export const DESTINATION_COORDINATES: Record<string, { lat: number; lng: number; beachDistance?: string; airportDistance?: string }> = {
   'kmp-ayt-01': { lat: 36.8486, lng: 31.0967, beachDistance: "0 metr (Birinchi qatorda)", airportDistance: "35 km (AYT)" },
@@ -76,7 +77,7 @@ export const SingleTourMap: React.FC<SingleTourMapProps> = ({ tour, height = '22
           borderColor: 'var(--tw-border)'
         }}
       >
-        <span className="text-2xl mb-1">🗺️</span>
+        <MapIcon className="w-6 h-6 mb-1 text-primary" />
         <p className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>Google Xarita</p>
         <p className="text-[10px] mt-0.5" style={{ color: 'var(--tw-text-sub)' }}>
           {tour.location}
@@ -170,7 +171,7 @@ export const SingleTourMap: React.FC<SingleTourMapProps> = ({ tour, height = '22
               }}
               title="Xarita / Sun'iy yo'ldosh ko'rinishi"
             >
-              {mapType === 'roadmap' ? '🛰️ Sun\'iy yo\'ldosh' : '🗺️ Standart'}
+              <span className="inline-flex items-center gap-1">{mapType === 'roadmap' ? <><Satellite className="w-3 h-3" /> Sun'iy yo'ldosh</> : <><MapIcon className="w-3 h-3" /> Standart</>}</span>
             </button>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`}
@@ -184,7 +185,7 @@ export const SingleTourMap: React.FC<SingleTourMapProps> = ({ tour, height = '22
               }}
               title="Google Maps marshrut"
             >
-              <span>🧭 Yo'l</span>
+              <span className="inline-flex items-center gap-1"><Compass className="w-3 h-3" /> Yo'l</span>
             </a>
           </div>
         </div>
@@ -201,12 +202,12 @@ export const SingleTourMap: React.FC<SingleTourMapProps> = ({ tour, height = '22
           >
             {coords.beachDistance && (
               <span className="flex items-center gap-1 truncate font-medium">
-                🏖️ <span style={{ color: 'var(--tw-text-main)' }}>{coords.beachDistance}</span>
+                <Waves className="w-3 h-3 shrink-0" /> <span style={{ color: 'var(--tw-text-main)' }}>{coords.beachDistance}</span>
               </span>
             )}
             {coords.airportDistance && (
               <span className="flex items-center gap-1 truncate font-medium ml-auto">
-                ✈️ <span style={{ color: 'var(--tw-text-main)' }}>{coords.airportDistance}</span>
+                <MapPin className="w-3 h-3 shrink-0" /> <span style={{ color: 'var(--tw-text-main)' }}>{coords.airportDistance}</span>
               </span>
             )}
           </div>
@@ -277,7 +278,7 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
               color: 'var(--tw-accent)'
             }}
           >
-            🗺️
+            <MapIcon className="w-4 h-4" />
           </div>
           <div>
             <h3 className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>
@@ -300,7 +301,7 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
               color: 'var(--tw-text-main)'
             }}
           >
-            {mapType === 'roadmap' ? '🛰️ Sputnik' : '🗺️ Xarita'}
+            <span className="inline-flex items-center gap-1">{mapType === 'roadmap' ? <><Satellite className="w-3 h-3" /> Sputnik</> : <><MapIcon className="w-3 h-3" /> Xarita</>}</span>
           </button>
           {onClose && (
             <button
@@ -328,12 +329,13 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
         }}
       >
         {[
-          { id: 'all', label: 'Barchasi' },
-          { id: 'beach', label: '🏖️ Plyaj' },
-          { id: 'luxury', label: '💎 VIP Luxury' },
-          { id: 'culture', label: '🕌 Madaniyat' }
+          { id: 'all', label: 'Barchasi', Icon: Globe2 },
+          { id: 'beach', label: 'Plyaj', Icon: Waves },
+          { id: 'luxury', label: 'VIP Luxury', Icon: Gem },
+          { id: 'culture', label: 'Madaniyat', Icon: Landmark }
         ].map((f) => {
           const isSelected = filterCategory === f.id;
+          const Icon = f.Icon;
           return (
             <button
               key={f.id}
@@ -346,7 +348,7 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
                 borderColor: isSelected ? 'var(--tw-accent)' : 'var(--tw-border)'
               }}
             >
-              {f.label}
+              <span className="inline-flex items-center gap-1"><Icon className="w-3 h-3" /> {f.label}</span>
             </button>
           );
         })}
@@ -422,7 +424,7 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
                   {activeTour.title}
                 </h4>
                 <p className="text-[10px] truncate" style={{ color: 'var(--tw-text-sub)' }}>
-                  📍 {activeTour.location} • {activeTour.nights}
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" /> {activeTour.location} • {activeTour.nights}</span>
                 </p>
                 <div className="flex items-center gap-2 mt-1.5">
                   <button
@@ -448,7 +450,7 @@ export const AllToursInteractiveMap: React.FC<AllToursInteractiveMapProps> = ({
                     }}
                     title="Google Maps yo'nalish"
                   >
-                    🧭 Yo'l
+                    <span className="inline-flex items-center gap-1"><Compass className="w-3 h-3" /> Yo'l</span>
                   </a>
                 </div>
               </div>

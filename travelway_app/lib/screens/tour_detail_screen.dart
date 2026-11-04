@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
 import '../widgets/booking_dialog.dart';
@@ -23,8 +24,15 @@ class TourDetailScreen extends StatelessWidget {
             leading: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
@@ -32,8 +40,15 @@ class TourDetailScreen extends StatelessWidget {
               IconButton(
                 icon: Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.notifications_active_outlined, color: AppTheme.accentGold, size: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.black45,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.notifications_active_outlined,
+                    color: AppTheme.accentGold,
+                    size: 20,
+                  ),
                 ),
                 onPressed: () {
                   showDialog(
@@ -53,7 +68,13 @@ class TourDetailScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       color: AppTheme.surfaceDark,
-                      child: const Center(child: Icon(Icons.hotel, size: 48, color: AppTheme.textMuted)),
+                      child: const Center(
+                        child: Icon(
+                          Icons.hotel,
+                          size: 48,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
                     ),
                   ),
                   Container(
@@ -61,7 +82,11 @@ class TourDetailScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.black38, Colors.transparent, AppTheme.bgDark],
+                        colors: [
+                          Colors.black38,
+                          Colors.transparent,
+                          AppTheme.bgDark,
+                        ],
                         stops: const [0.0, 0.5, 1.0],
                       ),
                     ),
@@ -74,14 +99,21 @@ class TourDetailScreen extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primary,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               tour.tag,
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -89,7 +121,10 @@ class TourDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black54,
                             borderRadius: BorderRadius.circular(8),
@@ -97,15 +132,28 @@ class TourDetailScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.star, color: AppTheme.accentGold, size: 14),
+                              const Icon(
+                                Icons.star,
+                                color: AppTheme.accentGold,
+                                size: 14,
+                              ),
                               const SizedBox(width: 4),
-                              Text('${tour.rating}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              Text(
+                                '${tour.rating}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.accentGreen.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
@@ -114,9 +162,20 @@ class TourDetailScreen extends StatelessWidget {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.verified, color: AppTheme.accentGreen, size: 14),
+                              Icon(
+                                Icons.verified,
+                                color: AppTheme.accentGreen,
+                                size: 14,
+                              ),
                               SizedBox(width: 4),
-                              Text('Kafolatlangan narx', style: TextStyle(fontSize: 10, color: AppTheme.accentGreen, fontWeight: FontWeight.bold)),
+                              Text(
+                                'Kafolatlangan narx',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppTheme.accentGreen,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -137,14 +196,27 @@ class TourDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     tour.title,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, color: AppTheme.primary, size: 16),
+                      const Icon(
+                        Icons.location_on,
+                        color: AppTheme.primary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
-                      Text(tour.location, style: const TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                      Text(
+                        tour.location,
+                        style: const TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -152,11 +224,23 @@ class TourDetailScreen extends StatelessWidget {
                   // Key Highlights Row
                   Row(
                     children: [
-                      _buildInfoTile(Icons.nights_stay_outlined, 'Davomiyligi', tour.nights),
+                      _buildInfoTile(
+                        Icons.nights_stay_outlined,
+                        'Davomiyligi',
+                        tour.nights,
+                      ),
                       const SizedBox(width: 10),
-                      _buildInfoTile(Icons.flight_takeoff, 'Aviaparvoz', tour.airline),
+                      _buildInfoTile(
+                        Icons.flight_takeoff,
+                        'Aviaparvoz',
+                        tour.airline,
+                      ),
                       const SizedBox(width: 10),
-                      _buildInfoTile(Icons.restaurant_outlined, 'Ovqatlanish', tour.mealType),
+                      _buildInfoTile(
+                        Icons.restaurant_outlined,
+                        'Ovqatlanish',
+                        tour.mealType,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -167,7 +251,9 @@ class TourDetailScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppTheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.primary.withOpacity(0.25)),
+                      border: Border.all(
+                        color: AppTheme.primary.withOpacity(0.25),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -177,7 +263,11 @@ class TourDetailScreen extends StatelessWidget {
                             color: AppTheme.primary.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.corporate_fare, color: AppTheme.primary, size: 22),
+                          child: const Icon(
+                            Icons.corporate_fare,
+                            color: AppTheme.primary,
+                            size: 22,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -186,11 +276,20 @@ class TourDetailScreen extends StatelessWidget {
                             children: [
                               const Text(
                                 'Bosh Turoperator:',
-                                style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+                                style: TextStyle(
+                                  color: AppTheme.textMuted,
+                                  fontSize: 10,
+                                ),
                               ),
                               Text(
-                                tour.tourOperator.isNotEmpty ? tour.tourOperator : 'Kompas Tour',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                                tour.tourOperator.isNotEmpty
+                                    ? tour.tourOperator
+                                    : 'Kompas Tour',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: AppTheme.primary,
+                                ),
                               ),
                             ],
                           ),
@@ -200,11 +299,18 @@ class TourDetailScreen extends StatelessWidget {
                           children: [
                             const Text(
                               'Bronlash Agentligi:',
-                              style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
+                              style: TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 10,
+                              ),
                             ),
                             Text(
                               '${tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi'} (+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%)',
-                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: AppTheme.accentGreen),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 12,
+                                color: AppTheme.accentGreen,
+                              ),
                             ),
                           ],
                         ),
@@ -215,7 +321,10 @@ class TourDetailScreen extends StatelessWidget {
 
                   // Price Transparency Card
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceDark,
                       borderRadius: BorderRadius.circular(16),
@@ -227,10 +336,19 @@ class TourDetailScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Asl turoperator narxi:', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                            const Text(
+                              'Asl turoperator narxi:',
+                              style: TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 11,
+                              ),
+                            ),
                             Text(
                               '\$${tour.originalCostPrice ?? (tour.price / (1 + tour.markupValue / 100)).round()}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -240,20 +358,47 @@ class TourDetailScreen extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                const Text('💼 Agentlik xizmat komissiyasi ', style: TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600)),
+                                const Icon(
+                                  Icons.work_outline,
+                                  size: 13,
+                                  color: AppTheme.primary,
+                                ),
+                                const SizedBox(width: 3),
+                                const Text(
+                                  'Agentlik xizmat komissiyasi ',
+                                  style: TextStyle(
+                                    color: AppTheme.primary,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 1,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppTheme.primary.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: Text('+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%', style: const TextStyle(color: AppTheme.primary, fontSize: 9, fontWeight: FontWeight.bold)),
+                                  child: Text(
+                                    '+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%',
+                                    style: const TextStyle(
+                                      color: AppTheme.primary,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                             Text(
                               '+\$${tour.price - (tour.originalCostPrice ?? (tour.price / (1 + tour.markupValue / 100)).round())}',
-                              style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -264,10 +409,21 @@ class TourDetailScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Mijoz uchun to\'liq narx:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.textMuted)),
+                            const Text(
+                              'Mijoz uchun to\'liq narx:',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: AppTheme.textMuted,
+                              ),
+                            ),
                             Text(
                               '\$${tour.price}',
-                              style: const TextStyle(color: AppTheme.accentGreen, fontWeight: FontWeight.w900, fontSize: 14),
+                              style: const TextStyle(
+                                color: AppTheme.accentGreen,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -277,7 +433,10 @@ class TourDetailScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Flight Information
-                  const Text('Parvoz va Tashuvchi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Parvoz va Tashuvchi',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(14),
@@ -296,25 +455,50 @@ class TourDetailScreen extends StatelessWidget {
                                 color: AppTheme.primary.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.airplanemode_active, color: AppTheme.primary, size: 20),
+                              child: const Icon(
+                                Icons.airplanemode_active,
+                                color: AppTheme.primary,
+                                size: 20,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(tour.flight, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                  Text('${tour.departureCity} ➔ ${tour.resort}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                                  Text(
+                                    tour.flight,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${tour.departureCity} ➔ ${tour.resort}',
+                                    style: const TextStyle(
+                                      color: AppTheme.textMuted,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.cardDark,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Text('To\'g\'ridan-to\'g\'ri', style: TextStyle(fontSize: 10, color: AppTheme.secondary)),
+                              child: const Text(
+                                'To\'g\'ridan-to\'g\'ri',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppTheme.secondary,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -323,8 +507,20 @@ class TourDetailScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Uchish sanasi:', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
-                              Text(tour.departureDate, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              const Text(
+                                'Uchish sanasi:',
+                                style: TextStyle(
+                                  color: AppTheme.textMuted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                tour.departureDate,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -334,7 +530,10 @@ class TourDetailScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   // Tour Package Inclusions
-                  const Text('Turpaketga nimalar kiritilgan?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Turpaketga nimalar kiritilgan?',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(14),
@@ -345,11 +544,21 @@ class TourDetailScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        _buildInclusionItem('To\'g\'ridan-to\'g\'ri charter aviareys (${tour.airline})'),
-                        _buildInclusionItem('Aeroport — Mehmonxona — Aeroport qulay transferi'),
-                        _buildInclusionItem('${tour.nightsCount} kecha ${tour.title} mehmonxonasida turar joy'),
-                        _buildInclusionItem('${tour.tag} (Ovqatlanish va barcha xizmatlar)'),
-                        _buildInclusionItem('Tibbiy sug\'urta (\$30,000 qoplamali)'),
+                        _buildInclusionItem(
+                          'To\'g\'ridan-to\'g\'ri charter aviareys (${tour.airline})',
+                        ),
+                        _buildInclusionItem(
+                          'Aeroport — Mehmonxona — Aeroport qulay transferi',
+                        ),
+                        _buildInclusionItem(
+                          '${tour.nightsCount} kecha ${tour.title} mehmonxonasida turar joy',
+                        ),
+                        _buildInclusionItem(
+                          '${tour.tag} (Ovqatlanish va barcha xizmatlar)',
+                        ),
+                        _buildInclusionItem(
+                          'Tibbiy sug\'urta (\$30,000 qoplamali)',
+                        ),
                         _buildInclusionItem('Rasmiy vakil va gid xizmati'),
                       ],
                     ),
@@ -367,7 +576,9 @@ class TourDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
           color: AppTheme.surfaceDark,
-          border: const Border(top: BorderSide(color: AppTheme.borderDark, width: 1)),
+          border: const Border(
+            top: BorderSide(color: AppTheme.borderDark, width: 1),
+          ),
         ),
         child: SafeArea(
           child: Row(
@@ -377,18 +588,29 @@ class TourDetailScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Umumiy narx (1 kishi):', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                    const Text(
+                      'Umumiy narx (1 kishi):',
+                      style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                    ),
                     Row(
                       children: [
                         Text(
                           '\$${tour.price}',
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
                         ),
                         if (tour.oldPrice != null) ...[
                           const SizedBox(width: 6),
                           Text(
                             '\$${tour.oldPrice}',
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, decoration: TextDecoration.lineThrough),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textMuted,
+                              decoration: TextDecoration.lineThrough,
+                            ),
                           ),
                         ],
                       ],
@@ -405,10 +627,16 @@ class TourDetailScreen extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 13,
+                  ),
                   backgroundColor: AppTheme.primary,
                 ),
-                child: const Text('Band qilish', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Band qilish',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -430,9 +658,18 @@ class TourDetailScreen extends StatelessWidget {
           children: [
             Icon(icon, color: AppTheme.secondary, size: 18),
             const SizedBox(height: 6),
-            Text(title, style: const TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+            Text(
+              title,
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 10),
+            ),
             const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              subtitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
@@ -445,7 +682,11 @@ class TourDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle_rounded, color: AppTheme.accentGreen, size: 16),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: AppTheme.accentGreen,
+            size: 16,
+          ),
           const SizedBox(width: 8),
           Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
         ],

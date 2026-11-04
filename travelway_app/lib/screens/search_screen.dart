@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_provider.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
@@ -20,7 +21,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Filters
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _nightsController = TextEditingController(text: '7');
+  final TextEditingController _nightsController = TextEditingController(
+    text: '7',
+  );
 
   // Combo Filters
   final TextEditingController _comboSearchController = TextEditingController();
@@ -28,33 +31,33 @@ class _SearchScreenState extends State<SearchScreen> {
   String _comboPriceFilter = 'ALL'; // 'ALL', 'CHEAP', 'LUXURY'
 
   final List<Map<String, String>> _countries = const [
-    {'code': 'ALL', 'name': 'Barcha mamlakatlar', 'flag': '🌍'},
-    {'code': 'TR', 'name': 'Turkiya', 'flag': '🇹🇷'},
-    {'code': 'EG', 'name': 'Misr', 'flag': '🇪🇬'},
-    {'code': 'AE', 'name': 'BAA', 'flag': '🇦🇪'},
-    {'code': 'TH', 'name': 'Tailand', 'flag': '🇹🇭'},
-    {'code': 'VN', 'name': 'Vetnam', 'flag': '🇻🇳'},
-    {'code': 'CN', 'name': 'Xitoy', 'flag': '🇨🇳'},
-    {'code': 'MV', 'name': 'Maldiv', 'flag': '🇲🇻'},
-    {'code': 'ID', 'name': 'Indoneziya', 'flag': '🇮🇩'},
-    {'code': 'GE', 'name': 'Gruziya', 'flag': '🇬🇪'},
-    {'code': 'LK', 'name': 'Shri-Lanka', 'flag': '🇱🇰'},
-    {'code': 'MY', 'name': 'Malayziya', 'flag': '🇲🇾'},
-    {'code': 'QA', 'name': 'Qatar', 'flag': '🇶🇦'},
-    {'code': 'SA', 'name': 'Saudiya Arabistoni', 'flag': '🇸🇦'},
-    {'code': 'OM', 'name': 'Ummon', 'flag': '🇴🇲'},
-    {'code': 'AZ', 'name': 'Ozarbayjon', 'flag': '🇦🇿'},
-    {'code': 'CY', 'name': 'Kipr', 'flag': '🇨🇾'},
-    {'code': 'ME', 'name': 'Chernogoriya', 'flag': '🇲🇪'},
-    {'code': 'IT', 'name': 'Italiya', 'flag': '🇮🇹'},
-    {'code': 'ES', 'name': 'Ispaniya', 'flag': '🇪🇸'},
-    {'code': 'FR', 'name': 'Fransiya', 'flag': '🇫🇷'},
-    {'code': 'CZ', 'name': 'Chexiya', 'flag': '🇨🇿'},
-    {'code': 'JP', 'name': 'Yaponiya', 'flag': '🇯🇵'},
-    {'code': 'KR', 'name': 'Janubiy Koreya', 'flag': '🇰🇷'},
-    {'code': 'SC', 'name': 'Seyshel', 'flag': '🇸🇨'},
-    {'code': 'MU', 'name': 'Mavrikiy', 'flag': '🇲🇺'},
-    {'code': 'IN', 'name': 'Hindiston (Goa)', 'flag': '🇮🇳'},
+    {'code': 'ALL', 'name': 'Barcha mamlakatlar'},
+    {'code': 'TR', 'name': 'Turkiya'},
+    {'code': 'EG', 'name': 'Misr'},
+    {'code': 'AE', 'name': 'BAA'},
+    {'code': 'TH', 'name': 'Tailand'},
+    {'code': 'VN', 'name': 'Vetnam'},
+    {'code': 'CN', 'name': 'Xitoy'},
+    {'code': 'MV', 'name': 'Maldiv'},
+    {'code': 'ID', 'name': 'Indoneziya'},
+    {'code': 'GE', 'name': 'Gruziya'},
+    {'code': 'LK', 'name': 'Shri-Lanka'},
+    {'code': 'MY', 'name': 'Malayziya'},
+    {'code': 'QA', 'name': 'Qatar'},
+    {'code': 'SA', 'name': 'Saudiya Arabistoni'},
+    {'code': 'OM', 'name': 'Ummon'},
+    {'code': 'AZ', 'name': 'Ozarbayjon'},
+    {'code': 'CY', 'name': 'Kipr'},
+    {'code': 'ME', 'name': 'Chernogoriya'},
+    {'code': 'IT', 'name': 'Italiya'},
+    {'code': 'ES', 'name': 'Ispaniya'},
+    {'code': 'FR', 'name': 'Fransiya'},
+    {'code': 'CZ', 'name': 'Chexiya'},
+    {'code': 'JP', 'name': 'Yaponiya'},
+    {'code': 'KR', 'name': 'Janubiy Koreya'},
+    {'code': 'SC', 'name': 'Seyshel'},
+    {'code': 'MU', 'name': 'Mavrikiy'},
+    {'code': 'IN', 'name': 'Hindiston (Goa)'},
   ];
 
   @override
@@ -65,7 +68,10 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  void _openSearchableCountryPicker(BuildContext context, AppProvider provider) {
+  void _openSearchableCountryPicker(
+    BuildContext context,
+    AppProvider provider,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -80,7 +86,7 @@ class _SearchScreenState extends State<SearchScreen> {
             final filtered = _countries.where((c) {
               if (query.isEmpty) return true;
               return c['name']!.toLowerCase().contains(query.toLowerCase()) ||
-                     c['code']!.toLowerCase().contains(query.toLowerCase());
+                  c['code']!.toLowerCase().contains(query.toLowerCase());
             }).toList();
 
             return Container(
@@ -100,38 +106,64 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text(
-                    '🌍 Davlatni tanlang yoki qidiring',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textMain,
-                    ),
+                  const Row(
+                    children: [
+                      Icon(Icons.public, size: 20, color: AppTheme.primary),
+                      SizedBox(width: 8),
+                      Text(
+                        'Davlatni tanlang yoki qidiring',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textMain,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   // Search Input (Type bo'lsin)
                   TextField(
                     autofocus: true,
-                    style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
+                    style: const TextStyle(
+                      color: AppTheme.textMain,
+                      fontSize: 13,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Davlat nomini yozing (masalan: Turkiya)...',
-                      hintStyle: const TextStyle(color: AppTheme.textSub, fontSize: 13),
-                      prefixIcon: const Icon(Icons.search, color: AppTheme.primary, size: 20),
+                      hintStyle: const TextStyle(
+                        color: AppTheme.textSub,
+                        fontSize: 13,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: AppTheme.primary,
+                        size: 20,
+                      ),
                       filled: true,
                       fillColor: AppTheme.subtleDark,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppTheme.borderDark),
+                        borderSide: const BorderSide(
+                          color: AppTheme.borderDark,
+                        ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppTheme.borderDark),
+                        borderSide: const BorderSide(
+                          color: AppTheme.borderDark,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: AppTheme.primary,
+                          width: 1.5,
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                     ),
                     onChanged: (val) {
                       setModalState(() => query = val);
@@ -142,23 +174,39 @@ class _SearchScreenState extends State<SearchScreen> {
                   Expanded(
                     child: ListView.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const Divider(color: AppTheme.borderDark, height: 1),
+                      separatorBuilder: (_, __) =>
+                          const Divider(color: AppTheme.borderDark, height: 1),
                       itemBuilder: (context, idx) {
                         final c = filtered[idx];
                         final isSel = provider.selectedCountry == c['code'];
                         return ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          leading: Text(c['flag']!, style: const TextStyle(fontSize: 22)),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          leading: const Icon(
+                            Icons.public,
+                            size: 22,
+                            color: AppTheme.primary,
+                          ),
                           title: Text(
                             c['name']!,
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                              color: isSel ? AppTheme.primary : AppTheme.textMain,
+                              fontWeight: isSel
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isSel
+                                  ? AppTheme.primary
+                                  : AppTheme.textMain,
                             ),
                           ),
                           trailing: isSel
-                              ? const Icon(Icons.check_circle, color: AppTheme.primary, size: 18)
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: AppTheme.primary,
+                                  size: 18,
+                                )
                               : null,
                           onTap: () {
                             provider.setCountry(c['code']!);
@@ -192,20 +240,88 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Top 4-Service Segment Buttons (Exact Web Match)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withOpacity(0.18),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
+                          color: Colors.white70,
+                          size: 15,
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          'SAYRHUB TRAVEL',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Keyingi manzilingiz qayer?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 21,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Jonli turlar, aviachiptalar va mehmonxonalar — bir joyda.',
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Service mode selection
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceDark,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   border: Border.all(color: AppTheme.borderDark),
                 ),
                 child: Row(
                   children: [
-                    _buildSegmentButton('packages', '🏖️', 'Paketlar'),
-                    _buildSegmentButton('combo', '🔄', 'Combo'),
-                    _buildSegmentButton('flights', '✈️', 'Biletlar'),
-                    _buildSegmentButton('hotels', '🏨', 'Mehmonxona'),
+                    _buildSegmentButton(
+                      'packages',
+                      Icons.beach_access,
+                      'Paketlar',
+                    ),
+                    _buildSegmentButton('combo', Icons.sync, 'Combo'),
+                    _buildSegmentButton(
+                      'flights',
+                      Icons.flight_takeoff,
+                      'Biletlar',
+                    ),
+                    _buildSegmentButton('hotels', Icons.hotel, 'Mehmonxona'),
                   ],
                 ),
               ),
@@ -227,7 +343,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildSegmentButton(String mode, String icon, String label) {
+  Widget _buildSegmentButton(String mode, IconData icon, String label) {
     final isSelected = _serviceMode == mode;
 
     return Expanded(
@@ -243,7 +359,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(icon, style: const TextStyle(fontSize: 14)),
+              Icon(icon, size: 16),
               const SizedBox(height: 2),
               Text(
                 label,
@@ -285,7 +401,23 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🛫 Jo\'nash shahri', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.flight_takeoff,
+                              size: 14,
+                              color: AppTheme.textSub,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Jo\'nash shahri',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSub,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -299,10 +431,20 @@ class _SearchScreenState extends State<SearchScreen> {
                               value: provider.selectedDeparture,
                               isExpanded: true,
                               dropdownColor: AppTheme.surfaceDark,
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textMain,
+                              ),
                               items: const [
-                                DropdownMenuItem(value: '26', child: Text('Toshkent (TAS)')),
-                                DropdownMenuItem(value: '27', child: Text('Samarqand (SKD)')),
+                                DropdownMenuItem(
+                                  value: '26',
+                                  child: Text('Toshkent (TAS)'),
+                                ),
+                                DropdownMenuItem(
+                                  value: '27',
+                                  child: Text('Samarqand (SKD)'),
+                                ),
                               ],
                               onChanged: (val) {
                                 if (val != null) provider.setDeparture(val);
@@ -318,10 +460,29 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('🌙 Kunlar soni (Kechalar)', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                        const Row(
+                          children: [
+                            Icon(
+                              Icons.nights_stay,
+                              size: 14,
+                              color: AppTheme.textSub,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Kunlar soni (Kechalar)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppTheme.textSub,
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.subtleDark,
                             borderRadius: BorderRadius.circular(12),
@@ -331,7 +492,8 @@ class _SearchScreenState extends State<SearchScreen> {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  final cur = int.tryParse(_nightsController.text) ?? 7;
+                                  final cur =
+                                      int.tryParse(_nightsController.text) ?? 7;
                                   final next = cur > 1 ? cur - 1 : 1;
                                   _nightsController.text = next.toString();
                                   provider.setNightsCount(next);
@@ -344,7 +506,14 @@ class _SearchScreenState extends State<SearchScreen> {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Center(
-                                    child: Text('-', style: TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold, fontSize: 14)),
+                                    child: Text(
+                                      '-',
+                                      style: TextStyle(
+                                        color: AppTheme.textMain,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -353,13 +522,21 @@ class _SearchScreenState extends State<SearchScreen> {
                                   controller: _nightsController,
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textMain,
+                                  ),
                                   decoration: const InputDecoration(
                                     isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
                                     border: InputBorder.none,
                                     hintText: '7',
-                                    hintStyle: TextStyle(color: AppTheme.textSub),
+                                    hintStyle: TextStyle(
+                                      color: AppTheme.textSub,
+                                    ),
                                   ),
                                   onSubmitted: (val) {
                                     final n = int.tryParse(val);
@@ -367,11 +544,19 @@ class _SearchScreenState extends State<SearchScreen> {
                                   },
                                 ),
                               ),
-                              const Text('kun', style: TextStyle(fontSize: 10, color: AppTheme.textSub, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'kun',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppTheme.textSub,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               const SizedBox(width: 4),
                               GestureDetector(
                                 onTap: () {
-                                  final cur = int.tryParse(_nightsController.text) ?? 7;
+                                  final cur =
+                                      int.tryParse(_nightsController.text) ?? 7;
                                   final next = cur + 1;
                                   _nightsController.text = next.toString();
                                   provider.setNightsCount(next);
@@ -384,7 +569,14 @@ class _SearchScreenState extends State<SearchScreen> {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Center(
-                                    child: Text('+', style: TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold, fontSize: 14)),
+                                    child: Text(
+                                      '+',
+                                      style: TextStyle(
+                                        color: AppTheme.textMain,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -402,10 +594,27 @@ class _SearchScreenState extends State<SearchScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('🌍 Borish mamlakati (Select & Qidiruv)', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                  const Row(
+                    children: [
+                      Icon(Icons.public, size: 14, color: AppTheme.textSub),
+                      SizedBox(width: 4),
+                      Text(
+                        'Borish mamlakati (Select & Qidiruv)',
+                        style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+                      ),
+                    ],
+                  ),
                   GestureDetector(
-                    onTap: () => _openSearchableCountryPicker(context, provider),
-                    child: const Text('Barchasi ▾', style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                    onTap: () =>
+                        _openSearchableCountryPicker(context, provider),
+                    child: const Text(
+                      'Barchasi ▾',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -415,7 +624,10 @@ class _SearchScreenState extends State<SearchScreen> {
               GestureDetector(
                 onTap: () => _openSearchableCountryPicker(context, provider),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.subtleDark,
                     borderRadius: BorderRadius.circular(12),
@@ -423,12 +635,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Row(
                     children: [
-                      Text(
-                        _countries.firstWhere(
-                          (c) => c['code'] == provider.selectedCountry,
-                          orElse: () => _countries[1],
-                        )['flag']!,
-                        style: const TextStyle(fontSize: 16),
+                      const Icon(
+                        Icons.public,
+                        size: 18,
+                        color: AppTheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -437,12 +647,24 @@ class _SearchScreenState extends State<SearchScreen> {
                             (c) => c['code'] == provider.selectedCountry,
                             orElse: () => _countries[1],
                           )['name']!,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textMain,
+                          ),
                         ),
                       ),
-                      const Icon(Icons.search, size: 16, color: AppTheme.textSub),
+                      const Icon(
+                        Icons.search,
+                        size: 16,
+                        color: AppTheme.textSub,
+                      ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_drop_down, size: 18, color: AppTheme.textSub),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        size: 18,
+                        color: AppTheme.textSub,
+                      ),
                     ],
                   ),
                 ),
@@ -463,15 +685,26 @@ class _SearchScreenState extends State<SearchScreen> {
                     return GestureDetector(
                       onTap: () => provider.setCountry(c['code']!),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: isSel ? AppTheme.primary : AppTheme.subtleDark,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: isSel ? AppTheme.primary : AppTheme.borderDark),
+                          border: Border.all(
+                            color: isSel
+                                ? AppTheme.primary
+                                : AppTheme.borderDark,
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Text(c['flag']!, style: const TextStyle(fontSize: 14)),
+                            const Icon(
+                              Icons.public,
+                              size: 14,
+                              color: AppTheme.primary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               c['name']!,
@@ -496,7 +729,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
                 decoration: InputDecoration(
                   hintText: 'Shahar yoki mehmonxona qidirish...',
-                  prefixIcon: const Icon(Icons.search, size: 18, color: AppTheme.textMuted),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    size: 18,
+                    color: AppTheme.textMuted,
+                  ),
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear, size: 16),
@@ -531,7 +768,9 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: BoxDecoration(
                 color: AppTheme.accentGreen.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppTheme.accentGreen.withOpacity(0.3)),
+                border: Border.all(
+                  color: AppTheme.accentGreen.withOpacity(0.3),
+                ),
               ),
               child: const Row(
                 children: [
@@ -539,7 +778,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   SizedBox(width: 4),
                   Text(
                     'Rasmiy Turpaketlar',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.accentGreen,
+                    ),
                   ),
                 ],
               ),
@@ -557,7 +800,10 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   CircularProgressIndicator(color: AppTheme.primary),
                   SizedBox(height: 12),
-                  Text('Narxlar tekshirilmoqda...', style: TextStyle(color: AppTheme.textMuted, fontSize: 13)),
+                  Text(
+                    'Narxlar tekshirilmoqda...',
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                  ),
                 ],
               ),
             ),
@@ -570,7 +816,10 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 Icon(Icons.travel_explore, size: 48, color: AppTheme.textMuted),
                 SizedBox(height: 10),
-                Text('Ushbu filtr bo\'yicha turlar topilmadi', style: TextStyle(color: AppTheme.textSub, fontSize: 13)),
+                Text(
+                  'Ushbu filtr bo\'yicha turlar topilmadi',
+                  style: TextStyle(color: AppTheme.textSub, fontSize: 13),
+                ),
               ],
             ),
           )
@@ -589,7 +838,11 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildTourCard(BuildContext context, TourPackage tour, AppProvider provider) {
+  Widget _buildTourCard(
+    BuildContext context,
+    TourPackage tour,
+    AppProvider provider,
+  ) {
     final isFav = provider.isFavorite(tour.id);
 
     return Container(
@@ -620,7 +873,13 @@ class _SearchScreenState extends State<SearchScreen> {
                 errorBuilder: (_, __, ___) => Container(
                   height: 145,
                   color: AppTheme.subtleDark,
-                  child: const Center(child: Icon(Icons.apartment, size: 40, color: AppTheme.textMuted)),
+                  child: const Center(
+                    child: Icon(
+                      Icons.apartment,
+                      size: 40,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
                 ),
               ),
 
@@ -629,7 +888,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.black54, Colors.transparent, Colors.black87],
+                      colors: [
+                        Colors.black54,
+                        Colors.transparent,
+                        Colors.black87,
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -647,31 +910,50 @@ class _SearchScreenState extends State<SearchScreen> {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primary,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         tour.tag.toUpperCase(),
-                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     if (tour.kompasTourCode.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black87,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.accentGreen.withOpacity(0.4)),
+                          border: Border.all(
+                            color: AppTheme.accentGreen.withOpacity(0.4),
+                          ),
                         ),
                         child: Text(
                           tour.kompasTourCode,
-                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.accentGreen,
+                          ),
                         ),
                       ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.accentGreen,
                         borderRadius: BorderRadius.circular(8),
@@ -683,7 +965,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           SizedBox(width: 2),
                           Text(
                             'Kafolatlangan',
-                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
                           ),
                         ],
                       ),
@@ -698,7 +984,10 @@ class _SearchScreenState extends State<SearchScreen> {
                 right: 48,
                 child: GestureDetector(
                   onTap: () {
-                    showDialog(context: context, builder: (_) => PriceAlertDialog(tour: tour));
+                    showDialog(
+                      context: context,
+                      builder: (_) => PriceAlertDialog(tour: tour),
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(7),
@@ -707,7 +996,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white30),
                     ),
-                    child: const Icon(Icons.notifications_active_outlined, size: 16, color: Colors.amber),
+                    child: const Icon(
+                      Icons.notifications_active_outlined,
+                      size: 16,
+                      color: Colors.amber,
+                    ),
                   ),
                 ),
               ),
@@ -760,12 +1053,19 @@ class _SearchScreenState extends State<SearchScreen> {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(Icons.location_on, size: 12, color: AppTheme.primary),
+                              const Icon(
+                                Icons.location_on,
+                                size: 12,
+                                color: AppTheme.primary,
+                              ),
                               const SizedBox(width: 3),
                               Expanded(
                                 child: Text(
                                   tour.location,
-                                  style: const TextStyle(color: Colors.white70, fontSize: 10),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 10,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -778,7 +1078,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     Row(
                       children: List.generate(
                         5,
-                        (i) => const Icon(Icons.star, size: 12, color: Colors.amber),
+                        (i) => const Icon(
+                          Icons.star,
+                          size: 12,
+                          color: Colors.amber,
+                        ),
                       ),
                     ),
                   ],
@@ -794,7 +1098,10 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 // Flight bar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.subtleDark,
                     borderRadius: BorderRadius.circular(10),
@@ -802,19 +1109,30 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.flight_takeoff, size: 14, color: AppTheme.accentSky),
+                      const Icon(
+                        Icons.flight_takeoff,
+                        size: 14,
+                        color: AppTheme.accentSky,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           tour.flight,
-                          style: const TextStyle(fontSize: 10, color: AppTheme.textSub),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textSub,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const Text(
                         'Transfer ✓ Sug\'urta ✓',
-                        style: TextStyle(fontSize: 10, color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppTheme.accentGreen,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -823,11 +1141,16 @@ class _SearchScreenState extends State<SearchScreen> {
                 // Tour Operator & Agency Trust Info
                 Container(
                   margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                    border: Border.all(
+                      color: AppTheme.primary.withOpacity(0.2),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -835,22 +1158,40 @@ class _SearchScreenState extends State<SearchScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.corporate_fare, size: 13, color: AppTheme.primary),
+                          const Icon(
+                            Icons.corporate_fare,
+                            size: 13,
+                            color: AppTheme.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
-                            tour.tourOperator.isNotEmpty ? tour.tourOperator : 'Kompas Tour',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppTheme.primary),
+                            tour.tourOperator.isNotEmpty
+                                ? tour.tourOperator
+                                : 'Kompas Tour',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.primary,
+                            ),
                           ),
                         ],
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.shield_outlined, size: 12, color: AppTheme.accentGreen),
+                          const Icon(
+                            Icons.shield_outlined,
+                            size: 12,
+                            color: AppTheme.accentGreen,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${tour.agencyName.isNotEmpty ? tour.agencyName : 'SayrHub Agentligi'} (+${tour.markupValue.toStringAsFixed(tour.markupValue.truncateToDouble() == tour.markupValue ? 0 : 1)}%)',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.accentGreen,
+                            ),
                           ),
                         ],
                       ),
@@ -870,7 +1211,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         children: [
                           Text(
                             '${tour.nights} (${tour.departureCity})',
-                            style: const TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.textMuted,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -902,7 +1246,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                           Text(
                             '~${(tour.price * 12950 / 1000).toStringAsFixed(0)} ming UZS',
-                            style: const TextStyle(fontSize: 9, color: AppTheme.accentGreen, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: AppTheme.accentGreen,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -917,29 +1265,50 @@ class _SearchScreenState extends State<SearchScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => TourDetailScreen(tour: tour)),
+                              MaterialPageRoute(
+                                builder: (_) => TourDetailScreen(tour: tour),
+                              ),
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 7,
+                            ),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          child: const Text('Batafsil', style: TextStyle(fontSize: 11)),
+                          child: const Text(
+                            'Batafsil',
+                            style: TextStyle(fontSize: 11),
+                          ),
                         ),
                         const SizedBox(width: 6),
                         ElevatedButton(
                           onPressed: () {
-                            showDialog(context: context, builder: (_) => BookingDialog(tour: tour));
+                            showDialog(
+                              context: context,
+                              builder: (_) => BookingDialog(tour: tour),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                          child: const Text(
+                            'Band qilish',
+                            style: TextStyle(fontSize: 11),
+                          ),
                         ),
                       ],
                     ),
@@ -958,7 +1327,9 @@ class _SearchScreenState extends State<SearchScreen> {
     if (provider.isLoadingServices) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppTheme.primary),
+        ),
       );
     }
     if (provider.comboTours.isEmpty) {
@@ -978,13 +1349,20 @@ class _SearchScreenState extends State<SearchScreen> {
       if (q.isNotEmpty) {
         final matchesTitle = combo.title.toLowerCase().contains(q);
         final matchesRoute = combo.route.toLowerCase().contains(q);
-        final matchesCity = combo.cities.any((c) => c.toLowerCase().contains(q));
+        final matchesCity = combo.cities.any(
+          (c) => c.toLowerCase().contains(q),
+        );
         if (!matchesTitle && !matchesRoute && !matchesCity) return false;
       }
 
       if (_comboSelectedCity != 'ALL') {
-        final matchesSelected = combo.cities.any((c) => c.toLowerCase() == _comboSelectedCity.toLowerCase()) ||
-            combo.route.toLowerCase().contains(_comboSelectedCity.toLowerCase());
+        final matchesSelected =
+            combo.cities.any(
+              (c) => c.toLowerCase() == _comboSelectedCity.toLowerCase(),
+            ) ||
+            combo.route.toLowerCase().contains(
+              _comboSelectedCity.toLowerCase(),
+            );
         if (!matchesSelected) return false;
       }
 
@@ -1002,7 +1380,10 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppTheme.primary.withOpacity(0.15), AppTheme.accentSky.withOpacity(0.12)],
+              colors: [
+                AppTheme.primary.withOpacity(0.15),
+                AppTheme.accentSky.withOpacity(0.12),
+              ],
             ),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(color: AppTheme.borderDark),
@@ -1010,11 +1391,34 @@ class _SearchScreenState extends State<SearchScreen> {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🔄 Multi-City • Eksklyuziv Paketlar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Icon(Icons.sync, size: 14, color: Colors.amber),
+                  SizedBox(width: 4),
+                  Text(
+                    'Multi-City • Eksklyuziv Paketlar',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 4),
-              Text('Kombinatsiyalashgan Combo Turlar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+              Text(
+                'Kombinatsiyalashgan Combo Turlar',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textMain,
+                ),
+              ),
               SizedBox(height: 4),
-              Text('Bitta sayohatda 2 yoki undan ortiq afsonaviy shaharlar. Ichki reyslar, VIP transferlar va mehmonxonalar to\'liq kiritilgan.', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              Text(
+                'Bitta sayohatda 2 yoki undan ortiq afsonaviy shaharlar. Ichki reyslar, VIP transferlar va mehmonxonalar to\'liq kiritilgan.',
+                style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+              ),
             ],
           ),
         ),
@@ -1041,19 +1445,33 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
                 child: TextField(
                   controller: _comboSearchController,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textMain,
+                  ),
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: 'Combo qidiruvi (shahar, yo\'nalish)...',
-                    hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                    prefixIcon: const Icon(Icons.search, size: 18, color: AppTheme.primary),
+                    hintStyle: const TextStyle(
+                      color: AppTheme.textMuted,
+                      fontSize: 12,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      size: 18,
+                      color: AppTheme.primary,
+                    ),
                     suffixIcon: _comboSearchController.text.isNotEmpty
                         ? GestureDetector(
                             onTap: () {
                               _comboSearchController.clear();
                               setState(() {});
                             },
-                            child: const Icon(Icons.close, size: 16, color: AppTheme.textSub),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: AppTheme.textSub,
+                            ),
                           )
                         : null,
                     border: InputBorder.none,
@@ -1074,14 +1492,17 @@ class _SearchScreenState extends State<SearchScreen> {
                       onTap: () => setState(() => _comboSelectedCity = 'ALL'),
                     ),
                     const SizedBox(width: 6),
-                    ...allCities.map((city) => Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: _buildComboChip(
-                            label: city,
-                            isSelected: _comboSelectedCity == city,
-                            onTap: () => setState(() => _comboSelectedCity = city),
-                          ),
-                        )),
+                    ...allCities.map(
+                      (city) => Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: _buildComboChip(
+                          label: city,
+                          isSelected: _comboSelectedCity == city,
+                          onTap: () =>
+                              setState(() => _comboSelectedCity = city),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1117,9 +1538,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   Text(
                     '${filtered.length} ta combo tur topildi',
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textSub, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSub,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                  if (_comboSearchController.text.isNotEmpty || _comboSelectedCity != 'ALL' || _comboPriceFilter != 'ALL')
+                  if (_comboSearchController.text.isNotEmpty ||
+                      _comboSelectedCity != 'ALL' ||
+                      _comboPriceFilter != 'ALL')
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -1130,7 +1557,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       },
                       child: const Text(
                         'Filtrni tozalash',
-                        style: TextStyle(fontSize: 11, color: AppTheme.primary, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                 ],
@@ -1146,9 +1577,16 @@ class _SearchScreenState extends State<SearchScreen> {
             alignment: Alignment.center,
             child: Column(
               children: [
-                const Icon(Icons.hub_outlined, size: 44, color: AppTheme.textMuted),
+                const Icon(
+                  Icons.hub_outlined,
+                  size: 44,
+                  color: AppTheme.textMuted,
+                ),
                 const SizedBox(height: 10),
-                const Text('Ushbu filtr bo\'yicha combo turlar topilmadi', style: TextStyle(color: AppTheme.textSub, fontSize: 13)),
+                const Text(
+                  'Ushbu filtr bo\'yicha combo turlar topilmadi',
+                  style: TextStyle(color: AppTheme.textSub, fontSize: 13),
+                ),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
@@ -1160,9 +1598,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
-                  child: const Text('Barcha combo turlarni ko\'rsatish', style: TextStyle(fontSize: 12)),
+                  child: const Text(
+                    'Barcha combo turlarni ko\'rsatish',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -1190,30 +1634,68 @@ class _SearchScreenState extends State<SearchScreen> {
                       height: 135,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(height: 135, color: AppTheme.subtleDark),
+                      errorBuilder: (_, __, ___) =>
+                          Container(height: 135, color: AppTheme.subtleDark),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(combo.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain)),
+                          Text(
+                            combo.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: AppTheme.textMain,
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          Text(combo.route, style: const TextStyle(color: AppTheme.accentSky, fontSize: 11, fontWeight: FontWeight.w600)),
+                          Text(
+                            combo.route,
+                            style: const TextStyle(
+                              color: AppTheme.accentSky,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 6,
-                            children: combo.cities.map((c) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                              decoration: BoxDecoration(color: AppTheme.subtleDark, borderRadius: BorderRadius.circular(6)),
-                              child: Text(c, style: const TextStyle(fontSize: 9, color: AppTheme.textSub)),
-                            )).toList(),
+                            children: combo.cities
+                                .map(
+                                  (c) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.subtleDark,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      c,
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        color: AppTheme.textSub,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
                           ),
                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('\$${combo.price}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                              Text(
+                                '\$${combo.price}',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
                               ElevatedButton(
                                 onPressed: () {
                                   final tempTour = TourPackage(
@@ -1225,16 +1707,30 @@ class _SearchScreenState extends State<SearchScreen> {
                                     flight: 'Toshkentdan reys',
                                     price: combo.price,
                                     img: combo.img,
-                                    country: combo.cities.isNotEmpty ? combo.cities.first : 'Combo',
+                                    country: combo.cities.isNotEmpty
+                                        ? combo.cities.first
+                                        : 'Combo',
                                     resort: combo.cities.join(' - '),
                                   );
-                                  showDialog(context: context, builder: (_) => BookingDialog(tour: tempTour));
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) =>
+                                        BookingDialog(tour: tempTour),
+                                  );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                 ),
-                                child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                                child: const Text(
+                                  'Band qilish',
+                                  style: TextStyle(fontSize: 11),
+                                ),
                               ),
                             ],
                           ),
@@ -1284,7 +1780,9 @@ class _SearchScreenState extends State<SearchScreen> {
     if (provider.isLoadingServices) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppTheme.primary),
+        ),
       );
     }
     if (provider.flights.isEmpty) {
@@ -1304,11 +1802,34 @@ class _SearchScreenState extends State<SearchScreen> {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('✈️ Aviabiletlar • Charter & GDS Bloklar', style: TextStyle(color: AppTheme.accentSky, fontSize: 10, fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Icon(Icons.flight, size: 14, color: AppTheme.accentSky),
+                  SizedBox(width: 4),
+                  Text(
+                    'Aviabiletlar • Charter & GDS Bloklar',
+                    style: TextStyle(
+                      color: AppTheme.accentSky,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 4),
-              Text('To\'g\'ridan-to\'g\'ri Aviachiptalar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+              Text(
+                'To\'g\'ridan-to\'g\'ri Aviachiptalar',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textMain,
+                ),
+              ),
               SizedBox(height: 4),
-              Text('Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o\'rinlar va qulay tariflar.', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              Text(
+                'Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o\'rinlar va qulay tariflar.',
+                style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+              ),
             ],
           ),
         ),
@@ -1335,15 +1856,39 @@ class _SearchScreenState extends State<SearchScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.flight, color: AppTheme.accentSky, size: 18),
+                          const Icon(
+                            Icons.flight,
+                            color: AppTheme.accentSky,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
-                          Text('${f.airline} (${f.flightNumber})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textMain)),
+                          Text(
+                            '${f.airline} (${f.flightNumber})',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: AppTheme.textMain,
+                            ),
+                          ),
                         ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(color: AppTheme.accentGreen.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
-                        child: const Text('Kafolatlangan', style: TextStyle(color: AppTheme.accentGreen, fontSize: 9, fontWeight: FontWeight.bold)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentGreen.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Kafolatlangan',
+                          style: TextStyle(
+                            color: AppTheme.accentGreen,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -1354,16 +1899,46 @@ class _SearchScreenState extends State<SearchScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(f.departureCity, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                          Text(f.departureTime, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                          Text(
+                            f.departureCity,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textMain,
+                            ),
+                          ),
+                          Text(
+                            f.departureTime,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
                         ],
                       ),
-                      const Icon(Icons.arrow_forward, size: 16, color: AppTheme.textMuted),
+                      const Icon(
+                        Icons.arrow_forward,
+                        size: 16,
+                        color: AppTheme.textMuted,
+                      ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(f.arrivalCity, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
-                          Text(f.arrivalTime, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                          Text(
+                            f.arrivalCity,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textMain,
+                            ),
+                          ),
+                          Text(
+                            f.arrivalTime,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textMuted,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -1376,21 +1951,40 @@ class _SearchScreenState extends State<SearchScreen> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.luggage, size: 14, color: AppTheme.textMuted),
+                          const Icon(
+                            Icons.luggage,
+                            size: 14,
+                            color: AppTheme.textMuted,
+                          ),
                           const SizedBox(width: 4),
-                          Text(f.baggage, style: const TextStyle(fontSize: 11, color: AppTheme.textSub)),
+                          Text(
+                            f.baggage,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSub,
+                            ),
+                          ),
                         ],
                       ),
                       Row(
                         children: [
-                          Text('\$${f.price}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                          Text(
+                            '\$${f.price}',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
                           const SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () {
                               final tempTour = TourPackage(
                                 id: f.id,
-                                title: '${f.airline} ${f.departureCity} - ${f.arrivalCity}',
-                                location: '${f.departureCity} ➔ ${f.arrivalCity}',
+                                title:
+                                    '${f.airline} ${f.departureCity} - ${f.arrivalCity}',
+                                location:
+                                    '${f.departureCity} ➔ ${f.arrivalCity}',
                                 tag: 'Aviabilet',
                                 nights: '1 kun',
                                 flight: '${f.airline} ${f.flightNumber}',
@@ -1399,13 +1993,24 @@ class _SearchScreenState extends State<SearchScreen> {
                                 country: f.arrivalCity,
                                 resort: f.arrivalCity,
                               );
-                              showDialog(context: context, builder: (_) => BookingDialog(tour: tempTour));
+                              showDialog(
+                                context: context,
+                                builder: (_) => BookingDialog(tour: tempTour),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                            child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                            child: const Text(
+                              'Band qilish',
+                              style: TextStyle(fontSize: 11),
+                            ),
                           ),
                         ],
                       ),
@@ -1425,7 +2030,9 @@ class _SearchScreenState extends State<SearchScreen> {
     if (provider.isLoadingServices) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 40),
-        child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppTheme.primary),
+        ),
       );
     }
     if (provider.hotels.isEmpty) {
@@ -1445,11 +2052,34 @@ class _SearchScreenState extends State<SearchScreen> {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('🏨 Faqat Mehmonxona • Qulay Tariflar', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+              Row(
+                children: [
+                  Icon(Icons.hotel, size: 14, color: Colors.amber),
+                  SizedBox(width: 4),
+                  Text(
+                    'Faqat Mehmonxona • Qulay Tariflar',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 4),
-              Text('Dunyo Mehmonxonalari', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textMain)),
+              Text(
+                'Dunyo Mehmonxonalari',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textMain,
+                ),
+              ),
               SizedBox(height: 4),
-              Text('Chiptani o\'zingiz olganingizda faqat mehmonxonani rasmiy eng arzon narxda band qiling.', style: TextStyle(fontSize: 11, color: AppTheme.textSub)),
+              Text(
+                'Chiptani o\'zingiz olganingizda faqat mehmonxonani rasmiy eng arzon narxda band qiling.',
+                style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+              ),
             ],
           ),
         ),
@@ -1477,7 +2107,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     height: 135,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(height: 135, color: AppTheme.subtleDark),
+                    errorBuilder: (_, __, ___) =>
+                        Container(height: 135, color: AppTheme.subtleDark),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12),
@@ -1488,13 +2119,35 @@ class _SearchScreenState extends State<SearchScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Text(h.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textMain), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                h.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: AppTheme.textMain,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            Text('${h.stars} ★', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text(
+                              '${h.stars} ★',
+                              style: const TextStyle(
+                                color: Colors.amber,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text('${h.resort}, ${h.country}', style: const TextStyle(color: AppTheme.textSub, fontSize: 11)),
+                        Text(
+                          '${h.resort}, ${h.country}',
+                          style: const TextStyle(
+                            color: AppTheme.textSub,
+                            fontSize: 11,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1502,8 +2155,21 @@ class _SearchScreenState extends State<SearchScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('\$${h.pricePerNight} / kecha', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primary)),
-                                Text('Jami: \$${h.total7Nights} (7 kecha)', style: const TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                                Text(
+                                  '\$${h.pricePerNight} / kecha',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                                Text(
+                                  'Jami: \$${h.total7Nights} (7 kecha)',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: AppTheme.textMuted,
+                                  ),
+                                ),
                               ],
                             ),
                             ElevatedButton(
@@ -1520,13 +2186,24 @@ class _SearchScreenState extends State<SearchScreen> {
                                   country: h.country,
                                   resort: h.resort,
                                 );
-                                showDialog(context: context, builder: (_) => BookingDialog(tour: tempTour));
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => BookingDialog(tour: tempTour),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
-                              child: const Text('Band qilish', style: TextStyle(fontSize: 11)),
+                              child: const Text(
+                                'Band qilish',
+                                style: TextStyle(fontSize: 11),
+                              ),
                             ),
                           ],
                         ),

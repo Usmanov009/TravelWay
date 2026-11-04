@@ -1,23 +1,23 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
 
 class TelegramLoginSheet extends StatefulWidget {
   final void Function(String name, String phone, String tcId) onLoginSuccess;
 
-  const TelegramLoginSheet({
-    super.key,
-    required this.onLoginSuccess,
-  });
+  const TelegramLoginSheet({super.key, required this.onLoginSuccess});
 
   static Future<void> show(
     BuildContext context, {
-    required void Function(String name, String phone, String tcId) onLoginSuccess,
+    required void Function(String name, String phone, String tcId)
+    onLoginSuccess,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -31,12 +31,15 @@ class TelegramLoginSheet extends StatefulWidget {
   State<TelegramLoginSheet> createState() => _TelegramLoginSheetState();
 }
 
-class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTickerProviderStateMixin {
+class _TelegramLoginSheetState extends State<TelegramLoginSheet>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final TextEditingController _otpController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController(text: '+998 ');
+  final TextEditingController _phoneController = TextEditingController(
+    text: '+998 ',
+  );
 
   // Profile completion controllers
   final TextEditingController _firstNameController = TextEditingController();
@@ -61,7 +64,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
   Future<void> _initSession() async {
     try {
       final baseUrl = ApiService().baseUrl;
-      final res = await http.post(Uri.parse('$baseUrl/api/auth/telegram/create-session')).timeout(const Duration(seconds: 4));
+      final res = await http
+          .post(Uri.parse('$baseUrl/api/auth/telegram/create-session'))
+          .timeout(const Duration(seconds: 4));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         if (data['success'] == true && data['sessionToken'] != null) {
@@ -93,7 +98,11 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot qidiring.')),
+          const SnackBar(
+            content: Text(
+              'Telegram ilovasini ochib bo\'lmadi. @sayrhub_bot qidiring.',
+            ),
+          ),
         );
       }
     }
@@ -103,7 +112,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     final code = _otpController.text.trim();
     if (code.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, 4 xonali tasdiqlash kodini to\'liq kiriting')),
+        const SnackBar(
+          content: Text('Iltimos, 4 xonali tasdiqlash kodini to\'liq kiriting'),
+        ),
       );
       return;
     }
@@ -112,19 +123,22 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
 
     String verifiedName = 'Mijoz';
     String verifiedPhone = '+998 90 000 00 00';
-    String verifiedTcId = 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+    String verifiedTcId =
+        'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
     String verifiedPassport = '';
 
     try {
       final baseUrl = ApiService().baseUrl;
-      final res = await http.post(
-        Uri.parse('$baseUrl/api/auth/telegram/verify-code'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'code': code,
-          'sessionToken': _sessionToken ?? 'session_default',
-        }),
-      ).timeout(const Duration(seconds: 5));
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/api/auth/telegram/verify-code'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'code': code,
+              'sessionToken': _sessionToken ?? 'session_default',
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -132,7 +146,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
           final u = data['user'];
           verifiedName = u['name'] ?? 'Mijoz';
           verifiedPhone = u['phone'] ?? '+998 90 000 00 00';
-          verifiedTcId = u['tcId'] ?? 'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+          verifiedTcId =
+              u['tcId'] ??
+              'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
           verifiedPassport = u['passportNumber'] ?? '';
         }
       }
@@ -140,7 +156,8 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
 
     String fn = '';
     String ln = '';
-    if (verifiedName.isNotEmpty && !verifiedName.toLowerCase().contains('mijoz')) {
+    if (verifiedName.isNotEmpty &&
+        !verifiedName.toLowerCase().contains('mijoz')) {
       final parts = verifiedName.split(' ');
       fn = parts.first;
       if (parts.length > 1) {
@@ -160,7 +177,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Telegram orqali tasdiqlandi! Endi shaxsiy ma\'lumotlaringizni to\'ldiring.'),
+          content: Text(
+            'Telegram orqali tasdiqlandi! Endi shaxsiy ma\'lumotlaringizni to\'ldiring.',
+          ),
           backgroundColor: AppTheme.accentGreen,
         ),
       );
@@ -181,7 +200,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
 
     if (ln.isEmpty || ln.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, familiyangizni to\'liq kiriting')),
+        const SnackBar(
+          content: Text('Iltimos, familiyangizni to\'liq kiriting'),
+        ),
       );
       return;
     }
@@ -189,7 +210,11 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     final passClean = pass.replaceAll(RegExp(r'\s'), '');
     if (passClean.length < 7) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, pasport seriya va raqamini to\'liq kiriting (masalan: AA 1234567)')),
+        const SnackBar(
+          content: Text(
+            'Iltimos, pasport seriya va raqamini to\'liq kiriting (masalan: AA 1234567)',
+          ),
+        ),
       );
       return;
     }
@@ -211,7 +236,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
 
     if (name.isEmpty || name.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, to\'liq ism-sharifingizni kiriting')),
+        const SnackBar(
+          content: Text('Iltimos, to\'liq ism-sharifingizni kiriting'),
+        ),
       );
       return;
     }
@@ -219,7 +246,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
     final digits = phone.replaceAll(RegExp(r'\D'), '');
     if (digits.length < 9) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, to\'g\'ri telefon raqam kiriting')),
+        const SnackBar(
+          content: Text('Iltimos, to\'g\'ri telefon raqam kiriting'),
+        ),
       );
       return;
     }
@@ -249,7 +278,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       child: Container(
         decoration: const BoxDecoration(
           color: AppTheme.surfaceDark,
@@ -286,7 +317,9 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
-                          _isProfileStep ? Icons.badge_outlined : Icons.send_rounded,
+                          _isProfileStep
+                              ? Icons.badge_outlined
+                              : Icons.send_rounded,
                           color: const Color(0xFF229ED9),
                           size: 20,
                         ),
@@ -296,12 +329,23 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _isProfileStep ? 'Profilni to\'ldirish' : 'Telegram orqali Kirish',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textMain),
+                            _isProfileStep
+                                ? 'Profilni to\'ldirish'
+                                : 'Telegram orqali Kirish',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textMain,
+                            ),
                           ),
                           Text(
-                            _isProfileStep ? 'Ism, familiya va pasport' : 'Rasmiy @$botUsername',
-                            style: const TextStyle(fontSize: 11, color: AppTheme.accentSky),
+                            _isProfileStep
+                                ? 'Ism, familiya va pasport'
+                                : 'Rasmiy @$botUsername',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.accentSky,
+                            ),
                           ),
                         ],
                       ),
@@ -325,15 +369,24 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                   children: [
                     // Verified Phone Card (ko'rinib turadi)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.subtleDark,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppTheme.accentGreen.withOpacity(0.35)),
+                        border: Border.all(
+                          color: AppTheme.accentGreen.withOpacity(0.35),
+                        ),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_rounded, color: AppTheme.accentGreen, size: 20),
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: AppTheme.accentGreen,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
@@ -341,7 +394,10 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                               children: [
                                 const Text(
                                   'Tasdiqlangan telefon raqami:',
-                                  style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppTheme.textMuted,
+                                  ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -357,14 +413,21 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.accentGreen.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Text(
                               'Ulangan',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.accentGreen),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.accentGreen,
+                              ),
                             ),
                           ),
                         ],
@@ -373,35 +436,67 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                     const SizedBox(height: 14),
 
                     // First Name
-                    const Text('Ism *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                    const Text(
+                      'Ism *',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textSub),
+                    ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _firstNameController,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textMain,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Masalan: Jasur',
-                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                        hintStyle: const TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                        ),
                         filled: true,
                         fillColor: AppTheme.subtleDark,
-                        prefixIcon: const Icon(Icons.person_outline, size: 18, color: AppTheme.primary),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        prefixIcon: const Icon(
+                          Icons.person_outline,
+                          size: 18,
+                          color: AppTheme.primary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
 
                     // Last Name
-                    const Text('Familiya *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                    const Text(
+                      'Familiya *',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textSub),
+                    ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _lastNameController,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textMain,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Masalan: Rahimov',
-                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                        hintStyle: const TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                        ),
                         filled: true,
                         fillColor: AppTheme.subtleDark,
-                        prefixIcon: const Icon(Icons.badge_outlined, size: 18, color: AppTheme.primary),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        prefixIcon: const Icon(
+                          Icons.badge_outlined,
+                          size: 18,
+                          color: AppTheme.primary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -410,22 +505,50 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
-                        Text('Pasport seriya va raqami *', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
-                        Text('Namuna: AA 1234567', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                        Text(
+                          'Pasport seriya va raqami *',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSub,
+                          ),
+                        ),
+                        Text(
+                          'Namuna: AA 1234567',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: _passportController,
                       textCapitalization: TextCapitalization.characters,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: AppTheme.textMain),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                        color: AppTheme.textMain,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'AA 1234567',
-                        hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12, letterSpacing: 1.5),
+                        hintStyle: const TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                          letterSpacing: 1.5,
+                        ),
                         filled: true,
                         fillColor: AppTheme.subtleDark,
-                        prefixIcon: const Icon(Icons.flight_takeoff, size: 18, color: AppTheme.primary),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        prefixIcon: const Icon(
+                          Icons.flight_takeoff,
+                          size: 18,
+                          color: AppTheme.primary,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 18),
@@ -439,11 +562,32 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                           backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 13),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text('Saqlash va SayrHub\'ga kirish 🚀', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Saqlash va SayrHub\'ga kirish',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 6),
+                                  Icon(Icons.rocket_launch, size: 16),
+                                ],
+                              ),
                       ),
                     ),
                   ],
@@ -457,8 +601,14 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                 labelColor: AppTheme.primary,
                 unselectedLabelColor: AppTheme.textMuted,
                 tabs: const [
-                  Tab(icon: Icon(Icons.security, size: 16), text: 'Telegram Bot'),
-                  Tab(icon: Icon(Icons.person_add_outlined, size: 16), text: 'Ma\'lumot kiritish'),
+                  Tab(
+                    icon: Icon(Icons.security, size: 16),
+                    text: 'Telegram Bot',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.person_add_outlined, size: 16),
+                    text: 'Ma\'lumot kiritish',
+                  ),
                 ],
               ),
 
@@ -478,16 +628,26 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                             decoration: BoxDecoration(
                               color: const Color(0xFF229ED9).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFF229ED9).withOpacity(0.3)),
+                              border: Border.all(
+                                color: const Color(0xFF229ED9).withOpacity(0.3),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.info_outline, color: Color(0xFF229ED9), size: 20),
+                                const Icon(
+                                  Icons.info_outline,
+                                  color: Color(0xFF229ED9),
+                                  size: 20,
+                                ),
                                 const SizedBox(width: 10),
                                 const Expanded(
                                   child: Text(
                                     'Botda "Start" va "Telefon raqamni ulashish" tugmasini bosing va olingan 4 xonali kodni kiriting.',
-                                    style: TextStyle(fontSize: 11, color: AppTheme.textMain, height: 1.3),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppTheme.textMain,
+                                      height: 1.3,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -501,18 +661,30 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                             child: ElevatedButton.icon(
                               onPressed: _openTelegramBot,
                               icon: const Icon(Icons.open_in_new, size: 16),
-                              label: const Text('Telegram Botni ochish (@sayrhub_bot)'),
+                              label: const Text(
+                                'Telegram Botni ochish (@sayrhub_bot)',
+                              ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF229ED9),
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
                           const SizedBox(height: 16),
 
-                          const Text('Bot bergan 4 xonali tasdiqlash kodi:', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const Text(
+                            'Bot bergan 4 xonali tasdiqlash kodi:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSub,
+                            ),
+                          ),
                           const SizedBox(height: 6),
                           TextField(
                             controller: _otpController,
@@ -522,13 +694,24 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                               FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(4),
                             ],
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8, color: AppTheme.textMain),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 8,
+                              color: AppTheme.textMain,
+                            ),
                             decoration: InputDecoration(
                               hintText: '0000',
-                              hintStyle: const TextStyle(color: AppTheme.textMuted, letterSpacing: 8),
+                              hintStyle: const TextStyle(
+                                color: AppTheme.textMuted,
+                                letterSpacing: 8,
+                              ),
                               filled: true,
                               fillColor: AppTheme.subtleDark,
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -540,12 +723,28 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 13),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 13,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               child: _isLoading
-                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                  : const Text('Tasdiqlash va Davom etish', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Tasdiqlash va Davom etish',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -558,35 +757,73 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Ism va Familiya', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const Text(
+                            'Ism va Familiya',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSub,
+                            ),
+                          ),
                           const SizedBox(height: 6),
                           TextField(
                             controller: _nameController,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textMain,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Masalan: Alisher Yusupov',
-                              hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                              hintStyle: const TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 12,
+                              ),
                               filled: true,
                               fillColor: AppTheme.subtleDark,
-                              prefixIcon: const Icon(Icons.person_outline, size: 18, color: AppTheme.primary),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              prefixIcon: const Icon(
+                                Icons.person_outline,
+                                size: 18,
+                                color: AppTheme.primary,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
 
-                          const Text('Telefon raqam', style: TextStyle(fontSize: 12, color: AppTheme.textSub)),
+                          const Text(
+                            'Telefon raqam',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSub,
+                            ),
+                          ),
                           const SizedBox(height: 6),
                           TextField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
-                            style: const TextStyle(fontSize: 13, color: AppTheme.textMain),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.textMain,
+                            ),
                             decoration: InputDecoration(
                               hintText: '+998 90 123 45 67',
-                              hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                              hintStyle: const TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 12,
+                              ),
                               filled: true,
                               fillColor: AppTheme.subtleDark,
-                              prefixIcon: const Icon(Icons.phone_outlined, size: 18, color: AppTheme.primary),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              prefixIcon: const Icon(
+                                Icons.phone_outlined,
+                                size: 18,
+                                color: AppTheme.primary,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -598,12 +835,28 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet> with SingleTick
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 13),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 13,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               child: _isLoading
-                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                  : const Text('Ro\'yxatdan o\'tish va Kirish', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Ro\'yxatdan o\'tish va Kirish',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

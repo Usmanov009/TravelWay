@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FlightTicket } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
+import { Briefcase, DollarSign, Plane, PlaneLanding, PlaneTakeoff, Pencil, RefreshCw } from 'lucide-react';
 
 interface AdminFlightsManagerProps {
   currentRole: AdminRole;
@@ -99,7 +100,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       flightNumber: `${f.flightNumber}-N`
     };
     onAddFlight(duplicated);
-    onShowToast(`"${f.flightNumber}" reysi nusxalandi! 📋`, 'success');
+    onShowToast(`"${f.flightNumber}" reysi nusxalandi!`, 'success');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -168,7 +169,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         data.flights.forEach((fl: FlightTicket) => {
           onUpdateFlight(fl);
         });
-        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar jonli yuklandi! ✈️`, 'success');
+        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar jonli yuklandi!`, 'success');
       } else {
         onShowToast("Reyslar topilmadi", 'info');
       }
@@ -194,7 +195,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
     };
 
     onUpdateFlight(updated);
-    onShowToast(`"${updated.flightNumber}" reysi narxi $${newPrice} qilib belgilandi! ✨`, 'success');
+    onShowToast(`"${updated.flightNumber}" reysi narxi $${newPrice} qilib belgilandi!`, 'success');
     setMarkupModalFlight(null);
   };
 
@@ -249,8 +250,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>✈️</span> Aviachiptalar & Charter Reyslar ({flights.length})
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+              <Plane aria-hidden="true" className="h-4 w-4" /> Aviachiptalar & Charter Reyslar ({flights.length})
             </h2>
             <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -259,7 +260,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
 
             {/* Active Commission Badge */}
             <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-200 text-[11px] px-3 py-1 rounded-full font-bold">
-              <span>💼 Komissiya:</span>
+              <Briefcase aria-hidden="true" className="h-3 w-3" /> Komissiya:
               <span className="text-emerald-600 dark:text-emerald-400 font-extrabold">{agencyCommissionRate}%</span>
               {onUpdateCommissionRate && (
                 <button
@@ -275,12 +276,12 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   }}
                   className="ml-1 text-[10px] underline hover:text-amber-900 dark:hover:text-amber-100 cursor-pointer"
                 >
-                  O'zgartirish ✏️
+                  <Pencil aria-hidden="true" className="inline h-3 w-3" /> O'zgartirish
                 </button>
               )}
             </div>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Charter va doimiy GDS reyslariga aviachiptalar savdosi • Komissiya: {agencyCommissionRate}%
           </p>
         </div>
@@ -289,18 +290,18 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
           <button
             onClick={handleLiveKompasFlightsSync}
             disabled={isLiveSyncing}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
             title="Kompas Tour charter reyslarini jonli yuklash"
           >
             <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
               sync
             </span>
-            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompas Reyslarini Yuklash 🔄'}</span>
+            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompas Reyslarini Yuklash'}</span>
           </button>
 
           <button
             onClick={openAddModal}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">add_circle</span>
             <span>Yangi Reys</span>
@@ -309,14 +310,14 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       </div>
 
       {/* 2. Filter Pills & Search */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-3">
+      <div className="p-4 sm:p-5 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 shadow-2xs space-y-3">
         {/* Header and Reset */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+            <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
               Aviachiptalar Filtrlari
             </span>
-            <span className="text-[10px] bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-bold">
               {filtered.length} ta natija
             </span>
           </div>
@@ -324,9 +325,9 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
           <button
             type="button"
             onClick={resetFilters}
-            className="text-[11px] text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+            className="text-[11px] text-zinc-500 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
           >
-            <span>🔄</span> Filtrlarni tozalash
+            <RefreshCw aria-hidden="true" className="h-3 w-3" /> Filtrlarni tozalash
           </button>
         </div>
 
@@ -334,8 +335,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Flight Type */}
           <div>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
-              ✈️ Reys turi:
+            <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 block mb-1">
+              <Plane aria-hidden="true" className="inline h-3 w-3" /> Reys turi:
             </span>
             <div className="flex items-center gap-1">
               {[
@@ -349,8 +350,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   onClick={() => setFilterType(t.code as any)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     filterType === t.code
-                      ? 'bg-sky-600 text-white shadow-2xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >
                   {t.label}
@@ -361,13 +362,13 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
 
           {/* Departure City */}
           <div>
-            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
-              🛫 Uchish shahri:
+            <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 block mb-1">
+              <PlaneTakeoff aria-hidden="true" className="inline h-3 w-3" /> Uchish shahri:
             </label>
             <select
               value={selectedDepCity}
               onChange={(e) => setSelectedDepCity(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:border-indigo-500"
             >
               <option value="ALL">Barchasi</option>
               <option value="Toshkent">Toshkent (TAS)</option>
@@ -379,13 +380,13 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
 
           {/* Arrival City */}
           <div>
-            <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block mb-1">
-              🛬 Qo'nish shahri / Kurort:
+            <label className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 block mb-1">
+              <PlaneLanding aria-hidden="true" className="inline h-3 w-3" /> Qo'nish shahri / Kurort:
             </label>
             <select
               value={selectedArrCity}
               onChange={(e) => setSelectedArrCity(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:border-indigo-500"
             >
               <option value="ALL">Barcha shaharlar</option>
               <option value="Antalya">Antalya (AYT)</option>
@@ -398,9 +399,9 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         </div>
 
         {/* Search, Airline, and Price Range */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
           <div className="relative w-full sm:max-w-md">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[18px]">
               search
             </span>
             <input
@@ -408,28 +409,28 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Reys raqami, aviakompaniya yoki shahar..."
-              className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+              className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none transition-all"
             />
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
               >
                 ✕
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-full sm:w-auto">
-            <span className="font-semibold shrink-0">💵 Narx ($):</span>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 w-full sm:w-auto">
+            <span className="font-semibold shrink-0 inline-flex items-center gap-1"><DollarSign aria-hidden="true" className="h-3 w-3" /> Narx ($):</span>
             <input
               type="number"
               min={0}
               placeholder="0"
               value={minPrice === 0 ? '' : minPrice}
               onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
-              className="w-18 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-18 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:border-indigo-500"
             />
             <span>—</span>
             <input
@@ -438,17 +439,17 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
               placeholder="Max"
               value={maxPrice === 99999 ? '' : maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value) || 99999)}
-              className="w-20 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-sky-500"
+              className="w-20 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white px-2 py-1.5 rounded-lg text-xs font-mono text-center border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:border-indigo-500"
             />
           </div>
         </div>
       </div>
 
       {/* 3. Flights Table */}
-      <div className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-2xs">
+      <div className="bg-card rounded-2xl border border-zinc-200/90 dark:border-zinc-800 overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-400 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+            <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200/80 dark:border-zinc-800 text-zinc-400 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
               <tr>
                 <th className="py-3.5 pl-5">Reys & Aviakompaniya</th>
                 <th className="py-3.5 px-3">Yo'nalish</th>
@@ -458,35 +459,35 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                 <th className="py-3.5 pr-5 text-right">Amallar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-zinc-800 dark:text-zinc-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-xs text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-xs text-zinc-400">
                     Hech qanday aviachipta topilmadi
                   </td>
                 </tr>
               ) : (
                 filtered.map((f) => (
-                  <tr key={f.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={f.id} className="hover:bg-zinc-50/70 dark:hover:bg-zinc-800/40 transition-colors">
                     <td className="py-3.5 pl-5">
-                      <p className="font-bold text-slate-900 dark:text-white text-xs">{f.flightNumber}</p>
-                      <p className="text-[11px] text-sky-600 dark:text-sky-400 font-medium">{f.airline}</p>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 font-medium border border-sky-200/60 dark:border-sky-800/50">
+                      <p className="font-bold text-zinc-900 dark:text-white text-xs">{f.flightNumber}</p>
+                      <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">{f.airline}</p>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-medium border border-indigo-200/60 dark:border-indigo-800/50">
                         {f.isCharter ? 'Charter' : 'Doimiy GDS'}
                       </span>
                     </td>
                     <td className="py-3.5 px-3">
-                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                         {f.departureCity} ({f.departureAirportCode}) ➔ {f.arrivalCity} ({f.arrivalAirportCode})
                       </p>
                       <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">To'g'ridan-to'g'ri</span>
                     </td>
                     <td className="py-3.5 px-3">
-                      <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{f.departureTime} – {f.arrivalTime}</p>
-                      <p className="text-[10px] text-slate-400">{f.departureDate}</p>
+                      <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{f.departureTime} – {f.arrivalTime}</p>
+                      <p className="text-[10px] text-zinc-400">{f.departureDate}</p>
                     </td>
                     <td className="py-3.5 px-3">
-                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">{f.baggage}</p>
+                      <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">{f.baggage}</p>
                       {f.seatsLeft <= 3 ? (
                         <span className="text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-1.5 py-0.2 rounded border border-rose-200 dark:border-rose-800/50">
                           Faqat {f.seatsLeft} ta joy qoldi!
@@ -500,8 +501,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                     <td className="py-3.5 px-3">
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-semibold text-slate-400">Asl (Kompas):</span>
-                          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                          <span className="text-[10px] font-semibold text-zinc-400">Asl (Kompas):</span>
+                          <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
                             ${f.originalCostPrice || Math.round(f.price / 1.08)}
                           </span>
                         </div>
@@ -516,8 +517,8 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
-                          <span className="text-[10px] font-extrabold text-sky-600 dark:text-sky-400">Mijozga:</span>
-                          <span className="text-sm font-black font-mono text-sky-600 dark:text-sky-400">
+                          <span className="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">Mijozga:</span>
+                          <span className="text-sm font-black font-mono text-indigo-600 dark:text-indigo-400">
                             ${f.price}
                           </span>
                         </div>
@@ -530,27 +531,27 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                           className="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 transition-colors border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-1 text-xs font-bold cursor-pointer"
                           title="Narxni sozlash (% ustama yoki qo'lda kiritish)"
                         >
-                          <span>💵</span>
+                          <DollarSign aria-hidden="true" className="h-3 w-3" />
                           <span className="text-[11px]">Narx</span>
                         </button>
                         <button
                           onClick={() => handleDuplicateFlight(f)}
-                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 text-slate-600 dark:text-slate-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-indigo-50 hover:text-indigo-600 text-zinc-600 dark:text-zinc-300 transition-colors"
                           title="Nusxalash"
                         >
                           <span className="material-symbols-outlined text-[17px]">content_copy</span>
                         </button>
                         <button
                           onClick={() => openEditModal(f)}
-                          className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 hover:text-sky-600 text-slate-600 dark:text-slate-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-indigo-50 hover:text-indigo-600 text-zinc-600 dark:text-zinc-300 transition-colors"
                           title="Tahrirlash"
                         >
                           <span className="material-symbols-outlined text-[17px]">edit</span>
                         </button>
                         <button
                           onClick={() => handleDelete(f.id, f.flightNumber)}
-                          className={`p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 hover:text-rose-600 transition-colors ${
-                            isMainAdmin ? 'text-slate-600 dark:text-slate-300' : 'text-slate-300 cursor-not-allowed'
+                          className={`p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-rose-50 hover:text-rose-600 transition-colors ${
+                            isMainAdmin ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-300 cursor-not-allowed'
                           }`}
                           title={isMainAdmin ? "O'chirish" : "Faqat Bosh Admin huquqida"}
                         >
@@ -568,16 +569,16 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
 
       {/* 4. MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-xl p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>✈️</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-card border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-xl p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Plane aria-hidden="true" className="h-4 w-4" />
                 <span>{editingFlight ? 'Reysni Tahrirlash' : "Yangi Reys Qo'shish"}</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
@@ -586,153 +587,153 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Aviakompaniya</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Aviakompaniya</label>
                   <input
                     type="text"
                     required
                     value={formAirline}
                     onChange={(e) => setFormAirline(e.target.value)}
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Reys Raqami *</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Reys Raqami *</label>
                   <input
                     type="text"
                     required
                     value={formFlightNumber}
                     onChange={(e) => setFormFlightNumber(e.target.value)}
                     placeholder="HY-271"
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Uchish Shahri (Kodi)</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Uchish Shahri (Kodi)</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={formDepCity}
                       onChange={(e) => setFormDepCity(e.target.value)}
                       placeholder="Toshkent"
-                      className="w-2/3 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                      className="w-2/3 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={formDepCode}
                       onChange={(e) => setFormDepCode(e.target.value)}
                       placeholder="TAS"
-                      className="w-1/3 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono uppercase"
+                      className="w-1/3 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-mono uppercase"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Qo'nish Shahri (Kodi)</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Qo'nish Shahri (Kodi)</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={formArrCity}
                       onChange={(e) => setFormArrCity(e.target.value)}
                       placeholder="Istanbul"
-                      className="w-2/3 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                      className="w-2/3 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={formArrCode}
                       onChange={(e) => setFormArrCode(e.target.value)}
                       placeholder="IST"
-                      className="w-1/3 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono uppercase"
+                      className="w-1/3 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-mono uppercase"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Uchish & Qo'nish Vaqti</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Uchish & Qo'nish Vaqti</label>
                   <div className="flex gap-2">
                     <input
                       type="time"
                       value={formDepTime}
                       onChange={(e) => setFormDepTime(e.target.value)}
-                      className="w-1/2 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                      className="w-1/2 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />
                     <input
                       type="time"
                       value={formArrTime}
                       onChange={(e) => setFormArrTime(e.target.value)}
-                      className="w-1/2 bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                      className="w-1/2 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Parvoz Sanasi</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Parvoz Sanasi</label>
                   <input
                     type="date"
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Chipta Narxi ($)</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Chipta Narxi ($)</label>
                   <input
                     type="number"
                     min="1"
                     value={formPrice}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-bold text-sky-600"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-bold text-indigo-600"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Qolgan Joylar Soni</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Qolgan Joylar Soni</label>
                   <input
                     type="number"
                     min="0"
                     value={formSeatsLeft}
                     onChange={(e) => setFormSeatsLeft(Number(e.target.value))}
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Bagaj Ma'lumoti</label>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Bagaj Ma'lumoti</label>
                   <input
                     type="text"
                     value={formBaggage}
                     onChange={(e) => setFormBaggage(e.target.value)}
                     placeholder="23 kg + 8 kg"
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div className="flex items-center pt-5">
-                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                     <input
                       type="checkbox"
                       checked={formIsCharter}
                       onChange={(e) => setFormIsCharter(e.target.checked)}
-                      className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500"
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <span>Charter Reys (Blok o'rinlar)</span>
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 text-xs font-semibold"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-2xs"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs"
                 >
                   {editingFlight ? 'Yangilashni Saqlash' : "Reysni Qo'shish"}
                 </button>

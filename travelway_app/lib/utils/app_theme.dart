@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Shadcn/ui surfaces with the SayrHub cyan accent.
-  static const Color primary = Color(0xFF06B6D4);
-  static const Color primaryDark = Color(0xFF0891B2);
-  static const Color accent = Color(0xFF06B6D4);
-  static const Color accentLight = Color(0x2606B6D4);
-  static const Color accentSky = Color(0xFF22D3EE);
-  static const Color secondary = Color(0xFF00B8DB);
+  // Shared SayrHub indigo and neutral palette.
+  static const Color primary = Color(0xFF4F46E5);
+  static const Color primaryDark = Color(0xFF4338CA);
+  static const Color accent = Color(0xFF4F46E5);
+  static const Color accentLight = Color(0x1A4F46E5);
+  static const Color accentSky = Color(0xFF818CF8);
+  static const Color secondary = Color(0xFF4F46E5);
 
-  static const Color bgDark = Color(0xFF141217);
-  static const Color surfaceDark = Color(0xFF1E1A23);
-  static const Color subtleDark = Color(0xFF27222F);
-  static const Color cardDark = Color(0xFF1E1A23);
-  static const Color borderDark = Color(0x1AFFFFFF); // --tw-border
-  static const Color borderHover = Color(0x2EFFFFFF);
+  static const Color bgDark = Color(0xFFF8FAFC);
+  static const Color surfaceDark = Color(0xFFFFFFFF);
+  static const Color subtleDark = Color(0xFFF1F5F9);
+  static const Color cardDark = Color(0xFFFFFFFF);
+  static const Color borderDark = Color(0xFFE2E8F0);
+  static const Color borderHover = Color(0xFFCBD5E1);
 
-  static const Color bgLight = Color(0xFFFAF9FB);
+  static const Color bgLight = Color(0xFFF8FAFC);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color subtleLight = Color(0xFFF4F2F5);
+  static const Color subtleLight = Color(0xFFF1F5F9);
   static const Color cardLight = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0xFFE5E2E7);
+  static const Color borderLight = Color(0xFFE2E8F0);
 
-  static const Color textMain = Color(0xFFFAF9FB);
-  static const Color textSub = Color(0xFFA39DB0);
-  static const Color textMuted = Color(0xFF726C7F);
+  static const Color textMain = Color(0xFF0F172A);
+  static const Color textSub = Color(0xFF475569);
+  static const Color textMuted = Color(0xFF64748B);
 
-  static const Color textMainLight = Color(0xFF1B181F);
-  static const Color textSubLight = Color(0xFF6F6978);
-  static const Color textMutedLight = Color(0xFF9993A3);
+  static const Color textMainLight = Color(0xFF0F172A);
+  static const Color textSubLight = Color(0xFF475569);
+  static const Color textMutedLight = Color(0xFF64748B);
 
   // Status & Badges
   static const Color accentGreen = Color(0xFF10B981);
@@ -67,7 +67,7 @@ class AppTheme {
         color: surfaceDark,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: borderDark, width: 1),
         ),
       ),
@@ -77,7 +77,9 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
@@ -86,7 +88,9 @@ class AppTheme {
           foregroundColor: textMain,
           side: const BorderSide(color: borderDark),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
@@ -98,15 +102,15 @@ class AppTheme {
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
         hintStyle: const TextStyle(color: textMuted, fontSize: 13),
@@ -152,7 +156,7 @@ class AppTheme {
         color: surfaceLight,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: borderLight, width: 1),
         ),
       ),
@@ -162,7 +166,9 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
         ),
       ),
@@ -171,7 +177,9 @@ class AppTheme {
           foregroundColor: textMainLight,
           side: const BorderSide(color: borderLight),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ),
@@ -183,15 +191,15 @@ class AppTheme {
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primaryDark, width: 1.5),
         ),
         hintStyle: const TextStyle(color: textMutedLight, fontSize: 13),

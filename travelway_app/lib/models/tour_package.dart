@@ -68,7 +68,7 @@ class TourPackage {
     this.markupValue = 8,
     this.tourOperator = 'Kompas Tour',
     this.agencyName = 'SayrHub',
-    this.operatorBadge = '🟢 Kompas Tour Live (1:1)',
+    this.operatorBadge = 'Kompas Tour Live (1:1)',
     this.lat,
     this.lng,
   });
@@ -78,15 +78,23 @@ class TourPackage {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Resort Hotel',
       location: json['location']?.toString() ?? '',
-      tag: json['tag']?.toString() ?? (json['mealDesc']?.toString() ?? 'All Inclusive'),
+      tag:
+          json['tag']?.toString() ??
+          (json['mealDesc']?.toString() ?? 'All Inclusive'),
       badgeType: json['badgeType']?.toString() ?? 'beach',
       is5Star: json['is5Star'] == true,
-      rating: (json['rating'] is num) ? (json['rating'] as num).toDouble() : 8.5,
+      rating: (json['rating'] is num)
+          ? (json['rating'] as num).toDouble()
+          : 8.5,
       nights: json['nights']?.toString() ?? '7 kecha',
       flight: json['flight']?.toString() ?? 'Charter parvoz',
       price: (json['price'] is num) ? (json['price'] as num).toInt() : 0,
-      oldPrice: (json['oldPrice'] is num) ? (json['oldPrice'] as num).toInt() : null,
-      img: json['img']?.toString() ?? 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+      oldPrice: (json['oldPrice'] is num)
+          ? (json['oldPrice'] as num).toInt()
+          : null,
+      img:
+          json['img']?.toString() ??
+          'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
       saved: json['saved'] == true,
       category: json['category']?.toString() ?? 'beach',
       departureCity: json['departureCity']?.toString() ?? 'Toshkent (TAS)',
@@ -97,17 +105,24 @@ class TourPackage {
       mealDesc: json['mealDesc']?.toString() ?? '',
       roomType: json['roomType']?.toString() ?? 'Standard Room',
       departureDate: json['departureDate']?.toString() ?? '',
-      nightsCount: (json['nightsCount'] is num) ? (json['nightsCount'] as num).toInt() : 7,
+      nightsCount: (json['nightsCount'] is num)
+          ? (json['nightsCount'] as num).toInt()
+          : 7,
       airline: json['airline']?.toString() ?? 'Uzbekistan Airways',
       kompasTourCode: json['kompasTourCode']?.toString() ?? '',
       kompasOnlineUrl: json['kompasOnlineUrl']?.toString() ?? '',
       isLiveKompas: json['isLiveKompas'] == true,
-      originalCostPrice: (json['originalCostPrice'] is num) ? (json['originalCostPrice'] as num).toInt() : null,
+      originalCostPrice: (json['originalCostPrice'] is num)
+          ? (json['originalCostPrice'] as num).toInt()
+          : null,
       markupType: json['markupType']?.toString() ?? 'percent',
-      markupValue: (json['markupValue'] is num) ? (json['markupValue'] as num) : 8,
+      markupValue: (json['markupValue'] is num)
+          ? (json['markupValue'] as num)
+          : 8,
       tourOperator: json['tourOperator']?.toString() ?? 'Kompas Tour',
       agencyName: json['agencyName']?.toString() ?? 'SayrHub',
-      operatorBadge: json['operatorBadge']?.toString() ?? '🟢 Kompas Tour Live (1:1)',
+      operatorBadge:
+          json['operatorBadge']?.toString() ?? 'Kompas Tour Live (1:1)',
       lat: (json['lat'] is num) ? (json['lat'] as num).toDouble() : null,
       lng: (json['lng'] is num) ? (json['lng'] as num).toDouble() : null,
     );

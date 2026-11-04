@@ -216,7 +216,7 @@ export async function connectDB() {
               const { syncStaffWithMongoDB } = await import('./src/server/services/adminStaffStorage.js');
               await syncStaffWithMongoDB();
             }
-          } catch {}
+          } catch { }
         }
       }, 30000);
     }

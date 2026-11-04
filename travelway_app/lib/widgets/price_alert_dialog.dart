@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../models/tour_package.dart';
 import '../models/price_alert.dart';
 import '../providers/app_provider.dart';
@@ -37,7 +38,11 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
     final target = int.tryParse(_targetPriceController.text.trim()) ?? 0;
     if (target <= 0 || _phoneController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Iltimos, maqsadli narx va telefon raqamingizni to\'g\'ri kiriting')),
+        const SnackBar(
+          content: Text(
+            'Iltimos, maqsadli narx va telefon raqamingizni to\'g\'ri kiriting',
+          ),
+        ),
       );
       return;
     }
@@ -64,9 +69,17 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
           backgroundColor: AppTheme.surfaceDark,
           content: Row(
             children: [
-              const Icon(Icons.notifications_active, color: AppTheme.accentGold, size: 20),
+              const Icon(
+                Icons.notifications_active,
+                color: AppTheme.accentGold,
+                size: 20,
+              ),
               const SizedBox(width: 10),
-              Expanded(child: Text('Narx \$$target ga tushganda SMS/Telegram xabar beramiz!')),
+              Expanded(
+                child: Text(
+                  'Narx \$$target ga tushganda SMS/Telegram xabar beramiz!',
+                ),
+              ),
             ],
           ),
         ),
@@ -92,12 +105,19 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                 const Expanded(
                   child: Row(
                     children: [
-                      Icon(Icons.notifications_active_outlined, color: AppTheme.accentGold, size: 20),
+                      Icon(
+                        Icons.notifications_active_outlined,
+                        color: AppTheme.accentGold,
+                        size: 20,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Narx tushishini kuzatish',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -139,11 +159,33 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.accentGold),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accentGold,
+                ),
                 onPressed: _isSubmitting ? null : _submitAlert,
                 child: _isSubmitting
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Signalni faollashtirish 🔔', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.notifications_active_outlined, size: 16),
+                          SizedBox(width: 6),
+                          Text(
+                            'Signalni faollashtirish',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ],

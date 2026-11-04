@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { FlightTicket } from '../types';
+import { CalendarDays, Building2, Flame, Luggage, Plane, PlaneLanding, PlaneTakeoff, RotateCw, Ticket } from 'lucide-react';
 
 interface FlightsViewProps {
   flights: FlightTicket[];
@@ -66,7 +67,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
-              <span>✈️ Aviabiletlar</span>
+              <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Aviabiletlar</span>
               <span>•</span>
               <span>Charter & GDS Bloklar</span>
             </div>
@@ -77,7 +78,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
               Eksklyuziv charter bloklari va doimiy reyslar. Bagaj (20-23kg) kiritilgan, kafolatlangan o'rinlar.
             </p>
           </div>
-          <span className="text-3xl">🎫</span>
+          <Ticket className="w-8 h-8 text-sky-500" />
         </div>
       </div>
 
@@ -104,7 +105,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                 color: tripType === 'round_trip' ? 'var(--tw-accent-contrast)' : 'var(--tw-text-main)'
               }}
             >
-              🔄 Borish-qaytish
+              <span className="inline-flex items-center gap-1"><RotateCw className="w-3 h-3" /> Borish-qaytish</span>
             </button>
             <button
               type="button"
@@ -154,7 +155,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              🛫 Qayerdan (Вылет)
+              <span className="inline-flex items-center gap-1"><PlaneTakeoff className="w-3 h-3" /> Qayerdan (Вылет)</span>
             </label>
             <select
               value={departureCity}
@@ -180,7 +181,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              🛬 Qayerga (Прилет)
+              <span className="inline-flex items-center gap-1"><PlaneLanding className="w-3 h-3" /> Qayerga (Прилет)</span>
             </label>
             <select
               value={arrivalCity}
@@ -211,7 +212,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              📅 Parvoz sanasi
+              <span className="inline-flex items-center gap-1"><CalendarDays className="w-3 h-3" /> Parvoz sanasi</span>
             </label>
             <input
               type="date"
@@ -230,7 +231,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              ✈️ Aviakompaniya
+              <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Aviakompaniya</span>
             </label>
             <select
               value={selectedAirline}
@@ -289,7 +290,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-7 h-7 rounded-xl bg-sky-500/15 text-sky-600 dark:text-sky-400 font-black text-xs flex items-center justify-center">
-                    ✈️
+                    <Plane className="w-4 h-4" />
                   </span>
                   <div>
                     <h4 className="text-xs font-black" style={{ color: 'var(--tw-text-main)' }}>
@@ -303,7 +304,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
 
                 <div className="text-right">
                   <span className="text-[9px] block text-amber-500 font-bold mt-0.5">
-                    🔥 {flight.seatsLeft} ta joy qoldi
+                    <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3" /> {flight.seatsLeft} ta joy qoldi</span>
                   </span>
                 </div>
               </div>
@@ -334,7 +335,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                   </span>
                   <div className="flex items-center gap-1 my-0.5">
                     <span className="w-6 h-0.5 bg-sky-500/40"></span>
-                    <span className="text-sky-500 text-[10px]">✈</span>
+                    <Plane className="w-3 h-3 text-sky-500" />
                     <span className="w-6 h-0.5 bg-sky-500/40"></span>
                   </div>
                   <span className="text-[8px] font-semibold text-emerald-600 dark:text-emerald-400">
@@ -357,7 +358,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
 
               {/* Baggage and Class info */}
               <div className="flex items-center justify-between text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
-                <span>🧳 {flight.baggage}</span>
+                <span className="inline-flex items-center gap-1"><Luggage className="w-3 h-3" /> {flight.baggage}</span>
                 <span className="font-semibold uppercase">{flight.cabinClass} toifasi</span>
               </div>
 
@@ -369,7 +370,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                   borderColor: 'var(--tw-border)'
                 }}
               >
-                <span>🏢 SayrHub</span>
+                <span className="inline-flex items-center gap-1"><Building2 className="w-3 h-3" /> SayrHub</span>
                 <span className="ml-auto text-emerald-600 dark:text-emerald-400">✓ Rasmiy Operator</span>
               </div>
 
@@ -400,7 +401,7 @@ export const FlightsView: React.FC<FlightsViewProps> = ({
                       color: 'var(--tw-text-main)'
                     }}
                   >
-                    🎫 Chipta
+                    <span className="inline-flex items-center gap-1"><Ticket className="w-3 h-3" /> Chipta</span>
                   </button>
 
                   <button

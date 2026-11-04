@@ -9,13 +9,13 @@ import 'screens/main_navigation_screen.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Keep the system chrome aligned with the default dark theme.
+  // Keep the system chrome aligned with the default light theme.
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: AppTheme.bgDark,
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: AppTheme.bgLight,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
@@ -35,8 +35,9 @@ class SayrHubApp extends StatelessWidget {
     return MaterialApp(
       title: 'SayrHub',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.lightTheme,
+      themeMode: ThemeMode.light,
       home: const MainNavigationScreen(),
     );
   }

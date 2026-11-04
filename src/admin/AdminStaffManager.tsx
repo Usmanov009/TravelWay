@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
+import { Briefcase, Crown, Shield } from 'lucide-react';
 
 interface AdminStaffManagerProps {
   currentRole: AdminRole;
@@ -37,14 +38,14 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
 
   if (!isMainAdmin) {
     return (
-      <div className="p-12 text-center bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/90 dark:border-slate-800 space-y-4 max-w-xl mx-auto my-8 shadow-2xs">
+      <div className="p-12 text-center bg-card rounded-2xl border border-zinc-200/90 dark:border-zinc-800 space-y-4 max-w-xl mx-auto my-8 shadow-2xs">
         <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center text-3xl border border-amber-200/70 dark:border-amber-800/50">
-          🛡️
+          <Shield aria-hidden="true" className="h-8 w-8" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Tur Adminlar Boshqaruvi Cheklangan</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Tur Adminlar Boshqaruvi Cheklangan</h3>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Xodimlar va tur adminlar tayinlash faqat
-          <b> 👑 Bosh Admin (Super Admin)</b> vakolatiga kiradi.
+          <b> <Crown aria-hidden="true" className="inline h-3.5 w-3.5" /> Bosh Admin (Super Admin)</b> vakolatiga kiradi.
         </p>
       </div>
     );
@@ -85,12 +86,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
     const emKey = (staff.email || '').toLowerCase();
     const loginVal = staff.username || staff.email.split('@')[0];
     const passVal = staff.password || passMap[uKey] || passMap[emKey] || 'admin123';
-    const textToCopy = `🛫 SayrHub Boshqaruv Paneli (Admin)\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
+    const textToCopy = `SayrHub Boshqaruv Paneli (Admin)\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(textToCopy);
       setCopiedId(staff.id);
-      onShowToast(`"${staff.name}" xodimining login va paroli nusxalandi! 📋`, 'success');
+      onShowToast(`"${staff.name}" xodimining login va paroli nusxalandi!`, 'success');
       setTimeout(() => setCopiedId(null), 3000);
     } else {
       onShowToast(`Login: ${loginVal} | Parol: ${passVal}`, 'info');
@@ -163,17 +164,17 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>🛡️</span> Tur Adminlar & Xodimlar Jamoasi ({staffList.length})
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <Shield aria-hidden="true" className="h-4 w-4" /> Tur Adminlar & Xodimlar Jamoasi ({staffList.length})
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             SayrHub tizimidagi Tur Adminlar, ularning kirish login va parollari hamda mas'ul yo'nalishlari
           </p>
         </div>
 
         <button
           onClick={openNewStaffModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all tap-bounce shrink-0"
         >
           <span className="material-symbols-outlined text-[18px]">person_add</span>
           <span>Yangi Tur Admin Tayinlash</span>
@@ -181,9 +182,9 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       </div>
 
       {/* 2. Search */}
-      <div className="p-4 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 shadow-2xs">
+      <div className="p-4 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 shadow-2xs">
         <div className="relative max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[18px]">
             search
           </span>
           <input
@@ -191,12 +192,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Xodim ismi, login yoki telefon..."
-            className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all"
+            className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white placeholder-slate-400 pl-9 pr-7 py-2 rounded-xl text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none transition-all"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
             >
               ✕
             </button>
@@ -206,12 +207,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
 
       {/* 3. Staff Cards Grid */}
       {filteredStaff.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/90 dark:border-slate-800 space-y-4 max-w-lg mx-auto my-6 shadow-2xs">
-          <div className="w-16 h-16 rounded-2xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 mx-auto flex items-center justify-center text-3xl">
-            🧳
+        <div className="p-12 text-center bg-card rounded-2xl border border-zinc-200/90 dark:border-zinc-800 space-y-4 max-w-lg mx-auto my-6 shadow-2xs">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center text-3xl">
+            <Briefcase aria-hidden="true" className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Adminlar Topilmadi</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Adminlar Topilmadi</h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
             Qidiruv so'rovi bo'yicha tur admin topilmadi.
           </p>
         </div>
@@ -232,26 +233,26 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
             return (
               <div
                 key={staff.id}
-                className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/90 dark:border-slate-800 space-y-4 shadow-2xs relative overflow-hidden"
+                className="p-5 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 space-y-4 shadow-2xs relative overflow-hidden"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <img
                       src={staff.avatar}
                       alt=""
-                      className="w-12 h-12 rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
+                      className="w-12 h-12 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700"
                     />
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-sm">{staff.name}</h4>
-                      <p className="text-xs text-slate-400">{staff.phone}</p>
+                      <h4 className="font-bold text-zinc-900 dark:text-white text-sm">{staff.name}</h4>
+                      <p className="text-xs text-zinc-400">{staff.phone}</p>
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1 border ${
                           isMain
                             ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/50'
-                            : 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/50'
+                            : 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800/50'
                         }`}
                       >
-                        {isMain ? '👑 Bosh Admin' : '🧳 Tur Admin'}
+                        {isMain ? <><Crown aria-hidden="true" className="h-3 w-3" /> Bosh Admin</> : <><Briefcase aria-hidden="true" className="h-3 w-3" /> Tur Admin</>}
                       </span>
                     </div>
                   </div>
@@ -264,7 +265,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                           onShowToast("Tur admin o'chirildi", 'info');
                         }
                       }}
-                      className="text-slate-400 hover:text-rose-600 p-1 transition"
+                      className="text-zinc-400 hover:text-rose-600 p-1 transition"
                       title="O'chirish"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -273,16 +274,16 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                 </div>
 
                 {/* Login & Password Credentials Box */}
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[15px] text-sky-600 dark:text-sky-400">key</span>
+                    <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[15px] text-indigo-600 dark:text-indigo-400">key</span>
                       Kirish Ma'lumotlari:
                     </span>
                     <button
                       type="button"
                       onClick={() => copyCredentials(staff)}
-                      className="flex items-center gap-1 text-[11px] text-sky-700 hover:text-sky-800 dark:text-sky-300 font-bold px-2 py-0.5 rounded-lg bg-sky-100/80 dark:bg-sky-950/70 hover:bg-sky-200/80 transition"
+                      className="flex items-center gap-1 text-[11px] text-indigo-700 hover:text-indigo-800 dark:text-indigo-300 font-bold px-2 py-0.5 rounded-lg bg-indigo-100/80 dark:bg-indigo-950/70 hover:bg-indigo-200/80 transition"
                       title="Telegram uchun matnni nusxalash"
                     >
                       <span className="material-symbols-outlined text-[14px]">
@@ -293,20 +294,20 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                      <span className="text-[10px] text-slate-400 block font-medium">Login:</span>
-                      <span className="text-sky-600 dark:text-sky-400 font-mono font-bold truncate block">
+                    <div className="bg-card px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                      <span className="text-[10px] text-zinc-400 block font-medium">Login:</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-mono font-bold truncate block">
                         @{displayUser}
                       </span>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="bg-card px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-slate-400 block font-medium">Parol:</span>
+                        <span className="text-[10px] text-zinc-400 block font-medium">Parol:</span>
                         <button
                           type="button"
                           onClick={() => setVisiblePasswordStaffId(isPassVisible ? null : staff.id)}
-                          className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-0.5"
+                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-0.5"
                           title={isPassVisible ? "Parolni yashirish" : "Parolni ko'rish"}
                         >
                           <span className="material-symbols-outlined text-[14px]">
@@ -314,7 +315,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                           </span>
                         </button>
                       </div>
-                      <span className="text-slate-900 dark:text-white font-mono font-bold truncate block">
+                      <span className="text-zinc-900 dark:text-white font-mono font-bold truncate block">
                         {isPassVisible ? displayPass : '••••••••'}
                       </span>
                     </div>
@@ -328,16 +329,16 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
 
       {/* 4. MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>🛡️</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-card border border-zinc-200 dark:border-zinc-800 rounded-3xl w-full max-w-lg p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                <Shield aria-hidden="true" className="h-4 w-4" />
                 <span>Yangi Tur Admin Tayinlash</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
@@ -346,7 +347,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
             <form onSubmit={handleAdd} className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
                     Xodim Ismi & Familiyasi *
                   </label>
                   <input
@@ -355,13 +356,13 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     value={name}
                     onChange={(e) => handleNameChange(e.target.value)}
                     placeholder="Masalan: Sardor Rahimiy"
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
                       Login (Username) *
                     </label>
                     <input
@@ -370,19 +371,19 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       placeholder="tur_sardor"
-                      className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono"
+                      className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-mono"
                     />
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block">
                         Parol *
                       </label>
                       <button
                         type="button"
                         onClick={generateRandomPassword}
-                        className="text-[10px] text-sky-600 dark:text-sky-400 font-bold hover:underline"
+                        className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
                       >
                         Qayta generatsiya
                       </button>
@@ -393,12 +394,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none font-mono"
+                        className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-mono"
                       />
                       <button
                         type="button"
                         onClick={() => setShowModalPassword(!showModalPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400"
                       >
                         <span className="material-symbols-outlined text-[16px]">
                           {showModalPassword ? 'visibility_off' : 'visibility'}
@@ -409,7 +410,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
                     Telefon Raqami
                   </label>
                   <input
@@ -417,12 +418,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+998 90 123 45 67"
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
                     Email (Ixtiyoriy)
                   </label>
                   <input
@@ -430,22 +431,22 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="xodim@sayrhub.uz"
-                    className="w-full bg-slate-100/90 dark:bg-slate-800/80 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 focus:outline-none"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 text-xs font-semibold"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-2xs"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs"
                 >
                   Adminni Tayinlash
                 </button>

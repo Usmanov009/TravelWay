@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ComboTour } from '../types';
+import { ArrowRightLeft, PartyPopper, Globe2, MapPin, Search, Plane, Moon, ClipboardList, Pin } from 'lucide-react';
 
 interface ComboToursViewProps {
   comboTours: ComboTour[];
@@ -56,7 +57,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
-              <span>🔄 Multi-City</span>
+              <span className="inline-flex items-center gap-1"><ArrowRightLeft className="w-3 h-3" /> Multi-City</span>
               <span>•</span>
               <span>1:1 Rasmiy Paketlar</span>
             </div>
@@ -67,7 +68,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
               Bitta sayohatda 2 yoki undan ortiq afsonaviy shaharlar. Ichki reyslar, VIP transferlar, 5* mehmonxonalar va qiziqarli ekskursiyalar to'liq kiritilgan.
             </p>
           </div>
-          <span className="text-3xl">🎈</span>
+          <PartyPopper className="w-8 h-8 text-amber-500" />
         </div>
       </div>
 
@@ -98,7 +99,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                   borderColor: selectedCity === city ? 'var(--tw-accent)' : 'var(--tw-border)'
                 }}
               >
-                {city === 'Barchasi' ? '🌍 Barcha Combo turlar' : `📍 ${city}`}
+                <span className="inline-flex items-center gap-1">{city === 'Barchasi' ? <><Globe2 className="w-3.5 h-3.5" /> Barcha Combo turlar</> : <><MapPin className="w-3.5 h-3.5" /> {city}</>}</span>
               </button>
             ))}
           </div>
@@ -113,7 +114,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
               borderColor: 'var(--tw-border)'
             }}
           >
-            <span className="text-xs">🔍</span>
+            <Search className="w-3.5 h-3.5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Shahar yoki mehmonxona qidirish..."
@@ -142,7 +143,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             }}
           >
             <label className="text-[10px] block font-semibold mb-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-              🛫 Jo'nash shahri:
+              <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Jo'nash shahri:</span>
             </label>
             <select
               value={departureCity}
@@ -197,7 +198,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
 
               <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
                 <span className="bg-amber-500 text-slate-950 text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                  🔄 Combo {combo.cities.length} ta shahar
+                  <span className="inline-flex items-center gap-1"><ArrowRightLeft className="w-3 h-3" /> Combo {combo.cities.length} ta shahar</span>
                 </span>
                 <span className="bg-emerald-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/20">
                   1:1 Narx
@@ -209,7 +210,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                   ★ {combo.rating} Reyting
                 </span>
                 <span className="text-[10px] bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-lg font-medium">
-                  🌙 {combo.nightsSplit}
+                  <span className="inline-flex items-center gap-1"><Moon className="w-3 h-3" /> {combo.nightsSplit}</span>
                 </span>
               </div>
             </div>
@@ -225,7 +226,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                   {combo.title}
                 </h4>
                 <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                  📍 {combo.routeSummary}
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" /> {combo.routeSummary}</span>
                 </p>
               </div>
 
@@ -262,7 +263,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                   color: 'var(--tw-text-sub)'
                 }}
               >
-                <span>✈️ Ichki reys / VIP transfer kiritilgan</span>
+                <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Ichki reys / VIP transfer kiritilgan</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Barchasi ichida</span>
               </div>
 
@@ -295,7 +296,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                       color: 'var(--tw-text-main)'
                     }}
                   >
-                    📋 Dastur
+                    <span className="inline-flex items-center gap-1"><ClipboardList className="w-3 h-3" /> Dastur</span>
                   </button>
 
                   <button
@@ -307,7 +308,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                       color: 'var(--tw-accent-contrast)'
                     }}
                   >
-                    📌 Band qilish
+                    <span className="inline-flex items-center gap-1"><Pin className="w-3 h-3" /> Band qilish</span>
                   </button>
                 </div>
               </div>

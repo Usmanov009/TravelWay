@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_provider.dart';
 import '../models/explore_vibe.dart';
 import '../utils/app_theme.dart';
@@ -14,12 +15,16 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   String _activeVibe = 'all';
 
-  final List<Map<String, String>> _categories = const [
-    {'id': 'all', 'label': '✨ Hammasi'},
-    {'id': 'beach', 'label': '🏖 Plyaj & Dengiz'},
-    {'id': 'culture', 'label': '🏛 Tarix & Madaniyat'},
-    {'id': 'mountain', 'label': "⛰ Tog'lar"},
-    {'id': 'luxury', 'label': '💎 Hashamat'},
+  final List<Map<String, Object>> _categories = const [
+    {'id': 'all', 'label': 'Hammasi', 'icon': Icons.auto_awesome},
+    {'id': 'beach', 'label': 'Plyaj & Dengiz', 'icon': Icons.beach_access},
+    {
+      'id': 'culture',
+      'label': 'Tarix & Madaniyat',
+      'icon': Icons.account_balance,
+    },
+    {'id': 'mountain', 'label': "Tog'lar", 'icon': Icons.terrain},
+    {'id': 'luxury', 'label': 'Hashamat', 'icon': Icons.diamond},
   ];
 
   @override
@@ -58,11 +63,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.accentLight,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                          border: Border.all(
+                            color: AppTheme.primary.withOpacity(0.3),
+                          ),
                         ),
                         child: const Text(
                           'SayrHub Vibes',
@@ -111,24 +121,47 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   final isSelected = _activeVibe == cat['id'];
 
                   return GestureDetector(
-                    onTap: () => setState(() => _activeVibe = cat['id']!),
+                    onTap: () =>
+                        setState(() => _activeVibe = cat['id']! as String),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppTheme.primary : AppTheme.surfaceDark,
+                        color: isSelected
+                            ? AppTheme.primary
+                            : AppTheme.surfaceDark,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected ? AppTheme.primary : AppTheme.borderDark,
+                          color: isSelected
+                              ? AppTheme.primary
+                              : AppTheme.borderDark,
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          cat['label']!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : AppTheme.textSub,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              cat['icon'] as IconData,
+                              size: 15,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppTheme.textSub,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              cat['label']! as String,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppTheme.textSub,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -149,7 +182,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
                 return GestureDetector(
                   onTap: () {
-                    provider.setSearchQuery(item.destQuery.split(',')[0].trim());
+                    provider.setSearchQuery(
+                      item.destQuery.split(',')[0].trim(),
+                    );
                     provider.setTabIndex(0); // Switch to Search tab
                   },
                   child: Container(
@@ -176,7 +211,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: AppTheme.subtleDark,
-                              child: const Icon(Icons.image, color: AppTheme.textMuted),
+                              child: const Icon(
+                                Icons.image,
+                                color: AppTheme.textMuted,
+                              ),
                             ),
                           ),
                         ),
@@ -199,7 +237,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           top: 10,
                           left: 10,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primary,
                               borderRadius: BorderRadius.circular(8),
@@ -252,11 +293,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               ),
                               const SizedBox(width: 10),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withOpacity(0.65),
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.white24, width: 0.8),
+                                  border: Border.all(
+                                    color: Colors.white24,
+                                    width: 0.8,
+                                  ),
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
@@ -264,7 +311,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   children: [
                                     const Text(
                                       'Boshlang\'ich',
-                                      style: TextStyle(fontSize: 8, color: Colors.white70),
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        color: Colors.white70,
+                                      ),
                                     ),
                                     Text(
                                       item.priceFrom,
