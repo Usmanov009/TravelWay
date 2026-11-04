@@ -1,19 +1,44 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
   CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
-  YAxis,
 } from 'recharts';
 import { Booking, ComboTour, FlightTicket, HotelOnly, PriceAlert, TourPackage } from '../types';
 import { AdminRole, AdminTab, AdminUser } from './adminTypes';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, BriefcaseBusiness, CalendarDays, CircleDollarSign, Plane, Plus, UsersRound } from '@/lib/flaticon-icons';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Bell,
+  BriefcaseBusiness,
+  CalendarDays,
+  CircleDollarSign,
+  UsersRound,
+} from '@/lib/flaticon-icons';
 
 interface AdminDashboardProps {
   currentRole: AdminRole;
@@ -34,6 +59,14 @@ interface AdminDashboardProps {
 
 const money = new Intl.NumberFormat('uz-UZ');
 const monthLabels = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'Iyun', 'Iyul', 'Avg', 'Sen', 'Okt', 'Noy', 'Dek'];
+const chartConfig = {
+  revenue: {
+    label: 'Bronlar qiymati',
+    color: 'var(--primary)',
+  },
+} satisfies ChartConfig;
+
+type RevenuePeriod = '6m' | '3m' | '1m';
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentRole,
@@ -46,9 +79,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   priceAlerts,
   usersCount,
   onSelectTab,
-  onQuickAddTour,
   agencyCommissionRate = 0,
 }) => {
+  const [revenuePeriod, setRevenuePeriod] = useState<RevenuePeriod>('6m');
   const activeBookings = bookings.filter((booking) => booking.type === 'active' && booking.status !== 'Bekor qilingan');
   const revenue = bookings.reduce(
     (total, booking) => total + (booking.status === 'Bekor qilingan' ? 0 : Number(booking.totalNumeric) || 0),
@@ -79,153 +112,234 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return months;
   }, [bookings]);
 
+  const displayedRevenue = revenuePeriod === '6m'
+    ? monthlyRevenue
+    : monthlyRevenue.slice(revenuePeriod === '3m' ? -3 : -1);
+  const serviceCount = tours.length + comboTours.length + flights.length + hotels.length;
+  const peopleMetric = currentRole === 'main_admin'
+    ? {
+      title: 'Foydalanuvchilar',
+      value: usersCount,
+      note: `${priceAlerts.length} ta narx signali`,
+      description: 'Ro‘yxatdan o‘tgan mijozlar',
+      icon: UsersRound,
+      tab: 'users' as const,
+      badge: 'Mijozlar',
+    }
+    : {
+      title: 'Narx signallari',
+      value: priceAlerts.length,
+      note: 'Faol kuzatuvdagi narxlar',
+      description: 'Mijozlar sozlagan bildirishnomalar',
+      icon: Bell,
+      tab: 'price_alerts' as const,
+      badge: 'Kuzatuv',
+    };
+
   const metrics = [
-    { title: 'Sayohat paketlari', value: tours.length + comboTours.length, note: `${tours.length} ta tur · ${comboTours.length} ta combo`, icon: BriefcaseBusiness, tab: 'tours' as const },
-    { title: 'Bronlar', value: bookings.length, note: `${activeBookings.length} ta faol bron`, icon: CalendarDays, tab: 'bookings' as const },
-    { title: 'Bronlarning qiymati', value: `$${money.format(revenue)}`, note: 'To‘lov va turoperator tasdig‘i alohida', icon: CircleDollarSign, tab: 'bookings' as const },
-    { title: 'Foydalanuvchilar', value: usersCount, note: `${priceAlerts.length} ta narx signali`, icon: UsersRound, tab: 'users' as const },
+    {
+      title: 'Bronlar daromadi',
+      value: `$${money.format(revenue)}`,
+      note: 'Bekor qilingan bronlar chiqarildi',
+      description: 'Barcha tasdiqlanmagan va tasdiqlangan bronlar',
+      icon: CircleDollarSign,
+      tab: 'bookings' as const,
+      badge: 'USD',
+    },
+    {
+      title: 'Jami bronlar',
+      value: bookings.length,
+      note: `${activeBookings.length} ta faol bron`,
+      description: 'Barcha saqlangan buyurtmalar',
+      icon: CalendarDays,
+      tab: 'bookings' as const,
+      badge: `${activeBookings.length} faol`,
+    },
+    {
+      title: 'Sayohat xizmatlari',
+      value: serviceCount,
+      note: `${tours.length} ta tur · ${comboTours.length} ta combo`,
+      description: `${flights.length} ta reys · ${hotels.length} ta mehmonxona`,
+      icon: BriefcaseBusiness,
+      tab: 'tours' as const,
+      badge: 'Katalog',
+    },
+    peopleMetric,
   ];
+
+  const selectMetric = (tab: AdminTab) => onSelectTab(tab);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">Boshqaruv paneli</h1>
-            <Badge variant="secondary">{currentRole === 'main_admin' ? 'Bosh admin' : 'Tur admin'}</Badge>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Xush kelibsiz, {currentAdmin.name}. Ko‘rsatkichlar bazadagi joriy yozuvlardan olinadi.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => onSelectTab('bookings')}>
-            <CalendarDays aria-hidden="true" />
-            Bronlarni ko‘rish
-          </Button>
-          <Button onClick={onQuickAddTour}>
-            <Plus aria-hidden="true" />
-            Tur qo‘shish
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
             <Card
               key={metric.title}
-              className="cursor-pointer rounded-2xl border-border bg-card shadow-xs transition-shadow hover:shadow-md"
-              onClick={() => onSelectTab(metric.tab)}
+              className="@container/card cursor-pointer"
+              onClick={() => selectMetric(metric.tab)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  selectMetric(metric.tab);
+                }
+              }}
+              role="button"
+              tabIndex={0}
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardDescription>{metric.title}</CardDescription>
-                <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+              <CardHeader className="flex-row items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <CardDescription>{metric.title}</CardDescription>
+                  <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                    {metric.value}
+                  </CardTitle>
+                </div>
+                <CardAction>
+                  <Badge variant="outline">
+                    <Icon aria-hidden="true" />
+                    {metric.badge}
+                  </Badge>
+                </CardAction>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-semibold tabular-nums">{metric.value}</div>
-                <p className="mt-1 text-xs text-muted-foreground">{metric.note}</p>
-              </CardContent>
+              <CardFooter className="flex-col items-start gap-1.5 text-sm">
+                <div className="line-clamp-1 font-medium">
+                  {metric.note}
+                </div>
+                <div className="text-muted-foreground">{metric.description}</div>
+              </CardFooter>
             </Card>
           );
         })}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-7">
-        <Card className="rounded-2xl border-border bg-card shadow-xs xl:col-span-4">
-          <CardHeader>
-            <CardTitle>Bronlar qiymati</CardTitle>
-            <CardDescription>Oxirgi 6 oy · bekor qilingan bronlar hisoblanmaydi</CardDescription>
+      <div className="px-4 lg:px-6">
+        <Card className="@container/card">
+          <CardHeader className="flex-row items-start justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle>Bronlar qiymati</CardTitle>
+              <CardDescription>
+                {revenuePeriod === '6m' ? 'Oxirgi 6 oy' : revenuePeriod === '3m' ? 'Oxirgi 3 oy' : 'Joriy oy'}
+                {' · bekor qilingan bronlar hisoblanmaydi'}
+              </CardDescription>
+            </div>
+            <CardAction>
+              <div className="flex items-center gap-1" role="group" aria-label="Daromad davrini tanlash">
+                {([
+                  ['6m', '6 oy'],
+                  ['3m', '3 oy'],
+                  ['1m', '1 oy'],
+                ] as const).map(([period, label]) => (
+                  <Button
+                    key={period}
+                    type="button"
+                    size="sm"
+                    variant={revenuePeriod === period ? 'secondary' : 'outline'}
+                    aria-pressed={revenuePeriod === period}
+                    onClick={() => setRevenuePeriod(period)}
+                    className="h-8 px-2.5 text-xs sm:px-3"
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </CardAction>
           </CardHeader>
-          <CardContent className="h-[280px] px-2 sm:px-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyRevenue} margin={{ left: 4, right: 12, top: 8, bottom: 0 }}>
+          <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+            <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+              <AreaChart data={displayedRevenue} margin={{ left: 12, right: 12, top: 8 }}>
                 <defs>
-                  <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.28} />
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                  <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} width={56} tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} />
-                <Tooltip formatter={(value) => [`$${money.format(Number(value))}`, 'Bron qiymati']} />
-                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2} fill="url(#revenueFill)" />
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={8}
+                  minTickGap={24}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      indicator="dot"
+                      formatter={(value) => `$${money.format(Number(value))}`}
+                    />
+                  }
+                />
+                <Area
+                  dataKey="revenue"
+                  type="monotone"
+                  fill="url(#fillRevenue)"
+                  stroke="var(--color-revenue)"
+                  strokeWidth={2}
+                />
               </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-border bg-card shadow-xs xl:col-span-3">
-          <CardHeader>
-            <CardTitle>Katalog holati</CardTitle>
-            <CardDescription>Bazaga saqlangan xizmatlar</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {[
-              { label: 'Combo turlar', count: comboTours.length, tab: 'combo' as const, icon: BriefcaseBusiness },
-              { label: 'Aviabiletlar', count: flights.length, tab: 'flights' as const, icon: Plane },
-              { label: 'Mehmonxonalar', count: hotels.length, tab: 'hotels' as const, icon: BriefcaseBusiness },
-              { label: 'Narx signallari', count: priceAlerts.length, tab: 'price_alerts' as const, icon: Bell },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button key={item.label} className="flex w-full items-center justify-between text-left" onClick={() => onSelectTab(item.tab)}>
-                  <span className="flex items-center gap-3 text-sm font-medium">
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-muted">
-                      <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
-                    </span>
-                    {item.label}
-                  </span>
-                  <span className="text-sm tabular-nums text-muted-foreground">{item.count}</span>
-                </button>
-              );
-            })}
-            <div className="border-t border-border pt-4 text-xs text-muted-foreground">
-              Agentlik komissiyasi: {agencyCommissionRate}% · Ko‘rsatkichlar bazadagi ma’lumotlardan hisoblangan.
-            </div>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-2xl border-border bg-card shadow-xs">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>So‘nggi bronlar</CardTitle>
-            <CardDescription>Yaqinda yaratilgan buyurtmalar</CardDescription>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => onSelectTab('bookings')}>Barchasi</Button>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="pb-3 font-medium">Mijoz</th>
-                  <th className="pb-3 font-medium">Yo‘nalish</th>
-                  <th className="pb-3 font-medium">Sana</th>
-                  <th className="pb-3 font-medium">Holati</th>
-                  <th className="pb-3 text-right font-medium">Qiymati</th>
-                </tr>
-              </thead>
-              <tbody>
+      <div className="px-4 lg:px-6">
+        <Card>
+          <CardHeader className="flex-row items-center justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle>So‘nggi bronlar</CardTitle>
+              <CardDescription>Yaqinda yaratilgan buyurtmalar</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => onSelectTab('bookings')}>
+              Barchasi
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Mijoz</TableHead>
+                  <TableHead>Yo‘nalish</TableHead>
+                  <TableHead>Sana</TableHead>
+                  <TableHead>Holati</TableHead>
+                  <TableHead className="text-right">Qiymati</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {recentBookings.length === 0 ? (
-                  <tr><td colSpan={5} className="py-10 text-center text-muted-foreground">Bazada bronlar hali mavjud emas.</td></tr>
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                      Bazada bronlar hali mavjud emas.
+                    </TableCell>
+                  </TableRow>
                 ) : recentBookings.map((booking) => (
-                  <tr key={booking.id} className="border-b border-border/60 last:border-0">
-                    <td className="py-3 font-medium">{booking.travelerName || '—'}</td>
-                    <td className="py-3">{booking.tourTitle}</td>
-                    <td className="py-3 text-muted-foreground">{booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('uz-UZ') : booking.dates || '—'}</td>
-                    <td className="py-3"><Badge variant={booking.status === 'Bekor qilingan' ? 'destructive' : 'secondary'}>{booking.status}</Badge></td>
-                    <td className="py-3 text-right tabular-nums">${money.format(Number(booking.totalNumeric) || 0)}</td>
-                  </tr>
+                  <TableRow key={booking.id}>
+                    <TableCell className="font-medium">{booking.travelerName || '—'}</TableCell>
+                    <TableCell>{booking.tourTitle}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {booking.createdAt
+                        ? new Date(booking.createdAt).toLocaleDateString('uz-UZ')
+                        : booking.dates || '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={booking.status === 'Bekor qilingan' ? 'destructive' : 'secondary'}>
+                        {booking.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      ${money.format(Number(booking.totalNumeric) || 0)}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+      <p className="px-4 text-xs text-muted-foreground lg:px-6">
+        Agentlik komissiyasi: {agencyCommissionRate}% · Xush kelibsiz, {currentAdmin.name}.
+      </p>
     </div>
   );
 };

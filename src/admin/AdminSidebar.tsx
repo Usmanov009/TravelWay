@@ -115,16 +115,16 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
 
   return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="border-b border-sidebar-border">
+    <Sidebar collapsible="offcanvas" variant="inset">
+      <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<a href="/" />} size="lg">
+            <SidebarMenuButton render={<a href="/" />} size="lg" className="data-[slot=sidebar-menu-button]:p-1.5!">
                 <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <GalleryVerticalEnd className="size-4" aria-hidden="true" />
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">SayrHub Admin</span>
+                  <span className="text-base font-semibold">SayrHub Admin</span>
                   <span className="text-xs text-muted-foreground">Boshqaruv tizimi</span>
                 </div>
             </SidebarMenuButton>
@@ -160,7 +160,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter>
         <div className="flex items-center gap-3 px-2 py-1">
           <Avatar>
             <AvatarImage src={currentAdmin.avatar} alt={currentAdmin.name} />

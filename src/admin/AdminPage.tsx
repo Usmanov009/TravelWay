@@ -153,6 +153,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   return (
     <SidebarProvider
       data-theme={adminTheme}
+      style={{
+        '--sidebar-width': 'calc(var(--spacing) * 72)',
+        '--header-height': 'calc(var(--spacing) * 12)'
+      } as React.CSSProperties}
       className={`${adminTheme === 'dark' ? 'dark' : ''} min-h-svh bg-background text-foreground font-sans antialiased transition-colors duration-200`}
     >
       <AdminSidebar
@@ -166,9 +170,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       />
 
       <SidebarInset className="min-h-svh">
-        {/* TOP BAR */}
         <AdminTopNav
           currentRole={currentRole}
+          currentTab={currentTab}
           currentAdmin={currentAdmin}
           onSwitchRole={onSwitchRole}
           onQuickAddTour={handleQuickAddTour}
@@ -179,27 +183,30 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           onToggleTheme={toggleAdminTheme}
         />
 
-        {/* TAB CONTENT CONTAINER */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto overflow-y-auto custom-scrollbar">
+        <main className="@container/main flex flex-1 flex-col gap-2 overflow-y-auto">
           {currentTab === 'dashboard' && (
-            <AdminDashboard
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              tours={tours}
-              comboTours={comboTours}
-              flights={flights}
-              hotels={hotels}
-              bookings={bookings}
-              priceAlerts={priceAlerts}
-              usersCount={usersCount}
-              onSelectTab={(tab) => setCurrentTab(tab)}
-              onUpdateBookingStatus={onUpdateBookingStatus}
-              onQuickAddTour={handleQuickAddTour}
-              agencyCommissionRate={agencyCommissionRate}
-              onUpdateCommissionRate={onUpdateCommissionRate}
-            />
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <AdminDashboard
+                currentRole={currentRole}
+                currentAdmin={currentAdmin}
+                tours={tours}
+                comboTours={comboTours}
+                flights={flights}
+                hotels={hotels}
+                bookings={bookings}
+                priceAlerts={priceAlerts}
+                usersCount={usersCount}
+                onSelectTab={(tab) => setCurrentTab(tab)}
+                onUpdateBookingStatus={onUpdateBookingStatus}
+                onQuickAddTour={handleQuickAddTour}
+                agencyCommissionRate={agencyCommissionRate}
+                onUpdateCommissionRate={onUpdateCommissionRate}
+              />
+            </div>
           )}
 
+          {currentTab !== 'dashboard' && (
+            <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
           {currentTab === 'tours' && (
             <AdminToursManager
               currentRole={currentRole}
@@ -312,6 +319,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               agencyCommissionRate={agencyCommissionRate}
               onUpdateCommissionRate={onUpdateCommissionRate}
             />
+          )}
+            </div>
           )}
         </main>
       </SidebarInset>
