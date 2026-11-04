@@ -31,7 +31,6 @@ import {
   Info,
   Lock,
   HeartHandshake,
-  Bus,
   Hotel
 } from '@/lib/flaticon-icons';
 
@@ -55,7 +54,7 @@ interface TourBookingPageProps {
     travelersCount?: number;
     adultsCount?: number;
     childrenCount?: number;
-  }) => void;
+  }) => Promise<void>;
   onShowToast: (msg: string, type?: 'info' | 'success' | 'error') => void;
   onOpenPriceAlert?: (tour: TourPackage) => void;
 }
@@ -94,15 +93,14 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
   const perAdult = tour.isLiveKompas
     ? Math.round(tour.price / 2)
     : tour.price;
-  const perChild = Math.round(perAdult * 0.5);
+  const perChild = perAdult;
   const finalPackagePrice = (adultsCount * perAdult) + (childrenCount * perChild);
   const perPersonEstimate = Math.round(finalPackagePrice / (totalTravelers || 1));
-  const uzsEstimate = finalPackagePrice * 12950;
 
   // Nights count helper
-  const parsedNights = tour.nightsCount || (tour.nights?.match(/\d+/) ? parseInt(tour.nights.match(/\d+/)![0], 10) : 7);
+  const parsedNights = tour.nightsCount || (tour.nights?.match(/\d+/) ? parseInt(tour.nights.match(/\d+/)![0], 10) : 0);
 
-  const handleBookingSubmit = () => {
+  const handleBookingSubmit = async () => {
     if (!leadName.trim()) {
       onShowToast("Iltimos, asosiy sayohatchining ism va familiyasini kiriting!", 'error');
       return;
@@ -111,11 +109,11 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
     setIsSubmitting(true);
 
     try {
-      onConfirmBooking({
+      await onConfirmBooking({
         tour,
         travelerName: leadName.trim(),
         phone: leadPhone.trim(),
-        passport: leadPassport.trim() || 'N/A',
+        passport: leadPassport.trim(),
         dob: '',
         payType: 'online_booking',
         discount: 0,
@@ -123,20 +121,25 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
         adultsCount,
         childrenCount
       });
-      onShowToast(`"${tour.title}" turi muvaffaqiyatli bron qilindi!`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Bron so‘rovini saqlab bo‘lmadi.', 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const copySmetaToClipboard = () => {
-    const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI VA SMETASI\n--------------------------------\nMehmonxona: ${tour.title}\nManzil: ${tour.location} (${tour.resort || ''})\nReys: ${tour.flightNumber || tour.flight} (${tour.airline || "O'zbekiston Havo Yo'llari"})\nJo'nash sanasi: ${tour.departureDate || 'Yaqin kunlarda'}\nDavomiyligi: ${parsedNights} kecha / ${parsedNights + 1} kun\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nBuyurtmachi: ${leadName || 'Mijoz'}\nTelefon: ${leadPhone}\nPasport: ${leadPassport || 'Kiritilmagan'}\nYakuniy narx: $${finalPackagePrice} (~${uzsEstimate.toLocaleString()} UZS)\nTuroperator kodi: ${tour.kompasTourCode || 'SH-UZ-9021'}\n--------------------------------\nSayrHub bilan qulay va xavfsiz sayohat!`;
-    navigator.clipboard.writeText(smeta);
-    onShowToast("Tur hisob-kitobi va smetasi nusxalandi!", "success");
+  const copySmetaToClipboard = async () => {
+    const smeta = `SAYRHUB — TUR SPESIFIKATSIYASI VA SMETASI\n--------------------------------\nMehmonxona: ${tour.title}\nManzil: ${tour.location} (${tour.resort || '—'})\nReys: ${tour.flightNumber || tour.flight || '—'} (${tour.airline || '—'})\nJo'nash sanasi: ${tour.departureDate || '—'}\nDavomiyligi: ${parsedNights} kecha / ${parsedNights + 1} kun\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nBuyurtmachi: ${leadName || 'Mijoz'}\nTelefon: ${leadPhone || '—'}\nPasport: ${leadPassport || 'Kiritilmagan'}\nTaxminiy narx: $${finalPackagePrice}\nTuroperator kodi: ${tour.kompasTourCode || '—'}\n--------------------------------\nSayrHub sayohat xizmatlari`;
+    try {
+      await navigator.clipboard.writeText(smeta);
+      onShowToast('Tur hisob-kitobi va smetasi nusxalandi!', 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Smetani nusxalab bo‘lmadi.', 'error');
+    }
   };
 
   const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-    `Assalomu alaykum! SayrHub orqali ushbu turni bron qilish bo'yicha savolim bor edi:\n\nMehmonxona: ${tour.title}\nManzil: ${tour.location}\nReys: ${tour.flightNumber || tour.flight}\nMuddat: ${tour.nights}\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nIsm: ${leadName}\nNarx: $${finalPackagePrice}\nKod: ${tour.kompasTourCode || 'SH-TR'}`
+    `Assalomu alaykum! SayrHub orqali ushbu turni bron qilish bo'yicha savolim bor edi:\n\nMehmonxona: ${tour.title}\nManzil: ${tour.location}\nReys: ${tour.flightNumber || tour.flight || '—'}\nMuddat: ${tour.nights || '—'}\nSayohatchilar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nIsm: ${leadName}\nNarx: $${finalPackagePrice}\nKod: ${tour.kompasTourCode || '—'}`
   )}`;
 
   return (
@@ -161,12 +164,12 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
             </span>
             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
               <ShieldCheck className="w-3 h-3 text-emerald-500 inline" />
-              100% Rasmiy kafolatlangan vaucher
+              Bron so‘rovi bazaga saqlanadi; tasdiqlanishini kuting
             </span>
           </div>
 
           <Badge variant="secondary" className="text-[10px] font-mono px-2 py-0.5 rounded-lg border-border">
-            {tour.kompasTourCode || 'SH-UZ-9021'}
+            {tour.kompasTourCode || '—'}
           </Badge>
         </div>
       </div>
@@ -220,27 +223,21 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 {tour.flightNumber || tour.flight}
               </p>
               <p className="text-[10px] text-primary truncate">
-                {tour.airline || "O'zbekiston Havo Yo'llari"}
+                {tour.airline || '—'}
               </p>
             </div>
 
             <div className="p-2.5 rounded-xl border border-border bg-card">
               <span className="text-[10px] text-muted-foreground block font-medium">Ovqatlanish</span>
               <p className="font-bold text-xs text-card-foreground mt-0.5">
-                {tour.mealType || 'AI'} — {tour.mealDesc || tour.tag || 'All Inclusive'}
-              </p>
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                Restoran & Bar bepul
+                {tour.mealType || '—'} — {tour.mealDesc || tour.tag || '—'}
               </p>
             </div>
 
             <div className="p-2.5 rounded-xl border border-border bg-card col-span-2 sm:col-span-1">
               <span className="text-[10px] text-muted-foreground block font-medium">Xona toifasi</span>
               <p className="font-bold text-xs text-card-foreground mt-0.5">
-                {tour.roomType || 'Standard Room'}
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                Barcha qulayliklar bilan
+                {tour.roomType || '—'}
               </p>
             </div>
           </CardContent>
@@ -276,7 +273,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-card-foreground inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Katta yoshdagilar</span>
                   <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-sky-500/10 text-sky-600 dark:text-sky-400 border-none">
-                    12+ yosh
+                    Kishi
                   </Badge>
                 </div>
                 <span className="text-[11px] text-muted-foreground">
@@ -330,11 +327,11 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-card-foreground inline-flex items-center gap-1"><Users className="w-3.5 h-3.5" /> Yosh bolalar</span>
                   <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-none">
-                    0-11 yosh
+                    Bola
                   </Badge>
                 </div>
                 <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                  50% maxsus chegirma: <b className="text-card-foreground">${perChild}</b>
+                  Hisoblangan tarif: <b className="text-card-foreground">${perChild}</b>
                 </span>
               </div>
 
@@ -408,7 +405,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 type="text"
                 value={leadName}
                 onChange={(e) => setLeadName(e.target.value)}
-                placeholder="Masalan: Jasur Rahimov"
+                placeholder="Ism va familiya"
                 className="rounded-xl h-10 text-xs bg-muted/40 border-border focus:bg-card"
               />
             </div>
@@ -424,7 +421,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                   type="text"
                   value={leadPhone}
                   onChange={(e) => setLeadPhone(e.target.value)}
-                  placeholder="+998 90 123 45 67"
+                  placeholder="+998 00 000 00 00"
                   className="rounded-xl h-10 text-xs bg-muted/40 border-border focus:bg-card font-mono"
                 />
               </div>
@@ -439,7 +436,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                   type="text"
                   value={leadPassport}
                   onChange={(e) => setLeadPassport(e.target.value)}
-                  placeholder="FA 9842104"
+                  placeholder="Pasport seriya va raqami"
                   className="rounded-xl h-10 text-xs bg-muted/40 border-border focus:bg-card font-mono uppercase"
                 />
               </div>
@@ -448,7 +445,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
             <div className="p-2.5 rounded-xl bg-primary/5 border border-primary/15 flex items-start gap-2 text-[11px] text-muted-foreground">
               <Lock className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               <span>
-                Ma'lumotlaringiz 100% himoyalangan va faqat xalqaro turoperator hamda sug'urta polisini ochish uchun ishlatiladi.
+                Ma'lumotlaringiz bron so'rovini ko'rib chiqish uchun yuboriladi. Yuborishdan oldin kiritilgan ma'lumotlarni tekshiring.
               </span>
             </div>
           </CardContent>
@@ -463,10 +460,10 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
               </div>
               <div>
                 <CardTitle className="text-sm font-bold text-card-foreground">
-                  Parvoz va logistika spesifikatsiyasi
+                  Parvoz ma'lumotlari
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                  To'g'ridan-to'g'ri charter qatnovi va aeroport transferi
+                  Tur ma'lumotlarida mavjud bo'lgan parvoz tafsilotlari
                 </CardDescription>
               </div>
             </div>
@@ -477,26 +474,16 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
               <div className="p-3 rounded-xl border border-border bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-medium">Yo'nalish va reys</span>
                 <p className="font-bold text-card-foreground mt-0.5">{tour.flightNumber || tour.flight}</p>
-                <p className="text-[10px] text-primary mt-0.5 font-medium">{tour.airline || "Uzbekistan Airways"}</p>
+                <p className="text-[10px] text-primary mt-0.5 font-medium">{tour.airline || '—'}</p>
               </div>
 
               <div className="p-3 rounded-xl border border-border bg-muted/30">
                 <span className="text-[10px] text-muted-foreground block font-medium">Yuk me'yori (Baggage)</span>
                 <p className="font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  {tour.baggage || "20 kg + 8 kg qo'l yuki"}
+                  {tour.baggage || '—'}
                 </p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Har bir sayyoh uchun</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Yuk me'yori</p>
               </div>
-            </div>
-
-            <div className="p-2.5 rounded-xl border border-border bg-card flex items-center justify-between text-xs">
-              <span className="flex items-center gap-2 text-card-foreground font-medium">
-                <Building2 className="w-3.5 h-3.5 text-primary" />
-                Aeroport ⇄ Mehmonxona qulay transferi:
-              </span>
-              <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] border-none font-bold">
-                Kiritilgan (0$)
-              </Badge>
             </div>
           </CardContent>
         </Card>
@@ -510,10 +497,10 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
               </div>
               <div>
                 <CardTitle className="text-sm font-bold text-card-foreground">
-                  Paket tarkibiga to'liq kiritilgan xizmatlar
+                  Paket tarkibi
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                  SayrHub orqali ortiqcha yashirin to'lovlar mavjud emas
+                  Tur uchun qayd etilgan xizmatlar
                 </CardDescription>
               </div>
             </div>
@@ -521,19 +508,12 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
 
           <CardContent className="pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {[
-                { title: 'To\'g\'ridan-to\'g\'ri aviaparvoz (Borish & Qaytish)', icon: <Plane className="w-4 h-4 text-primary shrink-0" /> },
-                { title: 'Aeroport — Mehmonxona — Aeroport transferi', icon: <Bus className="w-4 h-4 text-primary shrink-0" /> },
-                { title: `${tour.title} mehmonxonasida ${parsedNights} kecha`, icon: <Hotel className="w-4 h-4 text-primary shrink-0" /> },
-                { title: `${tour.mealType || 'AI'} — Barcha ovqatlanish va ichimliklar`, icon: <Utensils className="w-4 h-4 text-primary shrink-0" /> },
-                { title: 'Xalqaro tibbiy sug\'urta polisi ($30,000)', icon: <ShieldCheck className="w-4 h-4 text-primary shrink-0" /> },
-                { title: '24/7 SayrHub kuratori va gid hamrohligi', icon: <Users className="w-4 h-4 text-primary shrink-0" /> }
-              ].map((inc, i) => (
+              {tour.inclusions?.length ? tour.inclusions.map((inclusion, i) => (
                 <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-muted/40 border border-border">
-                  {inc.icon}
-                  <span className="text-card-foreground font-medium text-[11px]">{inc.title}</span>
+                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                  <span className="text-card-foreground font-medium text-[11px]">{inclusion}</span>
                 </div>
-              ))}
+              )) : <p className="text-xs text-muted-foreground">Paket tarkibi haqida ma'lumot berilmagan.</p>}
             </div>
           </CardContent>
         </Card>
@@ -548,15 +528,15 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 </div>
                 <div>
                   <CardTitle className="text-sm font-bold text-card-foreground">
-                    Rasmiy narx hisob-kitobi (Smeta)
+                    Narx hisob-kitobi
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">
-                    1:1 Turoperator kafolati bilan shaffof hisoblash
+                    Hisob-kitob ko'rsatilgan tur narxi asosida tuzildi
                   </CardDescription>
                 </div>
               </div>
               <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-none font-bold text-[10px]">
-                Jonli narx
+                {tour.isLiveKompas ? 'Kompas qidiruvi' : 'Ma’lumotlar bazasi'}
               </Badge>
             </div>
           </CardHeader>
@@ -571,7 +551,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
 
             {childrenCount > 0 && (
               <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
-                <span>Yosh bolalar ({childrenCount} bola - 50%):</span>
+                <span>Yosh bolalar ({childrenCount} bola):</span>
                 <span className="font-bold">
                   {childrenCount} × ${perChild} = ${childrenCount * perChild}
                 </span>
@@ -594,18 +574,13 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
               </div>
             )}
 
-            <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400">
-              <span>Aeroport va yonilg'i yig'imlari:</span>
-              <span className="font-bold">Kiritilgan ($0)</span>
-            </div>
-
             <Separator className="my-2" />
 
             <div className="flex justify-between items-end pt-1">
               <div>
                 <span className="text-[11px] text-muted-foreground block font-medium">Jami yakuniy qiymat:</span>
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold font-mono">
-                  ~{uzsEstimate.toLocaleString()} UZS
+                  Taxminiy narx
                 </span>
               </div>
               <div className="text-right">
@@ -613,7 +588,7 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                   ${finalPackagePrice}
                 </span>
                 <span className="text-[9px] block text-emerald-600 dark:text-emerald-400 font-bold">
-                  Kafolatlangan rasmiy narx
+                  Yakuniy narx operator tasdig'idan so'ng aniqlanadi
                 </span>
               </div>
             </div>
@@ -677,8 +652,8 @@ export const TourBookingPage: React.FC<TourBookingPageProps> = ({
                 ({totalTravelers} kishi uchun)
               </span>
             </div>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold block">
-              ~{uzsEstimate.toLocaleString()} UZS
+            <span className="text-[11px] text-muted-foreground font-bold block">
+              Yakuniy narx bron tasdiqlangach ma'lum bo'ladi
             </span>
           </div>
 

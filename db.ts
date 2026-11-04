@@ -38,7 +38,7 @@ const TourSchema = new mongoose.Schema({
   inclusions: [String],
   lat: Number,
   lng: Number,
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 // Booking Schema
 const BookingSchema = new mongoose.Schema({
@@ -66,6 +66,7 @@ const BookingSchema = new mongoose.Schema({
   childrenCount: Number,
   cancellationReason: String,
   cancelledAt: String,
+  paymentType: String,
 }, { timestamps: true });
 
 // Price Alert Schema
@@ -82,6 +83,7 @@ const PriceAlertSchema = new mongoose.Schema({
   notifyViaPush: { type: Boolean, default: true },
   notifyViaTelegram: { type: Boolean, default: true },
   userEmail: String,
+  userId: String,
 }, { timestamps: true });
 
 // User Profile Schema
@@ -94,8 +96,19 @@ const UserSchema = new mongoose.Schema({
   telegramUsername: String,
   passportNumber: String,
   passportExpiry: String,
+  dob: String,
   citizenship: String,
   cashbackBalance: { type: Number, default: 0 },
+  isVerified: { type: Boolean, default: false },
+  status: { type: String, enum: ['active', 'blocked'], default: 'active' },
+  favoriteTourIds: [String],
+  paymentCards: [{
+    id: String,
+    type: { type: String, enum: ['HUMO', 'UZCARD', 'VISA'] },
+    last4: String,
+    bank: String,
+    isPrimary: Boolean,
+  }],
 }, { timestamps: true });
 
 // Admin Staff Schema
@@ -132,7 +145,7 @@ AdminStaffSchema.pre('save', async function () {
 // Agency Settings Schema
 const AgencySettingsSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true, default: 'global_settings' },
-  agencyCommissionRate: { type: Number, default: 8 },
+  agencyCommissionRate: { type: Number, default: 0 },
   agencyName: { type: String, default: 'SayrHub' },
   tourOperator: { type: String, default: 'Kompas Tour' },
   updatedBy: String,
@@ -145,6 +158,13 @@ export const PriceAlertModel = mongoose.models.PriceAlert || mongoose.model('Pri
 export const UserModel = mongoose.models.User || mongoose.model('User', UserSchema);
 export const AdminStaffModel = mongoose.models.AdminStaff || mongoose.model('AdminStaff', AdminStaffSchema);
 export const AgencySettingsModel = mongoose.models.AgencySettings || mongoose.model('AgencySettings', AgencySettingsSchema);
+const CatalogItemSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  kind: { type: String, enum: ['combo-tours', 'flights', 'hotels'], required: true },
+  data: { type: mongoose.Schema.Types.Mixed, required: true },
+}, { timestamps: true });
+CatalogItemSchema.index({ kind: 1, id: 1 }, { unique: true });
+export const CatalogItemModel = mongoose.models.CatalogItem || mongoose.model('CatalogItem', CatalogItemSchema);
 
 let isConnected = false;
 let reconnectTimer: NodeJS.Timeout | null = null;
@@ -152,7 +172,7 @@ let reconnectTimer: NodeJS.Timeout | null = null;
 export async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) return;
   if (!MONGODB_URI) {
-    console.log('ℹ️ MONGODB_URI belgilanmagan — tizim xavfsiz in-memory zaxira rejimida ishlaydi.');
+    console.error('MONGODB_URI belgilanmagan — database API ishlamaydi.');
     return;
   }
   try {
@@ -183,19 +203,6 @@ export async function connectDB() {
       console.warn('⚠️ Error syncing admin staff with DB:', e.message);
     }
 
-    // Auto-seed initial tours and bookings if empty
-    const tourCount = await TourModel.countDocuments();
-    if (tourCount === 0) {
-      try {
-        const { INITIAL_TOURS } = await import('./src/data/mockData.js');
-        if (Array.isArray(INITIAL_TOURS) && INITIAL_TOURS.length > 0) {
-          await TourModel.insertMany(INITIAL_TOURS);
-          console.log(` Seeded ${INITIAL_TOURS.length} initial tours into MongoDB`);
-        }
-      } catch (seedErr: any) {
-        console.warn(' Auto-seed warning:', seedErr.message);
-      }
-    }
   } catch (error: any) {
     isConnected = false;
     console.error(' MongoDB Connection Error:', error.message);
@@ -213,10 +220,14 @@ export async function connectDB() {
                 clearInterval(reconnectTimer);
                 reconnectTimer = null;
               }
+              const { initAgencySettings } = await import('./src/server/services/agencySettings.js');
+              await initAgencySettings();
               const { syncStaffWithMongoDB } = await import('./src/server/services/adminStaffStorage.js');
               await syncStaffWithMongoDB();
             }
-          } catch { }
+          } catch (error: any) {
+            console.error('MongoDB reconnect failed:', error.message);
+          }
         }
       }, 30000);
     }

@@ -18,13 +18,10 @@ import {
   ShieldCheck,
   CreditCard,
   User,
-  QrCode,
   AlertTriangle,
-  KeyRound,
   Globe2,
   BriefcaseBusiness,
   Building2,
-  Bus,
   Hotel,
   Users,
   Baby,
@@ -48,7 +45,6 @@ interface ModalsProps {
   // Social Modal
   socialProvider: 'google' | null;
   onCloseSocial: () => void;
-  onSelectSocialAccount: (name: string, email: string) => void;
 
   // Tour Details Modal
   tourDetails: TourPackage | null;
@@ -73,7 +69,7 @@ interface ModalsProps {
     travelersCount?: number;
     adultsCount?: number;
     childrenCount?: number;
-  }) => void;
+  }) => Promise<void>;
 
   // Booking Success Modal
   successBooking: Booking | null;
@@ -134,7 +130,6 @@ export const Modals: React.FC<ModalsProps> = ({
   onVerifyOtp,
   socialProvider,
   onCloseSocial,
-  onSelectSocialAccount,
   tourDetails,
   onCloseTourDetails,
   onProceedToCheckout,
@@ -185,9 +180,9 @@ export const Modals: React.FC<ModalsProps> = ({
   // Checkout & Travelers state
   const [adultsCount, setAdultsCount] = useState<number>(checkoutAdults || 2);
   const [childrenCount, setChildrenCount] = useState<number>(checkoutChildren || 0);
-  const [bookingTravelerName, setBookingTravelerName] = useState<string>(currentName || 'SayrHub Sayohatchi');
-  const [bookingPhone, setBookingPhone] = useState<string>(currentPhone || '+998 90 123 45 67');
-  const [bookingPassport, setBookingPassport] = useState<string>(currentPassport || 'FA 9842104');
+  const [bookingTravelerName, setBookingTravelerName] = useState<string>(currentName || '');
+  const [bookingPhone, setBookingPhone] = useState<string>(currentPhone || '');
+  const [bookingPassport, setBookingPassport] = useState<string>(currentPassport || '');
   const [selectedPayType, setSelectedPayType] = useState('humo');
   const [cancelReason, setCancelReason] = useState<string>("Rejalarim o'zgardi");
 
@@ -195,9 +190,9 @@ export const Modals: React.FC<ModalsProps> = ({
   useEffect(() => {
     if (checkoutAdults !== undefined) setAdultsCount(checkoutAdults);
     if (checkoutChildren !== undefined) setChildrenCount(checkoutChildren);
-    if (currentName) setBookingTravelerName(currentName);
-    if (currentPhone) setBookingPhone(currentPhone);
-    if (currentPassport) setBookingPassport(currentPassport);
+    setBookingTravelerName(currentName || '');
+    setBookingPhone(currentPhone || '');
+    setBookingPassport(currentPassport || '');
   }, [checkoutAdults, checkoutChildren, checkoutTour, currentName, currentPhone, currentPassport]);
 
   // Edit profile state
@@ -254,13 +249,6 @@ export const Modals: React.FC<ModalsProps> = ({
     }
   };
 
-  const autofillOtp = (code: string) => {
-    const arr = code.split('').slice(0, 4);
-    setOtpDigits(arr);
-    onShowToast("Test kodi avtomatik to'ldirildi ✓", 'success');
-    setTimeout(() => onVerifyOtp(code), 400);
-  };
-
   return (
     <>
       {/* 1. OTP SMS CODE VERIFICATION MODAL */}
@@ -308,32 +296,9 @@ export const Modals: React.FC<ModalsProps> = ({
               </button>
             </div>
 
-            {/* Quick Auto-Fill Demo Chip */}
-            <div
-              className="flex items-center justify-between border rounded-xl p-2 px-3"
-              style={{
-                backgroundColor: 'var(--tw-subtle)',
-                borderColor: 'var(--tw-border)'
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[11px]" style={{ color: 'var(--tw-text-main)' }}>
-                  Test SMS kodi: <b className="font-mono" style={{ color: 'var(--tw-accent)' }}>7788</b>
-                </span>
-              </div>
-              <button
-                className="text-[11px] font-bold px-2 py-0.5 rounded-lg active:scale-95 transition"
-                style={{
-                  backgroundColor: 'var(--tw-accent-light)',
-                  color: 'var(--tw-accent)'
-                }}
-                onClick={() => autofillOtp('7788')}
-                type="button"
-              >
-                Nusxa olib qo'yish
-              </button>
-            </div>
+            <p className="rounded-xl border p-3 text-xs text-muted-foreground" style={{ borderColor: 'var(--tw-border)' }}>
+              SMS tasdiqlash xizmati hozircha sozlanmagan. Telegram orqali kiring.
+            </p>
 
             {/* 4-digit OTP Inputs */}
             <div className="flex justify-center gap-3 py-2">
@@ -370,8 +335,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   className="text-xs font-bold hover:underline active:scale-95"
                   style={{ color: 'var(--tw-accent)' }}
                   onClick={() => {
-                    setOtpSeconds(59);
-                    onShowToast("Yangi tasdiqlash kodi jo'natildi! (Test: 7788)", 'success');
+                    onShowToast('SMS tasdiqlash xizmati hozircha sozlanmagan.', 'error');
                   }}
                   type="button"
                 >
@@ -431,54 +395,8 @@ export const Modals: React.FC<ModalsProps> = ({
               </button>
             </div>
 
-            <div className="space-y-2.5">
-              <div
-                className="p-3 border rounded-2xl flex items-center justify-between cursor-pointer active:scale-98 transition"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)'
-                }}
-                onClick={() => onSelectSocialAccount('Jasur Rahimov', 'jasur.travel@gmail.com')}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs"
-                    style={{
-                      backgroundColor: 'var(--tw-accent)',
-                      color: 'var(--tw-accent-contrast)'
-                    }}
-                  >
-                    JR
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>Jasur Rahimov</h4>
-                    <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
-                      jasur.travel@gmail.com
-                    </p>
-                  </div>
-                </div>
-                <span className="text-xs font-semibold" style={{ color: 'var(--tw-accent)' }}>Ulash</span>
-              </div>
-
-              <div
-                className="p-3 border rounded-2xl flex items-center justify-between cursor-pointer active:scale-98 transition"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)'
-                }}
-                onClick={() => onSelectSocialAccount('Jasur R.', 'work.rahimov@company.uz')}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-xs">
-                    <BriefcaseBusiness className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold" style={{ color: 'var(--tw-text-main)' }}>Jasur R. (Korporativ)</h4>
-                    <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>work.rahimov@company.uz</p>
-                  </div>
-                </div>
-                <span className="text-xs font-semibold" style={{ color: 'var(--tw-text-sub)' }}>Ulash</span>
-              </div>
+            <div className="rounded-xl border p-3 text-xs text-muted-foreground" style={{ borderColor: 'var(--tw-border)' }}>
+              Google orqali kirish hozircha sozlanmagan. Ma’lumotlar bazasiga ulangan kirish uchun Telegramdan foydalaning.
             </div>
 
             <button
@@ -603,7 +521,7 @@ export const Modals: React.FC<ModalsProps> = ({
               >
                 <Plane className="w-4 h-4 text-primary" />
                 <div>
-                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>To'g'ridan-to'g'ri reys</p>
+                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Reys</p>
                   <p className="font-bold text-[11px] truncate" style={{ color: 'var(--tw-text-main)' }}>{tourDetails.flight}</p>
                 </div>
               </div>
@@ -617,33 +535,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 <Hotel className="w-4 h-4 text-primary" />
                 <div>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Yashash muddati</p>
-                  <p className="font-bold text-[11px]" style={{ color: 'var(--tw-text-main)' }}>{tourDetails.nights} / 8 kun</p>
-                </div>
-              </div>
-              <div
-                className="p-2.5 rounded-xl border flex items-center gap-2.5"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)'
-                }}
-              >
-                <Bus className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Transfer xizmati</p>
-                  <p className="font-bold text-[11px]" style={{ color: 'var(--tw-text-main)' }}>Aeroport — Mehmonxona</p>
-                </div>
-              </div>
-              <div
-                className="p-2.5 rounded-xl border flex items-center gap-2.5"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)'
-                }}
-              >
-                <ShieldCheck className="w-4 h-4 text-primary" />
-                <div>
-                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Tibbiy sug'urta</p>
-                  <p className="font-bold text-emerald-500 text-[11px]">$30,000 qoplama</p>
+                  <p className="font-bold text-[11px]" style={{ color: 'var(--tw-text-main)' }}>{tourDetails.nights || '—'}</p>
                 </div>
               </div>
             </div>
@@ -663,7 +555,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     Bosh Turoperator
                   </span>
                   <span className="font-extrabold text-sky-600 dark:text-sky-400 truncate block">
-                    {tourDetails.tourOperator || (tourDetails.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}
+                    {tourDetails.tourOperator || (tourDetails.isLiveKompas ? 'Kompas Tour' : '—')}
                   </span>
                 </div>
               </div>
@@ -689,18 +581,18 @@ export const Modals: React.FC<ModalsProps> = ({
               <div className="flex items-center justify-between text-[11px] font-semibold" style={{ color: 'var(--tw-text-sub)' }}>
                 <span>Asl turoperator narxi:</span>
                 <span className="font-mono font-bold">
-                  ${tourDetails.originalCostPrice || Math.round(tourDetails.price / (1 + (tourDetails.markupValue || 8) / 100))}
+                  ${tourDetails.originalCostPrice ?? tourDetails.price}
                 </span>
               </div>
               <div className="flex items-center justify-between text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold">
                 <span className="flex items-center gap-1">
                   <span className="inline-flex items-center gap-1"><BriefcaseBusiness className="w-3 h-3" /> Agentlik xizmati</span>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 border border-cyan-500/30">
-                    +{tourDetails.markupValue || 8}%
+                    +{tourDetails.markupValue ?? 0}%
                   </span>
                 </span>
                 <span className="font-mono font-bold">
-                  +${Math.max(0, tourDetails.price - (tourDetails.originalCostPrice || Math.round(tourDetails.price / (1 + (tourDetails.markupValue || 8) / 100))))}
+                  +${Math.max(0, tourDetails.price - (tourDetails.originalCostPrice ?? tourDetails.price))}
                 </span>
               </div>
               <div className="pt-1.5 border-t flex items-center justify-between font-bold" style={{ borderColor: 'var(--tw-border)' }}>
@@ -721,13 +613,13 @@ export const Modals: React.FC<ModalsProps> = ({
             >
               <div>
                 <span className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
-                  {tourDetails.isLiveKompas ? "Jonli 1:1 rasmiy narx:" : "Turpaket to'liq narxi:"}
+                  {tourDetails.isLiveKompas ? 'Kompas manbasidan olingan narx:' : 'Turpaket narxi:'}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <p className="text-xl font-black" style={{ color: 'var(--tw-accent)' }}>${tourDetails.price}</p>
                   {tourDetails.isLiveKompas && (
                     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                      Jonli 1:1
+                      Kompas
                     </span>
                   )}
                 </div>
@@ -801,7 +693,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     SAYRHUB
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 font-mono">
-                    {checkoutTour.kompasTourCode || 'SH-UZ-9021'}
+                    {checkoutTour.kompasTourCode || '—'}
                   </span>
                 </div>
                 <h3 className="text-base font-extrabold mt-1" style={{ color: 'var(--tw-text-main)' }}>{checkoutTour.title}</h3>
@@ -915,9 +807,9 @@ export const Modals: React.FC<ModalsProps> = ({
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-bold flex items-center gap-1" style={{ color: 'var(--tw-text-main)' }}><Baby className="w-3.5 h-3.5" /> Yosh bolalar</span>
-                    <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">0-11 yosh</span>
+                    <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Bola</span>
                   </div>
-                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">50% maxsus chegirma</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">Hisoblangan tarif</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -1004,7 +896,7 @@ export const Modals: React.FC<ModalsProps> = ({
                     type="text"
                     value={bookingTravelerName}
                     onChange={(e) => setBookingTravelerName(e.target.value)}
-                    placeholder="Masalan: Jasur Rahimov"
+                    placeholder="Ism va familiya"
                     className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
                     style={{
                       backgroundColor: 'var(--tw-surface)',
@@ -1023,7 +915,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       type="text"
                       value={bookingPhone}
                       onChange={(e) => setBookingPhone(e.target.value)}
-                      placeholder="+998 90 123 45 67"
+                      placeholder="+998 00 000 00 00"
                       className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
                       style={{
                         backgroundColor: 'var(--tw-surface)',
@@ -1040,7 +932,7 @@ export const Modals: React.FC<ModalsProps> = ({
                       type="text"
                       value={bookingPassport}
                       onChange={(e) => setBookingPassport(e.target.value)}
-                      placeholder="FA 9842104"
+                      placeholder="Pasport seriya va raqami"
                       className="w-full px-3 py-2 text-xs rounded-xl border font-medium focus:outline-none focus:ring-1"
                       style={{
                         backgroundColor: 'var(--tw-surface)',
@@ -1074,7 +966,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 >
                   <span className="text-[9px] block font-medium" style={{ color: 'var(--tw-text-sub)' }}>Reys & Aviakompaniya</span>
                   <p className="font-bold truncate" style={{ color: 'var(--tw-text-main)' }}>{checkoutTour.flightNumber || checkoutTour.flight}</p>
-                  <p className="text-[10px]" style={{ color: 'var(--tw-accent)' }}>{checkoutTour.airline || 'Uzbekistan Airways'}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--tw-accent)' }}>{checkoutTour.airline || '—'}</p>
                 </div>
                 <div
                   className="p-2 rounded-xl border"
@@ -1084,8 +976,8 @@ export const Modals: React.FC<ModalsProps> = ({
                   }}
                 >
                   <span className="text-[9px] block font-medium" style={{ color: 'var(--tw-text-sub)' }}>Bagaj me'yori</span>
-                  <p className="text-emerald-500 font-bold">{checkoutTour.baggage || "20 kg + 8 kg qo'l yuki"}</p>
-                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>To'g'ridan-to'g'ri charter</p>
+                  <p className="text-emerald-500 font-bold">{checkoutTour.baggage || '—'}</p>
+                  <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>Tur ma'lumotlarida ko'rsatilgan yuk me'yori</p>
                 </div>
               </div>
             </div>
@@ -1110,8 +1002,8 @@ export const Modals: React.FC<ModalsProps> = ({
                   }}
                 >
                   <span className="text-[9px] block font-medium" style={{ color: 'var(--tw-text-sub)' }}>Xona toifasi</span>
-                  <p className="font-bold" style={{ color: 'var(--tw-text-main)' }}>{checkoutTour.roomType || 'Standard Room'}</p>
-                  <p className="text-[10px] text-amber-500">★ {checkoutTour.rating} reyting</p>
+                  <p className="font-bold" style={{ color: 'var(--tw-text-main)' }}>{checkoutTour.roomType || '—'}</p>
+                  {checkoutTour.rating > 0 && <p className="text-[10px] text-amber-500">★ {checkoutTour.rating} reyting</p>}
                 </div>
                 <div
                   className="p-2 rounded-xl border"
@@ -1121,7 +1013,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   }}
                 >
                   <span className="text-[9px] block font-medium" style={{ color: 'var(--tw-text-sub)' }}>Ovqatlanish rejimi</span>
-                  <p className="font-bold" style={{ color: 'var(--tw-accent)' }}>{checkoutTour.mealType || 'AI'} — {checkoutTour.mealDesc || checkoutTour.tag}</p>
+                  <p className="font-bold" style={{ color: 'var(--tw-accent)' }}>{checkoutTour.mealType || '—'} — {checkoutTour.mealDesc || checkoutTour.tag || '—'}</p>
                   <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>{checkoutTour.nights}</p>
                 </div>
               </div>
@@ -1136,33 +1028,17 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: 'var(--tw-text-sub)' }}>
-                Paket tarkibiga to'liq kiritilgan (Inclusions):
+                Paket tarkibi:
               </span>
               <div className="grid grid-cols-2 gap-1.5 text-[10px]" style={{ color: 'var(--tw-text-main)' }}>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Charter aviaparvoz</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Aeroport transferi</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Mehmonxonada turish</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Sug'urta ($30,000)</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Ovqatlanish rejimi</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>SayrHub Gid xizmati</span>
-                </div>
+                {checkoutTour.inclusions?.length
+                  ? checkoutTour.inclusions.map((inclusion) => (
+                    <div className="flex items-center gap-1.5" key={inclusion}>
+                      <span className="text-emerald-500 font-bold">✓</span>
+                      <span>{inclusion}</span>
+                    </div>
+                  ))
+                  : <span className="text-muted-foreground">Paket tarkibi haqida ma’lumot berilmagan.</span>}
               </div>
             </div>
 
@@ -1172,7 +1048,7 @@ export const Modals: React.FC<ModalsProps> = ({
               const perAdult = checkoutTour.isLiveKompas
                 ? Math.round(checkoutTour.price / 2)
                 : checkoutTour.price;
-              const perChild = Math.round(perAdult * 0.5);
+              const perChild = perAdult;
               const finalPackagePrice = (adultsCount * perAdult) + (childrenCount * perChild);
               const perPersonEstimate = Math.round(finalPackagePrice / (totalTravelers || 1));
 
@@ -1194,7 +1070,7 @@ export const Modals: React.FC<ModalsProps> = ({
 
                     {childrenCount > 0 && (
                       <div className="flex justify-between items-center text-xs" style={{ color: 'var(--tw-text-sub)' }}>
-                        <span>Yosh bolalar ({childrenCount} bola - 50%):</span>
+                        <span>Yosh bolalar ({childrenCount} bola):</span>
                         <span className="font-bold text-emerald-500">
                           {childrenCount} × ${perChild} = ${childrenCount * perChild}
                         </span>
@@ -1217,15 +1093,10 @@ export const Modals: React.FC<ModalsProps> = ({
                       </div>
                     )}
 
-                    <div className="flex justify-between items-center text-xs text-emerald-500">
-                      <span>Charter & Aeroport yig'imlari:</span>
-                      <span className="font-bold">Kiritilgan (0$)</span>
-                    </div>
-
                     <div className="flex justify-between items-center text-xs pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
                       <span className="inline-flex items-center gap-1" style={{ color: 'var(--tw-text-sub)' }}><Building2 className="w-3 h-3" /> Turoperator:</span>
                       <span className="font-bold text-sky-600 dark:text-sky-400">
-                        {checkoutTour.tourOperator || (checkoutTour.isLiveKompas ? 'Kompas Tour' : 'SayrHub Operator')}
+                        {checkoutTour.tourOperator || (checkoutTour.isLiveKompas ? 'Kompas Tour' : '—')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
@@ -1238,11 +1109,11 @@ export const Modals: React.FC<ModalsProps> = ({
                       <span className="flex items-center gap-1">
                         <span className="inline-flex items-center gap-1"><BriefcaseBusiness className="w-3 h-3" /> Agentlik xizmati:</span>
                         <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-cyan-500/10 border border-cyan-500/30">
-                          +{checkoutTour.markupValue || 8}%
+                          +{checkoutTour.markupValue ?? 0}%
                         </span>
                       </span>
                       <span className="font-bold">
-                        Narxga kiritilgan (+${Math.max(0, finalPackagePrice - Math.round(finalPackagePrice / (1 + (checkoutTour.markupValue || 8) / 100)))})
+                        Narxga kiritilgan (+${Math.max(0, finalPackagePrice - Math.round(finalPackagePrice / (1 + (checkoutTour.markupValue ?? 0) / 100)))})
                       </span>
                     </div>
 
@@ -1258,7 +1129,7 @@ export const Modals: React.FC<ModalsProps> = ({
                           ${finalPackagePrice}
                         </span>
                         <span className="text-[9px] block text-emerald-600 dark:text-emerald-400 font-bold">
-                          {checkoutTour.isLiveKompas ? "1:1 rasmiy kafolatlangan narx" : "Bron to'lovi shart emas"}
+                          {checkoutTour.isLiveKompas ? 'Kompas manbasidan olingan' : 'Bron so‘rovi'}
                         </span>
                       </div>
                     </div>
@@ -1269,12 +1140,18 @@ export const Modals: React.FC<ModalsProps> = ({
                     <button
                       type="button"
                       id="btn-confirm-tour-booking"
-                      onClick={() => {
-                        onConfirmBooking({
+                      onClick={async () => {
+                        const travelerName = bookingTravelerName.trim() || currentName.trim();
+                        if (!travelerName) {
+                          onShowToast("Iltimos, asosiy sayohatchining ism va familiyasini kiriting.", 'error');
+                          return;
+                        }
+                        try {
+                          await onConfirmBooking({
                           tour: checkoutTour,
-                          travelerName: bookingTravelerName.trim() || currentName || 'SayrHub Sayohatchi',
+                          travelerName,
                           phone: bookingPhone.trim() || currentPhone || '',
-                          passport: bookingPassport.trim() || currentPassport || 'N/A',
+                          passport: bookingPassport.trim() || currentPassport || '',
                           dob: '',
                           payType: 'online_booking',
                           discount: 0,
@@ -1282,7 +1159,9 @@ export const Modals: React.FC<ModalsProps> = ({
                           adultsCount: adultsCount,
                           childrenCount: childrenCount
                         });
-                        onShowToast(`"${checkoutTour.title}" turi muvaffaqiyatli bron qilindi!`, 'success');
+                        } catch (error) {
+                          onShowToast(error instanceof Error ? error.message : 'Bron yaratib bo‘lmadi.', 'error');
+                        }
                       }}
                       className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-sm uppercase tracking-wider rounded-2xl shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 tap-bounce transition cursor-pointer active:scale-98"
                     >
@@ -1312,7 +1191,7 @@ export const Modals: React.FC<ModalsProps> = ({
 
                       <a
                         href={`https://t.me/share/url?url=${encodeURIComponent(`https://sayrhub.uz`)}&text=${encodeURIComponent(
-                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nMuddat: ${checkoutTour.nights}\nSayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nSayyoh: ${bookingTravelerName}\nNarx: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || 'SH-TR'}`
+                          `Assalomu alaykum! SayrHub orqali ushbu tur bo'yicha savolim bor edi:\n\nMehmonxona: ${checkoutTour.title}\nManzil: ${checkoutTour.location}\nReys: ${checkoutTour.flight}\nMuddat: ${checkoutTour.nights}\nSayyohlar: ${totalTravelers} kishi (${adultsCount} katta, ${childrenCount} bola)\nSayyoh: ${bookingTravelerName}\nNarx: $${finalPackagePrice}\nKod: ${checkoutTour.kompasTourCode || '—'}`
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -1372,11 +1251,11 @@ export const Modals: React.FC<ModalsProps> = ({
 
             <div>
               <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                To'lov Qabul Qilindi
+                Bron so‘rovi saqlandi
               </span>
-              <h3 className="text-base font-black mt-1" style={{ color: 'var(--tw-text-main)' }}>Muvaffaqiyatli Bron Qilindi!</h3>
+              <h3 className="text-base font-black mt-1" style={{ color: 'var(--tw-text-main)' }}>Bron so‘rovi qabul qilindi</h3>
               <p className="text-xs mt-0.5" style={{ color: 'var(--tw-text-sub)' }}>
-                Elektron turpaket vaucheri rasmiylashtirildi va tizimda saqlandi.
+                Bron raqami bazaga saqlandi. Turoperator tasdig‘idan keyin safar hujjatlari beriladi.
               </p>
             </div>
 
@@ -1388,9 +1267,12 @@ export const Modals: React.FC<ModalsProps> = ({
               }}
             >
               <div className="flex justify-between items-center pb-1.5 border-b" style={{ borderColor: 'var(--tw-border)' }}>
-                <span className="font-mono text-xs font-black" style={{ color: 'var(--tw-accent)' }}>{successBooking.voucherId}</span>
-                <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                  Faol
+                <span>
+                  <span className="block text-[9px] text-muted-foreground">Bron raqami</span>
+                  <span className="font-mono text-xs font-black" style={{ color: 'var(--tw-accent)' }}>{successBooking.voucherId}</span>
+                </span>
+                <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                  {successBooking.status}
                 </span>
               </div>
               <div className="text-xs">
@@ -1405,26 +1287,9 @@ export const Modals: React.FC<ModalsProps> = ({
                   </span>
                 </p>
                 <p className="text-[10px]" style={{ color: 'var(--tw-text-sub)' }}>
-                  Reys: <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>TAS → AYT (Charter)</span>
+                  Reys: <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>{successBooking.flight || '—'}</span>
                 </p>
               </div>
-
-              {/* QR Code Graphic */}
-              <div className="bg-white rounded-xl p-2 flex items-center justify-center">
-                <svg className="w-24 h-24 text-slate-900" fill="currentColor" viewBox="0 0 100 100">
-                  <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="10" y="10"></rect>
-                  <rect height="14" width="14" x="18" y="18"></rect>
-                  <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="60" y="10"></rect>
-                  <rect height="14" width="14" x="68" y="18"></rect>
-                  <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="10" y="60"></rect>
-                  <rect height="14" width="14" x="18" y="68"></rect>
-                  <rect height="30" width="6" x="48" y="10"></rect>
-                  <rect height="8" width="20" x="48" y="55"></rect>
-                  <rect height="15" width="25" x="60" y="70"></rect>
-                  <rect height="12" width="8" x="48" y="78"></rect>
-                </svg>
-              </div>
-              <p className="text-[9px] text-center" style={{ color: 'var(--tw-text-sub)' }}>Aeroport registratsiyasida QR kodni taqdim eting</p>
             </div>
 
             <div className="flex gap-2">
@@ -1469,28 +1334,19 @@ export const Modals: React.FC<ModalsProps> = ({
               borderColor: 'var(--tw-border)'
             }}
           >
-            <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>SayrHub Foydalanuvchi QR</h3>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--tw-text-main)' }}>Foydalanuvchi identifikatori</h3>
             <p className="text-xs" style={{ color: 'var(--tw-text-sub)' }}>
-              Aeroport va turoperator kassalarida tezkor identifikatsiya uchun
+              Hisob ma’lumotlari
             </p>
 
-            <div className="w-44 h-44 mx-auto bg-white rounded-2xl p-3 flex items-center justify-center shadow-inner">
-              <svg className="w-full h-full text-slate-900" fill="currentColor" viewBox="0 0 100 100">
-                <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="10" y="10"></rect>
-                <rect height="14" width="14" x="18" y="18"></rect>
-                <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="60" y="10"></rect>
-                <rect height="14" width="14" x="68" y="18"></rect>
-                <rect fill="none" height="30" rx="4" stroke="currentColor" strokeWidth="6" width="30" x="10" y="60"></rect>
-                <rect height="14" width="14" x="18" y="68"></rect>
-                <rect height="30" width="6" x="48" y="10"></rect>
-                <rect height="8" width="20" x="48" y="55"></rect>
-                <rect height="15" width="25" x="60" y="70"></rect>
-                <rect height="12" width="8" x="48" y="78"></rect>
-              </svg>
+            <div className="rounded-2xl border bg-muted p-5 space-y-2" style={{ borderColor: 'var(--tw-border)' }}>
+              <p className="text-[10px] uppercase text-muted-foreground">Akkaunt ID</p>
+              <p className="font-mono font-bold text-primary break-all">{userId || '—'}</p>
+              <p className="text-xs text-muted-foreground">{userName || '—'}</p>
             </div>
 
-            <p className="text-[11px] font-mono font-bold" style={{ color: 'var(--tw-accent)' }}>
-              {userId} • {userName}
+            <p className="text-[11px] text-muted-foreground">
+              QR orqali identifikatsiya xizmati hozircha mavjud emas.
             </p>
 
             <button
@@ -1791,7 +1647,7 @@ export const Modals: React.FC<ModalsProps> = ({
             <div className="flex items-center justify-between pb-2 border-b" style={{ borderColor: 'var(--tw-border)' }}>
               <div>
                 <span className="text-[10px] font-mono text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
-                  Elektron Vaucher
+                  Bron tafsilotlari
                 </span>
                 <h3 className="text-sm font-bold mt-1" style={{ color: 'var(--tw-text-main)' }}>{activeVoucherBooking.voucherId}</h3>
               </div>
@@ -1841,7 +1697,7 @@ export const Modals: React.FC<ModalsProps> = ({
                   }}
                 >
                   <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Holati:</span>
-                  <span className="font-semibold text-emerald-500">✓ Tasdiqlangan</span>
+                  <span className="font-semibold text-muted-foreground">{activeVoucherBooking.status}</span>
                 </div>
               </div>
 
@@ -1867,7 +1723,7 @@ export const Modals: React.FC<ModalsProps> = ({
                 }}
               >
                 <span className="text-[10px] block" style={{ color: 'var(--tw-text-sub)' }}>Parvoz & Transfer:</span>
-                <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>TAS → AYT Charter reysi kiritilgan</span>
+                <span className="font-semibold" style={{ color: 'var(--tw-text-main)' }}>{activeVoucherBooking.flight || '—'}</span>
               </div>
             </div>
 

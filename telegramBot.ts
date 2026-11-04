@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from 'crypto';
-import { UserModel } from './db.js';
+import { getDBStatus, UserModel } from './db.js';
 import { generateToken } from './src/server/auth.js';
 
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -180,8 +180,20 @@ export async function processTelegramUpdate(update: any) {
     const tgUsername = user.username ? `@${user.username}` : '';
     const otpCode = String(randomInt(1000, 10000));
 
+    if (!getDBStatus().connected) {
+      await sendTelegramMessage(chatId, 'Hozircha baza bilan aloqa yo‘q. Iltimos, keyinroq qayta urinib ko‘ring.');
+      return;
+    }
+
     let dbUser: any = null;
     try {
+      const existingUser = await UserModel.findOne({
+        $or: [{ telegramId: String(user.id) }, { phone: rawPhone }],
+      }).select('status').lean();
+      if (existingUser?.status === 'blocked') {
+        await sendTelegramMessage(chatId, 'Akkauntingiz bloklangan. Yordam uchun qo‘llab-quvvatlash xizmatiga murojaat qiling.');
+        return;
+      }
       dbUser = await UserModel.findOneAndUpdate(
         { $or: [{ telegramId: String(user.id) }, { phone: rawPhone }] },
         {
@@ -198,15 +210,10 @@ export async function processTelegramUpdate(update: any) {
         },
         { upsert: true, new: true }
       );
-    } catch (e: any) {
-      console.warn('MongoDB save telegram user warning:', e.message);
-      dbUser = {
-        tcId: 'tw-' + user.id,
-        name: fullName,
-        phone: rawPhone,
-        telegramId: String(user.id),
-        telegramUsername: tgUsername
-      };
+    } catch (error) {
+      console.error('MongoDB save telegram user failed:', error);
+      await sendTelegramMessage(chatId, 'Ro‘yxatdan o‘tishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko‘ring.');
+      return;
     }
 
     const userToken = generateToken({
@@ -249,8 +256,20 @@ export async function processTelegramUpdate(update: any) {
       const tgUsername = user.username ? `@${user.username}` : '';
       const otpCode = String(randomInt(1000, 10000));
 
+      if (!getDBStatus().connected) {
+        await sendTelegramMessage(chatId, 'Hozircha baza bilan aloqa yo‘q. Iltimos, keyinroq qayta urinib ko‘ring.');
+        return;
+      }
+
       let dbUser: any = null;
       try {
+        const existingUser = await UserModel.findOne({
+          $or: [{ telegramId: String(user.id) }, { phone: formattedPhone }],
+        }).select('status').lean();
+        if (existingUser?.status === 'blocked') {
+          await sendTelegramMessage(chatId, 'Akkauntingiz bloklangan. Yordam uchun qo‘llab-quvvatlash xizmatiga murojaat qiling.');
+          return;
+        }
         dbUser = await UserModel.findOneAndUpdate(
           { $or: [{ telegramId: String(user.id) }, { phone: formattedPhone }] },
           {
@@ -267,14 +286,10 @@ export async function processTelegramUpdate(update: any) {
           },
           { upsert: true, new: true }
         );
-      } catch (e: any) {
-        dbUser = {
-          tcId: 'tw-' + user.id,
-          name: fullName,
-          phone: formattedPhone,
-          telegramId: String(user.id),
-          telegramUsername: tgUsername
-        };
+      } catch (error) {
+        console.error('MongoDB save Telegram user failed:', error);
+        await sendTelegramMessage(chatId, 'Ro‘yxatdan o‘tishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko‘ring.');
+        return;
       }
 
       const userToken = generateToken({

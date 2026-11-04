@@ -10,12 +10,10 @@ import {
   Mail,
   Send,
   Check,
-  TrendingDown,
   Sparkles,
   Trash2,
   MapPin,
   Clock,
-  Zap
 } from '@/lib/flaticon-icons';
 
 interface PriceAlertModalProps {
@@ -36,18 +34,16 @@ interface PriceAlertModalProps {
     userEmail?: string;
   }) => void;
   onDeleteAlert: (alertId: string) => void;
-  onSimulatePriceDrop: (tourId: string, simulatedPrice: number) => void;
 }
 
 export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
   isOpen,
   tour,
   existingAlert,
-  userEmail = 'jasur.travel@gmail.com',
+  userEmail = '',
   onClose,
   onSaveAlert,
-  onDeleteAlert,
-  onSimulatePriceDrop
+  onDeleteAlert
 }) => {
   if (!isOpen || !tour) return null;
 
@@ -105,12 +101,6 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
       notifyViaTelegram,
       userEmail: enableEmail ? emailInput : undefined
     });
-    onClose();
-  };
-
-  const handleSimulate = () => {
-    const dropTo = Math.max(150, targetPrice - 15);
-    onSimulatePriceDrop(tour.id, dropTo);
     onClose();
   };
 
@@ -334,33 +324,6 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
               )}
             </div>
           </div>
-        </div>
-
-        {/* Live Simulation */}
-        <div className="border border-border p-3 rounded-xl bg-muted/40 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
-              <span className="text-xs font-bold text-foreground">Sinov rejimi (Test alert)</span>
-            </div>
-            <Badge variant="outline" className="text-[9px] font-mono text-primary">
-              Live Demo
-            </Badge>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-tight">
-            Ushbu tur narxini hozirning o'zida kutilayotgan chegaradan <b>(${Math.max(150, targetPrice - 15)})</b> pastga
-            tushirib, bildirishnoma ishlashini sinab ko'ring.
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            id="btn-simulate-price-drop"
-            onClick={handleSimulate}
-            className="w-full text-xs font-semibold h-8 rounded-lg gap-1.5 text-primary"
-          >
-            <TrendingDown className="w-3.5 h-3.5" />
-            <span>Narx tushishini hozir sinab ko'rish</span>
-          </Button>
         </div>
 
         {/* Actions */}

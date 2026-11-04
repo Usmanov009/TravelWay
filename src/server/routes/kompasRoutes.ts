@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { queryKompasTour, queryKompasHotels, queryKompasFlights, DEPARTURE_MAP, COUNTRY_TO_STATEINC } from '../services/kompasService.js';
+import { queryKompasTour, DEPARTURE_MAP, COUNTRY_TO_STATEINC } from '../services/kompasService.js';
 
 const router = Router();
 
@@ -72,28 +72,23 @@ router.get('/hot', async (req, res) => {
       ...maldivesTours.slice(0, 3)
     ];
 
-    const hotDeals = combined.map((t, idx) => {
-      const discountPercent = 25 + (idx % 4) * 8;
-      const discountText = `-${discountPercent}%`;
-      const originalPrice = Math.round(t.price / (1 - discountPercent / 100));
-      const hoursLeft = 3 + (idx % 6);
-      const minsLeft = 14 + (idx * 9) % 45;
-
+    const hotDeals = combined.map((tour) => {
+      const discountPercent = tour.oldPrice && tour.oldPrice > tour.price
+        ? Math.round(((tour.oldPrice - tour.price) / tour.oldPrice) * 100)
+        : undefined;
       return {
-        id: `hot-live-${t.id}`,
-        title: `${t.title} (${t.nights})`,
-        discount: discountText,
-        oldPrice: `$${originalPrice.toLocaleString()}`,
-        price: `$${t.price.toLocaleString()}`,
-        priceNumeric: t.price,
-        timeLeft: `${hoursLeft} soat ${minsLeft} daqiqa`,
-        flight: t.flight,
-        freeSeats: `${2 + (idx % 5)} ta o'rin qoldi`,
-        img: t.img,
-        location: t.location,
-        checkinDate: t.departureDate,
-        nights: t.nights,
-        kompasOnlineUrl: t.kompasOnlineUrl,
+        id: `hot-live-${tour.id}`,
+        title: `${tour.title}${tour.nights ? ` (${tour.nights})` : ''}`,
+        ...(discountPercent ? { discount: `-${discountPercent}%` } : {}),
+        ...(tour.oldPrice ? { oldPrice: `$${tour.oldPrice.toLocaleString()}` } : {}),
+        price: `$${tour.price.toLocaleString()}`,
+        priceNumeric: tour.price,
+        flight: tour.flight || undefined,
+        img: tour.img,
+        location: tour.location,
+        checkinDate: tour.departureDate || undefined,
+        nights: tour.nights || undefined,
+        kompasOnlineUrl: tour.kompasOnlineUrl,
         liveSource: 'online.uz.kompastour.com'
       };
     });
@@ -110,53 +105,7 @@ router.get('/hot', async (req, res) => {
   }
 });
 
-// 3. LIVE HOTELS: /api/kompas/hotels
-router.get('/hotels', async (req, res) => {
-  try {
-    const departure = String(req.query.departure || '26');
-    const country = String(req.query.country || 'TR').toUpperCase();
-    const resortFilter = String(req.query.resort || '').trim();
-    const townFrom = DEPARTURE_MAP[departure] || '26';
-    const stateInc = COUNTRY_TO_STATEINC[country] || '17';
-
-    let hotels = await queryKompasHotels({ townFrom, stateInc });
-    if (resortFilter && resortFilter !== 'Barcha kurortlar') {
-      hotels = hotels.filter(h => h.resort.toLowerCase().includes(resortFilter.toLowerCase()));
-    }
-
-    res.json({
-      success: true,
-      source: 'online.uz.kompastour.com (Mehmonxonalar)',
-      live: true,
-      count: hotels.length,
-      hotels
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message, hotels: [] });
-  }
-});
-
-// 4. LIVE FLIGHTS: /api/kompas/flights
-router.get('/flights', async (req, res) => {
-  try {
-    const from = String(req.query.from || 'Toshkent');
-    const country = String(req.query.country || 'ALL');
-
-    const flights = await queryKompasFlights({ from, country });
-
-    res.json({
-      success: true,
-      source: 'online.uz.kompastour.com (Charter & GDS)',
-      live: true,
-      count: flights.length,
-      flights
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message, flights: [] });
-  }
-});
-
-// 5. STATUS CHECK: /api/kompas/status
+// STATUS CHECK: /api/kompas/status
 router.get('/status', async (req, res) => {
   try {
     const check = await fetch('https://online.uz.kompastour.com/search_tour', { method: 'HEAD' });

@@ -1,325 +1,368 @@
-import { Router } from 'express';
-import { getDBStatus, TourModel, BookingModel, PriceAlertModel, UserModel } from '../../../db.js';
-import { INITIAL_TOURS } from '../../data/mockData.js';
-import { optionalAuth, authenticateToken, requireRole, AuthRequest } from '../auth.js';
+import { NextFunction, Request, Response, Router } from 'express';
+import {
+  BookingModel,
+  CatalogItemModel,
+  getDBStatus,
+  PriceAlertModel,
+  TourModel,
+  UserModel,
+} from '../../../db.js';
+import { authenticateToken, AuthRequest, optionalAuth, requireRole } from '../auth.js';
 
 const router = Router();
+const adminRoles = ['main_admin', 'tour_admin'];
+const catalogKinds = ['combo-tours', 'flights', 'hotels'] as const;
+type CatalogKind = typeof catalogKinds[number];
 
-// In-memory fallback stores when MongoDB is buffering or offline
-let memoryTours: any[] = [...INITIAL_TOURS];
-let memoryBookings: any[] = [];
-let memoryPriceAlerts: any[] = [];
-let memoryUsers: any[] = [];
+function requireDatabase(_req: Request, res: Response, next: NextFunction) {
+  if (!getDBStatus().connected) {
+    return res.status(503).json({
+      success: false,
+      error: 'MongoDB bilan aloqa yo‘q. Ma’lumotlar saqlanmadi; database sozlamasini tekshiring.',
+    });
+  }
+  next();
+}
 
-// DB Health / Connection Status
-router.get('/status', (req, res) => {
+function requireActiveUser(req: AuthRequest, res: Response, next: NextFunction) {
+  if (req.user?.role !== 'user') return next();
+  UserModel.findOne({ tcId: req.user.id }).select('status').lean()
+    .then((user) => {
+      if (!user || user.status === 'blocked') {
+        return res.status(403).json({ success: false, error: 'Foydalanuvchi akkaunti faol emas.' });
+      }
+      next();
+    })
+    .catch((error) => sendDatabaseError(res, error));
+}
+
+function sendDatabaseError(res: Response, error: unknown) {
+  console.error('Database request failed:', error);
+  return res.status(500).json({
+    success: false,
+    error: 'Ma’lumotlar bazasiga murojaat qilish amalga oshmadi.',
+  });
+}
+
+function isAdmin(req: AuthRequest) {
+  return adminRoles.includes(req.user?.role || '');
+}
+
+router.get('/status', (_req, res) => {
   res.json({ success: true, ...getDBStatus() });
 });
 
-// ==========================================
-// 1. TOURS ENDPOINTS (FIXES MISSING ENDPOINTS)
-// ==========================================
-router.get('/tours', async (req, res) => {
+router.get('/tours', requireDatabase, async (_req, res) => {
   try {
-    const isDBReady = getDBStatus().connected;
-    if (!isDBReady) {
-      return res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
-    }
-    const dbTours = await TourModel.find().maxTimeMS(2500).sort({ createdAt: -1 });
-    if (!dbTours || dbTours.length === 0) {
-      return res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
-    }
-    res.json({ success: true, count: dbTours.length, tours: dbTours });
-  } catch (err: any) {
-    res.json({ success: true, count: memoryTours.length, tours: memoryTours, fallback: true });
+    const tours = await TourModel.find().sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, count: tours.length, tours });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.post('/tours', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+router.post('/tours', authenticateToken, requireRole(...adminRoles), requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const tourData = req.body;
-    if (!tourData || !tourData.id) {
-      return res.status(400).json({ success: false, error: "Tur ma'lumotlari yoki id kiritilmagan" });
+    const tour = req.body;
+    if (!tour?.id || !tour?.title) {
+      return res.status(400).json({ success: false, error: 'Tur ID va nomi kiritilishi shart.' });
     }
-
-    // Update in-memory fallback
-    const existingIdx = memoryTours.findIndex(t => t.id === tourData.id);
-    if (existingIdx >= 0) {
-      memoryTours[existingIdx] = { ...memoryTours[existingIdx], ...tourData };
-    } else {
-      memoryTours.unshift(tourData);
-    }
-
-    if (getDBStatus().connected) {
-      await TourModel.findOneAndUpdate(
-        { id: tourData.id },
-        tourData,
-        { upsert: true, new: true }
-      ).maxTimeMS(2500);
-    }
-
-    res.json({ success: true, tour: tourData });
-  } catch (err: any) {
-    res.json({ success: true, tour: req.body, fallback: true });
+    const { _id: _ignoredId, __v: _ignoredVersion, ...tourData } = tour;
+    const savedTour = await TourModel.findOneAndUpdate(
+      { id: String(tour.id) },
+      { $set: tourData },
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    ).lean();
+    return res.json({ success: true, tour: savedTour });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.delete('/tours/:id', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+router.delete('/tours/:id', authenticateToken, requireRole(...adminRoles), requireDatabase, async (req, res) => {
   try {
-    const tourId = req.params.id;
-    memoryTours = memoryTours.filter(t => t.id !== tourId);
-
-    if (getDBStatus().connected) {
-      await TourModel.deleteOne({ id: tourId }).maxTimeMS(2500);
-    }
-
-    res.json({ success: true, id: tourId });
-  } catch (err: any) {
-    res.json({ success: true, fallback: true, id: req.params.id });
+    const result = await TourModel.deleteOne({ id: req.params.id });
+    return result.deletedCount
+      ? res.json({ success: true, id: req.params.id })
+      : res.status(404).json({ success: false, error: 'Tur topilmadi.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-// ==========================================
-// 2. BOOKINGS ENDPOINTS (PROTECTED)
-// ==========================================
-router.get('/bookings', optionalAuth, async (req: AuthRequest, res) => {
+router.get('/catalog/:kind', requireDatabase, async (req, res) => {
+  const kind = req.params.kind as CatalogKind;
+  if (!catalogKinds.includes(kind)) {
+    return res.status(404).json({ success: false, error: 'Katalog turi topilmadi.' });
+  }
   try {
-    const isDBReady = getDBStatus().connected;
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
-    const voucherQuery = req.query.voucherId as string;
-
-    // 1. Admins see all bookings
-    if (userRole === 'main_admin' || userRole === 'tour_admin') {
-      if (!isDBReady) {
-        return res.json({ success: true, count: memoryBookings.length, bookings: memoryBookings, fallback: true });
-      }
-      const bookings = await BookingModel.find().maxTimeMS(2500).sort({ createdAt: -1 });
-      return res.json({ success: true, count: bookings.length, bookings });
-    }
-
-    // 2. Authenticated customers see only their own bookings
-    if (userId) {
-      if (!isDBReady) {
-        const userBookings = memoryBookings.filter(b => b.travelerId === userId || b.tcId === userId || b.travelerName === req.user?.name);
-        return res.json({ success: true, count: userBookings.length, bookings: userBookings, fallback: true });
-      }
-      const bookings = await BookingModel.find({
-        $or: [
-          { travelerId: userId },
-          { tcId: userId },
-          { travelerName: req.user?.name }
-        ]
-      }).maxTimeMS(2500).sort({ createdAt: -1 });
-      return res.json({ success: true, count: bookings.length, bookings });
-    }
-
-    // 3. Single voucher lookup if voucherId provided
-    if (voucherQuery) {
-      const match = memoryBookings.find(b => b.voucherId === voucherQuery);
-      if (match) return res.json({ success: true, count: 1, bookings: [match] });
-      if (isDBReady) {
-        const dbMatch = await BookingModel.findOne({ voucherId: voucherQuery });
-        if (dbMatch) return res.json({ success: true, count: 1, bookings: [dbMatch] });
-      }
-    }
-
-    // 4. Anonymous visitors must NOT receive customer bookings
-    return res.json({ success: true, count: 0, bookings: [] });
-  } catch (err: any) {
-    res.json({ success: true, count: 0, bookings: [], fallback: true });
+    const entries = await CatalogItemModel.find({ kind }).sort({ createdAt: -1 }).lean();
+    return res.json({
+      success: true,
+      count: entries.length,
+      items: entries.map(({ data }) => data),
+    });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.post('/bookings', optionalAuth, async (req: AuthRequest, res) => {
+router.post('/catalog/:kind', authenticateToken, requireRole(...adminRoles), requireDatabase, async (req, res) => {
+  const kind = req.params.kind as CatalogKind;
+  if (!catalogKinds.includes(kind)) {
+    return res.status(404).json({ success: false, error: 'Katalog turi topilmadi.' });
+  }
+  const item = req.body;
+  const hasName = kind === 'hotels' ? Boolean(item?.name) : kind === 'flights'
+    ? Boolean(item?.flightNumber) : Boolean(item?.title);
+  if (!item?.id || !hasName) {
+    return res.status(400).json({ success: false, error: 'Katalog elementi ID va nomga ega bo‘lishi kerak.' });
+  }
   try {
-    const bookingData = { ...req.body };
-    if (req.user?.id) {
-      bookingData.travelerId = req.user.id;
-    }
-    const existingIdx = memoryBookings.findIndex(b => b.id === bookingData.id);
-    if (existingIdx >= 0) {
-      memoryBookings[existingIdx] = { ...memoryBookings[existingIdx], ...bookingData };
-    } else {
-      memoryBookings.unshift(bookingData);
-    }
-
-    if (getDBStatus().connected) {
-      await BookingModel.findOneAndUpdate(
-        { id: bookingData.id },
-        bookingData,
-        { upsert: true, new: true }
-      ).maxTimeMS(2500);
-    }
-    res.json({ success: true, booking: bookingData });
-  } catch (err: any) {
-    res.json({ success: true, booking: req.body, fallback: true });
+    await CatalogItemModel.findOneAndUpdate(
+      { kind, id: String(item.id) },
+      { $set: { data: item } },
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    );
+    return res.json({ success: true, item });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.put('/bookings/:id', authenticateToken, async (req: AuthRequest, res) => {
+router.delete('/catalog/:kind/:id', authenticateToken, requireRole(...adminRoles), requireDatabase, async (req, res) => {
+  const kind = req.params.kind as CatalogKind;
+  if (!catalogKinds.includes(kind)) {
+    return res.status(404).json({ success: false, error: 'Katalog turi topilmadi.' });
+  }
   try {
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
-
-    // Only admins or booking owners can edit bookings
-    if (userRole !== 'main_admin' && userRole !== 'tour_admin') {
-      const existing = memoryBookings.find(b => b.id === req.params.id);
-      if (existing && existing.travelerId && existing.travelerId !== userId) {
-        return res.status(403).json({ success: false, error: "Ruxsat berilmagan: Bu bron sizga tegishli emas" });
-      }
-    }
-
-    const existingIdx = memoryBookings.findIndex(b => b.id === req.params.id);
-    if (existingIdx >= 0) {
-      memoryBookings[existingIdx] = { ...memoryBookings[existingIdx], ...req.body };
-    }
-    if (getDBStatus().connected) {
-      await BookingModel.findOneAndUpdate(
-        { id: req.params.id },
-        { $set: req.body },
-        { new: true }
-      ).maxTimeMS(2500);
-    }
-    res.json({ success: true, booking: memoryBookings[existingIdx] || req.body });
-  } catch (err: any) {
-    res.json({ success: true, booking: req.body, fallback: true });
+    const result = await CatalogItemModel.deleteOne({ kind, id: req.params.id });
+    return result.deletedCount
+      ? res.json({ success: true, id: req.params.id })
+      : res.status(404).json({ success: false, error: 'Katalog elementi topilmadi.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.delete('/bookings/:id', authenticateToken, async (req: AuthRequest, res) => {
+router.get('/bookings', optionalAuth, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  if (!req.user && !req.query.voucherId) {
+    return res.status(401).json({ success: false, error: 'Bronlarni ko‘rish uchun tizimga kiring.' });
+  }
   try {
-    const userRole = req.user?.role;
-    const userId = req.user?.id;
-
-    if (userRole !== 'main_admin' && userRole !== 'tour_admin') {
-      const existing = memoryBookings.find(b => b.id === req.params.id);
-      if (existing && existing.travelerId && existing.travelerId !== userId) {
-        return res.status(403).json({ success: false, error: "Ruxsat berilmagan: Bu bron sizga tegishli emas" });
-      }
-    }
-
-    memoryBookings = memoryBookings.filter(b => b.id !== req.params.id);
-    if (getDBStatus().connected) {
-      await BookingModel.deleteOne({ id: req.params.id }).maxTimeMS(2500);
-    }
-    res.json({ success: true });
-  } catch (err: any) {
-    res.json({ success: true, fallback: true });
+    const query = isAdmin(req)
+      ? {}
+      : req.query.voucherId
+        ? { voucherId: String(req.query.voucherId) }
+        : { travelerId: req.user?.id };
+    const bookings = await BookingModel.find(query).sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, count: bookings.length, bookings });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-// ==========================================
-// 3. PRICE ALERTS ENDPOINTS
-// ==========================================
-router.get('/price-alerts', async (req, res) => {
+router.post('/bookings', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  if (!isAdmin(req) && req.user?.role !== 'user') {
+    return res.status(403).json({ success: false, error: 'Ruxsat berilmagan.' });
+  }
+  const booking = req.body;
+  if (!booking?.id || !booking?.tourTitle) {
+    return res.status(400).json({ success: false, error: 'Bron ID va tur nomi kiritilishi shart.' });
+  }
   try {
-    if (!getDBStatus().connected) {
-      return res.json({ success: true, count: memoryPriceAlerts.length, alerts: memoryPriceAlerts, fallback: true });
-    }
-    const alerts = await PriceAlertModel.find().maxTimeMS(2500).sort({ createdAt: -1 });
-    res.json({ success: true, count: alerts.length, alerts });
-  } catch (err: any) {
-    res.json({ success: true, count: memoryPriceAlerts.length, alerts: memoryPriceAlerts, fallback: true });
+    const savedBooking = await BookingModel.findOneAndUpdate(
+      { id: String(booking.id) },
+      { $set: { ...booking, travelerId: isAdmin(req) ? booking.travelerId : req.user?.id } },
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    ).lean();
+    return res.json({ success: true, booking: savedBooking });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.post('/price-alerts', async (req, res) => {
+router.put('/bookings/:id', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  if (!isAdmin(req) && req.body?.status !== 'Bekor qilingan') {
+    return res.status(403).json({ success: false, error: 'Foydalanuvchi faqat o‘z bronini bekor qilishi mumkin.' });
+  }
+  const query = isAdmin(req)
+    ? { id: req.params.id }
+    : { id: req.params.id, travelerId: req.user?.id };
+  const update = isAdmin(req)
+    ? req.body
+    : {
+      status: 'Bekor qilingan',
+      type: 'cancelled',
+      cancellationReason: String(req.body.cancellationReason || ''),
+      cancelledAt: String(req.body.cancelledAt || new Date().toISOString()),
+    };
   try {
-    const alertData = req.body;
-    const existingIdx = memoryPriceAlerts.findIndex(a => a.id === alertData.id);
-    if (existingIdx >= 0) {
-      memoryPriceAlerts[existingIdx] = { ...memoryPriceAlerts[existingIdx], ...alertData };
-    } else {
-      memoryPriceAlerts.unshift(alertData);
-    }
-    if (getDBStatus().connected) {
-      await PriceAlertModel.findOneAndUpdate(
-        { id: req.body.id },
-        req.body,
-        { upsert: true, new: true }
-      ).maxTimeMS(2500);
-    }
-    res.json({ success: true, alert: alertData });
-  } catch (err: any) {
-    res.json({ success: true, alert: req.body, fallback: true });
+    const booking = await BookingModel.findOneAndUpdate(
+      query,
+      { $set: update },
+      { new: true, runValidators: true },
+    ).lean();
+    return booking
+      ? res.json({ success: true, booking })
+      : res.status(404).json({ success: false, error: 'Bron topilmadi yoki ruxsat yo‘q.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.delete('/price-alerts/:id', async (req, res) => {
+router.delete('/bookings/:id', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  const query = isAdmin(req)
+    ? { id: req.params.id }
+    : { id: req.params.id, travelerId: req.user?.id };
   try {
-    memoryPriceAlerts = memoryPriceAlerts.filter(a => a.id !== req.params.id);
-    if (getDBStatus().connected) {
-      await PriceAlertModel.deleteOne({ id: req.params.id }).maxTimeMS(2500);
-    }
-    res.json({ success: true });
-  } catch (err: any) {
-    res.json({ success: true, fallback: true });
+    const result = await BookingModel.deleteOne(query);
+    return result.deletedCount
+      ? res.json({ success: true })
+      : res.status(404).json({ success: false, error: 'Bron topilmadi yoki ruxsat yo‘q.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-// ==========================================
-// 4. USERS ENDPOINTS (PROTECTED)
-// ==========================================
-router.get('/users', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+router.get('/price-alerts', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
   try {
-    if (!getDBStatus().connected) {
-      return res.json({ success: true, count: memoryUsers.length, users: memoryUsers, fallback: true });
-    }
-    const users = await UserModel.find().maxTimeMS(2500).sort({ createdAt: -1 });
-    res.json({ success: true, count: users.length, users });
-  } catch (err: any) {
-    res.json({ success: true, count: memoryUsers.length, users: memoryUsers, fallback: true });
+    const alerts = await PriceAlertModel.find(
+      isAdmin(req) ? {} : { userId: req.user?.id },
+    ).sort({ createdAt: -1 }).lean();
+    return res.json({ success: true, count: alerts.length, alerts });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.get('/users/me', authenticateToken, async (req: AuthRequest, res) => {
+router.post('/price-alerts', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  const alert = req.body;
+  if (!alert?.id || !alert?.tourId) {
+    return res.status(400).json({ success: false, error: 'Narx signali ID va tur ID talab qiladi.' });
+  }
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ success: false, error: "Avtorizatsiya talab qilinadi" });
-    }
-    if (getDBStatus().connected) {
-      const user = await UserModel.findOne({ tcId: userId });
-      if (user) return res.json({ success: true, user });
-    }
-    const memUser = memoryUsers.find(u => u.tcId === userId);
-    res.json({ success: true, user: memUser || null });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+    const savedAlert = await PriceAlertModel.findOneAndUpdate(
+      isAdmin(req) ? { id: String(alert.id) } : { id: String(alert.id), userId: req.user?.id },
+      { $set: { ...alert, userId: isAdmin(req) ? alert.userId : req.user?.id } },
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    ).lean();
+    return res.json({ success: true, alert: savedAlert });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 
-router.post('/users', optionalAuth, async (req: AuthRequest, res) => {
+router.delete('/price-alerts/:id', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
   try {
-    const userData = req.body;
-    if (!userData || !userData.tcId) {
-      return res.status(400).json({ success: false, error: "Foydalanuvchi identifikatori (tcId) kiritilmagan" });
-    }
+    const query = isAdmin(req)
+      ? { id: req.params.id }
+      : { id: req.params.id, userId: req.user?.id };
+    const result = await PriceAlertModel.deleteOne(query);
+    return result.deletedCount
+      ? res.json({ success: true })
+      : res.status(404).json({ success: false, error: 'Narx signali topilmadi yoki ruxsat yo‘q.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
 
-    // Authorization check: If logged in as non-admin, cannot edit another user's profile
-    if (req.user && req.user.role !== 'main_admin' && req.user.role !== 'tour_admin' && req.user.id !== userData.tcId) {
-      return res.status(403).json({ success: false, error: "Boshqa foydalanuvchi profilini tahrirlash taqiqlanadi" });
-    }
+router.get('/users', authenticateToken, requireRole(...adminRoles), requireDatabase, async (_req, res) => {
+  try {
+    const users = await UserModel.find().sort({ createdAt: -1 }).lean();
+    const bookingCounts = await BookingModel.aggregate([
+      { $group: { _id: '$travelerId', bookingsCount: { $sum: 1 }, totalSpentUSD: { $sum: '$totalNumeric' } } },
+    ]);
+    const byId = new Map(bookingCounts.map((entry) => [entry._id, entry]));
+    const results = users.map((user) => {
+      const booking = byId.get(user.tcId);
+      return {
+        ...user,
+        id: user.tcId,
+        cashback: user.cashbackBalance || 0,
+        bookingsCount: booking?.bookingsCount || 0,
+        totalSpentUSD: booking?.totalSpentUSD || 0,
+        registeredAt: user.createdAt,
+        status: user.status || 'active',
+      };
+    });
+    return res.json({ success: true, count: results.length, users: results });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
 
-    const existingIdx = memoryUsers.findIndex(u => u.tcId === userData.tcId);
-    if (existingIdx >= 0) {
-      memoryUsers[existingIdx] = { ...memoryUsers[existingIdx], ...userData };
-    } else {
-      memoryUsers.unshift(userData);
-    }
+router.get('/users/count', authenticateToken, requireRole(...adminRoles), requireDatabase, async (_req, res) => {
+  try {
+    const count = await UserModel.countDocuments();
+    return res.json({ success: true, count });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
 
-    if (getDBStatus().connected) {
-      const user = await UserModel.findOneAndUpdate(
-        { tcId: userData.tcId },
-        userData,
-        { upsert: true, new: true }
-      ).maxTimeMS(2500);
-      return res.json({ success: true, user });
-    }
-    res.json({ success: true, user: userData, fallback: true });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
+router.get('/users/me', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
+  if (req.user?.role !== 'user') {
+    return res.status(403).json({ success: false, error: 'Foydalanuvchi akkaunti talab qilinadi.' });
+  }
+  try {
+    const user = await UserModel.findOne({ tcId: req.user.id }).lean();
+    if (!user) return res.status(404).json({ success: false, error: 'Foydalanuvchi profili topilmadi.' });
+    if (user.status === 'blocked') return res.status(403).json({ success: false, error: 'Foydalanuvchi akkaunti bloklangan.' });
+    return res.json({ success: true, user });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+router.post('/users', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+  const user = req.body;
+  if (!user?.tcId || req.user?.role !== 'user' || req.user.id !== user.tcId) {
+    return res.status(403).json({ success: false, error: 'Faqat o‘z profilingizni saqlashingiz mumkin.' });
+  }
+  const profile = {
+    tcId: String(user.tcId),
+    name: String(user.name || ''),
+    phone: String(user.phone || ''),
+    email: String(user.email || ''),
+    telegramId: String(user.telegramId || ''),
+    telegramUsername: String(user.telegramUsername || ''),
+    passportNumber: String(user.passportNumber || ''),
+    passportExpiry: String(user.passportExpiry || ''),
+    dob: String(user.dob || ''),
+    cashbackBalance: Number(user.cashbackBalance ?? user.cashback ?? 0),
+    isVerified: Boolean(user.isVerified),
+    favoriteTourIds: Array.isArray(user.favoriteTourIds) ? user.favoriteTourIds.map(String) : [],
+    paymentCards: Array.isArray(user.paymentCards) ? user.paymentCards : [],
+  };
+  try {
+    const savedUser = await UserModel.findOneAndUpdate(
+      { tcId: profile.tcId },
+      { $set: profile, $setOnInsert: { status: 'active' } },
+      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    ).lean();
+    return res.json({ success: true, user: savedUser });
+  } catch (error) {
+    return sendDatabaseError(res, error);
+  }
+});
+
+router.patch('/users/:tcId/status', authenticateToken, requireRole('main_admin'), requireDatabase, async (req, res) => {
+  const status = req.body?.status;
+  if (status !== 'active' && status !== 'blocked') {
+    return res.status(400).json({ success: false, error: 'Foydalanuvchi holati yaroqsiz.' });
+  }
+  try {
+    const user = await UserModel.findOneAndUpdate(
+      { tcId: req.params.tcId },
+      { $set: { status } },
+      { new: true, runValidators: true },
+    ).lean();
+    return user
+      ? res.json({ success: true, user })
+      : res.status(404).json({ success: false, error: 'Foydalanuvchi topilmadi.' });
+  } catch (error) {
+    return sendDatabaseError(res, error);
   }
 });
 

@@ -74,6 +74,7 @@ export interface Booking {
   childrenCount?: number;
   cancellationReason?: string;
   cancelledAt?: string;
+  createdAt?: string;
 }
 
 export interface ExploreVibe {
@@ -90,13 +91,11 @@ export interface ExploreVibe {
 export interface HotSale {
   id: string;
   title: string;
-  discount: string;
-  oldPrice: string;
+  discount?: string;
+  oldPrice?: string;
   price: string;
   priceNumeric: number;
-  timeLeft: string;
-  flight: string;
-  freeSeats: string;
+  flight?: string;
   img: string;
   location: string;
   checkinDate?: string;
@@ -123,6 +122,9 @@ export interface UserProfile {
   passportExpiry: string;
   dob: string;
   isVerified: boolean;
+  status?: 'active' | 'blocked';
+  paymentCards?: PaymentCard[];
+  favoriteTourIds?: string[];
   telegramId?: string;
   telegramUsername?: string;
 }
@@ -241,4 +243,3 @@ export interface HotelOnly {
   tourOperator?: string;
   agencyName?: string;
 }
-

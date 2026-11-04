@@ -1,96 +1,105 @@
 import { Router } from 'express';
-import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from '../../data/extraServicesData.js';
+import { CatalogItemModel, getDBStatus } from '../../../db.js';
 
 export const comboRouter = Router();
 export const flightsRouter = Router();
 export const hotelsRouter = Router();
 
-// COMBO TOURS: /api/combo/tours
-comboRouter.get('/tours', (req, res) => {
-  try {
-    const { q, city } = req.query as Record<string, string>;
-    let results = [...INITIAL_COMBO_TOURS];
+function requireDatabase(res: { status: (code: number) => any; json: (body: unknown) => any }) {
+  if (!getDBStatus().connected) {
+    res.status(503).json({
+      success: false,
+      error: 'MongoDB bilan aloqa yo‘q. Katalog ma’lumotlari mavjud emas.',
+    });
+    return false;
+  }
+  return true;
+}
 
-    if (q) {
-      const query = q.toLowerCase();
-      results = results.filter(c => 
-        c.title.toLowerCase().includes(query) ||
-        c.cities.some(city => city.toLowerCase().includes(query)) ||
-        c.routeSummary.toLowerCase().includes(query)
+async function loadCatalog(kind: 'combo-tours' | 'flights' | 'hotels') {
+  const entries = await CatalogItemModel.find({ kind }).sort({ createdAt: -1 }).lean();
+  return entries.map((entry) => entry.data as Record<string, any>);
+}
+
+function matches(value: unknown, query: string) {
+  return String(value || '').toLocaleLowerCase().includes(query.toLocaleLowerCase());
+}
+
+comboRouter.get('/tours', async (req, res) => {
+  if (!requireDatabase(res)) return;
+  try {
+    const query = String(req.query.q || '').trim();
+    const city = String(req.query.city || '');
+    let results = await loadCatalog('combo-tours');
+    if (query) {
+      results = results.filter((item) =>
+        matches(item.title, query) ||
+        item.cities?.some((name: string) => matches(name, query)) ||
+        matches(item.routeSummary, query),
       );
     }
     if (city && city !== 'Barchasi') {
-      results = results.filter(c => c.cities.some(ct => ct.toLowerCase().includes(city.toLowerCase())));
+      results = results.filter((item) =>
+        item.cities?.some((name: string) => matches(name, city)),
+      );
     }
-
-    res.json({
-      success: true,
-      source: 'Combo Turlar (1:1 Rasmiy)',
-      count: results.length,
-      comboTours: results
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message, comboTours: [] });
+    return res.json({ success: true, source: 'MongoDB', count: results.length, comboTours: results });
+  } catch (error) {
+    console.error('Combo catalog query failed:', error);
+    return res.status(500).json({ success: false, error: 'Combo turlar bazasini o‘qib bo‘lmadi.' });
   }
 });
 
-// FLIGHTS: /api/flights/search
-flightsRouter.get('/search', (req, res) => {
+flightsRouter.get('/search', async (req, res) => {
+  if (!requireDatabase(res)) return;
   try {
-    const { from, to, airline, directOnly } = req.query as Record<string, string>;
-    let results = [...INITIAL_FLIGHTS];
-
+    const from = String(req.query.from || '');
+    const to = String(req.query.to || '');
+    const airline = String(req.query.airline || '');
+    const directOnly = req.query.directOnly === 'true';
+    let results = await loadCatalog('flights');
     if (from) {
-      results = results.filter(f => f.departureCity.toLowerCase().includes(from.toLowerCase()) || f.departureAirportCode.toLowerCase() === from.toLowerCase());
+      results = results.filter((item) =>
+        matches(item.departureCity, from) || matches(item.departureAirportCode, from),
+      );
     }
     if (to) {
-      results = results.filter(f => f.arrivalCity.toLowerCase().includes(to.toLowerCase()) || f.arrivalAirportCode.toLowerCase() === to.toLowerCase());
+      results = results.filter((item) =>
+        matches(item.arrivalCity, to) || matches(item.arrivalAirportCode, to),
+      );
     }
     if (airline && airline !== 'Barcha aviakompaniyalar') {
-      results = results.filter(f => f.airline.toLowerCase().includes(airline.toLowerCase()));
+      results = results.filter((item) => matches(item.airline, airline));
     }
-    if (directOnly === 'true') {
-      results = results.filter(f => f.flightType === 'direct');
-    }
-
-    res.json({
-      success: true,
-      source: 'Charter & GDS Aviabiletlar',
-      count: results.length,
-      flights: results
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message, flights: [] });
+    if (directOnly) results = results.filter((item) => item.flightType === 'direct');
+    return res.json({ success: true, source: 'MongoDB', count: results.length, flights: results });
+  } catch (error) {
+    console.error('Flight catalog query failed:', error);
+    return res.status(500).json({ success: false, error: 'Aviabiletlar bazasini o‘qib bo‘lmadi.' });
   }
 });
 
-// HOTELS ONLY: /api/hotels/search
-hotelsRouter.get('/search', (req, res) => {
+hotelsRouter.get('/search', async (req, res) => {
+  if (!requireDatabase(res)) return;
   try {
-    const { country, resort, meal, q } = req.query as Record<string, string>;
-    let results = [...INITIAL_HOTELS_ONLY];
-
+    const country = String(req.query.country || '');
+    const resort = String(req.query.resort || '');
+    const meal = String(req.query.meal || '');
+    const query = String(req.query.q || '');
+    let results = await loadCatalog('hotels');
     if (country && country !== 'Barchasi') {
-      results = results.filter(h => h.country.toLowerCase().includes(country.toLowerCase()));
+      results = results.filter((item) => matches(item.country, country));
     }
     if (resort && resort !== 'Barcha kurortlar') {
-      results = results.filter(h => h.resort.toLowerCase().includes(resort.toLowerCase()));
+      results = results.filter((item) => matches(item.resort, resort));
     }
-    if (meal && meal !== 'ALL') {
-      results = results.filter(h => h.mealType === meal);
+    if (meal && meal !== 'ALL') results = results.filter((item) => item.mealType === meal);
+    if (query) {
+      results = results.filter((item) => matches(item.name, query) || matches(item.resort, query));
     }
-    if (q) {
-      const query = q.toLowerCase();
-      results = results.filter(h => h.name.toLowerCase().includes(query) || h.resort.toLowerCase().includes(query));
-    }
-
-    res.json({
-      success: true,
-      source: 'Faqat Mehmonxona (1:1 Narxlar)',
-      count: results.length,
-      hotels: results
-    });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message, hotels: [] });
+    return res.json({ success: true, source: 'MongoDB', count: results.length, hotels: results });
+  } catch (error) {
+    console.error('Hotel catalog query failed:', error);
+    return res.status(500).json({ success: false, error: 'Mehmonxonalar bazasini o‘qib bo‘lmadi.' });
   }
 });

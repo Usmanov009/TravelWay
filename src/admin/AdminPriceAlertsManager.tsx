@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { PriceAlert, TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Bell, Flame, Send } from '@/lib/flaticon-icons';
+import { Bell, Send, Trash2 } from '@/lib/flaticon-icons';
 
 interface AdminPriceAlertsManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   priceAlerts: PriceAlert[];
   tours: TourPackage[];
-  onSimulatePriceDrop: (tourId: string, price: number) => void;
   onDeletePriceAlert?: (alertId: string) => void;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
@@ -19,21 +18,11 @@ export const AdminPriceAlertsManager: React.FC<AdminPriceAlertsManagerProps> = (
   currentAdmin,
   priceAlerts,
   tours,
-  onSimulatePriceDrop,
   onDeletePriceAlert,
   onShowToast,
   globalSearch = ''
 }) => {
   const [search, setSearch] = useState('');
-
-  const handleApplyDiscount = (alert: PriceAlert) => {
-    const newPrice = Math.max(100, alert.targetPrice - 20);
-    onSimulatePriceDrop(alert.tourId, newPrice);
-    onShowToast(
-      `"${alert.tourTitle}" uchun narx $${newPrice} ga tushirildi! Mijozga bildirishnoma jo'natildi.`,
-      'success'
-    );
-  };
 
   const effectiveSearch = (search || globalSearch).trim().toLowerCase();
 
@@ -141,13 +130,19 @@ export const AdminPriceAlertsManager: React.FC<AdminPriceAlertsManagerProps> = (
                       <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">Faol signal</p>
                     </td>
                     <td className="py-3.5 pr-5 text-right">
-                      <button
-                        onClick={() => handleApplyDiscount(alert)}
-                        className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-2xs transition-all tap-bounce"
-                        title="Mijoz kutgan narxdan pastroq narx belgilash va darhol bildirishnoma jo'natish"
-                      >
-                        <Flame aria-hidden="true" className="inline h-3.5 w-3.5" /> Aksiya Berish
-                      </button>
+                      {onDeletePriceAlert && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`"${alert.tourTitle}" narx signalini o‘chirmoqchimisiz?`)) {
+                              onDeletePriceAlert(alert.id);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs transition-all"
+                        >
+                          <Trash2 aria-hidden="true" className="inline h-3.5 w-3.5 mr-1" /> O‘chirish
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

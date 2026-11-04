@@ -6,9 +6,9 @@ interface AdminStaffManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   staffList: AdminUser[];
-  onAddStaff: (staff: AdminUser) => void;
-  onUpdateStaff: (staff: AdminUser) => void;
-  onRemoveStaff: (staffId: string) => void;
+  onAddStaff: (staff: AdminUser) => Promise<void>;
+  onUpdateStaff: (staff: AdminUser) => Promise<void>;
+  onRemoveStaff: (staffId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
 }
@@ -34,7 +34,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   const [phone, setPhone] = useState('+998 90 ');
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [visiblePasswordStaffId, setVisiblePasswordStaffId] = useState<string | null>(null);
 
   if (!isMainAdmin) {
     return (
@@ -78,27 +77,21 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
   };
 
   const copyCredentials = (staff: AdminUser) => {
-    let passMap: Record<string, string> = {};
-    try {
-      passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-    } catch (e) {}
-    const uKey = (staff.username || '').toLowerCase();
-    const emKey = (staff.email || '').toLowerCase();
     const loginVal = staff.username || staff.email.split('@')[0];
-    const passVal = staff.password || passMap[uKey] || passMap[emKey] || 'admin123';
-    const textToCopy = `SayrHub Boshqaruv Paneli (Admin)\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nParol: ${passVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
+    const textToCopy = `SayrHub Boshqaruv Paneli\nHavola: https://sayrhub.uz/admin\nLogin: ${loginVal}\nRol: ${staff.roleTitle || 'Tur Admin'}`;
 
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(textToCopy);
-      setCopiedId(staff.id);
-      onShowToast(`"${staff.name}" xodimining login va paroli nusxalandi!`, 'success');
-      setTimeout(() => setCopiedId(null), 3000);
+      void navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopiedId(staff.id);
+        onShowToast(`"${staff.name}" xodimining login ma’lumoti nusxalandi.`, 'success');
+        setTimeout(() => setCopiedId(null), 3000);
+      }).catch(() => onShowToast('Login ma’lumotini nusxalab bo‘lmadi.', 'error'));
     } else {
-      onShowToast(`Login: ${loginVal} | Parol: ${passVal}`, 'info');
+      onShowToast(`Login: ${loginVal}`, 'info');
     }
   };
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanName = name.trim();
     const cleanUser = username.trim().toLowerCase();
@@ -119,12 +112,12 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       name: cleanName,
       username: cleanUser,
       password: cleanPass,
-      email: email.trim() || `${cleanUser}@sayrhub.uz`,
-      phone: phone.trim() || '+998 90',
+      email: email.trim(),
+      phone: phone.trim(),
       role: 'tour_admin',
       roleTitle: 'Tur Admin',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      assignedDestinations: ['Barcha yo\'nalishlar'],
+      avatar: '',
+      assignedDestinations: [],
       canManageUsers: false,
       canManageStaff: false,
       canDeleteTours: true,
@@ -132,22 +125,17 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
       canManageBookings: true,
       canManageCatalog: true,
       createdAt: new Date().toISOString().split('T')[0],
-      lastActive: 'Hozir online',
+      lastActive: '',
       status: 'active'
     };
 
     try {
-      const existingMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-      existingMap[cleanUser] = cleanPass;
-      if (email.trim()) {
-        existingMap[email.trim().toLowerCase()] = cleanPass;
-      }
-      localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(existingMap));
-    } catch (e) {}
-
-    onAddStaff(newStaff);
-    onShowToast(`Yangi tur admin "${cleanName}" login: "${cleanUser}" va paroli bilan muvaffaqiyatli tayinlandi!`, 'success');
-    setIsModalOpen(false);
+      await onAddStaff(newStaff);
+      onShowToast(`Yangi tur admin "${cleanName}" bazaga saqlandi. Login: "${cleanUser}".`, 'success');
+      setIsModalOpen(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Admin xodimini saqlab bo‘lmadi.', 'error');
+    }
   };
 
   const effectiveSearch = (search || globalSearch).trim().toLowerCase();
@@ -221,14 +209,6 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
           {filteredStaff.map((staff) => {
             const isMain = staff.role === 'main_admin';
             const displayUser = staff.username || staff.email.split('@')[0];
-            let passMap: Record<string, string> = {};
-            try {
-              passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-            } catch (e) {}
-            const uKey = (staff.username || '').toLowerCase();
-            const emKey = (staff.email || '').toLowerCase();
-            const displayPass = staff.password || passMap[uKey] || passMap[emKey] || 'admin123';
-            const isPassVisible = visiblePasswordStaffId === staff.id;
 
             return (
               <div
@@ -237,11 +217,17 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={staff.avatar}
-                      alt=""
-                      className="w-12 h-12 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700"
-                    />
+                    {staff.avatar ? (
+                      <img
+                        src={staff.avatar}
+                        alt=""
+                        className="w-12 h-12 rounded-2xl object-cover border border-zinc-200 dark:border-zinc-700"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center font-bold border border-border">
+                        {staff.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <h4 className="font-bold text-zinc-900 dark:text-white text-sm">{staff.name}</h4>
                       <p className="text-xs text-zinc-400">{staff.phone}</p>
@@ -261,8 +247,8 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     <button
                       onClick={() => {
                         if (confirm(`"${staff.name}" xodimini o'chirishni tasdiqlaysizmi?`)) {
-                          onRemoveStaff(staff.id);
-                          onShowToast("Tur admin o'chirildi", 'info');
+                          void onRemoveStaff(staff.id).then(() => onShowToast("Tur admin o'chirildi", 'info'))
+                            .catch((error) => onShowToast(error instanceof Error ? error.message : "Tur adminni o'chirib bo'lmadi.", 'error'));
                         }
                       }}
                       className="text-zinc-400 hover:text-rose-600 p-1 transition"
@@ -273,7 +259,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                   )}
                 </div>
 
-                {/* Login & Password Credentials Box */}
+                {/* Login metadata only; passwords are never returned from the server. */}
                 <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
@@ -289,7 +275,7 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                       <span className="material-symbols-outlined text-[14px]">
                         {copiedId === staff.id ? 'check' : 'content_copy'}
                       </span>
-                      <span>{copiedId === staff.id ? 'Nusxalandi!' : 'Nusxalash'}</span>
+                      <span>{copiedId === staff.id ? 'Nusxalandi!' : 'Loginni nusxalash'}</span>
                     </button>
                   </div>
 
@@ -302,22 +288,8 @@ export const AdminStaffManager: React.FC<AdminStaffManagerProps> = ({
                     </div>
 
                     <div className="bg-card px-2.5 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-zinc-400 block font-medium">Parol:</span>
-                        <button
-                          type="button"
-                          onClick={() => setVisiblePasswordStaffId(isPassVisible ? null : staff.id)}
-                          className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white p-0.5"
-                          title={isPassVisible ? "Parolni yashirish" : "Parolni ko'rish"}
-                        >
-                          <span className="material-symbols-outlined text-[14px]">
-                            {isPassVisible ? 'visibility_off' : 'visibility'}
-                          </span>
-                        </button>
-                      </div>
-                      <span className="text-zinc-900 dark:text-white font-mono font-bold truncate block">
-                        {isPassVisible ? displayPass : '••••••••'}
-                      </span>
+                      <span className="text-[10px] text-zinc-400 block font-medium">Parol:</span>
+                      <span className="text-zinc-900 dark:text-white font-mono font-bold truncate block">Bazaviy himoyalangan</span>
                     </div>
                   </div>
                 </div>

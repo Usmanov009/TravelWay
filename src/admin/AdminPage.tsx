@@ -13,7 +13,6 @@ import { AdminUsersManager } from './AdminUsersManager';
 import { AdminStaffManager } from './AdminStaffManager';
 import { AdminPriceAlertsManager } from './AdminPriceAlertsManager';
 import { AdminSettings } from './AdminSettings';
-import { INITIAL_REGISTERED_USERS } from './adminMockData';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 interface AdminPageProps {
@@ -23,34 +22,33 @@ interface AdminPageProps {
   onExitToApp: () => void;
   // Live linked data
   tours: TourPackage[];
-  onAddTour: (tour: TourPackage) => void;
-  onUpdateTour: (tour: TourPackage) => void;
-  onDeleteTour: (tourId: string) => void;
+  onAddTour: (tour: TourPackage) => Promise<void>;
+  onUpdateTour: (tour: TourPackage) => Promise<void>;
+  onDeleteTour: (tourId: string) => Promise<void>;
   comboTours: ComboTour[];
-  onAddComboTour: (combo: ComboTour) => void;
-  onUpdateComboTour: (combo: ComboTour) => void;
-  onDeleteComboTour: (comboId: string) => void;
+  onAddComboTour: (combo: ComboTour) => Promise<void>;
+  onUpdateComboTour: (combo: ComboTour) => Promise<void>;
+  onDeleteComboTour: (comboId: string) => Promise<void>;
   flights: FlightTicket[];
-  onAddFlight: (flight: FlightTicket) => void;
-  onUpdateFlight: (flight: FlightTicket) => void;
-  onDeleteFlight: (flightId: string) => void;
+  onAddFlight: (flight: FlightTicket) => Promise<void>;
+  onUpdateFlight: (flight: FlightTicket) => Promise<void>;
+  onDeleteFlight: (flightId: string) => Promise<void>;
   hotels: HotelOnly[];
-  onAddHotel: (hotel: HotelOnly) => void;
-  onUpdateHotel: (hotel: HotelOnly) => void;
-  onDeleteHotel: (hotelId: string) => void;
+  onAddHotel: (hotel: HotelOnly) => Promise<void>;
+  onUpdateHotel: (hotel: HotelOnly) => Promise<void>;
+  onDeleteHotel: (hotelId: string) => Promise<void>;
   bookings: Booking[];
   onUpdateBookingStatus: (bookingId: string, status: Booking['status']) => void;
   onCancelBooking: (bookingId: string) => void;
   priceAlerts: PriceAlert[];
-  onSimulatePriceDrop: (tourId: string, price: number) => void;
   onDeletePriceAlert?: (alertId: string) => void;
   staffList: AdminUser[];
-  onAddStaff: (staff: AdminUser) => void;
-  onUpdateStaff: (staff: AdminUser) => void;
-  onRemoveStaff: (staffId: string) => void;
+  onAddStaff: (staff: AdminUser) => Promise<void>;
+  onUpdateStaff: (staff: AdminUser) => Promise<void>;
+  onRemoveStaff: (staffId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   agencyCommissionRate?: number;
-  onUpdateCommissionRate?: (rate: number) => void;
+  onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
 export const AdminPage: React.FC<AdminPageProps> = ({
@@ -78,18 +76,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onUpdateBookingStatus,
   onCancelBooking,
   priceAlerts,
-  onSimulatePriceDrop,
   onDeletePriceAlert,
   staffList,
   onAddStaff,
   onUpdateStaff,
   onRemoveStaff,
   onShowToast,
-  agencyCommissionRate = 8,
+  agencyCommissionRate = 0,
   onUpdateCommissionRate
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [usersCount, setUsersCount] = useState(0);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('sayrhub_admin_theme') || localStorage.getItem('travelway_admin_theme');
@@ -114,28 +112,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     } catch (e) {}
   };
 
-  // Find active admin profile with safe fallback
-  const fallbackAdmin: AdminUser = {
-    id: 'adm-root',
-    name: 'Admin',
-    email: 'admin@sayrhub.uz',
-    role: currentRole,
-    roleTitle: currentRole === 'main_admin' ? 'Bosh Admin' : 'Tur Admin',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    phone: '',
-    assignedDestinations: ['Barcha yo\'nalishlar'],
-    canManageUsers: true,
-    canManageStaff: true,
-    canDeleteTours: true,
-    canEditFinancials: true,
-    canManageBookings: true,
-    canManageCatalog: true,
-    createdAt: new Date().toISOString().split('T')[0],
-    lastActive: 'Hozir online',
-    status: 'active'
-  };
-  const currentAdmin = currentAdminUser || staffList.find(s => s.role === currentRole) || staffList[0] || fallbackAdmin;
+  const currentAdmin = currentAdminUser || staffList.find((staff) => staff.role === currentRole) || null;
   const activeBookingsCount = bookings.filter(b => b.status === 'Jarayonda' || b.type === 'active').length;
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
+    if (!token || currentRole !== 'main_admin') {
+      setUsersCount(0);
+      return;
+    }
+    fetch('/api/db/users/count', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Foydalanuvchilar sonini olib bo‘lmadi.');
+        setUsersCount(Number(data.count) || 0);
+      })
+      .catch((error: unknown) => {
+        onShowToast(error instanceof Error ? error.message : 'Foydalanuvchilar sonini olib bo‘lmadi.', 'error');
+      });
+  }, [currentRole, onShowToast]);
+
+  if (!currentAdmin) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-background p-6 text-center">
+        <div className="max-w-sm space-y-4">
+          <h1 className="text-xl font-semibold">Admin profili topilmadi</h1>
+          <p className="text-sm text-muted-foreground">Sessiyangizni yangilash uchun tizimdan chiqing va qayta kiring.</p>
+          <button type="button" className="text-sm font-medium text-primary underline" onClick={onExitToApp}>
+            Tizimdan chiqish
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleQuickAddTour = () => {
     setCurrentTab('tours');
@@ -182,10 +191,9 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               hotels={hotels}
               bookings={bookings}
               priceAlerts={priceAlerts}
-              usersCount={INITIAL_REGISTERED_USERS.length}
+              usersCount={usersCount}
               onSelectTab={(tab) => setCurrentTab(tab)}
               onUpdateBookingStatus={onUpdateBookingStatus}
-              onSimulatePriceDrop={onSimulatePriceDrop}
               onQuickAddTour={handleQuickAddTour}
               agencyCommissionRate={agencyCommissionRate}
               onUpdateCommissionRate={onUpdateCommissionRate}
@@ -290,7 +298,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               currentAdmin={currentAdmin}
               priceAlerts={priceAlerts}
               tours={tours}
-              onSimulatePriceDrop={onSimulatePriceDrop}
               onDeletePriceAlert={onDeletePriceAlert}
               onShowToast={onShowToast}
               globalSearch={searchTerm}

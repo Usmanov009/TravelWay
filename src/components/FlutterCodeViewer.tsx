@@ -118,7 +118,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool isPhoneTab = true;
   bool isPasswordMode = false;
   bool rememberMe = true;
-  final TextEditingController _phoneController = TextEditingController(text: '90 123-45-67');
+  final TextEditingController _phoneController = TextEditingController();
 
   void _showOtpModal() {
     showModalBottomSheet(
@@ -154,29 +154,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF15233C),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFF5B00).withOpacity(0.3)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Test SMS kodi: 7788', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF5B00)),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Muvaffaqiyatli kirdingiz! ✓')),
-                        );
-                      },
-                      child: const Text('To\'ldirish'),
-                    ),
-                  ],
-                ),
+              const Text(
+                'SMS orqali kirish sozlanmagan. Telegram orqali kiring.',
+                style: TextStyle(color: Colors.white70),
               ),
             ],
           ),
@@ -187,7 +167,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   void _signInWithGoogle() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Google orqali kirilmoqda...')),
+      const SnackBar(content: Text('Google orqali kirish sozlanmagan. Telegram orqali kiring.')),
     );
   }
 
@@ -367,24 +347,7 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tours = [
-      TourPackageModel(
-        title: 'Rixos Premium Belek 5*',
-        location: 'Antalya, Turkiya',
-        tag: 'Ultra All Inclusive',
-        price: 740,
-        rating: 9.6,
-        imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-      ),
-      TourPackageModel(
-        title: 'Atlantis The Royal 5*',
-        location: 'Dubay, Palm Jumeirah',
-        tag: 'Premium Luxury',
-        price: 1250,
-        rating: 9.8,
-        imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-      ),
-    ];
+    final tours = <TourPackageModel>[];
 
     return Scaffold(
       backgroundColor: const Color(0xFF0C1322),
@@ -393,7 +356,9 @@ class SearchScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF0C1322),
         elevation: 0,
       ),
-      body: ListView.builder(
+      body: tours.isEmpty
+          ? const Center(child: Text('Bazadan turpaketlar topilmadi.', style: TextStyle(color: Colors.white70)))
+          : ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: tours.length,
         itemBuilder: (context, index) {

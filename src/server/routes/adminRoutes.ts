@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { getDBStatus } from '../../../db.js';
 import { 
   generateToken, 
   comparePassword, 
@@ -31,24 +32,21 @@ router.post('/login', async (req, res) => {
       error: "Login va parol kiritilishi shart!"
     });
   }
+  if (!getDBStatus().connected) {
+    return res.status(503).json({
+      success: false,
+      error: 'MongoDB ulanmagan. Admin tizimiga kirish uchun database kerak.',
+    });
+  }
 
   // Strip quotes and trim environment variables
   const cleanEnv = (val?: string) => (val || '').replace(/^["']|["']$/g, '').trim();
-  const validUser = cleanEnv(process.env.ADMIN_USERNAME).toLowerCase() || 'admin';
-  const validPass = cleanEnv(process.env.ADMIN_PASSWORD) || 'admin123';
+  const validUser = cleanEnv(process.env.ADMIN_USERNAME).toLowerCase();
+  const validPass = cleanEnv(process.env.ADMIN_PASSWORD);
 
   // 1. Super / Main Admin check (accepts 'admin', 'admin@sayrhub.uz', 'admin@travelway.uz' or custom ADMIN_USERNAME)
-  const isUserMatched = (
-    inputUser === validUser ||
-    inputUser === 'admin' ||
-    inputUser === 'admin@sayrhub.uz' ||
-    inputUser === 'admin@travelway.uz'
-  );
-
-  const isPassMatched = (
-    inputPass === validPass ||
-    inputPass === 'admin123'
-  );
+  const isUserMatched = Boolean(validUser && inputUser === validUser);
+  const isPassMatched = Boolean(validPass && inputPass === validPass);
 
   if (isUserMatched && isPassMatched) {
     const adminUser = {
@@ -57,7 +55,8 @@ router.post('/login', async (req, res) => {
       username: 'admin',
       role: 'main_admin' as const,
       roleTitle: 'Bosh Admin (Super)',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      email: validUser,
+      avatar: '',
     };
 
     const token = generateToken(adminUser, '7d');
@@ -70,56 +69,13 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  // 2. Default Tour Admin check (instant zero-latency fallback)
-  const isDefaultTourUser = (
-    inputUser === 'tour_admin' || 
-    inputUser === 'turadmin' || 
-    inputUser === 'tour' || 
-    inputUser === 'tour@sayrhub.uz' || 
-    inputUser === 'operator'
-  );
-  const isDefaultTourPass = (inputPass === 'tour123' || inputPass === 'admin123');
-
-  if (isDefaultTourUser && isDefaultTourPass) {
-    const tourAdminUser = {
-      id: 'staff-tour-1',
-      name: 'Azizbek Rahimov',
-      username: 'tour_admin',
-      role: 'tour_admin' as const,
-      roleTitle: 'Tur Admin (Operatsion)',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      email: 'tour@sayrhub.uz',
-      phone: '+998 90 123 45 67',
-      assignedDestinations: ['Turkiya', 'BAA', 'Misr', 'Tailand', 'Maldiv'],
-      canManageUsers: false,
-      canManageStaff: false,
-      canDeleteTours: true,
-      canEditFinancials: true,
-      canManageBookings: true,
-      canManageCatalog: true,
-      status: 'active' as const
-    };
-
-    const token = generateToken(tourAdminUser, '7d');
-
-    return res.json({
-      success: true,
-      role: 'tour_admin',
-      adminUser: tourAdminUser,
-      token
-    });
-  }
-
-  // 3. Check Admin Staff in MongoDB & Persistent Storage
+  // Authenticate staff accounts stored in MongoDB.
   try {
     const staff = await findStaffByIdentifier(inputUser);
 
     if (staff) {
       const isPasswordValid = await comparePassword(inputPass, staff.password);
-      // Emergency password match for test environments
-      const isMasterKey = (inputPass === 'admin123');
-
-      if (isPasswordValid || isMasterKey) {
+      if (isPasswordValid) {
         if (staff.status === 'suspended') {
           return res.status(403).json({
             success: false,
@@ -158,6 +114,9 @@ router.post('/login', async (req, res) => {
 // 2. ADMIN STAFF MANAGEMENT (PROTECTED)
 // ==========================================
 router.get('/staff', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+  if (!getDBStatus().connected) {
+    return res.status(503).json({ success: false, error: 'MongoDB ulanmagan; admin ro‘yxati mavjud emas.' });
+  }
   try {
     const staffList = await getPublicStaffList();
     res.json({ success: true, staff: staffList });
@@ -166,7 +125,10 @@ router.get('/staff', authenticateToken, requireRole('main_admin', 'tour_admin'),
   }
 });
 
-router.post('/staff', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+router.post('/staff', authenticateToken, requireRole('main_admin'), async (req: AuthRequest, res) => {
+  if (!getDBStatus().connected) {
+    return res.status(503).json({ success: false, error: 'MongoDB ulanmagan; admin xodimi saqlanmadi.' });
+  }
   try {
     const result = await saveStaff(req.body);
     if (!result.success) {
@@ -178,7 +140,10 @@ router.post('/staff', authenticateToken, requireRole('main_admin', 'tour_admin')
   }
 });
 
-router.delete('/staff/:id', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {
+router.delete('/staff/:id', authenticateToken, requireRole('main_admin'), async (req: AuthRequest, res) => {
+  if (!getDBStatus().connected) {
+    return res.status(503).json({ success: false, error: 'MongoDB ulanmagan; admin xodimi o‘chirilmadi.' });
+  }
   try {
     const result = await deleteStaff(req.params.id);
     if (!result.success) {
@@ -194,9 +159,17 @@ router.delete('/staff/:id', authenticateToken, requireRole('main_admin', 'tour_a
 // 3. AGENCY COMMISSION (EDITABLE BY ALL ADMINS & PERSISTED)
 // ==========================================
 
-router.get('/commission', (req, res) => {
-  const currentRate = getAgencyCommissionRate();
-  res.json({ success: true, commissionRate: currentRate });
+router.get('/commission', (_req, res) => {
+  if (!getDBStatus().connected) {
+    return res.status(503).json({ success: false, error: 'MongoDB ulanmagan; agentlik sozlamalari mavjud emas.' });
+  }
+  try {
+    const currentRate = getAgencyCommissionRate();
+    return res.json({ success: true, commissionRate: currentRate });
+  } catch (error) {
+    console.error('Agency settings read failed:', error);
+    return res.status(500).json({ success: false, error: 'Agentlik sozlamalarini olib bo‘lmadi.' });
+  }
 });
 
 router.post('/commission', authenticateToken, requireRole('main_admin', 'tour_admin'), async (req: AuthRequest, res) => {

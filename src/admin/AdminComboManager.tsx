@@ -7,9 +7,9 @@ interface AdminComboManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   comboTours: ComboTour[];
-  onAddComboTour: (combo: ComboTour) => void;
-  onUpdateComboTour: (combo: ComboTour) => void;
-  onDeleteComboTour: (comboId: string) => void;
+  onAddComboTour: (combo: ComboTour) => Promise<void>;
+  onUpdateComboTour: (combo: ComboTour) => Promise<void>;
+  onDeleteComboTour: (comboId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
 }
@@ -35,19 +35,27 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
   const [formRouteSummary, setFormRouteSummary] = useState('');
   const [formCities, setFormCities] = useState('');
   const [formNightsSplit, setFormNightsSplit] = useState('');
-  const [formPrice, setFormPrice] = useState<number>(850);
-  const [formOldPrice, setFormOldPrice] = useState<number>(1050);
-  const [formImg, setFormImg] = useState('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80');
+  const [formPrice, setFormPrice] = useState<number>(0);
+  const [formOldPrice, setFormOldPrice] = useState<number>(0);
+  const [formDepartureCity, setFormDepartureCity] = useState('');
+  const [formDepartureDate, setFormDepartureDate] = useState('');
+  const [formAirline, setFormAirline] = useState('');
+  const [formFlight, setFormFlight] = useState('');
+  const [formImg, setFormImg] = useState('');
 
   const openAddModal = () => {
     setEditingCombo(null);
     setFormTitle('');
-    setFormRouteSummary('Toshkent ➔ Istanbul (3k) ➔ Kapadokya (4k) ➔ Toshkent');
-    setFormCities('Istanbul, Kapadokya');
-    setFormNightsSplit('3 kecha Istanbul + 4 kecha Kapadokya');
-    setFormPrice(850);
-    setFormOldPrice(1050);
-    setFormImg('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80');
+    setFormRouteSummary('');
+    setFormCities('');
+    setFormNightsSplit('');
+    setFormPrice(0);
+    setFormOldPrice(0);
+    setFormDepartureCity('');
+    setFormDepartureDate('');
+    setFormAirline('');
+    setFormFlight('');
+    setFormImg('');
     setIsModalOpen(true);
   };
 
@@ -58,22 +66,30 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
     setFormCities(c.cities.join(', '));
     setFormNightsSplit(c.nightsSplit);
     setFormPrice(c.price);
-    setFormOldPrice(c.oldPrice || Math.round(c.price * 1.2));
+    setFormOldPrice(c.oldPrice || 0);
+    setFormDepartureCity(c.departureCity);
+    setFormDepartureDate(c.departureDate);
+    setFormAirline(c.airline);
+    setFormFlight(c.flight);
     setFormImg(c.img);
     setIsModalOpen(true);
   };
 
-  const handleDuplicateCombo = (c: ComboTour) => {
+  const handleDuplicateCombo = async (c: ComboTour) => {
     const duplicated: ComboTour = {
       ...c,
       id: `combo-${Date.now()}`,
       title: `${c.title} (Nusxa)`
     };
-    onAddComboTour(duplicated);
-    onShowToast(`"${c.title}" combo turi nusxalandi!`, 'success');
+    try {
+      await onAddComboTour(duplicated);
+      onShowToast(`"${c.title}" combo turi nusxalandi!`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Combo turni nusxalab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim()) {
       onShowToast("Iltimos, Combo tur nomini kiriting!", 'error');
@@ -81,58 +97,78 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
     }
 
     const cityArray = formCities.split(',').map((s) => s.trim()).filter(Boolean);
+    const nightsTotal = (formNightsSplit.match(/\d+/g) || []).reduce((total, value) => total + Number(value), 0);
+    if (!formRouteSummary.trim() || cityArray.length === 0 || nightsTotal <= 0 || formPrice <= 0 ||
+      !formDepartureCity.trim() || !formDepartureDate || !formAirline.trim() || !formFlight.trim()) {
+      onShowToast("Combo tur ma’lumotlarining barcha majburiy maydonlarini to‘ldiring.", 'error');
+      return;
+    }
 
+    try {
     if (editingCombo) {
       const updated: ComboTour = {
         ...editingCombo,
         title: formTitle.trim(),
         routeSummary: formRouteSummary.trim(),
-        cities: cityArray.length > 0 ? cityArray : ['Istanbul', 'Kapadokya'],
-        nightsSplit: formNightsSplit.trim() || '3 kecha + 4 kecha',
+        route: cityArray,
+        cities: cityArray,
+        nightsTotal,
+        nightsSplit: formNightsSplit.trim(),
         price: Number(formPrice),
-        oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
-        img: formImg || 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80'
+        oldPrice: formOldPrice > 0 ? Number(formOldPrice) : undefined,
+        departureCity: formDepartureCity.trim(),
+        departureDate: formDepartureDate,
+        airline: formAirline.trim(),
+        flight: formFlight.trim(),
+        img: formImg
       };
-      onUpdateComboTour(updated);
+      await onUpdateComboTour(updated);
       onShowToast(`"${formTitle}" Combo turi yangilandi!`, 'success');
     } else {
       const newCombo: ComboTour = {
         id: `combo-${Date.now()}`,
         title: formTitle.trim(),
-        route: cityArray.length > 0 ? cityArray : ['Istanbul', 'Kapadokya'],
-        routeSummary: formRouteSummary.trim() || 'Toshkent ➔ Istanbul ➔ Kapadokya ➔ Toshkent',
-        cities: cityArray.length > 0 ? cityArray : ['Istanbul', 'Kapadokya'],
-        nightsTotal: 7,
-        nightsSplit: formNightsSplit.trim() || '3 kecha + 4 kecha',
+        route: cityArray,
+        routeSummary: formRouteSummary.trim(),
+        cities: cityArray,
+        nightsTotal,
+        nightsSplit: formNightsSplit.trim(),
         hotels: [],
-        transfersIncluded: true,
-        excursionsIncluded: ['Kapadokya havo shari', 'Bosfor safari'],
+        transfersIncluded: false,
+        excursionsIncluded: [],
         price: Number(formPrice),
-        oldPrice: formOldPrice ? Number(formOldPrice) : Math.round(formPrice * 1.25),
-        departureCity: 'Toshkent (TAS)',
-        departureDate: '2026-10-15',
-        airline: 'Uzbekistan Airways',
-        flight: 'HY-271 / HY-272',
-        img: formImg || 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=800&auto=format&fit=crop&q=80',
-        rating: 4.9,
-        kompasTourCode: `CMB-${Math.floor(1000 + Math.random() * 9000)}`,
+        oldPrice: formOldPrice > 0 ? Number(formOldPrice) : undefined,
+        departureCity: formDepartureCity.trim(),
+        departureDate: formDepartureDate,
+        airline: formAirline.trim(),
+        flight: formFlight.trim(),
+        img: formImg,
+        rating: 0,
+        kompasTourCode: '',
         itinerary: []
       };
-      onAddComboTour(newCombo);
+      await onAddComboTour(newCombo);
       onShowToast(`Yangi "${formTitle}" combo turi qo'shildi!`, 'success');
     }
 
     setIsModalOpen(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Combo turni saqlab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleDelete = (id: string, title: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Combo turlarni o'chirish faqat Bosh Admin huquqida!", 'error');
       return;
     }
     if (confirm(`"${title}" combo turini o'chirmoqchimisiz?`)) {
-      onDeleteComboTour(id);
-      onShowToast(`"${title}" o'chirildi!`, 'info');
+      try {
+        await onDeleteComboTour(id);
+        onShowToast(`"${title}" o'chirildi!`, 'info');
+      } catch (error) {
+        onShowToast(error instanceof Error ? error.message : 'Combo turni o‘chirib bo‘lmadi.', 'error');
+      }
     }
   };
 
@@ -175,6 +211,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
           </span>
           <input
             type="text"
+            required
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Shahar yoki marshrut bo'yicha..."
@@ -325,6 +362,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
                   </label>
                   <input
                     type="text"
+                    required
                     value={formCities}
                     onChange={(e) => setFormCities(e.target.value)}
                     placeholder="Istanbul, Kapadokya"
@@ -336,6 +374,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Marshrut Sxemasi</label>
                   <input
                     type="text"
+                    required
                     value={formRouteSummary}
                     onChange={(e) => setFormRouteSummary(e.target.value)}
                     placeholder="Toshkent ➔ Istanbul (3k) ➔ Kapadokya (4k) ➔ Toshkent"
@@ -347,6 +386,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Kechalar Taqsimoti</label>
                   <input
                     type="text"
+                    required
                     value={formNightsSplit}
                     onChange={(e) => setFormNightsSplit(e.target.value)}
                     placeholder="3 kecha Istanbul + 4 kecha Kapadokya"
@@ -356,10 +396,57 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
+                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Jo‘nash shahri</label>
+                    <input
+                      type="text"
+                      required
+                      value={formDepartureCity}
+                      onChange={(e) => setFormDepartureCity(e.target.value)}
+                      className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Jo‘nash sanasi</label>
+                    <input
+                      type="date"
+                      required
+                      value={formDepartureDate}
+                      onChange={(e) => setFormDepartureDate(e.target.value)}
+                      className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Aviakompaniya</label>
+                    <input
+                      type="text"
+                      required
+                      value={formAirline}
+                      onChange={(e) => setFormAirline(e.target.value)}
+                      className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Reys</label>
+                    <input
+                      type="text"
+                      required
+                      value={formFlight}
+                      onChange={(e) => setFormFlight(e.target.value)}
+                      className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
                     <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Narx ($)</label>
                     <input
                       type="number"
                       min="1"
+                      required
                       value={formPrice}
                       onChange={(e) => setFormPrice(Number(e.target.value))}
                       className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-bold text-indigo-600"
@@ -370,7 +457,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
                     <input
                       type="number"
                       min="1"
-                      value={formOldPrice}
+                      value={formOldPrice || ''}
                       onChange={(e) => setFormOldPrice(Number(e.target.value))}
                       className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />

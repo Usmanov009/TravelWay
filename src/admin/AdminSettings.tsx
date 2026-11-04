@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
-import { Briefcase, Globe, Package, Plane, Settings } from '@/lib/flaticon-icons';
+import { Briefcase, Package, Settings } from '@/lib/flaticon-icons';
 
 interface AdminSettingsProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   agencyCommissionRate?: number;
-  onUpdateCommissionRate?: (rate: number) => void;
+  onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
 export const AdminSettings: React.FC<AdminSettingsProps> = ({
@@ -18,16 +18,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
-  const [kompasUrl, setKompasUrl] = useState('https://online.uz.kompastour.com/search_tour');
-  const [commissionRate, setCommissionRate] = useState<number>(() => {
-    if (agencyCommissionRate !== undefined) return agencyCommissionRate;
-    try {
-      const saved = localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission');
-      if (saved) return Number(saved);
-    } catch (e) {}
-    return 8;
-  });
-  const [tgBotUsername, setTgBotUsername] = useState('@sayrhub_bot');
+  const [commissionRate, setCommissionRate] = useState<number>(agencyCommissionRate ?? 0);
   const [isSavingCommission, setIsSavingCommission] = useState(false);
 
   useEffect(() => {
@@ -36,77 +27,51 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     }
   }, [agencyCommissionRate]);
 
-  // Sync commission from backend
-  useEffect(() => {
-    fetch('/api/admin/commission')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && typeof data.commissionRate === 'number') {
-          setCommissionRate(data.commissionRate);
-          try {
-            localStorage.setItem('sayrhub_agency_commission', String(data.commissionRate));
-            localStorage.setItem('travelway_agency_commission', String(data.commissionRate));
-          } catch (e) {}
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingCommission(true);
 
     try {
-      // 1. Save commission (accessible to all admins: both Main Admin and Tour Admin)
       const cleanCommission = Math.max(0, Math.min(100, Number(commissionRate) || 0));
+      if (!onUpdateCommissionRate) throw new Error('Komissiyani saqlash xizmati mavjud emas.');
+      await onUpdateCommissionRate(cleanCommission);
       setCommissionRate(cleanCommission);
-
-      try {
-        localStorage.setItem('sayrhub_agency_commission', String(cleanCommission));
-        localStorage.setItem('travelway_agency_commission', String(cleanCommission));
-      } catch (e) {}
-
-      // Immediately propagate to all items and prices across the app
-      if (onUpdateCommissionRate) {
-        onUpdateCommissionRate(cleanCommission);
-      }
-
-      let token = '';
-      try {
-        token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-      } catch (e) {}
-
-      await fetch('/api/admin/commission', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ commissionRate: cleanCommission })
-      });
-
-      if (isMainAdmin) {
-        onShowToast(`Tizim sozlamalari va agentlik komissiyasi (${cleanCommission}%) saqlandi va barcha narxlarga qo'llanildi!`, 'success');
-      } else {
-        onShowToast(`Agentlik komissiyasi (${cleanCommission}%) saqlandi va barcha narxlarga qo'llanildi!`, 'success');
-      }
-    } catch (err) {
-      onShowToast("Sozlamalarni saqlashda xatolik yuz berdi", 'error');
+      onShowToast(`Agentlik komissiyasi (${cleanCommission}%) bazada saqlandi.`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Sozlamalarni saqlashda xatolik yuz berdi.', 'error');
     } finally {
       setIsSavingCommission(false);
     }
   };
 
-  const handleDownloadBackup = () => {
+  const handleDownloadBackup = async () => {
     try {
+      if (!isMainAdmin) throw new Error('Zaxira nusxasini faqat bosh admin yuklab olishi mumkin.');
+      const token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
+      if (!token) throw new Error('Admin sessiyasi yaroqsiz. Qaytadan kiring.');
+      const definitions = [
+        ['tours', '/api/db/tours', 'tours'],
+        ['comboTours', '/api/db/catalog/combo-tours', 'items'],
+        ['flights', '/api/db/catalog/flights', 'items'],
+        ['hotels', '/api/db/catalog/hotels', 'items'],
+        ['bookings', '/api/db/bookings', 'bookings'],
+        ['priceAlerts', '/api/db/price-alerts', 'alerts'],
+        ['users', '/api/db/users', 'users'],
+        ['staff', '/api/admin/staff', 'staff'],
+        ['commission', '/api/admin/commission', 'commissionRate'],
+      ] as const;
+      const resultEntries = await Promise.all(definitions.map(async ([name, url, key]) => {
+        const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || `${name} zaxira ma’lumotini olib bo‘lmadi.`);
+        }
+        return [name, data[key]] as const;
+      }));
       const backupData = {
         exportedAt: new Date().toISOString(),
-        version: '2.5.0',
-        tours: localStorage.getItem('sayrhub_tours') || localStorage.getItem('travelway_tours'),
-        bookings: localStorage.getItem('sayrhub_bookings') || localStorage.getItem('travelway_bookings'),
-        staff: localStorage.getItem('sayrhub_admin_staff') || localStorage.getItem('travelway_admin_staff'),
-        priceAlerts: localStorage.getItem('sayrhub_price_alerts') || localStorage.getItem('travelway_price_alerts'),
-        commissionRate: localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission') || 8
+        source: 'MongoDB',
+        ...Object.fromEntries(resultEntries),
       };
       const jsonBlob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(jsonBlob);
@@ -118,8 +83,8 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       onShowToast("Tizim zaxira nusxasi (JSON) muvaffaqiyatli yuklab olindi!", 'success');
-    } catch (e) {
-      onShowToast("Zaxiralashda xatolik yuz berdi", 'error');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Zaxiralashda xatolik yuz berdi.', 'error');
     }
   };
 
@@ -182,63 +147,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
         </div>
 
-        {/* 2. Kompas Tour Integration */}
         <div className="p-6 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 space-y-4 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
-                <Globe aria-hidden="true" className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Kompas Tour Live Web Scraper & API</h4>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">online.uz.kompastour.com bilan 1:1 real vaqtli ulanish</p>
-              </div>
-            </div>
-
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-full border border-emerald-200/80 dark:border-emerald-800/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Faol & Ishlamoqda
-            </span>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
-              Kompas Tour Qidiruv URL {isMainAdmin ? '' : '(Faqat Bosh Admin tahrirlay oladi)'}
-            </label>
-            <input
-              type="text"
-              disabled={!isMainAdmin}
-              value={kompasUrl}
-              onChange={(e) => setKompasUrl(e.target.value)}
-              className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent font-mono focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none disabled:opacity-60"
-            />
-          </div>
-        </div>
-
-        {/* 3. Telegram Notifications */}
-        <div className="p-6 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 space-y-4 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
-              <Plane aria-hidden="true" className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Telegram Bot Xabarnomalari</h4>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Yangi buyurtmalar va narx signallari uchun bot</p>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
-              Rasmiy Bot Username {isMainAdmin ? '' : '(Faqat Bosh Admin tahrirlay oladi)'}
-            </label>
-            <input
-              type="text"
-              disabled={!isMainAdmin}
-              value={tgBotUsername}
-              onChange={(e) => setTgBotUsername(e.target.value)}
-              className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none disabled:opacity-60"
-            />
-          </div>
+          <h4 className="text-sm font-bold text-zinc-900 dark:text-white">Kompas Tour va Telegram integratsiyalari</h4>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Integratsiya manzillari va maxfiy kalitlar server konfiguratsiyasidan olinadi. Ularni ushbu sahifada
+            tahrirlash xavfsizlik va saqlash kafolati bermaydi.
+          </p>
         </div>
 
         {/* 4. Backup & System Data */}
@@ -254,14 +168,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               </div>
             </div>
 
-            <button
+            {isMainAdmin && <button
               type="button"
-              onClick={handleDownloadBackup}
+              onClick={() => void handleDownloadBackup()}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-200 text-xs font-bold transition-all tap-bounce border border-zinc-200 dark:border-zinc-700"
             >
               <span className="material-symbols-outlined text-[17px] text-purple-600 dark:text-purple-400">download</span>
               <span>Zaxira Nusxani Yuklab Olish</span>
-            </button>
+            </button>}
           </div>
         </div>
 
@@ -274,7 +188,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           >
             <span className="material-symbols-outlined text-[18px]">save</span>
             <span>
-              {isMainAdmin ? "Barcha Sozlamalarni Saqlash" : "Agentlik Komissiyasini Saqlash"}
+              Agentlik Komissiyasini Saqlash
             </span>
           </button>
         </div>

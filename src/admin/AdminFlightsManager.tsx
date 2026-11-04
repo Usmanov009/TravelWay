@@ -8,13 +8,13 @@ interface AdminFlightsManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   flights: FlightTicket[];
-  onAddFlight: (flight: FlightTicket) => void;
-  onUpdateFlight: (flight: FlightTicket) => void;
-  onDeleteFlight: (flightId: string) => void;
+  onAddFlight: (flight: FlightTicket) => Promise<void>;
+  onUpdateFlight: (flight: FlightTicket) => Promise<void>;
+  onDeleteFlight: (flightId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
   agencyCommissionRate?: number;
-  onUpdateCommissionRate?: (rate: number) => void;
+  onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
 export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
@@ -26,7 +26,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   onDeleteFlight,
   onShowToast,
   globalSearch = '',
-  agencyCommissionRate = 8,
+  agencyCommissionRate = 0,
   onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
@@ -37,41 +37,40 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   const [selectedAirline, setSelectedAirline] = useState('ALL');
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(99999);
-  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
   const [markupModalFlight, setMarkupModalFlight] = useState<FlightTicket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFlight, setEditingFlight] = useState<FlightTicket | null>(null);
 
   // Form
-  const [formAirline, setFormAirline] = useState('Uzbekistan Airways');
-  const [formFlightNumber, setFormFlightNumber] = useState('HY-271');
-  const [formDepCity, setFormDepCity] = useState('Toshkent');
-  const [formDepCode, setFormDepCode] = useState('TAS');
-  const [formArrCity, setFormArrCity] = useState('Istanbul');
-  const [formArrCode, setFormArrCode] = useState('IST');
-  const [formDepTime, setFormDepTime] = useState('08:30');
-  const [formArrTime, setFormArrTime] = useState('11:50');
-  const [formDate, setFormDate] = useState('2026-09-28');
-  const [formPrice, setFormPrice] = useState(380);
-  const [formBaggage, setFormBaggage] = useState('23 kg + 8 kg');
-  const [formSeatsLeft, setFormSeatsLeft] = useState(9);
-  const [formIsCharter, setFormIsCharter] = useState(true);
+  const [formAirline, setFormAirline] = useState('');
+  const [formFlightNumber, setFormFlightNumber] = useState('');
+  const [formDepCity, setFormDepCity] = useState('');
+  const [formDepCode, setFormDepCode] = useState('');
+  const [formArrCity, setFormArrCity] = useState('');
+  const [formArrCode, setFormArrCode] = useState('');
+  const [formDepTime, setFormDepTime] = useState('');
+  const [formArrTime, setFormArrTime] = useState('');
+  const [formDate, setFormDate] = useState('');
+  const [formPrice, setFormPrice] = useState(0);
+  const [formBaggage, setFormBaggage] = useState('');
+  const [formSeatsLeft, setFormSeatsLeft] = useState(0);
+  const [formIsCharter, setFormIsCharter] = useState(false);
 
   const openAddModal = () => {
     setEditingFlight(null);
-    setFormAirline('Uzbekistan Airways');
-    setFormFlightNumber('HY-271');
-    setFormDepCity('Toshkent');
-    setFormDepCode('TAS');
-    setFormArrCity('Antalya');
-    setFormArrCode('AYT');
-    setFormDepTime('07:00');
-    setFormArrTime('10:15');
-    setFormDate('2026-10-05');
-    setFormPrice(320);
-    setFormBaggage('20 kg + 7 kg');
-    setFormSeatsLeft(14);
-    setFormIsCharter(true);
+    setFormAirline('');
+    setFormFlightNumber('');
+    setFormDepCity('');
+    setFormDepCode('');
+    setFormArrCity('');
+    setFormArrCode('');
+    setFormDepTime('');
+    setFormArrTime('');
+    setFormDate('');
+    setFormPrice(0);
+    setFormBaggage('');
+    setFormSeatsLeft(0);
+    setFormIsCharter(false);
     setIsModalOpen(true);
   };
 
@@ -79,37 +78,48 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
     setEditingFlight(f);
     setFormAirline(f.airline);
     setFormFlightNumber(f.flightNumber);
-    setFormDepCity(f.departureCity);
-    setFormDepCode(f.departureAirportCode);
-    setFormArrCity(f.arrivalCity);
-    setFormArrCode(f.arrivalAirportCode);
-    setFormDepTime(f.departureTime);
-    setFormArrTime(f.arrivalTime);
-    setFormDate(f.departureDate);
+    setFormDepCity(f.departureCity || '');
+    setFormDepCode(f.departureAirportCode || '');
+    setFormArrCity(f.arrivalCity || '');
+    setFormArrCode(f.arrivalAirportCode || '');
+    setFormDepTime(f.departureTime || '');
+    setFormArrTime(f.arrivalTime || '');
+    setFormDate(f.departureDate || '');
     setFormPrice(f.price);
-    setFormBaggage(f.baggage);
+    setFormBaggage(f.baggage || '');
     setFormSeatsLeft(f.seatsLeft);
     setFormIsCharter(f.isCharter);
     setIsModalOpen(true);
   };
 
-  const handleDuplicateFlight = (f: FlightTicket) => {
+  const handleDuplicateFlight = async (f: FlightTicket) => {
     const duplicated: FlightTicket = {
       ...f,
       id: `fl-${Date.now()}`,
       flightNumber: `${f.flightNumber}-N`
     };
-    onAddFlight(duplicated);
-    onShowToast(`"${f.flightNumber}" reysi nusxalandi!`, 'success');
+    try {
+      await onAddFlight(duplicated);
+      onShowToast(`"${f.flightNumber}" reysi nusxalandi!`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Reysni nusxalab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formFlightNumber.trim()) {
       onShowToast("Reys raqamini kiriting!", 'error');
       return;
     }
+    if (!formAirline.trim() || !formDepCity.trim() || !formDepCode.trim() || !formArrCity.trim() ||
+      !formArrCode.trim() || !formDepTime || !formArrTime || !formDate || formPrice <= 0 ||
+      !formBaggage.trim()) {
+      onShowToast("Reys ma’lumotlarining barcha majburiy maydonlarini to‘ldiring.", 'error');
+      return;
+    }
 
+    try {
     if (editingFlight) {
       const updated: FlightTicket = {
         ...editingFlight,
@@ -127,13 +137,13 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         seatsLeft: formSeatsLeft,
         isCharter: formIsCharter
       };
-      onUpdateFlight(updated);
+      await onUpdateFlight(updated);
       onShowToast(`"${formFlightNumber}" reysi yangilandi!`, 'success');
     } else {
       const newFlight: FlightTicket = {
         id: `fl-${Date.now()}`,
         airline: formAirline,
-        airlineCode: formAirline.includes('Uzbekistan') ? 'HY' : 'TK',
+        airlineCode: '',
         flightNumber: formFlightNumber,
         departureCity: formDepCity,
         departureAirportCode: formDepCode,
@@ -141,7 +151,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         arrivalAirportCode: formArrCode,
         departureTime: formDepTime,
         arrivalTime: formArrTime,
-        flightDuration: '4s 30m',
+        flightDuration: '',
         departureDate: formDate,
         tripType: 'round_trip',
         flightType: 'direct',
@@ -150,39 +160,21 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         seatsLeft: formSeatsLeft,
         isCharter: formIsCharter,
         cabinClass: 'economy',
-        kompasFlightCode: `GDS-${formFlightNumber}`
+        kompasFlightCode: ''
       };
-      onAddFlight(newFlight);
+      await onAddFlight(newFlight);
       onShowToast(`Yangi "${formFlightNumber}" reysi qo'shildi!`, 'success');
     }
 
     setIsModalOpen(false);
-  };
-
-  const handleLiveKompasFlightsSync = async () => {
-    setIsLiveSyncing(true);
-    try {
-      const fromParam = selectedDepCity !== 'ALL' ? selectedDepCity : 'Toshkent';
-      const res = await fetch(`/api/kompas/flights?from=${encodeURIComponent(fromParam)}`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.flights) && data.flights.length > 0) {
-        data.flights.forEach((fl: FlightTicket) => {
-          onUpdateFlight(fl);
-        });
-        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta charter va GDS reyslar jonli yuklandi!`, 'success');
-      } else {
-        onShowToast("Reyslar topilmadi", 'info');
-      }
-    } catch (e: any) {
-      onShowToast("Reyslarni yuklashda xatolik yuz berdi", 'error');
-    } finally {
-      setIsLiveSyncing(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Reysni saqlab bo‘lmadi.', 'error');
     }
   };
 
-  const handleSaveMarkup = (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
-    if (!markupModalFlight) return;
-    const originalCost = markupModalFlight.originalCostPrice || Math.round(newPrice / 1.08);
+  const handleSaveMarkup = async (newPrice: number, markupType: 'percent' | 'manual', markupValue: number): Promise<boolean> => {
+    if (!markupModalFlight) return false;
+    const originalCost = markupModalFlight.originalCostPrice ?? markupModalFlight.price;
 
     const updated: FlightTicket = {
       ...markupModalFlight,
@@ -190,23 +182,33 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
       originalCostPrice: originalCost,
       markupType,
       markupValue,
-      tourOperator: markupModalFlight.tourOperator || 'Kompas Tour',
-      agencyName: markupModalFlight.agencyName || 'SayrHub'
+      tourOperator: markupModalFlight.tourOperator,
+      agencyName: markupModalFlight.agencyName
     };
 
-    onUpdateFlight(updated);
+    try {
+    await onUpdateFlight(updated);
     onShowToast(`"${updated.flightNumber}" reysi narxi $${newPrice} qilib belgilandi!`, 'success');
     setMarkupModalFlight(null);
+    return true;
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Reys narxini saqlab bo‘lmadi.', 'error');
+      return false;
+    }
   };
 
-  const handleDelete = (id: string, flightNumber: string) => {
+  const handleDelete = async (id: string, flightNumber: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Reyslarni o'chirish faqat Bosh Admin huquqida!", 'error');
       return;
     }
     if (confirm(`"${flightNumber}" reysini jadvaldan o'chirmoqchimisiz?`)) {
-      onDeleteFlight(id);
-      onShowToast(`"${flightNumber}" o'chirildi!`, 'info');
+      try {
+        await onDeleteFlight(id);
+        onShowToast(`"${flightNumber}" o'chirildi!`, 'info');
+      } catch (error) {
+        onShowToast(error instanceof Error ? error.message : 'Reysni o‘chirib bo‘lmadi.', 'error');
+      }
     }
   };
 
@@ -255,7 +257,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
             </h2>
             <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Kompas Charter Live</span>
+              <span>MongoDB katalogi</span>
             </span>
 
             {/* Active Commission Badge */}
@@ -270,7 +272,9 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                     if (input !== null) {
                       const val = Number(input);
                       if (!isNaN(val) && val >= 0 && val <= 100) {
-                        onUpdateCommissionRate(val);
+                        void onUpdateCommissionRate(val).catch((error) =>
+                          onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error')
+                        );
                       }
                     }
                   }}
@@ -287,18 +291,6 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={handleLiveKompasFlightsSync}
-            disabled={isLiveSyncing}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
-            title="Kompas Tour charter reyslarini jonli yuklash"
-          >
-            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
-              sync
-            </span>
-            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompas Reyslarini Yuklash'}</span>
-          </button>
-
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
@@ -503,7 +495,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-semibold text-zinc-400">Asl (Kompas):</span>
                           <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
-                            ${f.originalCostPrice || Math.round(f.price / 1.08)}
+                            ${f.originalCostPrice ?? f.price}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -513,7 +505,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                           <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             {f.markupType === 'manual'
                               ? `$${f.price}`
-                              : `+${f.markupValue || 8}%`}
+                              : `+${f.markupValue ?? agencyCommissionRate}%`}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
@@ -614,6 +606,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <div className="flex gap-2">
                     <input
                       type="text"
+                      required
                       value={formDepCity}
                       onChange={(e) => setFormDepCity(e.target.value)}
                       placeholder="Toshkent"
@@ -621,6 +614,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                     />
                     <input
                       type="text"
+                      required
                       value={formDepCode}
                       onChange={(e) => setFormDepCode(e.target.value)}
                       placeholder="TAS"
@@ -634,6 +628,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <div className="flex gap-2">
                     <input
                       type="text"
+                      required
                       value={formArrCity}
                       onChange={(e) => setFormArrCity(e.target.value)}
                       placeholder="Istanbul"
@@ -641,6 +636,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                     />
                     <input
                       type="text"
+                      required
                       value={formArrCode}
                       onChange={(e) => setFormArrCode(e.target.value)}
                       placeholder="IST"
@@ -654,12 +650,14 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <div className="flex gap-2">
                     <input
                       type="time"
+                      required
                       value={formDepTime}
                       onChange={(e) => setFormDepTime(e.target.value)}
                       className="w-1/2 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                     />
                     <input
                       type="time"
+                      required
                       value={formArrTime}
                       onChange={(e) => setFormArrTime(e.target.value)}
                       className="w-1/2 bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-2 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
@@ -671,6 +669,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Parvoz Sanasi</label>
                   <input
                     type="date"
+                    required
                     value={formDate}
                     onChange={(e) => setFormDate(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
@@ -682,6 +681,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <input
                     type="number"
                     min="1"
+                    required
                     value={formPrice}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-bold text-indigo-600"
@@ -693,6 +693,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <input
                     type="number"
                     min="0"
+                    required
                     value={formSeatsLeft}
                     onChange={(e) => setFormSeatsLeft(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
@@ -703,6 +704,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Bagaj Ma'lumoti</label>
                   <input
                     type="text"
+                    required
                     value={formBaggage}
                     onChange={(e) => setFormBaggage(e.target.value)}
                     placeholder="23 kg + 8 kg"
@@ -750,17 +752,21 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
           onClose={() => setMarkupModalFlight(null)}
           itemTitle={`${markupModalFlight.airline} (${markupModalFlight.flightNumber})`}
           itemSubtitle={`${markupModalFlight.departureCity} (${markupModalFlight.departureAirportCode}) ➔ ${markupModalFlight.arrivalCity} (${markupModalFlight.arrivalAirportCode})`}
-          originalCostPrice={markupModalFlight.originalCostPrice || Math.round(markupModalFlight.price / 1.08)}
+          originalCostPrice={markupModalFlight.originalCostPrice ?? markupModalFlight.price}
           currentPrice={markupModalFlight.price}
           currentMarkupType={markupModalFlight.markupType || 'percent'}
           currentMarkupValue={markupModalFlight.markupValue || agencyCommissionRate}
-          tourOperator={markupModalFlight.tourOperator || 'Kompas Tour'}
-          agencyName={markupModalFlight.agencyName || 'SayrHub'}
+          tourOperator={markupModalFlight.tourOperator || ''}
+          agencyName={markupModalFlight.agencyName || ''}
           agencyCommissionRate={agencyCommissionRate}
-          onApplyToAllCommission={onUpdateCommissionRate}
-          onSave={(newPrice, markupType, markupVal) => {
-            handleSaveMarkup(newPrice, markupType, markupVal);
-          }}
+          onApplyToAllCommission={onUpdateCommissionRate ? async (rate) => {
+            try {
+              await onUpdateCommissionRate(rate);
+            } catch (error) {
+              onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error');
+            }
+          } : undefined}
+          onSave={handleSaveMarkup}
         />
       )}
     </div>

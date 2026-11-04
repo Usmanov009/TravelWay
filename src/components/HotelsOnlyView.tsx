@@ -73,7 +73,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
               Mehmonxona Bron Qilish
             </h3>
             <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-              Aviabiletsiz, faqat mehmonxonada qolish. Luxury 5* Deluxe kurortlar, Ultra All Inclusive va xususiy plyajli mehmonxonalar.
+              Mehmonxona takliflarining narxi va qulayliklari tanlangan mehmonxona ma'lumotlariga bog'liq.
             </p>
           </div>
           <Palmtree className="w-8 h-8 text-emerald-600" />
@@ -225,7 +225,7 @@ export const HotelsOnlyView: React.FC<HotelsOnlyViewProps> = ({
             Topilgan Mehmonxonalar ({filteredHotels.length})
           </span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-            1:1 Rasmiy Narxlar
+            Narxlar (USD)
           </span>
         </div>
 

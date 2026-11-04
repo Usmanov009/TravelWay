@@ -27,13 +27,13 @@ interface AdminToursManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   tours: TourPackage[];
-  onAddTour: (tour: TourPackage) => void;
-  onUpdateTour: (tour: TourPackage) => void;
-  onDeleteTour: (tourId: string) => void;
+  onAddTour: (tour: TourPackage) => Promise<void>;
+  onUpdateTour: (tour: TourPackage) => Promise<void>;
+  onDeleteTour: (tourId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
   agencyCommissionRate?: number;
-  onUpdateCommissionRate?: (rate: number) => void;
+  onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
 export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
@@ -45,7 +45,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
   onDeleteTour,
   onShowToast,
   globalSearch = '',
-  agencyCommissionRate = 8,
+  agencyCommissionRate = 0,
   onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
@@ -89,70 +89,83 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
 
   // Form State
   const [formTitle, setFormTitle] = useState('');
-  const [formCountry, setFormCountry] = useState('Turkiya');
-  const [formResort, setFormResort] = useState('Antalya');
-  const [formDepartureCity, setFormDepartureCity] = useState('Toshkent (TAS)');
-  const [formHotelStars, setFormHotelStars] = useState('5★ Deluxe');
-  const [formMealType, setFormMealType] = useState<'UAI' | 'AI' | 'FB' | 'HB' | 'BB' | 'RO'>('UAI');
-  const [formPrice, setFormPrice] = useState<number>(750);
-  const [formOldPrice, setFormOldPrice] = useState<number>(950);
-  const [formNightsCount, setFormNightsCount] = useState<number>(7);
-  const [formAirline, setFormAirline] = useState('Uzbekistan Airways');
-  const [formFlight, setFormFlight] = useState('Charter HY-3501 (Toshkent — Antalya)');
-  const [formImg, setFormImg] = useState('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80');
+  const [formCountry, setFormCountry] = useState('');
+  const [formResort, setFormResort] = useState('');
+  const [formDepartureCity, setFormDepartureCity] = useState('');
+  const [formHotelStars, setFormHotelStars] = useState('');
+  const [formMealType, setFormMealType] = useState<'UAI' | 'AI' | 'FB' | 'HB' | 'BB' | 'RO' | ''>('');
+  const [formPrice, setFormPrice] = useState<number>(0);
+  const [formOldPrice, setFormOldPrice] = useState<number>(0);
+  const [formNightsCount, setFormNightsCount] = useState<number>(0);
+  const [formAirline, setFormAirline] = useState('');
+  const [formFlight, setFormFlight] = useState('');
+  const [formDepartureDate, setFormDepartureDate] = useState('');
+  const [formImg, setFormImg] = useState('');
 
   const openAddModal = () => {
     setEditingTour(null);
     setFormTitle('');
-    setFormCountry('Turkiya');
-    setFormResort('Antalya');
-    setFormDepartureCity('Toshkent (TAS)');
-    setFormHotelStars('5★ Deluxe');
-    setFormMealType('UAI');
-    setFormPrice(750);
-    setFormOldPrice(950);
-    setFormNightsCount(7);
-    setFormAirline('Uzbekistan Airways');
-    setFormFlight('Charter HY-3501 (Toshkent — Antalya)');
-    setFormImg('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80');
+    setFormCountry('');
+    setFormResort('');
+    setFormDepartureCity('');
+    setFormHotelStars('');
+    setFormMealType('');
+    setFormPrice(0);
+    setFormOldPrice(0);
+    setFormNightsCount(0);
+    setFormAirline('');
+    setFormFlight('');
+    setFormDepartureDate('');
+    setFormImg('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (tour: TourPackage) => {
     setEditingTour(tour);
     setFormTitle(tour.title);
-    setFormCountry(tour.country || 'Turkiya');
-    setFormResort(tour.resort || 'Antalya');
-    setFormDepartureCity(tour.departureCity || 'Toshkent (TAS)');
-    setFormHotelStars(tour.hotelStars || '5★');
-    setFormMealType(tour.mealType || 'AI');
+    setFormCountry(tour.country || '');
+    setFormResort(tour.resort || '');
+    setFormDepartureCity(tour.departureCity || '');
+    setFormHotelStars(tour.hotelStars || '');
+    setFormMealType(tour.mealType || '');
     setFormPrice(tour.price);
-    setFormOldPrice(tour.oldPrice || Math.round(tour.price * 1.2));
-    setFormNightsCount(tour.nightsCount || 7);
-    setFormAirline(tour.airline || 'Uzbekistan Airways');
+    setFormOldPrice(tour.oldPrice || 0);
+    setFormNightsCount(tour.nightsCount || 0);
+    setFormAirline(tour.airline || '');
     setFormFlight(tour.flight);
+    setFormDepartureDate(tour.departureDate || '');
     setFormImg(tour.img);
     setIsModalOpen(true);
   };
 
-  const handleDuplicateTour = (tour: TourPackage) => {
+  const handleDuplicateTour = async (tour: TourPackage) => {
     const duplicated: TourPackage = {
       ...tour,
       id: `tw-tour-${Date.now()}`,
       title: `${tour.title} (Nusxa)`
     };
-    onAddTour(duplicated);
-    onShowToast(`"${tour.title}" turlar katalogida nusxalandi!`, 'success');
+    try {
+      await onAddTour(duplicated);
+      onShowToast(`"${tour.title}" turlar katalogida nusxalandi!`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Turni nusxalab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formTitle.trim()) {
       onShowToast("Iltimos, turpaket nomini to'liq kiriting!", 'error');
       return;
     }
+    if (!formCountry || !formResort.trim() || !formDepartureCity.trim() || !formHotelStars || !formMealType ||
+      formPrice <= 0 || formNightsCount <= 0 || !formAirline.trim() || !formFlight.trim() || !formDepartureDate || !formImg.trim()) {
+      onShowToast("Tur ma’lumotlarining barcha majburiy maydonlarini to‘ldiring.", 'error');
+      return;
+    }
 
+    try {
     if (editingTour) {
       const updated: TourPackage = {
         ...editingTour,
@@ -162,18 +175,18 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
         location: `${formCountry}, ${formResort}`,
         departureCity: formDepartureCity,
         hotelStars: formHotelStars,
-        mealType: formMealType,
+        mealType: formMealType as TourPackage['mealType'],
         price: Number(formPrice),
         oldPrice: formOldPrice ? Number(formOldPrice) : undefined,
         nightsCount: Number(formNightsCount),
         nights: `${formNightsCount} kecha`,
         airline: formAirline,
         flight: formFlight,
-        img: formImg || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80',
+        img: formImg,
         is5Star: formHotelStars.includes('5'),
-        departureDate: 'Har kuni parvoz'
+        departureDate: formDepartureDate
       };
-      onUpdateTour(updated);
+      await onUpdateTour(updated);
       onShowToast(`"${formTitle}" muvaffaqiyatli yangilandi!`, 'success');
     } else {
       const newTour: TourPackage = {
@@ -184,28 +197,31 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
         location: `${formCountry}, ${formResort}`,
         departureCity: formDepartureCity,
         hotelStars: formHotelStars,
-        mealType: formMealType,
+        mealType: formMealType as TourPackage['mealType'],
         price: Number(formPrice),
-        oldPrice: formOldPrice ? Number(formOldPrice) : Math.round(formPrice * 1.2),
+        oldPrice: formOldPrice > 0 ? Number(formOldPrice) : undefined,
         nightsCount: Number(formNightsCount),
         nights: `${formNightsCount} kecha`,
         airline: formAirline,
         flight: formFlight,
-        img: formImg || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=80',
-        tag: 'Kafolatlangan Charter',
-        rating: 4.9,
+        img: formImg,
+        tag: formMealType,
+        rating: 0,
         is5Star: formHotelStars.includes('5'),
-        departureDate: 'Har kuni qatnov',
+        departureDate: formDepartureDate,
         saved: false,
-        category: 'All Inclusive',
-        badgeType: 'luxury',
-        seatsStatus: 'guaranteed'
+        category: formMealType,
+        badgeType: formHotelStars.includes('5') ? 'ultra' : 'luxury',
+        seatsStatus: 'request'
       };
-      onAddTour(newTour);
+      await onAddTour(newTour);
       onShowToast(`Yangi "${formTitle}" turpaketi qo'shildi!`, 'success');
     }
 
     setIsModalOpen(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Turni saqlab bo‘lmadi.', 'error');
+    }
   };
 
   const handleLiveKompasSync = async () => {
@@ -242,9 +258,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
       const res = await fetch(`/api/kompas/search?${params.toString()}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
-        data.tours.forEach((newT: TourPackage) => {
-          onUpdateTour(newT);
-        });
+        await Promise.all(data.tours.map((newT: TourPackage) => onUpdateTour(newT)));
         onShowToast(`Kompas Tour tizimidan ${data.tours.length} ta turpaket admin panelga jonli olib kirildi!`, 'success');
       } else {
         onShowToast("Kompas Tour tizimidan ma'lumot olib bo'lmadi yoki turpaketlar topilmadi", 'info');
@@ -256,34 +270,44 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
     }
   };
 
-  const handleSaveMarkup = (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
-    if (!markupModalTour) return;
+  const handleSaveMarkup = async (newPrice: number, markupType: 'percent' | 'manual', markupValue: number): Promise<boolean> => {
+    if (!markupModalTour) return false;
 
-    const originalCost = markupModalTour.originalCostPrice || Math.round(markupModalTour.price / 1.08);
+    const originalCost = markupModalTour.originalCostPrice ?? markupModalTour.price;
     const updatedTour: TourPackage = {
       ...markupModalTour,
       price: newPrice,
       originalCostPrice: originalCost,
       markupType,
       markupValue,
-      tourOperator: markupModalTour.tourOperator || 'Kompas Tour',
-      agencyName: markupModalTour.agencyName || 'SayrHub',
-      operatorBadge: 'Kompas Tour Rasmiy'
+      tourOperator: markupModalTour.tourOperator,
+      agencyName: markupModalTour.agencyName,
+      operatorBadge: markupModalTour.operatorBadge
     };
 
-    onUpdateTour(updatedTour);
+    try {
+    await onUpdateTour(updatedTour);
     onShowToast(`"${updatedTour.title}" narxi $${newPrice} qilib belgilandi! Mobil ilovada yangilandi.`, 'success');
     setMarkupModalTour(null);
+    return true;
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Tur narxini saqlab bo‘lmadi.', 'error');
+      return false;
+    }
   };
 
-  const handleDelete = (tourId: string, title: string) => {
+  const handleDelete = async (tourId: string, title: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Tur paketlarni o'chirish faqat Bosh Admin huquqida!", 'error');
       return;
     }
     if (confirm(`Rostdan ham "${title}" turini katalogdan o'chirmoqchimisiz?`)) {
-      onDeleteTour(tourId);
-      onShowToast(`"${title}" muvaffaqiyatli o'chirildi!`, 'info');
+      try {
+        await onDeleteTour(tourId);
+        onShowToast(`"${title}" muvaffaqiyatli o'chirildi!`, 'info');
+      } catch (error) {
+        onShowToast(error instanceof Error ? error.message : 'Turni o‘chirib bo‘lmadi.', 'error');
+      }
     }
   };
 
@@ -379,7 +403,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             </h2>
             <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-[10px] px-2.5 py-1 rounded-full font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Kompas Tour Live (1:1)</span>
+              <span>MongoDB katalogi</span>
             </span>
 
             {/* Active Agency Commission Pill */}
@@ -394,7 +418,9 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                     if (input !== null) {
                       const val = Number(input);
                       if (!isNaN(val) && val >= 0 && val <= 100) {
-                        onUpdateCommissionRate(val);
+                        void onUpdateCommissionRate(val).catch((error) =>
+                          onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error')
+                        );
                       }
                     }
                   }}
@@ -406,7 +432,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
             </div>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            online.uz.kompastour.com va SayrHub tizimidagi barcha faol turpaketlar • Komissiya: {agencyCommissionRate}%
+            Bazada saqlangan turpaketlar va Kompas qidiruvi • Komissiya: {agencyCommissionRate}%
           </p>
         </div>
 
@@ -823,7 +849,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-semibold text-zinc-400">Asl (Kompas):</span>
                           <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
-                            ${tour.originalCostPrice || Math.round(tour.price / 1.08)}
+                            ${tour.originalCostPrice ?? tour.price}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -833,7 +859,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                           <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             {tour.markupType === 'manual'
                               ? `$${tour.price}`
-                              : `+${tour.markupValue || 8}%`}
+                              : `+${tour.markupValue ?? agencyCommissionRate}%`}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
@@ -923,10 +949,12 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Davlat</label>
                   <select
+                    required
                     value={formCountry}
                     onChange={(e) => setFormCountry(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Davlatni tanlang</option>
                     <option value="Turkiya">Turkiya</option>
                     <option value="BAA">BAA (Dubay)</option>
                     <option value="Misr">Misr</option>
@@ -941,6 +969,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Kurort / Shahar</label>
                   <input
                     type="text"
+                    required
                     value={formResort}
                     onChange={(e) => setFormResort(e.target.value)}
                     placeholder="Masalan: Antalya, Belek, Dubay..."
@@ -951,10 +980,12 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Mehmonxona Toifasi</label>
                   <select
+                    required
                     value={formHotelStars}
                     onChange={(e) => setFormHotelStars(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Toifani tanlang</option>
                     <option value="5★ Deluxe">5★ Deluxe</option>
                     <option value="5★">5★ Standard</option>
                     <option value="4★+">4★+ Superior</option>
@@ -966,10 +997,12 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Ovqatlanish Turi</label>
                   <select
+                    required
                     value={formMealType}
-                    onChange={(e) => setFormMealType(e.target.value as any)}
+                    onChange={(e) => setFormMealType(e.target.value as typeof formMealType)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Ovqatlanish turini tanlang</option>
                     <option value="UAI">UAI (Ultra All Inclusive)</option>
                     <option value="AI">AI (All Inclusive)</option>
                     <option value="FB">FB (Full Board - 3 mahal)</option>
@@ -996,7 +1029,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                   <input
                     type="number"
                     min="1"
-                    value={formOldPrice}
+                    value={formOldPrice || ''}
                     onChange={(e) => setFormOldPrice(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
@@ -1009,6 +1042,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                     min="1"
                     max="30"
                     value={formNightsCount}
+                    required
                     onChange={(e) => setFormNightsCount(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
@@ -1018,6 +1052,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Aviakompaniya</label>
                   <input
                     type="text"
+                    required
                     value={formAirline}
                     onChange={(e) => setFormAirline(e.target.value)}
                     placeholder="Uzbekistan Airways, Turkish Airlines..."
@@ -1029,9 +1064,33 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Reys & Parvoz Yo'nalishi</label>
                   <input
                     type="text"
+                    required
                     value={formFlight}
                     onChange={(e) => setFormFlight(e.target.value)}
                     placeholder="Charter HY-3501 (Toshkent ➔ Antalya)"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Jo‘nash shahri</label>
+                  <input
+                    type="text"
+                    required
+                    value={formDepartureCity}
+                    onChange={(e) => setFormDepartureCity(e.target.value)}
+                    placeholder="Masalan: Toshkent (TAS)"
+                    className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Jo‘nash sanasi</label>
+                  <input
+                    type="date"
+                    required
+                    value={formDepartureDate}
+                    onChange={(e) => setFormDepartureDate(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   />
                 </div>
@@ -1040,6 +1099,7 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Mehmonxona Rasmi (URL)</label>
                   <input
                     type="url"
+                    required
                     value={formImg}
                     onChange={(e) => setFormImg(e.target.value)}
                     placeholder="https://..."
@@ -1087,17 +1147,21 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
           itemTitle={markupModalTour.title}
           itemSubtitle={`${markupModalTour.resort || ''}, ${markupModalTour.country || ''} (${markupModalTour.nights})`}
           itemImage={markupModalTour.img}
-          originalCostPrice={markupModalTour.originalCostPrice || Math.round(markupModalTour.price / 1.08)}
+          originalCostPrice={markupModalTour.originalCostPrice ?? markupModalTour.price}
           currentPrice={markupModalTour.price}
           currentMarkupType={markupModalTour.markupType || 'percent'}
-          currentMarkupValue={markupModalTour.markupValue || agencyCommissionRate}
-          tourOperator={markupModalTour.tourOperator || 'Kompas Tour'}
-          agencyName={markupModalTour.agencyName || 'SayrHub'}
+          currentMarkupValue={markupModalTour.markupValue ?? agencyCommissionRate}
+          tourOperator={markupModalTour.tourOperator || ''}
+          agencyName={markupModalTour.agencyName || ''}
           agencyCommissionRate={agencyCommissionRate}
-          onApplyToAllCommission={onUpdateCommissionRate}
-          onSave={(newPrice, markupType, markupVal) => {
-            handleSaveMarkup(newPrice, markupType, markupVal);
-          }}
+          onApplyToAllCommission={onUpdateCommissionRate ? async (rate) => {
+            try {
+              await onUpdateCommissionRate(rate);
+            } catch (error) {
+              onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error');
+            }
+          } : undefined}
+          onSave={handleSaveMarkup}
         />
       )}
     </div>

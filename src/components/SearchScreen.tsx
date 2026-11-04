@@ -6,7 +6,6 @@ import { FlightsView } from './FlightsView';
 import { HotelsOnlyView } from './HotelsOnlyView';
 import { ServiceModals } from './ServiceModals';
 import { CountrySelectCombobox } from './CountrySelectCombobox';
-import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from '../data/extraServicesData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,6 @@ interface SearchScreenProps {
     userEmail?: string;
   }) => void;
   onDeletePriceAlert?: (alertId: string) => void;
-  onSimulatePriceDrop?: (tourId: string, simulatedPrice: number) => void;
   onBookCombo?: (combo: ComboTour) => void;
   onBookFlight?: (flight: FlightTicket) => void;
   onBookHotel?: (hotel: HotelOnly) => void;
@@ -244,14 +242,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
   priceAlerts = [],
   onSavePriceAlert,
   onDeletePriceAlert,
-  onSimulatePriceDrop,
   onBookCombo,
   onBookFlight,
   onBookHotel,
-  comboTours = INITIAL_COMBO_TOURS,
-  flights = INITIAL_FLIGHTS,
-  hotels = INITIAL_HOTELS_ONLY,
-  agencyCommissionRate = 8
+  comboTours = [],
+  flights = [],
+  hotels = [],
+  agencyCommissionRate = 0
 }) => {
   // Service Mode State ('tours' | 'combo' | 'flights' | 'hotels')
   const [serviceMode, setServiceMode] = useState<SearchServiceMode>('tours');
@@ -361,13 +358,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
       if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
         setLiveTours(data.tours);
         setIsLiveActive(true);
-        onShowToast(`Jonli qidiruv: ${data.tours.length} ta turpaket (1:1 rasmiy narxda) olindi!`, 'success');
+        onShowToast(`Jonli qidiruv: ${data.tours.length} ta turpaket topildi. Ko'rsatilgan narxlar so'rov natijasiga asoslangan.`, 'success');
       } else {
         onShowToast(`Qidiruv natijalari yangilandi`, 'info');
       }
     } catch (err) {
       console.warn('Live search failed:', err);
-      onShowToast(`Turlar yangilandi`, 'info');
+      onShowToast('Jonli tur qidiruvida xatolik yuz berdi.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -1545,11 +1542,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
             }
             setSelectedAlertTour(null);
           }}
-          onSimulatePriceDrop={(tId, simPrice) => {
-            if (onSimulatePriceDrop) {
-              onSimulatePriceDrop(tId, simPrice);
-            }
-          }}
         />
         </Suspense>
       )}
@@ -1568,11 +1560,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({
           onDeleteAlert={(alertId) => {
             if (onDeletePriceAlert) {
               onDeletePriceAlert(alertId);
-            }
-          }}
-          onSimulatePriceDrop={(tId, simPrice) => {
-            if (onSimulatePriceDrop) {
-              onSimulatePriceDrop(tId, simPrice);
             }
           }}
         />

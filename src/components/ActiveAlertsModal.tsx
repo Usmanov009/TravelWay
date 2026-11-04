@@ -1,6 +1,6 @@
 import React from 'react';
 import { PriceAlert, TourPackage } from '../types';
-import { Bell, MapPin, PartyPopper, Smartphone, Plane, Mail, Zap } from '@/lib/flaticon-icons';
+import { Bell, MapPin, PartyPopper, Smartphone, Plane, Mail } from '@/lib/flaticon-icons';
 
 interface ActiveAlertsModalProps {
   isOpen: boolean;
@@ -9,7 +9,6 @@ interface ActiveAlertsModalProps {
   onClose: () => void;
   onEditAlert: (tour: TourPackage) => void;
   onDeleteAlert: (alertId: string) => void;
-  onSimulatePriceDrop: (tourId: string, simulatedPrice: number) => void;
 }
 
 export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
@@ -18,8 +17,7 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
   tours,
   onClose,
   onEditAlert,
-  onDeleteAlert,
-  onSimulatePriceDrop
+  onDeleteAlert
 }) => {
   if (!isOpen) return null;
 
@@ -202,18 +200,6 @@ export const ActiveAlertsModal: React.FC<ActiveAlertsModalProps> = ({
 
                   {/* Actions */}
                   <div className="flex items-center gap-1.5 pt-1 border-t" style={{ borderColor: 'var(--tw-border)' }}>
-                    <button
-                      type="button"
-                      onClick={() => onSimulatePriceDrop(alert.tourId, alert.targetPrice - 10)}
-                      className="flex-1 py-1.5 px-2 rounded-xl text-[10px] font-bold tap-bounce transition flex items-center justify-center gap-1 border"
-                      style={{
-                        backgroundColor: 'var(--tw-accent-light)',
-                        borderColor: 'var(--tw-accent)',
-                        color: 'var(--tw-accent)'
-                      }}
-                    >
-                      <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Sinash (-$10)</span>
-                    </button>
                     {currentTour && (
                       <button
                         type="button"

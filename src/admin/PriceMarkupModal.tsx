@@ -16,7 +16,7 @@ interface PriceMarkupModalProps {
   currentPrice: number;
   currentMarkupType?: 'percent' | 'manual';
   currentMarkupValue?: number;
-  onSave: (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => void;
+  onSave: (newPrice: number, markupType: 'percent' | 'manual', markupValue: number) => Promise<boolean>;
   tourOperator?: string;
   agencyName?: string;
   agencyCommissionRate?: number;
@@ -34,9 +34,9 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
   currentMarkupType = 'percent',
   currentMarkupValue,
   onSave,
-  tourOperator = 'Kompas Tour',
-  agencyName = 'SayrHub',
-  agencyCommissionRate = 8,
+  tourOperator = '',
+  agencyName = '',
+  agencyCommissionRate = 0,
   onApplyToAllCommission
 }) => {
   const [markupType, setMarkupType] = useState<'percent' | 'manual'>(currentMarkupType);
@@ -47,9 +47,10 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
     if (originalCostPrice > 0 && currentPrice > originalCostPrice) {
       return Math.round(((currentPrice - originalCostPrice) / originalCostPrice) * 100);
     }
-    return 8;
+    return agencyCommissionRate;
   });
-  const [manualPrice, setManualPrice] = useState<number>(currentPrice || originalCostPrice || 500);
+  const [manualPrice, setManualPrice] = useState<number>(currentPrice);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,15 +60,15 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
       } else if (originalCostPrice > 0 && currentPrice > originalCostPrice) {
         setPercentValue(Math.round(((currentPrice - originalCostPrice) / originalCostPrice) * 100));
       } else {
-        setPercentValue(8);
+        setPercentValue(agencyCommissionRate);
       }
-      setManualPrice(currentPrice || Math.round(originalCostPrice * 1.08));
+      setManualPrice(currentPrice);
     }
   }, [isOpen, currentPrice, originalCostPrice, currentMarkupType, currentMarkupValue]);
 
   if (!isOpen) return null;
 
-  const cost = originalCostPrice > 0 ? originalCostPrice : Math.round(currentPrice / 1.08);
+  const cost = originalCostPrice > 0 ? originalCostPrice : currentPrice;
 
   // Calculated values
   let finalCustomerPrice = currentPrice;
@@ -84,13 +85,18 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
     effectivePercent = cost > 0 ? Math.round((profitAmount / cost) * 100) : 0;
   }
 
-  const handleApply = () => {
-    onSave(
+  const handleApply = async () => {
+    setIsSaving(true);
+    try {
+      const saved = await onSave(
       finalCustomerPrice,
       markupType,
       markupType === 'percent' ? percentValue : finalCustomerPrice
-    );
-    onClose();
+      );
+      if (saved) onClose();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const quickPercentages = [5, 8, 10, 12, 15, 20];
@@ -333,6 +339,7 @@ export const PriceMarkupModal: React.FC<PriceMarkupModalProps> = ({
           <Button
             size="sm"
             type="button"
+            disabled={isSaving}
             onClick={handleApply}
             className="text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-xs cursor-pointer"
           >

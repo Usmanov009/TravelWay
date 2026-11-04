@@ -63,7 +63,7 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
       return;
     }
 
-    const headers = ['Vaucher ID', 'Sayohatchi', 'Tur Nomi', 'Yo\'nalish', 'Sana', 'Summa', 'Status'];
+    const headers = ['Bron ID', 'Sayohatchi', 'Tur Nomi', 'Yo\'nalish', 'Sana', 'Summa', 'Status'];
     const rows = filteredBookings.map(b => [
       `"${b.voucherId || ''}"`,
       `"${b.travelerName || ''}"`,
@@ -213,7 +213,7 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
           <table className="w-full text-left text-sm">
             <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200/80 dark:border-zinc-800 text-zinc-400 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
               <tr>
-                <th className="py-3.5 pl-5">Vaucher / Tur</th>
+                <th className="py-3.5 pl-5">Bron / Tur</th>
                 <th className="py-3.5 px-3">Sayohatchi</th>
                 <th className="py-3.5 px-3">Marshrut & Muddat</th>
                 <th className="py-3.5 px-3">Narx (USD)</th>
@@ -341,7 +341,7 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
             {/* Voucher Card preview */}
             <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Elektron Vaucher:</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Bron raqami:</span>
                 <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
                   {selectedBooking.voucherId}
                 </span>

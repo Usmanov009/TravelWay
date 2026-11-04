@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowRight, Smartphone, AlertCircle, Briefcase, Crown, GalleryVerticalEnd } from '@/lib/flaticon-icons';
+import { Lock, User, Eye, EyeOff, ArrowRight, Smartphone, AlertCircle, GalleryVerticalEnd } from '@/lib/flaticon-icons';
 
 interface AdminLoginPageProps {
   onLoginSuccess: (adminRole?: string, adminUser?: any) => void;
@@ -26,206 +26,41 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
     const cleanUser = username.trim().toLowerCase();
     const cleanPass = password.trim();
-
     if (!cleanUser || !cleanPass) {
       setError("Iltimos, login va parolni to'liq kiriting!");
       return;
     }
 
     setIsLoading(true);
-
-    // Helper to check locally saved staff in localStorage
-    const checkLocalStaff = () => {
-      let staffList: any[] = [];
-      try {
-        const raw = localStorage.getItem('sayrhub_admin_staff') || localStorage.getItem('travelway_admin_staff');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) staffList = parsed;
-        }
-      } catch (e) {}
-
-      // Check default tour admin
-      if (!staffList.some(s => s.username === 'tour_admin')) {
-        staffList.push({
-          id: 'staff-tour-1',
-          name: 'Azizbek Rahimov',
-          username: 'tour_admin',
-          password: 'tour123',
-          email: 'tour@sayrhub.uz',
-          role: 'tour_admin',
-          roleTitle: 'Tur Admin',
-          assignedDestinations: ['Barcha yo\'nalishlar'],
-          canManageUsers: false,
-          canManageStaff: false,
-          canDeleteTours: true,
-          canEditFinancials: false,
-          canManageBookings: true,
-          canManageCatalog: true,
-          status: 'active'
-        });
-      }
-
-      let passMap: Record<string, string> = {};
-      try {
-        passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-      } catch (e) {}
-
-      return staffList.find((s: any) => {
-        const u = (s.username || '').toLowerCase().trim();
-        const em = (s.email || '').toLowerCase().trim();
-        const storedPass = (s.password || passMap[u] || passMap[em] || '').trim();
-        const isUserMatch = (u === cleanUser || em === cleanUser);
-        const isPassMatch = (storedPass ? storedPass === cleanPass : true) || cleanPass === 'admin123';
-        return isUserMatch && isPassMatch;
-      });
-    };
-
-    const handleLocalStaffSuccess = (matchedStaff: any) => {
-      if (matchedStaff.status === 'suspended') {
-        setError("Bu admin hisobi to'xtatilgan (faol emas)!");
-        return;
-      }
-      try {
-        const staffToken = 'token_staff_' + (matchedStaff.id || 'tour_admin');
-        sessionStorage.setItem('sayrhub_admin_auth', 'true');
-        sessionStorage.setItem('travelway_admin_auth', 'true');
-        sessionStorage.setItem('sayrhub_admin_token', staffToken);
-        sessionStorage.setItem('travelway_admin_token', staffToken);
-        sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(matchedStaff));
-        sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(matchedStaff));
-
-        localStorage.setItem('sayrhub_admin_auth', 'true');
-        localStorage.setItem('travelway_admin_auth', 'true');
-        localStorage.setItem('sayrhub_admin_token', staffToken);
-        localStorage.setItem('travelway_admin_token', staffToken);
-        localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(matchedStaff));
-        localStorage.setItem('travelway_active_admin_user', JSON.stringify(matchedStaff));
-      } catch (e) {}
-      onShowToast(`Tur Admin paneli: ${matchedStaff.name || 'Xush kelibsiz'}!`, 'success');
-      onLoginSuccess(matchedStaff.role || 'tour_admin', matchedStaff);
-    };
-
     try {
-      // Check with backend endpoint
-      const res = await fetch('/api/admin/login', {
+      const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: cleanUser, password: cleanPass })
+        body: JSON.stringify({ username: cleanUser, password: cleanPass }),
       });
-      const data = await res.json();
-
-      if (data.success) {
-        if (data.token) {
-          try {
-            sessionStorage.setItem('sayrhub_admin_token', data.token);
-            sessionStorage.setItem('travelway_admin_token', data.token);
-            sessionStorage.setItem('sayrhub_admin_auth', 'true');
-            sessionStorage.setItem('travelway_admin_auth', 'true');
-            if (data.adminUser) {
-              sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
-              sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
-            }
-
-            localStorage.setItem('sayrhub_admin_token', data.token);
-            localStorage.setItem('travelway_admin_token', data.token);
-            localStorage.setItem('sayrhub_admin_auth', 'true');
-            localStorage.setItem('travelway_admin_auth', 'true');
-            if (data.adminUser) {
-              localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
-              localStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
-            }
-          } catch (e) {}
-        }
-        const isSuper = (data.role || 'main_admin') === 'main_admin';
-        onShowToast(
-          isSuper
-            ? "Boshqaruv paneliga xush kelibsiz!"
-            : `Tur Admin paneli: ${data.adminUser?.name || 'Xush kelibsiz'}!`,
-          'success'
-        );
-        onLoginSuccess(data.role || 'main_admin', data.adminUser);
-        return;
-      } else {
-        // Fallback for default super admin if server rejects or env mismatch
-        if ((cleanUser === 'admin' || cleanUser === 'admin@sayrhub.uz' || cleanUser === 'admin@travelway.uz') && cleanPass === 'admin123') {
-          const fallbackAdmin = {
-            id: 'adm-root',
-            name: 'Bosh Admin',
-            username: 'admin',
-            role: 'main_admin',
-            roleTitle: 'Bosh Admin (Super)'
-          };
-          try {
-            sessionStorage.setItem('sayrhub_admin_auth', 'true');
-            sessionStorage.setItem('travelway_admin_auth', 'true');
-            sessionStorage.setItem('sayrhub_admin_token', 'token_super_root');
-            sessionStorage.setItem('travelway_admin_token', 'token_super_root');
-            sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
-            sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
-
-            localStorage.setItem('sayrhub_admin_auth', 'true');
-            localStorage.setItem('travelway_admin_auth', 'true');
-            localStorage.setItem('sayrhub_admin_token', 'token_super_root');
-            localStorage.setItem('travelway_admin_token', 'token_super_root');
-            localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
-            localStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
-          } catch (e) {}
-          onShowToast("Boshqaruv paneliga xush kelibsiz!", 'success');
-          onLoginSuccess('main_admin', fallbackAdmin);
-          return;
-        }
-
-        // Check locally saved staff (for any newly added admin)
-        const localStaff = checkLocalStaff();
-        if (localStaff) {
-          handleLocalStaffSuccess(localStaff);
-          return;
-        }
-
-        setError(data.error || "Login yoki parol noto'g'ri!");
-      }
-    } catch (err) {
-      // Offline / standalone fallback
-      if ((cleanUser === 'admin' || cleanUser === 'admin@sayrhub.uz' || cleanUser === 'admin@travelway.uz') && cleanPass === 'admin123') {
-        const fallbackAdmin = {
-          id: 'adm-root',
-          name: 'Bosh Admin',
-          username: 'admin',
-          role: 'main_admin',
-          roleTitle: 'Bosh Admin (Super)'
-        };
-        try {
-          sessionStorage.setItem('sayrhub_admin_auth', 'true');
-          sessionStorage.setItem('travelway_admin_auth', 'true');
-          sessionStorage.setItem('sayrhub_admin_token', 'token_super_root');
-          sessionStorage.setItem('travelway_admin_token', 'token_super_root');
-          sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
-          sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
-
-          localStorage.setItem('sayrhub_admin_auth', 'true');
-          localStorage.setItem('travelway_admin_auth', 'true');
-          localStorage.setItem('sayrhub_admin_token', 'token_super_root');
-          localStorage.setItem('travelway_admin_token', 'token_super_root');
-          localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(fallbackAdmin));
-          localStorage.setItem('travelway_active_admin_user', JSON.stringify(fallbackAdmin));
-        } catch (e) {}
-        onShowToast("Boshqaruv paneliga xush kelibsiz!", 'success');
-        onLoginSuccess('main_admin', fallbackAdmin);
-        return;
+      const data = await response.json();
+      if (!response.ok || !data.success || !data.token) {
+        throw new Error(data.error || "Login yoki parol noto'g'ri!");
       }
 
-      // Check locally saved staff on network error
-      const localStaff = checkLocalStaff();
-      if (localStaff) {
-        handleLocalStaffSuccess(localStaff);
-        return;
+      sessionStorage.setItem('sayrhub_admin_token', data.token);
+      sessionStorage.setItem('travelway_admin_token', data.token);
+      sessionStorage.setItem('sayrhub_admin_auth', 'true');
+      sessionStorage.setItem('travelway_admin_auth', 'true');
+      if (data.adminUser) {
+        sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
+        sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
       }
-
-      setError("Server bilan aloqa o'rnatib bo'lmadi. Iltimos, keyinroq qaytadan urinib ko'ring.");
+      const isMainAdmin = data.role === 'main_admin';
+      onShowToast(
+        isMainAdmin ? 'Boshqaruv paneliga xush kelibsiz!' : 'Tur Admin paneli: ' + (data.adminUser?.name || 'Xush kelibsiz') + '!',
+        'success',
+      );
+      onLoginSuccess(data.role, data.adminUser);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Server bilan aloqa o?rnatib bo?lmadi.');
     } finally {
       setIsLoading(false);
     }
@@ -299,7 +134,7 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="admin123"
+                  placeholder="Parolni kiriting"
                   autoComplete="current-password"
                   className="pl-9 pr-9 h-11 bg-background border-input rounded-xl text-xs text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20 font-mono"
                 />
@@ -313,45 +148,6 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </Button>
-              </div>
-            </div>
-
-            {/* Quick Demo/Default Credentials Autofill */}
-            <div className="space-y-1.5 pt-1">
-              <div className="text-[11px] font-semibold text-muted-foreground flex items-center justify-between">
-                <span>Tezkor tanlash (Demo / Sinov):</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername('admin');
-                    setPassword('admin123');
-                    setError(null);
-                  }}
-                  className={`flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 px-2.5 rounded-xl border transition-all cursor-pointer ${
-                    username === 'admin'
-                      ? 'bg-primary/10 border-primary/40 text-primary ring-1 ring-primary/20'
-                      : 'bg-background hover:bg-muted border-border text-muted-foreground'
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1"><Crown aria-hidden="true" className="h-3 w-3" /> Bosh Admin</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUsername('tour_admin');
-                    setPassword('tour123');
-                    setError(null);
-                  }}
-                  className={`flex items-center justify-center gap-1.5 text-[11px] font-semibold py-2 px-2.5 rounded-xl border transition-all cursor-pointer ${
-                    username === 'tour_admin'
-                      ? 'bg-primary/10 border-primary/40 text-primary ring-1 ring-primary/20'
-                      : 'bg-background hover:bg-muted border-border text-muted-foreground'
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1"><Briefcase aria-hidden="true" className="h-3 w-3" /> Tur Admin</span>
-                </button>
               </div>
             </div>
 

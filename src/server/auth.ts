@@ -3,12 +3,11 @@ import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
 
 const isProd = process.env.NODE_ENV === 'production';
-export const JWT_SECRET = process.env.JWT_SECRET || (isProd 
-  ? (() => { 
-      console.warn('⚠️ DIQQAT: Production muhitida JWT_SECRET belgilanmagan! Iltimos, .env faylida kuchli JWT_SECRET o\'rnating.'); 
-      return 'sayrhub_prod_secret_fallback_key_' + (process.pid || 2026); 
-    })()
-  : 'sayrhub_jwt_secret_dev_key_2026');
+const configuredSecret = process.env.JWT_SECRET?.trim();
+if (isProd && !configuredSecret) {
+  throw new Error('Production muhitida JWT_SECRET majburiy.');
+}
+export const JWT_SECRET = configuredSecret || 'sayrhub_jwt_secret_dev_key_2026';
 
 export interface AuthenticatedUser {
   id: string;
@@ -56,25 +55,6 @@ export function generateToken(payload: AuthenticatedUser, expiresIn: string = '7
  */
 export function verifyToken(token: string): AuthenticatedUser | null {
   if (!token) return null;
-  // Local fallback tokens when DB or server is in offline/resilient mode
-  if (token === 'token_super_root' || token.startsWith('token_super_')) {
-    return {
-      id: 'adm-root',
-      username: 'admin',
-      role: 'main_admin',
-      name: 'Bosh Admin'
-    };
-  }
-  if (token.startsWith('token_staff_')) {
-    const staffId = token.replace('token_staff_', '');
-    return {
-      id: staffId || 'staff-local',
-      username: 'staff',
-      role: 'tour_admin',
-      name: 'Tur Admin'
-    };
-  }
-
   try {
     return jwt.verify(token, JWT_SECRET) as AuthenticatedUser;
   } catch {
@@ -87,9 +67,9 @@ export function verifyToken(token: string): AuthenticatedUser | null {
  */
 export function authenticateToken(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.startsWith('Bearer ') 
-    ? authHeader.substring(7).trim() 
-    : (req.query?.token as string);
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.substring(7).trim()
+    : '';
 
   if (!token) {
     return res.status(401).json({
@@ -115,9 +95,9 @@ export function authenticateToken(req: AuthRequest, res: Response, next: NextFun
  */
 export function optionalAuth(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.startsWith('Bearer ') 
-    ? authHeader.substring(7).trim() 
-    : (req.query?.token as string);
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.substring(7).trim()
+    : '';
 
   if (token) {
     const user = verifyToken(token);

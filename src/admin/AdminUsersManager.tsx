@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminRole, AdminUser } from './adminTypes';
-import { INITIAL_REGISTERED_USERS } from './adminMockData';
-import { Crown, LockKeyhole, UsersRound } from '@/lib/flaticon-icons';
+import { Crown, Download, LockKeyhole, Search, UsersRound } from '@/lib/flaticon-icons';
+import { UserProfile } from '../types';
+
+type AdminCustomer = UserProfile & {
+  id: string;
+  registeredAt?: string;
+  totalSpentUSD: number;
+  bookingsCount: number;
+  status: 'active' | 'blocked';
+};
 
 interface AdminUsersManagerProps {
   currentRole: AdminRole;
@@ -17,8 +25,29 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
   globalSearch = ''
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
-  const [users, setUsers] = useState(INITIAL_REGISTERED_USERS);
+  const [users, setUsers] = useState<AdminCustomer[]>([]);
   const [search, setSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isMainAdmin) return;
+    const token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
+    if (!token) {
+      onShowToast('Admin sessiyasi yaroqsiz. Qaytadan kiring.', 'error');
+      return;
+    }
+    setIsLoading(true);
+    fetch('/api/db/users', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Foydalanuvchilarni olib bo‘lmadi.');
+        setUsers(Array.isArray(data.users) ? data.users : []);
+      })
+      .catch((error: unknown) => {
+        onShowToast(error instanceof Error ? error.message : 'Foydalanuvchilarni olib bo‘lmadi.', 'error');
+      })
+      .finally(() => setIsLoading(false));
+  }, [isMainAdmin, onShowToast]);
 
   if (!isMainAdmin) {
     return (
@@ -38,9 +67,26 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
     );
   }
 
-  const toggleBlockUser = (userId: string, name: string, currentStatus: 'active' | 'blocked') => {
+  const toggleBlockUser = async (userId: string, name: string, currentStatus: 'active' | 'blocked') => {
     const next = currentStatus === 'active' ? 'blocked' : 'active';
-    setUsers(prev => prev.map(u => u.id === userId ? { ...u, status: next } : u));
+    const token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
+    if (!token) {
+      onShowToast('Admin sessiyasi yaroqsiz. Qaytadan kiring.', 'error');
+      return;
+    }
+    try {
+      const response = await fetch(`/api/db/users/${encodeURIComponent(userId)}/status`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: next }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || 'Foydalanuvchi holatini yangilab bo‘lmadi.');
+      setUsers((prev) => prev.map((user) => user.id === userId ? { ...user, status: next } : user));
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Foydalanuvchi holatini yangilab bo‘lmadi.', 'error');
+      return;
+    }
     onShowToast(`"${name}" foydalanuvchisi ${next === 'blocked' ? 'bloklandi' : 'faollashtirildi'}`, 'info');
   };
 
@@ -101,7 +147,7 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
           onClick={handleExportCSV}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-background dark:bg-muted hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 border border-zinc-200/90 dark:border-zinc-700 font-semibold text-xs shadow-2xs transition-all tap-bounce self-start sm:self-auto"
         >
-          <span className="material-symbols-outlined text-[17px] text-emerald-600 dark:text-emerald-400">download</span>
+          <Download aria-hidden="true" className="size-4 text-emerald-600 dark:text-emerald-400" />
           <span>Mijozlarni CSV Eksport Qilish</span>
         </button>
       </div>
@@ -109,9 +155,7 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
       {/* 2. Search */}
       <div className="p-4 rounded-2xl bg-card border border-zinc-200/90 dark:border-zinc-800 shadow-2xs">
         <div className="relative max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-[18px]">
-            search
-          </span>
+          <Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
             value={search}
@@ -145,7 +189,9 @@ export const AdminUsersManager: React.FC<AdminUsersManagerProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-zinc-800 dark:text-zinc-200">
-              {filtered.length === 0 ? (
+              {isLoading ? (
+                <tr><td colSpan={6} className="py-12 text-center text-xs text-zinc-400">Ma’lumotlar bazadan olinmoqda...</td></tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-xs text-zinc-400">
                     Foydalanuvchilar topilmadi

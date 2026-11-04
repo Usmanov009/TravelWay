@@ -106,10 +106,10 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
 
     pollIntervalRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/auth/telegram/check-session?token=${token}`);
+        const res = await fetch(`/api/auth/telegram/check-session?sessionToken=${encodeURIComponent(token)}`);
         const data = await res.json();
 
-        if (data.success && data.status === 'verified' && data.user) {
+        if (data.success && data.authenticated && data.user) {
           clearInterval(pollIntervalRef.current);
           if (data.token) {
             try {
@@ -258,7 +258,7 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
 
     try {
       const token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token');
-      await fetch('/api/auth/telegram/update-profile', {
+      const response = await fetch('/api/db/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,14 +266,15 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
         },
         body: JSON.stringify(completeUser)
       });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Profilni saqlab bo‘lmadi.');
+      }
     } catch (err) {
-      console.warn('Backend user profile update warning:', err);
+      setIsSubmittingProfile(false);
+      onShowToast(err instanceof Error ? err.message : 'Profilni saqlab bo‘lmadi.', 'error');
+      return;
     }
-
-    try {
-      localStorage.setItem('sayrhub_user_profile', JSON.stringify(completeUser));
-      localStorage.setItem('travelway_user_profile', JSON.stringify(completeUser));
-    } catch (e) {}
 
     setIsSubmittingProfile(false);
     onShowToast(`Xush kelibsiz, ${trimmedFirst}! Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!`, 'success');
@@ -495,7 +496,7 @@ export const TelegramAuthModal: React.FC<TelegramAuthModalProps> = ({
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Masalan: Jasur"
+                  placeholder="Ismingiz"
                   className="h-10 text-xs rounded-xl"
                 />
               </div>

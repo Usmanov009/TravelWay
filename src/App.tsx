@@ -1,19 +1,9 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { TabType, LanguageCode, ThemeMode, TourPackage, Booking, PaymentCard, UserProfile, ToastMessage, PriceAlert, ComboTour, FlightTicket, HotelOnly } from './types';
-import {
-  INITIAL_USER,
-  INITIAL_CARDS,
-  INITIAL_TOURS,
-  INITIAL_BOOKINGS,
-  INITIAL_EXPLORE_VIBES,
-  INITIAL_HOT_SALES
-} from './data/mockData';
+import React, { lazy, Suspense, useCallback, useMemo, useState, useEffect } from 'react';
+import { TabType, LanguageCode, ThemeMode, TourPackage, Booking, PaymentCard, UserProfile, ToastMessage, PriceAlert, ComboTour, FlightTicket, HotelOnly, ExploreVibe, HotSale } from './types';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { SearchScreen } from './components/SearchScreen';
 import { AdminRole, AdminUser } from './admin/adminTypes';
-import { INITIAL_ADMIN_STAFF } from './admin/adminMockData';
-import { INITIAL_COMBO_TOURS, INITIAL_FLIGHTS, INITIAL_HOTELS_ONLY } from './data/extraServicesData';
 import { AlertTriangle, Bell, CheckCircle2 } from '@/lib/flaticon-icons';
 
 const FlutterCodeViewer = lazy(() =>
@@ -75,48 +65,38 @@ export default function App() {
     return 'light';
   });
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [hasUnreadNotifs, setHasUnreadNotifs] = useState(true);
+  const [hasUnreadNotifs, setHasUnreadNotifs] = useState(false);
 
   // Data state
-  const [user, setUser] = useState<UserProfile>(() => {
-    try {
-      const saved = localStorage.getItem('sayrhub_user_profile') || localStorage.getItem('travelway_user_profile');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return INITIAL_USER;
+  const [user, setUser] = useState<UserProfile>({
+    name: '', phone: '', email: '', tcId: '', cashback: 0,
+    passportNumber: '', passportExpiry: '', dob: '', isVerified: false
   });
-  const [cards, setCards] = useState<PaymentCard[]>(INITIAL_CARDS);
-  const [tours, setTours] = useState<TourPackage[]>(INITIAL_TOURS);
-  const [comboTours, setComboTours] = useState<ComboTour[]>(INITIAL_COMBO_TOURS);
-  const [flights, setFlights] = useState<FlightTicket[]>(INITIAL_FLIGHTS);
-  const [hotels, setHotels] = useState<HotelOnly[]>(INITIAL_HOTELS_ONLY);
-  const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS);
-  const [hotDeals, setHotDeals] = useState<any[]>(INITIAL_HOT_SALES);
+  const [cards, setCards] = useState<PaymentCard[]>([]);
+  const [tours, setTours] = useState<TourPackage[]>([]);
+  const [comboTours, setComboTours] = useState<ComboTour[]>([]);
+  const [flights, setFlights] = useState<FlightTicket[]>([]);
+  const [hotels, setHotels] = useState<HotelOnly[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [hotDeals, setHotDeals] = useState<any[]>([]);
   const [isRefreshingHotDeals, setIsRefreshingHotDeals] = useState<boolean>(false);
 
-  // Agency Commission Rate State (persisted & synced with backend)
-  const [agencyCommissionRate, setAgencyCommissionRate] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('sayrhub_agency_commission') || localStorage.getItem('travelway_agency_commission');
-      if (saved) return Number(saved);
-    } catch (e) {}
-    return 8;
-  });
+  const [agencyCommissionRate, setAgencyCommissionRate] = useState(0);
 
   // Sync agency commission rate from backend on mount
   useEffect(() => {
     fetch('/api/admin/commission')
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Agentlik sozlamalarini olib bo‘lmadi.');
+        return data;
+      })
       .then((data) => {
         if (data.success && typeof data.commissionRate === 'number') {
           setAgencyCommissionRate(data.commissionRate);
-          try {
-            localStorage.setItem('sayrhub_agency_commission', String(data.commissionRate));
-            localStorage.setItem('travelway_agency_commission', String(data.commissionRate));
-          } catch (e) {}
         }
       })
-      .catch(() => {});
+      .catch((error) => console.error('Agency settings load failed:', error));
   }, []);
 
   // Desktop Admin Panel State
@@ -129,7 +109,7 @@ export default function App() {
   });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
-      return sessionStorage.getItem('sayrhub_admin_auth') === 'true' || sessionStorage.getItem('travelway_admin_auth') === 'true';
+      return Boolean(sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token'));
     } catch (e) {
       return false;
     }
@@ -151,13 +131,7 @@ export default function App() {
     } catch (e) {}
     return null;
   });
-  const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>(() => {
-    try {
-      const saved = localStorage.getItem('sayrhub_admin_staff') || localStorage.getItem('travelway_admin_staff');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return INITIAL_ADMIN_STAFF;
-  });
+  const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>([]);
 
   // Sync staff list from backend / MongoDB only when admin is authenticated
   useEffect(() => {
@@ -166,8 +140,7 @@ export default function App() {
     try {
       token = sessionStorage.getItem('sayrhub_admin_token') || 
               sessionStorage.getItem('travelway_admin_token') ||
-              localStorage.getItem('sayrhub_admin_token') ||
-              localStorage.getItem('travelway_admin_token') || '';
+              '';
     } catch (e) {}
     if (!token) return;
 
@@ -176,31 +149,20 @@ export default function App() {
         'Authorization': `Bearer ${token}`
       }
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Adminlar ro‘yxatini olib bo‘lmadi.');
+        return data;
+      })
       .then((data) => {
         if (data.success && Array.isArray(data.staff)) {
-          let passMap: Record<string, string> = {};
-          try {
-            passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-            const localStaff = JSON.parse(localStorage.getItem('sayrhub_admin_staff') || '[]');
-            localStaff.forEach((s: any) => {
-              if (s.username && s.password) passMap[s.username.toLowerCase()] = s.password;
-            });
-          } catch (e) {}
-
-          const mergedStaff = data.staff.map((s: any) => ({
-            ...s,
-            password: s.password || passMap[(s.username || '').toLowerCase()] || ''
-          }));
-
-          setAdminStaffList(mergedStaff);
-          try {
-            localStorage.setItem('sayrhub_admin_staff', JSON.stringify(mergedStaff));
-            localStorage.setItem('travelway_admin_staff', JSON.stringify(mergedStaff));
-          } catch (e) {}
+          setAdminStaffList(data.staff);
         }
       })
-      .catch((err) => console.warn('Sync admin staff error:', err));
+      .catch((err) => {
+        setAdminStaffList([]);
+        console.error('Admin staff load failed:', err);
+      });
   }, [isAdminAuthenticated]);
 
   useEffect(() => {
@@ -226,8 +188,16 @@ export default function App() {
     try {
       sessionStorage.removeItem('sayrhub_admin_auth');
       sessionStorage.removeItem('travelway_admin_auth');
+      sessionStorage.removeItem('sayrhub_admin_token');
+      sessionStorage.removeItem('travelway_admin_token');
       sessionStorage.removeItem('sayrhub_active_admin_user');
       sessionStorage.removeItem('travelway_active_admin_user');
+      localStorage.removeItem('sayrhub_admin_auth');
+      localStorage.removeItem('travelway_admin_auth');
+      localStorage.removeItem('sayrhub_admin_token');
+      localStorage.removeItem('travelway_admin_token');
+      localStorage.removeItem('sayrhub_active_admin_user');
+      localStorage.removeItem('travelway_active_admin_user');
     } catch (e) {}
     setIsAdminAuthenticated(false);
     setCurrentAdminUser(null);
@@ -238,80 +208,100 @@ export default function App() {
   const fetchLiveHotDeals = async () => {
     setIsRefreshingHotDeals(true);
     try {
-      const res = await fetch('/api/kompas/hot');
-      const data = await res.json();
-      if (data.success && Array.isArray(data.hotDeals) && data.hotDeals.length > 0) {
-        setHotDeals(data.hotDeals);
-      }
-    } catch (e) {
-      console.warn('Live hot deals error:', e);
+      const response = await fetch('/api/kompas/hot');
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || 'Jonli takliflarni olib bo?lmadi.');
+      setHotDeals(Array.isArray(data.hotDeals) ? data.hotDeals : []);
+    } catch (error) {
+      setHotDeals([]);
+      console.error('Live hot deals request failed:', error);
     } finally {
       setIsRefreshingHotDeals(false);
     }
   };
 
   useEffect(() => {
-    fetchLiveHotDeals();
+    let active = true;
+    void fetchLiveHotDeals();
+    const adminToken = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
+    const userToken = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token');
+    const token = adminToken || userToken;
+    const headers = token ? { Authorization: 'Bearer ' + token } : undefined;
+    const load = async <T,>(url: string, key: string): Promise<T[]> => {
+      const response = await fetch(url, { headers });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || key + ' ?????????????? ???? ???????.');
+      return Array.isArray(data[key]) ? data[key] as T[] : [];
+    };
 
-    // 1. Fetch live Tours from MongoDB
-    fetch('/api/db/tours')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.tours) && data.tours.length > 0) {
-          setTours(data.tours);
-        }
-      })
-      .catch((e) => console.warn('MongoDB tours fetch:', e));
+    Promise.all([
+      load<TourPackage>('/api/db/tours', 'tours'),
+      load<ComboTour>('/api/combo/tours', 'comboTours'),
+      load<FlightTicket>('/api/flights/search', 'flights'),
+      load<HotelOnly>('/api/hotels/search', 'hotels'),
+    ]).then(([nextTours, nextCombos, nextFlights, nextHotels]) => {
+      if (!active) return;
+      setTours(nextTours);
+      setComboTours(nextCombos);
+      setFlights(nextFlights);
+      setHotels(nextHotels);
+    }).catch((error: unknown) => {
+      if (!active) return;
+      setTours([]);
+      setComboTours([]);
+      setFlights([]);
+      setHotels([]);
+      console.error('Catalog load from MongoDB failed:', error);
+    });
 
-    // 2. Fetch live Bookings from MongoDB (authenticated)
-    const adminToken = typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token')) : null;
-    const userToken = typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token')) : null;
-    const activeToken = adminToken || userToken;
-
-    if (activeToken) {
-      fetch('/api/db/bookings', {
-        headers: {
-          'Authorization': `Bearer ${activeToken}`
-        }
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && Array.isArray(data.bookings) && data.bookings.length > 0) {
-            setBookings(data.bookings);
-          }
+    if (token) {
+      fetch('/api/db/bookings', { headers })
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok || !data.success) throw new Error(data.error || 'Bronlarni olib bo?lmadi.');
+          if (active) setBookings(Array.isArray(data.bookings) ? data.bookings : []);
         })
-        .catch((e) => console.warn('MongoDB bookings fetch:', e));
+        .catch((error) => { if (active) { setBookings([]); console.error('Bookings load failed:', error); } });
+      fetch('/api/db/price-alerts', { headers })
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok || !data.success) throw new Error(data.error || 'Narx signallarini olib bo?lmadi.');
+          if (active) setPriceAlerts(Array.isArray(data.alerts) ? data.alerts : []);
+        })
+        .catch((error) => { if (active) { setPriceAlerts([]); console.error('Price alerts load failed:', error); } });
+    } else {
+      setBookings([]);
+      setPriceAlerts([]);
     }
 
-    // 3. Fetch Price Alerts from MongoDB
-    fetch('/api/db/price-alerts')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.alerts) && data.alerts.length > 0) {
-          setPriceAlerts(data.alerts);
-        }
-      })
-      .catch((e) => console.warn('MongoDB alerts fetch:', e));
-  }, []);
+    if (userToken) {
+      fetch('/api/db/users/me', { headers: { Authorization: 'Bearer ' + userToken } })
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok || !data.success) throw new Error(data.error || 'Profilni olib bo?lmadi.');
+          if (!active) return;
+          const profile = data.user;
+          setUser({
+            name: profile.name || '', phone: profile.phone || '', email: profile.email || '',
+            tcId: profile.tcId, cashback: profile.cashbackBalance || 0,
+            passportNumber: profile.passportNumber || '', passportExpiry: profile.passportExpiry || '',
+            dob: profile.dob || '', isVerified: Boolean(profile.isVerified),
+            telegramId: profile.telegramId, telegramUsername: profile.telegramUsername,
+            favoriteTourIds: Array.isArray(profile.favoriteTourIds) ? profile.favoriteTourIds : [],
+          });
+          setCards(Array.isArray(profile.paymentCards) ? profile.paymentCards : []);
+          const favoriteIds = new Set<string>(profile.favoriteTourIds || []);
+          setTours((prev) => prev.map((tour) => ({ ...tour, saved: favoriteIds.has(tour.id) })));
+        })
+        .catch((error) => console.error('User profile load from MongoDB failed:', error));
+    }
+    return () => { active = false; };
+  }, [isAdminAuthenticated, user.tcId]);
 
-  // Price Alerts State
-  const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>(() => {
-    try {
-      const saved = localStorage.getItem('sayrhub_price_alerts') || localStorage.getItem('travelway_price_alerts') || localStorage.getItem('tripcraft_price_alerts');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return [];
-  });
+  const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([]);
   const [activePriceAlertTour, setActivePriceAlertTour] = useState<TourPackage | null>(null);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('sayrhub_price_alerts', JSON.stringify(priceAlerts));
-      localStorage.setItem('travelway_price_alerts', JSON.stringify(priceAlerts));
-    } catch (e) {}
-  }, [priceAlerts]);
-
-  const handleSavePriceAlert = (alertData: {
+  const handleSavePriceAlert = async (alertData: {
     tourId: string;
     tourTitle: string;
     tourLocation: string;
@@ -322,68 +312,38 @@ export default function App() {
     notifyViaTelegram: boolean;
     userEmail?: string;
   }) => {
-    setPriceAlerts((prev) => {
-      const filtered = prev.filter((a) => a.tourId !== alertData.tourId);
-      const newAlert: PriceAlert = {
-        id: `alert-${Date.now()}`,
-        tourId: alertData.tourId,
-        tourTitle: alertData.tourTitle,
-        tourLocation: alertData.tourLocation,
-        tourImg: alertData.tourImg,
-        currentPrice: alertData.currentPrice,
-        targetPrice: alertData.targetPrice,
-        createdAt: new Date().toLocaleDateString('uz-UZ', { month: 'short', day: 'numeric' }),
-        status: 'active',
-        notifyViaPush: alertData.notifyViaPush,
-        notifyViaTelegram: alertData.notifyViaTelegram,
-        userEmail: alertData.userEmail
-      };
-
-      // Save to MongoDB
-      fetch('/api/db/price-alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAlert)
-      }).catch((e) => console.warn('MongoDB alert save error:', e));
-
-      return [...filtered, newAlert];
-    });
-
-    showToast(
-      `"${alertData.tourTitle}" uchun narx signali (< $${alertData.targetPrice}) muvaffaqiyatli saqlandi!`,
-      'success'
-    );
+    const token = getUserToken();
+    if (!token) {
+      showToast('Narx signalini saqlash uchun avval tizimga kiring.', 'error');
+      return;
+    }
+    const newAlert: PriceAlert = {
+      id: 'alert-' + Date.now(),
+      ...alertData,
+      createdAt: new Date().toISOString(),
+      status: 'active',
+    };
+    try {
+      await requestApi('/api/db/price-alerts', {
+        method: 'POST', body: JSON.stringify(newAlert),
+      }, token);
+      setPriceAlerts((prev) => [newAlert, ...prev.filter((alert) => alert.tourId !== newAlert.tourId)]);
+      showToast('Narx signali bazaga saqlandi.', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Narx signalini saqlab bo?lmadi.', 'error');
+    }
   };
 
-  const handleDeletePriceAlert = (alertId: string) => {
-    setPriceAlerts((prev) => prev.filter((a) => a.id !== alertId));
-    fetch(`/api/db/price-alerts/${alertId}`, { method: 'DELETE' }).catch((e) => console.warn('MongoDB alert delete error:', e));
-    showToast("Narx signali o'chirildi", 'info');
-  };
-
-  const handleSimulatePriceDrop = (tourId: string, simulatedPrice: number) => {
-    setTours((prev) =>
-      prev.map((t) => {
-        if (t.id === tourId) {
-          return {
-            ...t,
-            oldPrice: t.price,
-            price: simulatedPrice
-          };
-        }
-        return t;
-      })
-    );
-
-    const alert = priceAlerts.find((a) => a.tourId === tourId);
-    const targetTour = tours.find((t) => t.id === tourId);
-    const title = targetTour ? targetTour.title : 'Tanlangan tur';
-
-    setHasUnreadNotifs(true);
-    showToast(
-      `NARX TUSHDI! "${title}" narxi $${simulatedPrice} ga pasaydi (Chegara: < $${alert?.targetPrice || simulatedPrice + 10})!`,
-      'success'
-    );
+  const handleDeletePriceAlert = async (alertId: string) => {
+    const token = getUserToken() || getAdminToken();
+    try {
+      if (!token) throw new Error('Narx signalini o?chirish uchun tizimga kiring.');
+      await requestApi('/api/db/price-alerts/' + encodeURIComponent(alertId), { method: 'DELETE' }, token);
+      setPriceAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+      showToast('Narx signali o?chirildi.', 'info');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Narx signalini o?chirib bo?lmadi.', 'error');
+    }
   };
 
   // Modals state
@@ -409,14 +369,14 @@ export default function App() {
   // Toast notifications
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showToast = useCallback((text: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Date.now().toString() + Math.random().toString();
     setToasts((prev) => [...prev, { id, text, type }]);
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 3200);
-  };
+  }, []);
 
 
 
@@ -436,41 +396,32 @@ export default function App() {
   }, [themeMode]);
 
   // Tour favorite toggle
-  const handleToggleSaveTour = (tourId: string, e?: React.MouseEvent) => {
+  const handleToggleSaveTour = async (tourId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setTours((prev) =>
-      prev.map((t) => {
-        if (t.id === tourId) {
-          const newSaved = !t.saved;
-          showToast(
-            newSaved ? "Turpaket saqlanganlarga qo'shildi" : "Saqlanganlardan olib tashlandi",
-            newSaved ? 'success' : 'info'
-          );
-          return { ...t, saved: newSaved };
-        }
-        return t;
-      })
-    );
+    const favoriteTourIds = new Set(user.favoriteTourIds || []);
+    const wasSaved = favoriteTourIds.has(tourId);
+    if (wasSaved) favoriteTourIds.delete(tourId);
+    else favoriteTourIds.add(tourId);
+    const nextFavoriteTourIds = [...favoriteTourIds];
+    const nextUser = { ...user, favoriteTourIds: nextFavoriteTourIds };
+    try {
+      await saveUserProfileToDB(nextUser, cards, nextFavoriteTourIds);
+      setUser(nextUser);
+      setTours((prev) => prev.map((tour) => ({ ...tour, saved: favoriteTourIds.has(tour.id) })));
+      showToast(wasSaved ? 'Saqlanganlardan olib tashlandi' : "Turpaket saqlanganlarga qo'shildi", 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Saqlangan turlarni yangilab bo‘lmadi.', 'error');
+    }
   };
 
   // OTP Handlers
-  const handleRequestOtp = (phone: string) => {
-    setOtpPhone(phone);
-    setIsOtpOpen(true);
-    showToast(`SMS kod yuborildi: Test kodi [ 7 7 8 8 ]`, 'info');
+  const handleRequestOtp = (_phone: string) => {
+    showToast('SMS orqali kirish xizmati sozlanmagan. Telegram orqali kiring.', 'error');
   };
 
-  const handleVerifyOtp = (code: string) => {
+  const handleVerifyOtp = (_code: string) => {
     setIsOtpOpen(false);
-    showToast('SMS tasdiqlash muvaffaqiyatli o\'tdi! ✓', 'success');
-    setCurrentTab('search');
-  };
-
-  // Social Auth
-  const handleSelectSocialAccount = (name: string, email: string) => {
-    setSocialProvider(null);
-    showToast(`${name} (${email}) orqali muvaffaqiyatli kirdingiz!`, 'success');
-    setCurrentTab('search');
+    showToast('SMS tasdiqlash xizmati sozlanmagan.', 'error');
   };
 
   const handleTelegramAuth = () => {
@@ -492,25 +443,6 @@ export default function App() {
         isVerified: true
       };
       setUser(updatedUser);
-      try {
-        localStorage.setItem('sayrhub_user_profile', JSON.stringify(updatedUser));
-        localStorage.setItem('travelway_user_profile', JSON.stringify(updatedUser));
-      } catch (e) {}
-
-      let token = '';
-      try {
-        token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-      } catch (e) {}
-
-      fetch('/api/db/users', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(updatedUser)
-      }).catch((e) => console.warn('MongoDB save user error:', e));
-
       showToast(`Xush kelibsiz, ${updatedUser.name}! SayrHub'ga kirdingiz`, 'success');
     } else {
       showToast("Xush kelibsiz! Telegram orqali ro'yxatdan o'tildi", 'success');
@@ -520,37 +452,34 @@ export default function App() {
   };
 
   // MongoDB Booking helpers
-  const saveBookingToDB = (booking: Booking) => {
-    let token = '';
-    try {
-      token = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-    } catch (e) {}
-    fetch('/api/db/bookings', {
+  const saveBookingToDB = async (booking: Booking) => {
+    const token = getUserToken();
+    if (!token) throw new Error('Bron qilish uchun avval Telegram orqali tizimga kiring.');
+    await requestApi('/api/db/bookings', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(booking)
-    }).catch((e) => console.warn('MongoDB booking save error:', e));
+      body: JSON.stringify(booking),
+    }, token);
   };
 
-  const deleteBookingFromDB = (id: string) => {
-    let token = '';
+  const persistBooking = async (booking: Booking) => {
     try {
-      token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || '';
-    } catch (e) {}
-    fetch(`/api/db/bookings/${id}`, { 
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      }
-    }).catch((e) => console.warn('MongoDB delete booking error:', e));
+      await saveBookingToDB(booking);
+      setBookings((prev) => [booking, ...prev]);
+      return true;
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Bronni bazaga saqlab bo‘lmadi.', 'error');
+      return false;
+    }
+  };
+
+  const deleteBookingFromDB = async (id: string) => {
+    const token = getUserToken() || getAdminToken();
+    if (!token) throw new Error('Bronni o‘chirish uchun tizimga kiring.');
+    await requestApi('/api/db/bookings/' + encodeURIComponent(id), { method: 'DELETE' }, token);
   };
 
   // Booking handlers
-  const handleConfirmBooking = (bookingData: {
+  const handleConfirmBooking = async (bookingData: {
     tour: TourPackage;
     travelerName: string;
     phone?: string;
@@ -565,21 +494,27 @@ export default function App() {
     const travelers = bookingData.travelersCount || checkoutTravelers || 2;
     const adults = bookingData.adultsCount !== undefined ? bookingData.adultsCount : 2;
     const children = bookingData.childrenCount !== undefined ? bookingData.childrenCount : 0;
-    const code = `TW-VOUCHER-${Math.floor(1000 + Math.random() * 9000)}`;
+    const code = `TW-BR-${Date.now()}`;
 
     const perAdult = bookingData.tour.isLiveKompas
       ? Math.round(bookingData.tour.price / 2)
       : bookingData.tour.price;
-    const perChild = Math.round(perAdult * 0.5);
+    const perChild = perAdult;
     const packageTotal = (adults * perAdult) + (children * perChild);
     const total = Math.max(0, packageTotal - bookingData.discount);
 
-    const depDate = bookingData.tour.departureDate || '2026-10-15';
-    const nights = bookingData.tour.nightsCount || (bookingData.tour.nights.match(/\d+/) ? parseInt(bookingData.tour.nights.match(/\d+/)![0], 10) : 7);
-    const startDateObj = new Date(depDate);
-    const endDateObj = new Date(startDateObj);
-    endDateObj.setDate(endDateObj.getDate() + nights);
-    const endDateStr = endDateObj.toISOString().split('T')[0];
+    const depDate = bookingData.tour.departureDate?.trim() || '';
+    const nights = bookingData.tour.nightsCount || (bookingData.tour.nights.match(/\d+/) ? parseInt(bookingData.tour.nights.match(/\d+/)![0], 10) : 0);
+    const dateParts = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(depDate);
+    const startDateObj = new Date(dateParts
+      ? `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}T00:00:00.000Z`
+      : depDate);
+    if (!depDate || Number.isNaN(startDateObj.getTime()) || nights <= 0) {
+      showToast('Bron yaratish uchun turda to‘g‘ri jo‘nash sanasi va kechalar soni bo‘lishi kerak.', 'error');
+      return;
+    }
+    const endDateObj = new Date(startDateObj.getTime() + nights * 86400000);
+    const endDateStr = endDateObj.toISOString().slice(0, 10);
 
     const formattedDates = `${startDateObj.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' })} — ${endDateObj.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short', year: 'numeric' })}`;
 
@@ -594,7 +529,7 @@ export default function App() {
       dates: formattedDates,
       startDate: depDate,
       endDate: endDateStr,
-      status: 'Tasdiqlangan',
+      status: 'Jarayonda',
       voucherId: code,
       price: priceText,
       totalNumeric: total,
@@ -611,24 +546,27 @@ export default function App() {
       childrenCount: children
     };
 
-    setBookings((prev) => [newBooking, ...prev]);
-    saveBookingToDB(newBooking);
+    if (!(await persistBooking(newBooking))) return;
     setCheckoutTour(null);
     setSuccessBooking(newBooking);
-    showToast(`Tur muvaffaqiyatli saqlandi! Vaucher tayyorlandi.`, 'success');
+    showToast('Bron so‘rovi bazaga saqlandi. Tasdiqlanishini kuting.', 'success');
   };
 
-  const handleBookHotDeal = (deal: any) => {
-    const code = `VOUCHER-HOT${Math.floor(1000 + Math.random() * 9000)}`;
+  const handleBookHotDeal = async (deal: HotSale) => {
+    if (!deal.title || !Number.isFinite(deal.priceNumeric)) {
+      showToast('Taklif ma’lumotlari noto‘g‘ri, bron yaratilmadi.', 'error');
+      return;
+    }
+    const code = `TW-BR-${Date.now()}`;
     const newBooking: Booking = {
       id: `b${Date.now()}`,
       tourTitle: deal.title,
-      dest: deal.location || 'Antalya - Dubay',
-      dates: 'Yaqin 3 kun ichida',
-      status: 'Tasdiqlangan',
+      dest: deal.location || '—',
+      dates: deal.checkinDate || '—',
+      status: 'Jarayonda',
       voucherId: code,
       price: `${deal.price} (1 kishi)`,
-      totalNumeric: deal.priceNumeric || 495,
+      totalNumeric: deal.priceNumeric,
       travelerName: user.name,
       type: 'active',
       guestsCount: 1,
@@ -636,14 +574,13 @@ export default function App() {
       childrenCount: 0
     };
 
-    setBookings((prev) => [newBooking, ...prev]);
-    saveBookingToDB(newBooking);
-    showToast(`Qaynoq tur "${deal.title}" muvaffaqiyatli band qilindi!`, 'success');
+    if (!(await persistBooking(newBooking))) return;
+    showToast(`"${deal.title}" bron so‘rovi bazaga saqlandi.`, 'success');
     setCurrentTab('trips');
   };
 
-  const handleBookCombo = (combo: ComboTour) => {
-    const code = `TW-COMBO-${Math.floor(1000 + Math.random() * 9000)}`;
+  const handleBookCombo = async (combo: ComboTour) => {
+    const code = `TW-BR-${Date.now()}`;
     const newBooking: Booking = {
       id: `combo-${Date.now()}`,
       tourTitle: combo.title,
@@ -651,7 +588,7 @@ export default function App() {
       dates: `${combo.departureDate} (${combo.nightsSplit})`,
       startDate: combo.departureDate,
       endDate: combo.departureDate,
-      status: 'Tasdiqlangan',
+      status: 'Jarayonda',
       voucherId: code,
       price: `$${combo.price} (Combo)`,
       totalNumeric: combo.price,
@@ -665,13 +602,12 @@ export default function App() {
       adultsCount: 2,
       childrenCount: 0
     };
-    setBookings((prev) => [newBooking, ...prev]);
-    saveBookingToDB(newBooking);
-    showToast(`"${combo.title}" combo turi muvaffaqiyatli band qilindi!`, 'success');
+    if (!(await persistBooking(newBooking))) return;
+    showToast(`"${combo.title}" bron so‘rovi bazaga saqlandi.`, 'success');
   };
 
-  const handleBookFlight = (flight: FlightTicket) => {
-    const code = `TW-ETKT-${Math.floor(1000 + Math.random() * 9000)}`;
+  const handleBookFlight = async (flight: FlightTicket) => {
+    const code = `TW-BR-${Date.now()}`;
     const newBooking: Booking = {
       id: `fl-${Date.now()}`,
       tourTitle: `${flight.airline} (${flight.flightNumber}) Aviachipta`,
@@ -679,7 +615,7 @@ export default function App() {
       dates: `${flight.departureDate} (${flight.departureTime})`,
       startDate: flight.departureDate,
       endDate: flight.returnDate || flight.departureDate,
-      status: 'Tasdiqlangan',
+      status: 'Jarayonda',
       voucherId: code,
       price: `$${flight.price} (Aviabilet)`,
       totalNumeric: flight.price,
@@ -693,51 +629,57 @@ export default function App() {
       adultsCount: 1,
       childrenCount: 0
     };
-    setBookings((prev) => [newBooking, ...prev]);
-    saveBookingToDB(newBooking);
-    showToast(`"${flight.flightNumber}" reysiga aviachipta band qilindi!`, 'success');
+    if (!(await persistBooking(newBooking))) return;
+    showToast(`"${flight.flightNumber}" bron so‘rovi bazaga saqlandi.`, 'success');
   };
 
-  const handleBookHotel = (hotel: HotelOnly) => {
-    const code = `TW-HOTEL-${Math.floor(1000 + Math.random() * 9000)}`;
+  const handleBookHotel = async (hotel: HotelOnly) => {
+    const code = `TW-BR-${Date.now()}`;
     const newBooking: Booking = {
       id: `ht-${Date.now()}`,
       tourTitle: hotel.name,
       dest: `${hotel.resort}, ${hotel.country}`,
       dates: `${hotel.nightsCount} kecha (${hotel.roomType})`,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + hotel.nightsCount * 86400000).toISOString().split('T')[0],
-      status: 'Tasdiqlangan',
+      status: 'Jarayonda',
       voucherId: code,
       price: `$${hotel.totalPrice} (Faqat mehmonxona)`,
       totalNumeric: hotel.totalPrice,
       travelerName: user.name,
       type: 'active',
       hotelImg: hotel.img,
-      flight: "Mehmonxona vaucheri (Aviaparvozsiz)",
-      airline: "O'z hisobidan",
+      flight: '',
+      airline: '',
       nightsCount: hotel.nightsCount,
       guestsCount: 2,
       adultsCount: 2,
       childrenCount: 0
     };
-    setBookings((prev) => [newBooking, ...prev]);
-    saveBookingToDB(newBooking);
-    showToast(`"${hotel.name}" mehmonxonasi muvaffaqiyatli band qilindi!`, 'success');
+    if (!(await persistBooking(newBooking))) return;
+    showToast(`"${hotel.name}" bron so‘rovi bazaga saqlandi.`, 'success');
   };
 
-  const getAuthHeaders = () => {
-    let token = '';
-    try {
-      token = sessionStorage.getItem('sayrhub_admin_token') || 
-              sessionStorage.getItem('travelway_admin_token') ||
-              localStorage.getItem('sayrhub_admin_token') ||
-              localStorage.getItem('travelway_admin_token') || '';
-    } catch (e) {}
-    return {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
+  const getAdminToken = () => sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
+  const getUserToken = () => sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || '';
+  const getAuthHeaders = (token = getAdminToken()): Record<string, string> => ({
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: 'Bearer ' + token } : {}),
+  });
+  const requestApi = async (url: string, init: RequestInit = {}, token = getAdminToken()) => {
+    const response = await fetch(url, {
+      ...init,
+      headers: { ...getAuthHeaders(token), ...(init.headers as Record<string, string> || {}) },
+    });
+    const data = await response.json() as { success?: boolean; error?: string };
+    if (!response.ok || !data.success) throw new Error(data.error || 'Server so?rovni bajara olmadi.');
+    return data;
+  };
+  const saveUserProfileToDB = async (nextUser: UserProfile, nextCards = cards, favoriteTourIds = nextUser.favoriteTourIds || []) => {
+    const token = getUserToken();
+    if (!token) throw new Error('Profilni saqlash uchun avval tizimga kiring.');
+    await requestApi('/api/db/users', {
+      method: 'POST',
+      body: JSON.stringify({ ...nextUser, cashbackBalance: nextUser.cashback, paymentCards: nextCards, favoriteTourIds }),
+    }, token);
   };
 
   const handleCancelBooking = (bookingId: string) => {
@@ -747,12 +689,26 @@ export default function App() {
     }
   };
 
-  const handleConfirmCancelBooking = (reason?: string) => {
+  const handleConfirmCancelBooking = async (reason?: string) => {
     if (cancelBookingTarget) {
       const targetId = cancelBookingTarget.id;
       const cancellationReason = reason || "Foydalanuvchi tomonidan bekor qilindi";
       const cancelledAt = new Date().toISOString();
-
+      const token = getUserToken() || getAdminToken();
+      try {
+        await requestApi('/api/db/bookings/' + encodeURIComponent(targetId), {
+          method: 'PUT',
+          body: JSON.stringify({
+            status: 'Bekor qilingan',
+            type: 'cancelled',
+            cancellationReason,
+            cancelledAt,
+          }),
+        }, token);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : 'Bronni bekor qilib bo‘lmadi.', 'error');
+        return;
+      }
       setBookings((prev) =>
         prev.map((b) =>
           b.id === targetId
@@ -767,344 +723,189 @@ export default function App() {
         )
       );
 
-      fetch(`/api/db/bookings/${targetId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          status: 'Bekor qilingan',
-          type: 'cancelled',
-          cancellationReason,
-          cancelledAt
-        })
-      }).catch((e) => console.warn('MongoDB update booking cancellation error:', e));
-
-      showToast(`"${cancelBookingTarget.tourTitle}" buyurtmasi bekor qilindi. Mablag' to'liq qaytarildi.`, 'info');
+      showToast(`"${cancelBookingTarget.tourTitle}" buyurtmasi bekor qilindi.`, 'info');
       setCancelBookingTarget(null);
     }
   };
 
-  const handleRemoveBooking = (bookingId: string) => {
-    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
-    deleteBookingFromDB(bookingId);
-    showToast("Buyurtma tarixdan o'chirildi.", 'info');
+  const handleRemoveBooking = async (bookingId: string) => {
+    try {
+      await deleteBookingFromDB(bookingId);
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+      showToast("Buyurtma tarixdan o'chirildi.", 'info');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Bronni o‘chirib bo‘lmadi.', 'error');
+    }
   };
 
-  // ADMIN OPERATIONS (CRUD FOR TOURS, COMBOS, FLIGHTS, HOTELS, BOOKINGS, STAFF)
-  const handleAddTour = (tour: TourPackage) => {
-    setTours((prev) => [tour, ...prev]);
-    fetch('/api/db/tours', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(tour)
-    }).catch((e) => console.warn('MongoDB tour save error:', e));
+  // ADMIN OPERATIONS (database-backed CRUD)
+  const handleAddTour = async (tour: TourPackage) => {
+    await requestApi('/api/db/tours', { method: 'POST', body: JSON.stringify(tour) });
+    setTours((prev) => [tour, ...prev.filter((item) => item.id !== tour.id)]);
   };
-  const handleUpdateTour = (tour: TourPackage) => {
-    setTours((prev) => {
-      const idx = prev.findIndex((t) => t.id === tour.id);
-      if (idx !== -1) {
-        const next = [...prev];
-        next[idx] = tour;
-        return next;
-      }
-      return [tour, ...prev];
-    });
-    fetch('/api/db/tours', {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(tour)
-    }).catch((e) => console.warn('MongoDB tour update error:', e));
+  const handleUpdateTour = async (tour: TourPackage) => {
+    await requestApi('/api/db/tours', { method: 'POST', body: JSON.stringify(tour) });
+    setTours((prev) => [tour, ...prev.filter((item) => item.id !== tour.id)]);
   };
-  const handleDeleteTour = (tourId: string) => {
-    setTours((prev) => prev.filter((t) => t.id !== tourId));
-    fetch(`/api/db/tours/${tourId}`, { 
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    }).catch((e) => console.warn('MongoDB tour delete error:', e));
+  const handleDeleteTour = async (tourId: string) => {
+    await requestApi('/api/db/tours/' + encodeURIComponent(tourId), { method: 'DELETE' });
+    setTours((prev) => prev.filter((tour) => tour.id !== tourId));
   };
 
-  const handleAddComboTour = (combo: ComboTour) => {
-    setComboTours((prev) => [combo, ...prev]);
+  const handleAddComboTour = async (combo: ComboTour) => {
+    await requestApi('/api/db/catalog/combo-tours', { method: 'POST', body: JSON.stringify(combo) });
+    setComboTours((prev) => [combo, ...prev.filter((item) => item.id !== combo.id)]);
   };
-  const handleUpdateComboTour = (combo: ComboTour) => {
-    setComboTours((prev) => {
-      const idx = prev.findIndex((c) => c.id === combo.id);
-      if (idx !== -1) {
-        const next = [...prev];
-        next[idx] = combo;
-        return next;
-      }
-      return [combo, ...prev];
-    });
-  };
-  const handleDeleteComboTour = (comboId: string) => {
-    setComboTours((prev) => prev.filter((c) => c.id !== comboId));
+  const handleUpdateComboTour = handleAddComboTour;
+  const handleDeleteComboTour = async (id: string) => {
+    await requestApi('/api/db/catalog/combo-tours/' + encodeURIComponent(id), { method: 'DELETE' });
+    setComboTours((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleAddFlight = (flight: FlightTicket) => {
-    setFlights((prev) => [flight, ...prev]);
+  const handleAddFlight = async (flight: FlightTicket) => {
+    await requestApi('/api/db/catalog/flights', { method: 'POST', body: JSON.stringify(flight) });
+    setFlights((prev) => [flight, ...prev.filter((item) => item.id !== flight.id)]);
   };
-  const handleUpdateFlight = (flight: FlightTicket) => {
-    setFlights((prev) => {
-      const idx = prev.findIndex((f) => f.id === flight.id);
-      if (idx !== -1) {
-        const next = [...prev];
-        next[idx] = flight;
-        return next;
-      }
-      return [flight, ...prev];
-    });
-  };
-  const handleDeleteFlight = (flightId: string) => {
-    setFlights((prev) => prev.filter((f) => f.id !== flightId));
+  const handleUpdateFlight = handleAddFlight;
+  const handleDeleteFlight = async (id: string) => {
+    await requestApi('/api/db/catalog/flights/' + encodeURIComponent(id), { method: 'DELETE' });
+    setFlights((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleAddHotel = (hotel: HotelOnly) => {
-    setHotels((prev) => [hotel, ...prev]);
+  const handleAddHotel = async (hotel: HotelOnly) => {
+    await requestApi('/api/db/catalog/hotels', { method: 'POST', body: JSON.stringify(hotel) });
+    setHotels((prev) => [hotel, ...prev.filter((item) => item.id !== hotel.id)]);
   };
-  const handleUpdateHotel = (hotel: HotelOnly) => {
-    setHotels((prev) => {
-      const idx = prev.findIndex((h) => h.id === hotel.id);
-      if (idx !== -1) {
-        const next = [...prev];
-        next[idx] = hotel;
-        return next;
-      }
-      return [hotel, ...prev];
-    });
-  };
-  const handleDeleteHotel = (hotelId: string) => {
-    setHotels((prev) => prev.filter((h) => h.id !== hotelId));
+  const handleUpdateHotel = handleAddHotel;
+  const handleDeleteHotel = async (id: string) => {
+    await requestApi('/api/db/catalog/hotels/' + encodeURIComponent(id), { method: 'DELETE' });
+    setHotels((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleUpdateBookingStatus = (bookingId: string, status: Booking['status']) => {
-    setBookings((prev) => prev.map((b) => b.id === bookingId ? { ...b, status } : b));
-    fetch(`/api/db/bookings/${bookingId}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ status })
-    }).catch((e) => console.warn('MongoDB update booking status error:', e));
+  const handleUpdateBookingStatus = async (bookingId: string, status: Booking['status']) => {
+    try {
+      await requestApi('/api/db/bookings/' + encodeURIComponent(bookingId), {
+        method: 'PUT', body: JSON.stringify({ status }),
+      });
+      setBookings((prev) => prev.map((booking) => booking.id === bookingId ? { ...booking, status } : booking));
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Bron holatini yangilab bo?lmadi.', 'error');
+    }
   };
-  const handleAdminCancelBooking = (bookingId: string) => {
-    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
-    deleteBookingFromDB(bookingId);
+  const handleAdminCancelBooking = async (bookingId: string) => {
+    try {
+      await requestApi('/api/db/bookings/' + encodeURIComponent(bookingId), { method: 'DELETE' });
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingId));
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Bronni o?chirib bo?lmadi.', 'error');
+    }
   };
 
   const handleAddStaff = async (staff: AdminUser) => {
-    // 1. Cache password locally for fallback
-    if (staff.username && staff.password) {
-      try {
-        const passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-        passMap[staff.username.toLowerCase().trim()] = staff.password.trim();
-        if (staff.email) {
-          passMap[staff.email.toLowerCase().trim()] = staff.password.trim();
-        }
-        localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(passMap));
-      } catch (e) {}
-    }
-
-    // 2. Optimistic local update
-    setAdminStaffList((prev) => {
-      const updated = [staff, ...prev];
-      try {
-        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
-        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-
-    // 3. Persist to MongoDB & backend
-    try {
-      const res = await fetch('/api/admin/staff', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(staff)
-      });
-      const data = await res.json();
-      if (data.success && data.staff) {
-        setAdminStaffList((prev) =>
-          prev.map((s) => s.id === staff.id ? { ...staff, ...data.staff, password: staff.password } : s)
-        );
-      } else if (!data.success && data.error) {
-        showToast(data.error, 'error');
-      }
-    } catch (e) {
-      console.warn('Sync staff to backend error:', e);
-    }
+    await requestApi('/api/admin/staff', { method: 'POST', body: JSON.stringify(staff) });
+    const safeStaff = { ...staff, password: undefined };
+    setAdminStaffList((prev) => [safeStaff, ...prev.filter((item) => item.id !== staff.id)]);
   };
-
   const handleUpdateStaff = async (staff: AdminUser) => {
-    if (staff.username && staff.password) {
-      try {
-        const passMap = JSON.parse(localStorage.getItem('sayrhub_staff_passwords') || '{}');
-        passMap[staff.username.toLowerCase().trim()] = staff.password.trim();
-        if (staff.email) {
-          passMap[staff.email.toLowerCase().trim()] = staff.password.trim();
-        }
-        localStorage.setItem('sayrhub_staff_passwords', JSON.stringify(passMap));
-      } catch (e) {}
-    }
-
-    setAdminStaffList((prev) => {
-      const updated = prev.map((s) => s.id === staff.id ? staff : s);
-      try {
-        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
-        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-
-    try {
-      const res = await fetch('/api/admin/staff', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(staff)
-      });
-      const data = await res.json();
-      if (!data.success && data.error) {
-        showToast(data.error, 'error');
-      }
-    } catch (e) {
-      console.warn('Sync staff update to backend error:', e);
-    }
+    await requestApi('/api/admin/staff', { method: 'POST', body: JSON.stringify(staff) });
+    const safeStaff = { ...staff, password: undefined };
+    setAdminStaffList((prev) => prev.map((item) => item.id === staff.id ? safeStaff : item));
   };
-
   const handleRemoveStaff = async (staffId: string) => {
-    setAdminStaffList((prev) => {
-      const updated = prev.filter((s) => s.id !== staffId);
-      try {
-        localStorage.setItem('sayrhub_admin_staff', JSON.stringify(updated));
-        localStorage.setItem('travelway_admin_staff', JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-
-    try {
-      const res = await fetch(`/api/admin/staff/${staffId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-      const data = await res.json();
-      if (!data.success && data.error) {
-        showToast(data.error, 'error');
-      }
-    } catch (e) {
-      console.warn('Delete staff on backend error:', e);
-    }
+    await requestApi('/api/admin/staff/' + encodeURIComponent(staffId), { method: 'DELETE' });
+    setAdminStaffList((prev) => prev.filter((item) => item.id !== staffId));
   };
 
   const handleUpdateCommissionRate = async (newRate: number) => {
     const cleanRate = Math.max(0, Math.min(100, Number(newRate) || 0));
-    setAgencyCommissionRate(cleanRate);
-
+    const nextTours = tours.map((tour) => {
+      if (tour.markupType !== 'percent' || tour.originalCostPrice === undefined) return tour;
+      return { ...tour, price: Math.round(tour.originalCostPrice * (1 + cleanRate / 100)), markupValue: cleanRate };
+    });
+    const nextHotels = hotels.map((hotel) => {
+      if (hotel.markupType !== 'percent' || hotel.originalCostPrice === undefined) return hotel;
+      const totalPrice = Math.round(hotel.originalCostPrice * (1 + cleanRate / 100));
+      return { ...hotel, totalPrice, pricePerNight: Math.round(totalPrice / Math.max(1, hotel.nightsCount)), markupValue: cleanRate };
+    });
+    const nextFlights = flights.map((flight) => {
+      if (flight.markupType !== 'percent' || flight.originalCostPrice === undefined) return flight;
+      return { ...flight, price: Math.round(flight.originalCostPrice * (1 + cleanRate / 100)), markupValue: cleanRate };
+    });
     try {
-      localStorage.setItem('sayrhub_agency_commission', String(cleanRate));
-      localStorage.setItem('travelway_agency_commission', String(cleanRate));
-    } catch (e) {}
-
-    // 1. Recalculate prices across tours with percent markup
-    setTours((prevTours) =>
-      prevTours.map((t) => {
-        if (t.markupType === 'percent' || !t.markupType) {
-          const cost = t.originalCostPrice || Math.round(t.price / (1 + (t.markupValue || 8) / 100));
-          const newPrice = Math.round(cost * (1 + cleanRate / 100));
-          return {
-            ...t,
-            originalCostPrice: cost,
-            price: newPrice,
-            markupType: 'percent' as const,
-            markupValue: cleanRate
-          };
-        }
-        return t;
-      })
-    );
-
-    // 2. Recalculate prices across hotels
-    setHotels((prevHotels) =>
-      prevHotels.map((h) => {
-        if (h.markupType === 'percent' || !h.markupType) {
-          const cost = h.originalCostPrice || Math.round(h.totalPrice / (1 + (h.markupValue || 8) / 100));
-          const newTotal = Math.round(cost * (1 + cleanRate / 100));
-          const nights = h.nightsCount || 7;
-          return {
-            ...h,
-            originalCostPrice: cost,
-            totalPrice: newTotal,
-            pricePerNight: Math.round(newTotal / nights),
-            markupType: 'percent' as const,
-            markupValue: cleanRate
-          };
-        }
-        return h;
-      })
-    );
-
-    // 3. Recalculate prices across flights
-    setFlights((prevFlights) =>
-      prevFlights.map((f) => {
-        if (f.markupType === 'percent' || !f.markupType) {
-          const cost = f.originalCostPrice || Math.round(f.price / (1 + (f.markupValue || 8) / 100));
-          const newPrice = Math.round(cost * (1 + cleanRate / 100));
-          return {
-            ...f,
-            originalCostPrice: cost,
-            price: newPrice,
-            markupType: 'percent' as const,
-            markupValue: cleanRate
-          };
-        }
-        return f;
-      })
-    );
-
-    // 4. Send to backend
-    try {
-      let token = '';
-      try {
-        token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-      } catch (e) {}
-
-      await fetch('/api/admin/commission', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({ commissionRate: cleanRate })
+      await Promise.all([
+        ...nextTours.filter((item, index) => item !== tours[index]).map((item) => requestApi('/api/db/tours', { method: 'POST', body: JSON.stringify(item) })),
+        ...nextHotels.filter((item, index) => item !== hotels[index]).map((item) => requestApi('/api/db/catalog/hotels', { method: 'POST', body: JSON.stringify(item) })),
+        ...nextFlights.filter((item, index) => item !== flights[index]).map((item) => requestApi('/api/db/catalog/flights', { method: 'POST', body: JSON.stringify(item) })),
+      ]);
+      await requestApi('/api/admin/commission', {
+        method: 'POST', body: JSON.stringify({ commissionRate: cleanRate }),
       });
-      showToast(`Agentlik komissiyasi ${cleanRate}% qilib saqlandi va barcha narxlarga qo'llanildi!`, 'success');
-    } catch (err) {
-      console.warn('Could not sync commission to server:', err);
+      setTours(nextTours);
+      setHotels(nextHotels);
+      setFlights(nextFlights);
+      setAgencyCommissionRate(cleanRate);
+      showToast('Agentlik komissiyasi va narxlar bazada yangilandi.', 'success');
+    } catch (error) {
+      throw error instanceof Error ? error : new Error('Komissiya sozlamasini saqlab bo‘lmadi.');
     }
   };
 
-  const handleSavePassport = (passportNumber: string, passportExpiry: string) => {
-    setUser((prev) => ({ ...prev, passportNumber, passportExpiry }));
-    setIsEditPassportOpen(false);
-    showToast("Zagran pasport ma'lumotlari muvaffaqiyatli yangilandi! ✓", 'success');
+  const handleSavePassport = async (passportNumber: string, passportExpiry: string) => {
+    const nextUser = { ...user, passportNumber, passportExpiry };
+    try {
+      await saveUserProfileToDB(nextUser);
+      setUser(nextUser);
+      setIsEditPassportOpen(false);
+      showToast("Pasport ma'lumotlari bazada yangilandi.", 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Pasport ma’lumotlarini saqlab bo‘lmadi.', 'error');
+    }
   };
 
   const handleConfirmLogout = () => {
     setIsLogoutConfirmOpen(false);
+    sessionStorage.removeItem('sayrhub_user_token');
+    sessionStorage.removeItem('travelway_user_token');
+    setUser({
+      name: '', phone: '', email: '', tcId: '', cashback: 0,
+      passportNumber: '', passportExpiry: '', dob: '', isVerified: false,
+      favoriteTourIds: [],
+    });
+    setCards([]);
+    setBookings([]);
+    setPriceAlerts([]);
+    setTours((prev) => prev.map((tour) => ({ ...tour, saved: false })));
     setCurrentTab('auth');
     showToast("Profilingizdan xavfsiz chiqildi. Xush kelibsiz!", 'info');
   };
 
-  const handleSaveProfile = (name: string, phone: string) => {
-    setUser((prev) => ({ ...prev, name, phone }));
-    setIsEditProfileOpen(false);
-    showToast("Profil ma'lumotlari muvaffaqiyatli yangilandi! ✓", 'success');
+  const handleSaveProfile = async (name: string, phone: string) => {
+    const nextUser = { ...user, name, phone };
+    try {
+      await saveUserProfileToDB(nextUser);
+      setUser(nextUser);
+      setIsEditProfileOpen(false);
+      showToast('Profil ma’lumotlari bazada yangilandi.', 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Profil ma’lumotlarini saqlab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleSaveCard = (cardData: Omit<PaymentCard, 'id' | 'isPrimary'>) => {
+  const handleSaveCard = async (cardData: Omit<PaymentCard, 'id' | 'isPrimary'>) => {
     const newCard: PaymentCard = {
       id: `c${Date.now()}`,
       ...cardData,
       isPrimary: false
     };
-    setCards((prev) => [...prev, newCard]);
-    setIsAddCardOpen(false);
-    showToast("Yangi to'lov kartasi muvaffaqiyatli saqlandi!", 'success');
+    const nextCards = [...cards, newCard];
+    try {
+      await saveUserProfileToDB(user, nextCards);
+      setCards(nextCards);
+      setIsAddCardOpen(false);
+      showToast("Yangi karta bazada saqlandi.", 'success');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Kartani saqlab bo‘lmadi.', 'error');
+    }
   };
 
   const userInitials = (user.name || 'TW')
@@ -1117,6 +918,24 @@ export default function App() {
     .toUpperCase() || 'TW';
 
   const savedToursList = tours.filter((t) => t.saved);
+  const exploreItems = useMemo(() => {
+    const categories: ExploreVibe['vibe'][] = ['beach', 'culture', 'mountain', 'luxury'];
+    return categories.flatMap((vibe) => {
+      const matchingTours = tours.filter((tour) => tour.category === vibe);
+      if (matchingTours.length === 0) return [];
+      const representative = matchingTours[0];
+      return [{
+        id: vibe,
+        vibe,
+        title: representative.country || representative.location,
+        badge: representative.tag,
+        count: `${matchingTours.length} ta tur`,
+        priceFrom: `$${Math.min(...matchingTours.map((tour) => tour.price))}`,
+        img: representative.img,
+        destQuery: representative.resort || representative.location,
+      }];
+    });
+  }, [tours]);
 
   // DESKTOP ADMIN PANEL FULLSCREEN VIEW
   if (isAdminMode) {
@@ -1176,7 +995,6 @@ export default function App() {
         onUpdateBookingStatus={handleUpdateBookingStatus}
         onCancelBooking={handleAdminCancelBooking}
         priceAlerts={priceAlerts}
-        onSimulatePriceDrop={handleSimulatePriceDrop}
         onDeletePriceAlert={handleDeletePriceAlert}
         staffList={adminStaffList}
         onAddStaff={handleAddStaff}
@@ -1272,12 +1090,7 @@ export default function App() {
                     onBack={() => setCurrentTab('search')}
                     onOpenSupport={() => setIsSupportOpen(true)}
                     onRequestOtp={handleRequestOtp}
-                    onOpenSocial={(p) => setSocialProvider(p)}
                     onTelegramAuth={handleTelegramAuth}
-                    onAuthSuccess={(msg) => {
-                      showToast(msg, 'success');
-                      setCurrentTab('search');
-                    }}
                     onShowToast={showToast}
                   />
                 </div>
@@ -1301,7 +1114,6 @@ export default function App() {
                   priceAlerts={priceAlerts}
                   onSavePriceAlert={handleSavePriceAlert}
                   onDeletePriceAlert={handleDeletePriceAlert}
-                  onSimulatePriceDrop={handleSimulatePriceDrop}
                   onBookCombo={handleBookCombo}
                   onBookFlight={handleBookFlight}
                   onBookHotel={handleBookHotel}
@@ -1311,7 +1123,7 @@ export default function App() {
 
               {currentTab === 'explore' && (
                 <ExploreScreen
-                  exploreItems={INITIAL_EXPLORE_VIBES}
+                  exploreItems={exploreItems}
                   onSelectVibeItem={(dest) => {
                     showToast(`${dest} tanlandi!`, 'info');
                     setCurrentTab('search');
@@ -1353,17 +1165,29 @@ export default function App() {
                   onOpenEditProfile={() => setIsEditProfileOpen(true)}
                   onEditPassport={() => setIsEditPassportOpen(true)}
                   onOpenAddCard={() => setIsAddCardOpen(true)}
-                  onSetPrimaryCard={(cardId) => {
-                    setCards((prev) => prev.map((c) => ({ ...c, isPrimary: c.id === cardId })));
-                    showToast("Asosiy to'lov kartasi yangilandi", 'info');
+                  onSetPrimaryCard={async (cardId) => {
+                    const nextCards = cards.map((card) => ({ ...card, isPrimary: card.id === cardId }));
+                    try {
+                      await saveUserProfileToDB(user, nextCards);
+                      setCards(nextCards);
+                      showToast("Asosiy karta bazada yangilandi.", 'success');
+                    } catch (error) {
+                      showToast(error instanceof Error ? error.message : 'Asosiy kartani yangilab bo‘lmadi.', 'error');
+                    }
                   }}
-                  onDeleteCard={(cardId) => {
+                  onDeleteCard={async (cardId) => {
                     if (cards.length <= 1) {
                       showToast("Kamida 1 ta faol karta qolishi kerak!", 'error');
                       return;
                     }
-                    setCards((prev) => prev.filter((c) => c.id !== cardId));
-                    showToast("Karta o'chirildi", 'info');
+                    const nextCards = cards.filter((card) => card.id !== cardId);
+                    try {
+                      await saveUserProfileToDB(user, nextCards);
+                      setCards(nextCards);
+                      showToast("Karta bazadan o'chirildi.", 'info');
+                    } catch (error) {
+                      showToast(error instanceof Error ? error.message : 'Kartani o‘chirib bo‘lmadi.', 'error');
+                    }
                   }}
                   onSelectLang={(lang) => {
                     setCurrentLang(lang);
@@ -1428,7 +1252,6 @@ export default function App() {
             onVerifyOtp={handleVerifyOtp}
             socialProvider={socialProvider}
             onCloseSocial={() => setSocialProvider(null)}
-            onSelectSocialAccount={handleSelectSocialAccount}
             tourDetails={tourDetails}
             onCloseTourDetails={() => setTourDetails(null)}
             onProceedToCheckout={(t) => {
@@ -1493,7 +1316,6 @@ export default function App() {
             onClose={() => setActivePriceAlertTour(null)}
             onSaveAlert={handleSavePriceAlert}
             onDeleteAlert={handleDeletePriceAlert}
-            onSimulatePriceDrop={handleSimulatePriceDrop}
           /></Suspense>}
 
           {/* Telegram Auth & Registration Modal */}

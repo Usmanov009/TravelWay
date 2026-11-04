@@ -59,13 +59,13 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] uppercase tracking-wider mb-1.5">
               <span className="inline-flex items-center gap-1"><ArrowRightLeft className="w-3 h-3" /> Multi-City</span>
               <span>•</span>
-              <span>1:1 Rasmiy Paketlar</span>
+              <span>Mavjud paketlar</span>
             </div>
             <h3 className="text-base font-black leading-tight" style={{ color: 'var(--tw-text-main)' }}>
               Kombinatsiyalashgan Combo Turlar
             </h3>
             <p className="text-xs mt-1" style={{ color: 'var(--tw-text-sub)' }}>
-              Bitta sayohatda 2 yoki undan ortiq afsonaviy shaharlar. Ichki reyslar, VIP transferlar, 5* mehmonxonalar va qiziqarli ekskursiyalar to'liq kiritilgan.
+              Bir sayohat doirasida bir nechta shahar bo'ylab paketlar. Xizmatlar tanlangan paket tafsilotlariga qarab farq qiladi.
             </p>
           </div>
           <PartyPopper className="w-8 h-8 text-amber-500" />
@@ -169,7 +169,7 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
             Mavjud Combo Paketlar ({filteredCombos.length})
           </span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-            1:1 Rasmiy Narxlar
+            Narxlar (USD)
           </span>
         </div>
 
@@ -252,19 +252,6 @@ export const ComboToursView: React.FC<ComboToursViewProps> = ({
                     </span>
                   </div>
                 ))}
-              </div>
-
-              {/* Inclusions pill */}
-              <div
-                className="p-2 rounded-xl border flex items-center justify-between text-[10px]"
-                style={{
-                  backgroundColor: 'var(--tw-subtle)',
-                  borderColor: 'var(--tw-border)',
-                  color: 'var(--tw-text-sub)'
-                }}
-              >
-                <span className="inline-flex items-center gap-1"><Plane className="w-3 h-3" /> Ichki reys / VIP transfer kiritilgan</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Barchasi ichida</span>
               </div>
 
               {/* Price & Actions */}

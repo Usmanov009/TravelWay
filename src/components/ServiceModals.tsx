@@ -164,27 +164,17 @@ export const ServiceModals: React.FC<ServiceModalsProps> = ({
                 }}
               >
                 <h4 className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--tw-text-main)' }}>
-                  <span className="inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Narxga kiritilgan xizmatlar</span>
+                  <span className="inline-flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Paket tafsilotlari</span>
                 </h4>
                 <ul className="text-xs space-y-1.5" style={{ color: 'var(--tw-text-sub)' }}>
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-500 font-bold">✓</span>
-                    <span>Xalqaro aviaparvoz: {selectedComboTour.flight}</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-500 font-bold">✓</span>
-                    <span>Shaharlararo ichki reys / VIP transfer to'liq kiritilgan</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-emerald-500 font-bold">✓</span>
-                    <span>Tibbiy sug'urta va rasmiy vaucher</span>
-                  </li>
-                  {selectedComboTour.excursionsIncluded.map((exc, idx) => (
+                  {selectedComboTour.excursionsIncluded.length > 0
+                    ? selectedComboTour.excursionsIncluded.map((exc, idx) => (
                     <li key={idx} className="flex items-center gap-2">
                       <span className="text-amber-500 font-bold">★</span>
                       <span>Ekskursiya: {exc}</span>
                     </li>
-                  ))}
+                    ))
+                    : <li>Paket tafsilotlari haqida ma'lumot berilmagan.</li>}
                 </ul>
               </div>
 

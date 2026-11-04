@@ -8,13 +8,13 @@ interface AdminHotelsManagerProps {
   currentRole: AdminRole;
   currentAdmin: AdminUser;
   hotels: HotelOnly[];
-  onAddHotel: (hotel: HotelOnly) => void;
-  onUpdateHotel: (hotel: HotelOnly) => void;
-  onDeleteHotel: (hotelId: string) => void;
+  onAddHotel: (hotel: HotelOnly) => Promise<void>;
+  onUpdateHotel: (hotel: HotelOnly) => Promise<void>;
+  onDeleteHotel: (hotelId: string) => Promise<void>;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
   agencyCommissionRate?: number;
-  onUpdateCommissionRate?: (rate: number) => void;
+  onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
 export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
@@ -26,7 +26,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
   onDeleteHotel,
   onShowToast,
   globalSearch = '',
-  agencyCommissionRate = 8,
+  agencyCommissionRate = 0,
   onUpdateCommissionRate
 }) => {
   const isMainAdmin = currentRole === 'main_admin';
@@ -37,69 +37,78 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(99999);
   const [sourceFilter, setSourceFilter] = useState<'ALL' | 'KOMPAS' | 'ADMIN'>('ALL');
-  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
   const [markupModalHotel, setMarkupModalHotel] = useState<HotelOnly | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHotel, setEditingHotel] = useState<HotelOnly | null>(null);
 
   // Form
   const [formName, setFormName] = useState('');
-  const [formResort, setFormResort] = useState('Belek');
-  const [formCountry, setFormCountry] = useState('Turkiya');
-  const [formStars, setFormStars] = useState('5★ Deluxe');
-  const [formRoomType, setFormRoomType] = useState('Deluxe Sea View Room');
-  const [formMealType, setFormMealType] = useState<'UAI' | 'AI' | 'FB' | 'HB' | 'BB' | 'RO'>('UAI');
-  const [formPricePerNight, setFormPricePerNight] = useState(130);
-  const [formNightsCount, setFormNightsCount] = useState(7);
-  const [formImg, setFormImg] = useState('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80');
+  const [formResort, setFormResort] = useState('');
+  const [formCountry, setFormCountry] = useState('');
+  const [formStars, setFormStars] = useState('');
+  const [formRoomType, setFormRoomType] = useState('');
+  const [formMealType, setFormMealType] = useState<'UAI' | 'AI' | 'FB' | 'HB' | 'BB' | 'RO' | ''>('');
+  const [formPricePerNight, setFormPricePerNight] = useState(0);
+  const [formNightsCount, setFormNightsCount] = useState(0);
+  const [formImg, setFormImg] = useState('');
 
   const openAddModal = () => {
     setEditingHotel(null);
     setFormName('');
-    setFormResort('Belek');
-    setFormCountry('Turkiya');
-    setFormStars('5★ Deluxe');
-    setFormRoomType('Deluxe Sea View Room');
-    setFormMealType('UAI');
-    setFormPricePerNight(130);
-    setFormNightsCount(7);
-    setFormImg('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop&q=80');
+    setFormResort('');
+    setFormCountry('');
+    setFormStars('');
+    setFormRoomType('');
+    setFormMealType('');
+    setFormPricePerNight(0);
+    setFormNightsCount(0);
+    setFormImg('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (h: HotelOnly) => {
     setEditingHotel(h);
     setFormName(h.name);
-    setFormResort(h.resort);
-    setFormCountry(h.country);
-    setFormStars(h.stars);
-    setFormRoomType(h.roomType);
-    setFormMealType(h.mealType);
+    setFormResort(h.resort || '');
+    setFormCountry(h.country || '');
+    setFormStars(h.stars || '');
+    setFormRoomType(h.roomType || '');
+    setFormMealType(h.mealType || '');
     setFormPricePerNight(h.pricePerNight);
     setFormNightsCount(h.nightsCount);
-    setFormImg(h.img);
+    setFormImg(h.img || '');
     setIsModalOpen(true);
   };
 
-  const handleDuplicateHotel = (h: HotelOnly) => {
+  const handleDuplicateHotel = async (h: HotelOnly) => {
     const duplicated: HotelOnly = {
       ...h,
       id: `hot-adm-${Date.now()}`,
       name: `${h.name} (Nusxa)`
     };
-    onAddHotel(duplicated);
-    onShowToast(`"${h.name}" mehmonxonasi nusxalandi!`, 'success');
+    try {
+      await onAddHotel(duplicated);
+      onShowToast(`"${h.name}" mehmonxonasi nusxalandi!`, 'success');
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Mehmonxonani nusxalab bo‘lmadi.', 'error');
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim()) {
       onShowToast("Mehmonxona nomini kiriting!", 'error');
       return;
     }
+    if (!formResort.trim() || !formCountry.trim() || !formStars.trim() || !formRoomType.trim() ||
+      !formMealType || formPricePerNight <= 0 || formNightsCount <= 0 || !formImg.trim()) {
+      onShowToast("Mehmonxona ma’lumotlarining barcha majburiy maydonlarini to‘ldiring.", 'error');
+      return;
+    }
 
     const totalPrice = formPricePerNight * formNightsCount;
 
+    try {
     if (editingHotel) {
       const updated: HotelOnly = {
         ...editingHotel,
@@ -108,13 +117,14 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
         country: formCountry,
         stars: formStars,
         roomType: formRoomType,
-        mealType: formMealType,
+        mealType: formMealType as HotelOnly['mealType'],
+        mealDesc: formMealType === 'UAI' ? 'Ultra All Inclusive' : formMealType === 'AI' ? 'All Inclusive' : formMealType,
         pricePerNight: formPricePerNight,
         nightsCount: formNightsCount,
         totalPrice,
         img: formImg
       };
-      onUpdateHotel(updated);
+      await onUpdateHotel(updated);
       onShowToast(`"${formName}" mehmonxonasi yangilandi!`, 'success');
     } else {
       const newHotel: HotelOnly = {
@@ -123,55 +133,38 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
         resort: formResort.trim(),
         country: formCountry,
         stars: formStars,
-        rating: 9.6,
-        reviewsCount: 140,
+        rating: 0,
+        reviewsCount: 0,
         roomType: formRoomType,
-        mealType: formMealType,
-        mealDesc: formMealType === 'UAI' ? 'Ultra All Inclusive' : 'All Inclusive',
+        mealType: formMealType as HotelOnly['mealType'],
+        mealDesc: formMealType === 'UAI' ? 'Ultra All Inclusive' : formMealType === 'AI' ? 'All Inclusive' : formMealType,
         pricePerNight: formPricePerNight,
         nightsCount: formNightsCount,
         totalPrice,
-        amenities: ['Wi-Fi', 'Basseyn', 'SPA', 'Plyaj', 'Restoran'],
-        distanceToBeach: '1-qator (Dengiz bo\'yida)',
+        amenities: [],
+        distanceToBeach: '',
         img: formImg,
-        kompasHotelCode: `HTL-${Date.now().toString().slice(-5)}`
+        kompasHotelCode: ''
       };
-      onAddHotel(newHotel);
+      await onAddHotel(newHotel);
       onShowToast(`Yangi "${formName}" mehmonxonasi qo'shildi!`, 'success');
     }
 
     setIsModalOpen(false);
-  };
-
-  const handleLiveKompasHotelsSync = async () => {
-    setIsLiveSyncing(true);
-    try {
-      const params = new URLSearchParams();
-      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
-      if (search.trim()) params.set('q', search.trim());
-
-      const res = await fetch(`/api/kompas/hotels?${params.toString()}`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
-        data.hotels.forEach((h: HotelOnly) => {
-          onUpdateHotel(h);
-        });
-        onShowToast(`Kompas Tour onlayn tizimidan ${data.hotels.length} ta mehmonxona jonli yuklandi!`, 'success');
-      } else {
-        onShowToast("Kompas Tour tizimidan mehmonxonalar topilmadi", 'info');
-      }
-    } catch (e: any) {
-      onShowToast("Kompas Tour bilan aloqa xatosi", 'error');
-    } finally {
-      setIsLiveSyncing(false);
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Mehmonxonani saqlab bo‘lmadi.', 'error');
     }
   };
 
-  const handleSaveMarkup = (newTotalPrice: number, markupType: 'percent' | 'manual', markupValue: number) => {
-    if (!markupModalHotel) return;
-    const nights = markupModalHotel.nightsCount || 7;
+  const handleSaveMarkup = async (newTotalPrice: number, markupType: 'percent' | 'manual', markupValue: number): Promise<boolean> => {
+    if (!markupModalHotel) return false;
+    const nights = markupModalHotel.nightsCount;
+    if (nights <= 0) {
+      onShowToast('Mehmonxonada kechalar soni ko‘rsatilmagan.', 'error');
+      return false;
+    }
     const perNight = Math.round(newTotalPrice / nights);
-    const originalCost = markupModalHotel.originalCostPrice || Math.round(newTotalPrice / 1.08);
+    const originalCost = markupModalHotel.originalCostPrice ?? (markupModalHotel.totalPrice ?? markupModalHotel.pricePerNight * nights);
 
     const updated: HotelOnly = {
       ...markupModalHotel,
@@ -180,23 +173,33 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
       originalCostPrice: originalCost,
       markupType,
       markupValue,
-      tourOperator: markupModalHotel.tourOperator || 'Kompas Tour',
-      agencyName: markupModalHotel.agencyName || 'SayrHub'
+      tourOperator: markupModalHotel.tourOperator,
+      agencyName: markupModalHotel.agencyName
     };
 
-    onUpdateHotel(updated);
+    try {
+    await onUpdateHotel(updated);
     onShowToast(`"${updated.name}" narxi $${newTotalPrice} ($${perNight}/kecha) qilib belgilandi!`, 'success');
     setMarkupModalHotel(null);
+    return true;
+    } catch (error) {
+      onShowToast(error instanceof Error ? error.message : 'Mehmonxona narxini saqlab bo‘lmadi.', 'error');
+      return false;
+    }
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Mehmonxonalarni o'chirish faqat Bosh Admin huquqida!", 'error');
       return;
     }
     if (confirm(`"${name}" mehmonxonasini ro'yxatdan o'chirmoqchimisiz?`)) {
-      onDeleteHotel(id);
-      onShowToast(`"${name}" o'chirildi!`, 'info');
+      try {
+        await onDeleteHotel(id);
+        onShowToast(`"${name}" o'chirildi!`, 'info');
+      } catch (error) {
+        onShowToast(error instanceof Error ? error.message : 'Mehmonxonani o‘chirib bo‘lmadi.', 'error');
+      }
     }
   };
 
@@ -258,7 +261,9 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                     if (input !== null) {
                       const val = Number(input);
                       if (!isNaN(val) && val >= 0 && val <= 100) {
-                        onUpdateCommissionRate(val);
+                        void onUpdateCommissionRate(val).catch((error) =>
+                          onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error')
+                        );
                       }
                     }
                   }}
@@ -275,18 +280,6 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={handleLiveKompasHotelsSync}
-            disabled={isLiveSyncing}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
-            title="Kompas Tour onlayn tizimidan eng so'nggi mehmonxona narxlarini yuklash"
-          >
-            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
-              sync
-            </span>
-            <span>{isLiveSyncing ? 'Yuklanmoqda...' : 'Kompasdan Jonli Yuklash'}</span>
-          </button>
-
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
@@ -529,7 +522,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] font-semibold text-zinc-400">Asl (Kompas):</span>
                           <span className="text-xs font-mono font-bold text-zinc-700 dark:text-zinc-300">
-                            ${h.originalCostPrice || Math.round((h.totalPrice || h.pricePerNight * (h.nightsCount || 7)) / 1.08)}
+                            ${h.originalCostPrice ?? (h.totalPrice ?? h.pricePerNight * (h.nightsCount || 1))}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -539,7 +532,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                           <span className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                             {h.markupType === 'manual'
                               ? `$${h.totalPrice}`
-                              : `+${h.markupValue || 8}%`}
+                              : `+${h.markupValue ?? agencyCommissionRate}%`}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
@@ -627,10 +620,12 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Davlat</label>
                   <select
+                    required
                     value={formCountry}
                     onChange={(e) => setFormCountry(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Davlatni tanlang</option>
                     <option value="Turkiya">Turkiya</option>
                     <option value="BAA">BAA (Dubay)</option>
                     <option value="Misr">Misr</option>
@@ -643,6 +638,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Kurort / Tuman</label>
                   <input
                     type="text"
+                    required
                     value={formResort}
                     onChange={(e) => setFormResort(e.target.value)}
                     placeholder="Belek, Kemer, Palm..."
@@ -653,10 +649,12 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Yulduzlar Toifasi</label>
                   <select
+                    required
                     value={formStars}
                     onChange={(e) => setFormStars(e.target.value)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Toifani tanlang</option>
                     <option value="5★ Deluxe">5★ Deluxe</option>
                     <option value="5★">5★ Standard</option>
                     <option value="4★">4★ Standard</option>
@@ -668,6 +666,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Xona Turi</label>
                   <input
                     type="text"
+                    required
                     value={formRoomType}
                     onChange={(e) => setFormRoomType(e.target.value)}
                     placeholder="Standard Sea View, Deluxe..."
@@ -678,10 +677,12 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                 <div>
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Ovqatlanish Turi</label>
                   <select
+                    required
                     value={formMealType}
-                    onChange={(e) => setFormMealType(e.target.value as any)}
+                    onChange={(e) => setFormMealType(e.target.value as typeof formMealType)}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
+                    <option value="">Ovqatlanish turini tanlang</option>
                     <option value="UAI">UAI (Ultra All Inclusive)</option>
                     <option value="AI">AI (All Inclusive)</option>
                     <option value="FB">FB (3 mahal)</option>
@@ -696,6 +697,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                   <input
                     type="number"
                     min="1"
+                    required
                     value={formPricePerNight}
                     onChange={(e) => setFormPricePerNight(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none font-bold text-indigo-600"
@@ -708,6 +710,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                     type="number"
                     min="1"
                     max="30"
+                    required
                     value={formNightsCount}
                     onChange={(e) => setFormNightsCount(Number(e.target.value))}
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
@@ -718,6 +721,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
                   <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">Mehmonxona Rasmi (URL)</label>
                   <input
                     type="url"
+                    required
                     value={formImg}
                     onChange={(e) => setFormImg(e.target.value)}
                     placeholder="https://..."
@@ -765,17 +769,21 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
           itemTitle={markupModalHotel.name}
           itemSubtitle={`${markupModalHotel.resort}, ${markupModalHotel.country} (${markupModalHotel.nightsCount || 7} kecha)`}
           itemImage={markupModalHotel.img}
-          originalCostPrice={markupModalHotel.originalCostPrice || Math.round((markupModalHotel.totalPrice || markupModalHotel.pricePerNight * 7) / 1.08)}
+          originalCostPrice={markupModalHotel.originalCostPrice ?? (markupModalHotel.totalPrice ?? markupModalHotel.pricePerNight * (markupModalHotel.nightsCount || 1))}
           currentPrice={markupModalHotel.totalPrice || markupModalHotel.pricePerNight * (markupModalHotel.nightsCount || 7)}
           currentMarkupType={markupModalHotel.markupType || 'percent'}
           currentMarkupValue={markupModalHotel.markupValue || agencyCommissionRate}
-          tourOperator={markupModalHotel.tourOperator || 'Kompas Tour'}
-          agencyName={markupModalHotel.agencyName || 'SayrHub'}
+          tourOperator={markupModalHotel.tourOperator || ''}
+          agencyName={markupModalHotel.agencyName || ''}
           agencyCommissionRate={agencyCommissionRate}
-          onApplyToAllCommission={onUpdateCommissionRate}
-          onSave={(newPrice, markupType, markupVal) => {
-            handleSaveMarkup(newPrice, markupType, markupVal);
-          }}
+          onApplyToAllCommission={onUpdateCommissionRate ? async (rate) => {
+            try {
+              await onUpdateCommissionRate(rate);
+            } catch (error) {
+              onShowToast(error instanceof Error ? error.message : 'Komissiyani saqlab bo‘lmadi.', 'error');
+            }
+          } : undefined}
+          onSave={handleSaveMarkup}
         />
       )}
     </div>

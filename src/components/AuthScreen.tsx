@@ -18,7 +18,6 @@ import {
   Tag,
   ChevronDown,
   Check,
-  Gift,
   ArrowRight,
   ShieldCheck,
   Sparkles,
@@ -32,9 +31,7 @@ interface AuthScreenProps {
   onBack: () => void;
   onOpenSupport: () => void;
   onRequestOtp: (phone: string) => void;
-  onOpenSocial: (provider: 'google') => void;
   onTelegramAuth: () => void;
-  onAuthSuccess: (welcomeMsg: string) => void;
   onShowToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
 
@@ -44,9 +41,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   onBack,
   onOpenSupport,
   onRequestOtp,
-  onOpenSocial,
   onTelegramAuth,
-  onAuthSuccess,
   onShowToast
 }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -55,7 +50,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form states
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -97,26 +91,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
+    if (mode === 'login' && activeTab === 'phone' && !isPasswordMode) {
+      onRequestOtp(`+998 ${phoneNumber}`);
+      return;
+    }
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-
-      if (mode === 'register') {
-        onAuthSuccess(`Xush kelibsiz, ${regFullName || 'Foydalanuvchi'}! $30 sayohat vaucheri balansingizga qo'shildi!`);
-        return;
-      }
-
-      if (activeTab === 'phone') {
-        if (isPasswordMode) {
-          onAuthSuccess("Parol muvaffaqiyatli tasdiqlandi. Tizimga xush kelibsiz!");
-        } else {
-          onRequestOtp(`+998 ${phoneNumber}`);
-        }
-      } else {
-        onAuthSuccess(`${email || 'Foydalanuvchi'} hisobiga muvaffaqiyatli kirildi!`);
-      }
-    }, 650);
+    onShowToast(
+      'Telefon, email va parol orqali kirish hozircha sozlanmagan. Ma’lumotlar bazasiga ulangan Telegram orqali kiring.',
+      'error'
+    );
   };
 
   return (
@@ -225,7 +208,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             </CardTitle>
             <CardDescription className="text-xs text-muted-foreground max-w-sm mx-auto" id="auth-main-subtitle">
               {mode === 'register'
-                ? "Yangi hisob yarating va birinchi sayohatingiz uchun $30 vaucherga ega bo'ling!"
+                ? "Yangi hisob yaratish uchun ma’lumotlar bazasiga ulangan Telegram tasdiqlash xizmatidan foydalaning."
                 : "Eng sara turpaketlar, charter reyslar va narx signallariga kirish uchun ma'lumotlaringizni kiriting"}
             </CardDescription>
           </div>
@@ -297,7 +280,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       type="text"
                       value={regFullName}
                       onChange={(e) => setRegFullName(e.target.value)}
-                      placeholder="Masalan: Jasur Rahimov"
+                      placeholder="Ism va familiya"
                       className="pl-9 h-10 rounded-xl bg-background border-border text-xs focus-visible:ring-primary/20"
                     />
                   </div>
@@ -429,7 +412,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                       type="text"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="jasur@sayrhub.uz yoki #SH-884291"
+                      placeholder="name@example.com"
                       className="pl-9 h-10 rounded-xl bg-background border-border text-xs focus-visible:ring-primary/20"
                     />
                   </div>
@@ -496,29 +479,21 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             {/* Primary Action Submit Button */}
             <Button
               id="submit-auth-btn"
-              disabled={isSubmitting}
               variant="default"
               size="lg"
               className="w-full rounded-xl h-11 text-xs font-bold gap-2 cursor-pointer shadow-md shadow-primary/20 mt-2"
               type="submit"
             >
-              {isSubmitting ? (
-                <div className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  <span>Tekshirilmoqda...</span>
-                </div>
-              ) : (
-                <>
-                  <span id="submit-auth-label">
-                    {mode === 'register'
-                      ? "Ro'yxatdan o'tish"
-                      : activeTab === 'phone' && !isPasswordMode
-                      ? 'Tasdiqlash kodini olish'
-                      : 'Tizimga kirish'}
-                  </span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <>
+                <span id="submit-auth-label">
+                  {mode === 'register'
+                    ? "Ro'yxatdan o'tish"
+                    : activeTab === 'phone' && !isPasswordMode
+                    ? 'Tasdiqlash kodini olish'
+                    : 'Tizimga kirish'}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </>
             </Button>
           </form>
 
@@ -548,7 +523,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <Button
               id="btn-login-google"
               variant="outline"
-              onClick={() => onOpenSocial('google')}
+              onClick={() => onShowToast('Google orqali kirish hozircha sozlanmagan.', 'error')}
               className="rounded-xl h-10 text-xs font-semibold gap-2 border-border bg-background hover:bg-muted"
               type="button"
             >
@@ -560,24 +535,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
         {/* Card Footer with Promo Banner & Switch Mode */}
         <CardFooter className="px-6 pb-6 pt-2 flex flex-col space-y-4">
-          {/* Bonus Perk Banner Card */}
-          <div className="w-full rounded-2xl border border-primary/20 bg-primary/5 p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Gift className="w-4 h-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <Badge variant="secondary" className="text-[9px] uppercase font-bold text-primary bg-primary/10 border-0 px-1.5 py-0">
-                  Bonus
-                </Badge>
-                <p className="text-xs font-bold text-foreground truncate">$30 vaucher kutmoqda!</p>
-              </div>
-              <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                Ro'yxatdan o'ting va ilk turpaket uchun $30 chegirmaga ega bo'ling.
-              </p>
-            </div>
-          </div>
-
           {/* Bottom Switch Footer */}
           <div className="text-center space-y-1.5 w-full">
             <div className="text-xs text-muted-foreground" id="auth-switch-footer">
