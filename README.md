@@ -88,8 +88,11 @@ Natija: `travelway_app/build/app/outputs/flutter-apk/`
 > Uni o‘rnatib sinash mumkin, lekin Google Play’ga yuklab bo‘lmaydi. Play uchun
 > alohida keystore yaratib, `signingConfigs.release` qo‘shish kerak.
 >
-> CI: `.github/workflows/android-apk.yml` har `main` push’ida APK yig‘ib,
-> `sayrhub-release-apk` nomli artifact sifatida yuklaydi.
+> CI: tayyor workflow `docs/ci/android-apk.yml` da saqlangan. Uni GitHub
+> Actions’da yoqish uchun `.github/workflows/android-apk.yml` ga nusxalang
+> (repo sozlamalarida workflow fayllarini yozish uchun `workflows` ruxsati
+> kerak). Workflow har `main` push’ida APK yig‘ib, `sayrhub-release-apk`
+> artifact sifatida yuklaydi.
 
 ## 4. Autentifikatsiya va ma’lumotlar bazasi (mobil ilova)
 
