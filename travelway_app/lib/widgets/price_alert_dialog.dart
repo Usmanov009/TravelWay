@@ -58,6 +58,9 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
       currentPrice: widget.tour.price,
       phone: _phoneController.text.trim(),
       createdAt: DateTime.now().toIso8601String(),
+      tourId: widget.tour.id,
+      tourImg: widget.tour.img,
+      tourLocation: widget.tour.location,
     );
 
     await provider.createPriceAlert(alert);

@@ -63,6 +63,47 @@ flutter run -d android
 
 ---
 
+## 3. Android APK yig‘ish
+
+```bash
+cd travelway_app
+flutter pub get
+flutter analyze                              # statik tahlil
+flutter test                                 # unit testlar (12 ta)
+flutter build apk --release                  # universal APK
+flutter build apk --release --split-per-abi   # ABI bo‘yicha kichik APK'lar
+```
+
+Natija: `travelway_app/build/app/outputs/flutter-apk/`
+
+| Fayl | Hajm | Kimga |
+|---|---|---|
+| `app-release.apk` | ~54 MB | universal (barcha qurilmalar) |
+| `app-arm64-v8a-release.apk` | ~19 MB | zamonaviy telefonlar |
+| `app-armeabi-v7a-release.apk` | ~17 MB | eski telefonlar |
+| `app-x86_64-release.apk` | ~20 MB | emulyatorlar |
+
+> **Diqqat:** release APK hozircha **Android Debug** kaliti bilan imzolangan
+> (`android/app/build.gradle.kts` → `signingConfig = signingConfigs.getByName("debug")`).
+> Uni o‘rnatib sinash mumkin, lekin Google Play’ga yuklab bo‘lmaydi. Play uchun
+> alohida keystore yaratib, `signingConfigs.release` qo‘shish kerak.
+>
+> CI: `.github/workflows/android-apk.yml` har `main` push’ida APK yig‘ib,
+> `sayrhub-release-apk` nomli artifact sifatida yuklaydi.
+
+## 4. Autentifikatsiya va ma’lumotlar bazasi (mobil ilova)
+
+- Bronlar, narx signallari va foydalanuvchi profili `MongoDB`da saqlanadi va
+  **JWT** talab qiladi.
+- Kirish Telegram OTP orqali: `/api/auth/telegram/create-session` → botdagi kod →
+  `/api/auth/telegram/verify-code` → JWT qurilmada (`SharedPreferences`) saqlanadi
+  va barcha `/api/db/*` so‘rovlariga `Authorization: Bearer <token>` sifatida
+  qo‘shiladi.
+- Tizimga kirilmagan foydalanuvchi bronni saqlay olmaydi — ilova
+  “Telegram orqali tizimga kiring” deb ogohlantiradi.
+
+---
+
 ## 🩺 Muammolarni bartaraf etish
 
 ### MongoDB Atlas: "Could not connect to any servers ... IP isn't whitelisted"

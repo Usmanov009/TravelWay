@@ -38,11 +38,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final loggedIn = prefs.getBool('sayrhub_is_logged_in') ?? false;
-      final name = prefs.getString('sayrhub_user_name') ?? 'Alisher Yusupov';
-      final phone =
-          prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67';
-      final tcId = prefs.getString('sayrhub_user_id') ?? 'TC-882109';
+      if (!mounted) return;
+      final provider = Provider.of<AppProvider>(context, listen: false);
+      await provider.apiService.ready;
+
+      final authenticated = provider.isAuthenticated;
+      final loggedIn = authenticated || (prefs.getBool('sayrhub_is_logged_in') ?? false);
+      final name = (authenticated && provider.userName.isNotEmpty)
+          ? provider.userName
+          : (prefs.getString('sayrhub_user_name') ?? 'Alisher Yusupov');
+      final phone = (authenticated && provider.userPhone.isNotEmpty)
+          ? provider.userPhone
+          : (prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67');
+      final tcId = (authenticated && provider.userTcId.isNotEmpty)
+          ? provider.userTcId
+          : (prefs.getString('sayrhub_user_id') ?? 'TC-882109');
 
       final cardsRaw = prefs.getString('sayrhub_user_payment_cards');
       int cardsCount = 0;
@@ -68,6 +78,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    try {
+      final provider = Provider.of<AppProvider>(context, listen: false);
+      await provider.logout();
+    } catch (_) {}
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('sayrhub_is_logged_in', false);
