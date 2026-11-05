@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { Toaster } from 'sonner';
 import { TourPackage, Booking, PriceAlert, ComboTour, FlightTicket, HotelOnly } from '../types';
 import { AdminRole, AdminTab, AdminUser } from './adminTypes';
-import { AdminSidebar } from './AdminSidebar';
-import { AdminTopNav } from './AdminTopNav';
-import { AdminDashboard } from './AdminDashboard';
+import { AppSidebar } from './dashboard/app-sidebar';
+import { SiteHeader } from './dashboard/site-header';
+import { SectionCards } from './dashboard/section-cards';
+import { ChartAreaInteractive } from './dashboard/chart-area-interactive';
+import { DataTable } from './dashboard/data-table';
+import { toTableRows } from './dashboard/booking-rows';
 import { AdminToursManager } from './AdminToursManager';
 import { AdminComboManager } from './AdminComboManager';
 import { AdminFlightsManager } from './AdminFlightsManager';
@@ -14,6 +18,9 @@ import { AdminStaffManager } from './AdminStaffManager';
 import { AdminPriceAlertsManager } from './AdminPriceAlertsManager';
 import { AdminSettings } from './AdminSettings';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Moon, Search, Sun, X } from '@/lib/flaticon-icons';
 
 interface AdminPageProps {
   currentRole: AdminRole;
@@ -51,6 +58,19 @@ interface AdminPageProps {
   onUpdateCommissionRate?: (rate: number) => Promise<void>;
 }
 
+const pageTitles: Record<AdminTab, string> = {
+  dashboard: 'Boshqaruv paneli',
+  tours: 'Turpaketlar',
+  combo: 'Combo turlar',
+  flights: 'Aviachiptalar',
+  hotels: 'Mehmonxonalar',
+  bookings: 'Buyurtmalar',
+  users: 'Mijozlar',
+  staff: 'Adminlar jamoasi',
+  price_alerts: 'Narx signallari',
+  settings: 'Tizim sozlamalari'
+};
+
 export const AdminPage: React.FC<AdminPageProps> = ({
   currentRole,
   currentAdminUser,
@@ -87,13 +107,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchFocusToken, setSearchFocusToken] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('sayrhub_admin_theme') || localStorage.getItem('travelway_admin_theme');
       if (saved === 'dark' || saved === 'light') return saved;
     } catch (e) {}
-    return 'light'; // Default to crisp, soft eye-friendly light dashboard
+    return 'light';
   });
 
   // Guard: If non-main-admin tries to view closed sections, redirect to dashboard
@@ -113,7 +134,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   };
 
   const currentAdmin = currentAdminUser || staffList.find((staff) => staff.role === currentRole) || null;
-  const activeBookingsCount = bookings.filter(b => b.status === 'Jarayonda' || b.type === 'active').length;
+
+  // The sidebar "Qidiruv" item focuses the global search field of list screens.
+  useEffect(() => {
+    if (!searchFocusToken) return;
+    const input = document.getElementById('admin-global-search');
+    if (input instanceof HTMLInputElement) input.focus();
+  }, [searchFocusToken, currentTab]);
+
+  const handleSelectTab = (tab: AdminTab) => {
+    if ((tab as string) === 'search') {
+      if (currentTab === 'dashboard') setCurrentTab('bookings');
+      setSearchFocusToken((token) => token + 1);
+      return;
+    }
+    setCurrentTab(tab);
+  };
 
   useEffect(() => {
     const token = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
@@ -146,184 +182,211 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     );
   }
 
-  const handleQuickAddTour = () => {
-    setCurrentTab('tours');
-  };
+  const tableRows = toTableRows(bookings);
+  const showHeaderActions = currentTab !== 'dashboard';
 
   return (
     <SidebarProvider
       data-theme={adminTheme}
-      style={{
-        '--sidebar-width': 'calc(var(--spacing) * 72)',
-        '--header-height': 'calc(var(--spacing) * 12)'
-      } as React.CSSProperties}
+      style={
+        {
+          '--sidebar-width': 'calc(var(--spacing) * 72)',
+          '--header-height': 'calc(var(--spacing) * 12)'
+        } as React.CSSProperties
+      }
       className={`${adminTheme === 'dark' ? 'dark' : ''} min-h-svh bg-background text-foreground font-sans antialiased transition-colors duration-200`}
     >
-      <AdminSidebar
+      <AppSidebar
+        variant="inset"
         currentTab={currentTab}
-        onSelectTab={(tab) => setCurrentTab(tab)}
-        currentRole={currentRole}
+        onSelectTab={handleSelectTab}
         currentAdmin={currentAdmin}
-        totalActiveBookings={activeBookingsCount}
-        totalAlerts={priceAlerts.length}
         onExitToApp={onExitToApp}
       />
 
       <SidebarInset className="min-h-svh">
-        <AdminTopNav
-          currentRole={currentRole}
-          currentTab={currentTab}
-          currentAdmin={currentAdmin}
-          onSwitchRole={onSwitchRole}
-          onQuickAddTour={handleQuickAddTour}
-          onExitToApp={onExitToApp}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          adminTheme={adminTheme}
-          onToggleTheme={toggleAdminTheme}
-        />
+        <SiteHeader title={pageTitles[currentTab]}>
+          {showHeaderActions && (
+            <>
+              <div className="relative hidden w-[min(30vw,18rem)] md:block">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  id="admin-global-search"
+                  type="text"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Qidirish..."
+                  aria-label="Admin bo‘limlaridan qidirish"
+                  className="h-8 bg-muted/50 pl-9 pr-9 text-xs"
+                />
+                {searchTerm && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-1 top-1/2 size-6 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    title="Qidiruvni tozalash"
+                    type="button"
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleAdminTheme}
+                className="size-8"
+                title={adminTheme === 'light' ? "Tungi rejimga o'tish" : "Kunduzgi rejimga o'tish"}
+                type="button"
+              >
+                {adminTheme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4 text-amber-400" />}
+              </Button>
+            </>
+          )}
+        </SiteHeader>
 
-        <main className="@container/main flex flex-1 flex-col gap-2 overflow-y-auto">
-          {currentTab === 'dashboard' && (
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <AdminDashboard
-                currentRole={currentRole}
-                currentAdmin={currentAdmin}
-                tours={tours}
-                comboTours={comboTours}
-                flights={flights}
-                hotels={hotels}
-                bookings={bookings}
-                priceAlerts={priceAlerts}
-                usersCount={usersCount}
-                onSelectTab={(tab) => setCurrentTab(tab)}
-                onUpdateBookingStatus={onUpdateBookingStatus}
-                onQuickAddTour={handleQuickAddTour}
-                agencyCommissionRate={agencyCommissionRate}
-                onUpdateCommissionRate={onUpdateCommissionRate}
-              />
+              {currentTab === 'dashboard' ? (
+                <>
+                  <SectionCards bookings={bookings} usersCount={usersCount} />
+                  <div className="px-4 lg:px-6">
+                    <ChartAreaInteractive bookings={bookings} />
+                  </div>
+                  <DataTable
+                    data={tableRows}
+                    onCancelBooking={onCancelBooking}
+                    onUpdateBookingStatus={(bookingId, status) =>
+                      onUpdateBookingStatus(bookingId, status as Booking['status'])
+                    }
+                  />
+                </>
+              ) : null}
+
+              {currentTab !== 'dashboard' && (
+                <div className="flex flex-1 flex-col gap-4 px-4 md:gap-6 lg:px-6">
+                  {currentTab === 'tours' && (
+                    <AdminToursManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      tours={tours}
+                      onAddTour={onAddTour}
+                      onUpdateTour={onUpdateTour}
+                      onDeleteTour={onDeleteTour}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                      agencyCommissionRate={agencyCommissionRate}
+                      onUpdateCommissionRate={onUpdateCommissionRate}
+                    />
+                  )}
+
+                  {currentTab === 'combo' && (
+                    <AdminComboManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      comboTours={comboTours}
+                      onAddComboTour={onAddComboTour}
+                      onUpdateComboTour={onUpdateComboTour}
+                      onDeleteComboTour={onDeleteComboTour}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                    />
+                  )}
+
+                  {currentTab === 'flights' && (
+                    <AdminFlightsManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      flights={flights}
+                      onAddFlight={onAddFlight}
+                      onUpdateFlight={onUpdateFlight}
+                      onDeleteFlight={onDeleteFlight}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                      agencyCommissionRate={agencyCommissionRate}
+                      onUpdateCommissionRate={onUpdateCommissionRate}
+                    />
+                  )}
+
+                  {currentTab === 'hotels' && (
+                    <AdminHotelsManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      hotels={hotels}
+                      onAddHotel={onAddHotel}
+                      onUpdateHotel={onUpdateHotel}
+                      onDeleteHotel={onDeleteHotel}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                      agencyCommissionRate={agencyCommissionRate}
+                      onUpdateCommissionRate={onUpdateCommissionRate}
+                    />
+                  )}
+
+                  {currentTab === 'bookings' && (
+                    <AdminBookingsManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      bookings={bookings}
+                      onUpdateBookingStatus={onUpdateBookingStatus}
+                      onCancelBooking={onCancelBooking}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                    />
+                  )}
+
+                  {currentTab === 'users' && currentRole === 'main_admin' && (
+                    <AdminUsersManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                    />
+                  )}
+
+                  {currentTab === 'staff' && currentRole === 'main_admin' && (
+                    <AdminStaffManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      staffList={staffList}
+                      onAddStaff={onAddStaff}
+                      onUpdateStaff={onUpdateStaff}
+                      onRemoveStaff={onRemoveStaff}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                    />
+                  )}
+
+                  {currentTab === 'price_alerts' && (
+                    <AdminPriceAlertsManager
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      priceAlerts={priceAlerts}
+                      tours={tours}
+                      onDeletePriceAlert={onDeletePriceAlert}
+                      onShowToast={onShowToast}
+                      globalSearch={searchTerm}
+                    />
+                  )}
+
+                  {currentTab === 'settings' && (
+                    <AdminSettings
+                      currentRole={currentRole}
+                      currentAdmin={currentAdmin}
+                      onShowToast={onShowToast}
+                      agencyCommissionRate={agencyCommissionRate}
+                      onUpdateCommissionRate={onUpdateCommissionRate}
+                    />
+                  )}
+                </div>
+              )}
             </div>
-          )}
-
-          {currentTab !== 'dashboard' && (
-            <div className="flex flex-1 flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
-          {currentTab === 'tours' && (
-            <AdminToursManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              tours={tours}
-              onAddTour={onAddTour}
-              onUpdateTour={onUpdateTour}
-              onDeleteTour={onDeleteTour}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-              agencyCommissionRate={agencyCommissionRate}
-              onUpdateCommissionRate={onUpdateCommissionRate}
-            />
-          )}
-
-          {currentTab === 'combo' && (
-            <AdminComboManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              comboTours={comboTours}
-              onAddComboTour={onAddComboTour}
-              onUpdateComboTour={onUpdateComboTour}
-              onDeleteComboTour={onDeleteComboTour}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-            />
-          )}
-
-          {currentTab === 'flights' && (
-            <AdminFlightsManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              flights={flights}
-              onAddFlight={onAddFlight}
-              onUpdateFlight={onUpdateFlight}
-              onDeleteFlight={onDeleteFlight}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-              agencyCommissionRate={agencyCommissionRate}
-              onUpdateCommissionRate={onUpdateCommissionRate}
-            />
-          )}
-
-          {currentTab === 'hotels' && (
-            <AdminHotelsManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              hotels={hotels}
-              onAddHotel={onAddHotel}
-              onUpdateHotel={onUpdateHotel}
-              onDeleteHotel={onDeleteHotel}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-              agencyCommissionRate={agencyCommissionRate}
-              onUpdateCommissionRate={onUpdateCommissionRate}
-            />
-          )}
-
-          {currentTab === 'bookings' && (
-            <AdminBookingsManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              bookings={bookings}
-              onUpdateBookingStatus={onUpdateBookingStatus}
-              onCancelBooking={onCancelBooking}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-            />
-          )}
-
-          {currentTab === 'users' && currentRole === 'main_admin' && (
-            <AdminUsersManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-            />
-          )}
-
-          {currentTab === 'staff' && currentRole === 'main_admin' && (
-            <AdminStaffManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              staffList={staffList}
-              onAddStaff={onAddStaff}
-              onUpdateStaff={onUpdateStaff}
-              onRemoveStaff={onRemoveStaff}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-            />
-          )}
-
-          {currentTab === 'price_alerts' && (
-            <AdminPriceAlertsManager
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              priceAlerts={priceAlerts}
-              tours={tours}
-              onDeletePriceAlert={onDeletePriceAlert}
-              onShowToast={onShowToast}
-              globalSearch={searchTerm}
-            />
-          )}
-
-          {currentTab === 'settings' && (
-            <AdminSettings
-              currentRole={currentRole}
-              currentAdmin={currentAdmin}
-              onShowToast={onShowToast}
-              agencyCommissionRate={agencyCommissionRate}
-              onUpdateCommissionRate={onUpdateCommissionRate}
-            />
-          )}
-            </div>
-          )}
-        </main>
+          </div>
+        </div>
       </SidebarInset>
+      <Toaster position="top-center" richColors />
     </SidebarProvider>
   );
 };
