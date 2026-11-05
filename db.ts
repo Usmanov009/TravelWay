@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import dns from 'node:dns';
+
+// Render/Cloud Run kabi muhitlarda IPv6 egress bo'lmasa, SRV yozuvlari IPv6
+// manzilni birinchi qaytarib ulanishni "osilib" qo'yishi mumkin.
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {
+  // Node versiyasi qo'llamasagina e'tiborsiz qoldiramiz
+}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -168,18 +177,60 @@ export const CatalogItemModel = mongoose.models.CatalogItem || mongoose.model('C
 
 let isConnected = false;
 let reconnectTimer: NodeJS.Timeout | null = null;
+let lastConnectionError: string | null = null;
+let lastConnectionAttemptAt: string | null = null;
+
+/**
+ * Atlas/driver xatolarini foydalanuvchi tushunadigan ko'rsatmaga aylantiradi.
+ */
+export function diagnoseMongoError(error: unknown): string | null {
+  const message = String((error as any)?.message || error || '');
+  if (!message) return null;
+
+  if (/IP whitelist|not whitelisted|whitelist.*IP|Could not connect to any servers/i.test(message)) {
+    return "Atlas Network Access: joriy IP ruxsat etilmagan. Atlas → Security → Network Access → Add IP Address (server uchun 0.0.0.0/0) qo'shing.";
+  }
+  if (/Authentication failed|bad auth|SCRAM|credentials/i.test(message)) {
+    return "Atlas foydalanuvchi nomi/paroli noto'g'ri. MONGODB_URI ichidagi maxsus belgilarni URL-encode qiling (@ → %40, # → %23, : → %3A).";
+  }
+  if (/ENOTFOUND|querySrv|EAI_AGAIN|DNS/i.test(message)) {
+    return "DNS/SRV yechilmadi: klaster hosti xato yoki DNS filtri. MONGODB_URI'dagi hostni Atlas → Connect → Drivers bo'limidan tekshiring.";
+  }
+  if (/ECONNREFUSED|EHOSTUNREACH|ENETUNREACH|ECONNRESET/i.test(message)) {
+    return "Tarmoq ulanishi rad etildi: 27017-port to'silgan yoki Atlas hosti noto'g'ri. Hosting provayderining outbound 27017 ruxsatini tekshiring.";
+  }
+  if (/timed out|ETIMEDOUT|Server selection/i.test(message)) {
+    return "Server tanlanmadi: Atlas klasteri pauza (M0) holatida bo'lishi yoki tarmoq 27017-portni to'sgan bo'lishi mumkin. Atlas → Clusters → Resume.";
+  }
+  return null;
+}
+
+function reportConnectionFailure(error: unknown, context: string) {
+  const message = String((error as any)?.message || error || 'Unknown MongoDB error');
+  const hint = diagnoseMongoError(error);
+  lastConnectionError = message;
+  lastConnectionAttemptAt = new Date().toISOString();
+  console.error(`❌ ${context}:`, message);
+  if (hint) console.error(`💡 ${hint}`);
+  return hint;
+}
 
 export async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) return;
   if (!MONGODB_URI) {
-    console.error('MONGODB_URI belgilanmagan — database API ishlamaydi.');
+    lastConnectionError = 'MONGODB_URI belgilanmagan';
+    lastConnectionAttemptAt = new Date().toISOString();
+    console.error('❌ MONGODB_URI belgilanmagan — database API ishlamaydi.');
     return;
   }
+  lastConnectionAttemptAt = new Date().toISOString();
   try {
     const conn = await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 10000,
     });
     isConnected = !!conn.connections[0].readyState;
+    lastConnectionError = null;
     console.log(`✅ MongoDB Connected to database: ${conn.connection.name}`);
 
     if (reconnectTimer) {
@@ -205,7 +256,7 @@ export async function connectDB() {
 
   } catch (error: any) {
     isConnected = false;
-    console.error(' MongoDB Connection Error:', error.message);
+    reportConnectionFailure(error, 'MongoDB Connection Error');
 
     // Schedule background reconnect retry
     if (!reconnectTimer) {
@@ -215,6 +266,7 @@ export async function connectDB() {
             await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
             if ((mongoose.connection.readyState as number) === 1) {
               isConnected = true;
+              lastConnectionError = null;
               console.log('✅ MongoDB background connection established!');
               if (reconnectTimer) {
                 clearInterval(reconnectTimer);
@@ -226,7 +278,7 @@ export async function connectDB() {
               await syncStaffWithMongoDB();
             }
           } catch (error: any) {
-            console.error('MongoDB reconnect failed:', error.message);
+            reportConnectionFailure(error, 'MongoDB reconnect failed');
           }
         }
       }, 30000);
@@ -235,9 +287,14 @@ export async function connectDB() {
 }
 
 export function getDBStatus() {
+  const isProd = process.env.NODE_ENV === 'production';
   return {
     connected: mongoose.connection.readyState === 1,
     readyState: mongoose.connection.readyState,
-    dbName: mongoose.connection.name || 'travelway'
+    dbName: mongoose.connection.name || 'travelway',
+    lastAttemptAt: lastConnectionAttemptAt,
+    hint: lastConnectionError ? diagnoseMongoError(lastConnectionError) : null,
+    // Raw driver message faqat lokal/staging muhitida ko'rsatiladi.
+    lastError: isProd ? null : lastConnectionError,
   };
 }

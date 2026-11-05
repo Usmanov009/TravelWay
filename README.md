@@ -60,3 +60,27 @@ flutter run -d android
 > **Eslatma (Android Emulyator):**
 > Android emulyatordan kompyuterdagi backendga ulanish uchun Profil bo'limidagi **"URL Sozlash"** tugmasini bosib manzilni `http://10.0.2.2:3000` ga o'zgartirishingiz mumkin.
 > Haqiqiy smartfonda sinash uchun esa kompyuteringizning mahalliy Wi-Fi IP manzilini (masalan, `http://192.168.1.X:3000`) kiritishingiz kifoya.
+
+---
+
+## 🩺 Muammolarni bartaraf etish
+
+### MongoDB Atlas: "Could not connect to any servers ... IP isn't whitelisted"
+
+Sabab: serverni ishga tushirayotgan IP manzil Atlas klasterining allowlist'ida yo'q.
+
+1. https://cloud.mongodb.com → loyihangiz → **Security → Network Access**.
+2. **Add IP Address** → server uchun `0.0.0.0/0` (barcha IP'lar) qo'shing.
+   Render/Vercel kabi bepul hostinglarda chiqish IP'si o'zgaruvchan bo'ladi, shuning uchun statik IP xizmati bo'lmasa shu variant ishlatiladi.
+   Xavfsizlik uchun kuchli parol va faqat shu baza uchun ochilgan alohida Atlas foydalanuvchisidan foydalaning.
+3. **Clusters** bo'limida klaster `Paused` holatida emasligini tekshiring — M0 (bepul) klaster uzoq faolsizlikdan keyin pauza bo'ladi va **Resume** talab qiladi.
+4. Parolda `@ : / ? #` kabi belgilar bo'lsa, ularni URL-encode qiling (`@` → `%40`, `#` → `%23`, `:` → `%3A`).
+5. Ulanishni tekshirish:
+
+```bash
+npm run db:check
+```
+
+Skript xato sababini (IP allowlist, parol, DNS/SRV, bloklangan port, pauza) aniq ko'rsatadi.
+Server loglarida ham shu ko'rsatma chiqadi, `GET /api/db/status` esa `hint` va `lastAttemptAt` maydonlarini qaytaradi.
+
