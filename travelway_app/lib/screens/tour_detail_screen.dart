@@ -1,10 +1,11 @@
+import '../utils/country_utils.dart';
 import 'package:flutter/material.dart';
 
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
 import '../utils/flaticon_icons.dart';
-import '../widgets/booking_dialog.dart';
 import '../widgets/price_alert_dialog.dart';
+import 'tour_booking_screen.dart';
 
 class TourDetailScreen extends StatelessWidget {
   final TourPackage tour;
@@ -205,12 +206,11 @@ class TourDetailScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(
-                        FlaticonIcons.locationOn,
-                        color: AppTheme.primary,
-                        size: 16,
+                      Text(
+                        getCountryFlag(tour.country.isNotEmpty ? tour.country : tour.location),
+                        style: const TextStyle(fontSize: 16),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       Text(
                         tour.location,
                         style: const TextStyle(
@@ -622,9 +622,11 @@ class TourDetailScreen extends StatelessWidget {
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => BookingDialog(tour: tour),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => TourBookingScreen(tour: tour),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -635,7 +637,7 @@ class TourDetailScreen extends StatelessWidget {
                   backgroundColor: AppTheme.primary,
                 ),
                 child: const Text(
-                  'Band qilish',
+                  'Bron qilish',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

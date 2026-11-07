@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/tour_package.dart';
 import '../models/booking.dart';
@@ -17,14 +18,36 @@ class BookingDialog extends StatefulWidget {
 }
 
 class _BookingDialogState extends State<BookingDialog> {
-  final _nameController = TextEditingController(text: 'Sardor Alimov');
-  final _phoneController = TextEditingController(text: '+998 90 123 45 67');
-  final _passportController = TextEditingController(text: 'AA 1234567');
-  String _selectedPayment = 'Humo/Uzcard';
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController(text: '+998 ');
+  final _passportController = TextEditingController();
+  String _selectedPayment = 'Payme';
   bool _isSubmitting = false;
 
   int _adultsCount = 2;
   int _childrenCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final name = prefs.getString('sayrhub_user_name');
+      final phone = prefs.getString('sayrhub_user_phone');
+      final pass = prefs.getString('sayrhub_user_passport');
+      if (mounted) {
+        setState(() {
+          if (name != null && name.isNotEmpty) _nameController.text = name;
+          if (phone != null && phone.isNotEmpty) _phoneController.text = phone;
+          if (pass != null && pass.isNotEmpty) _passportController.text = pass;
+        });
+      }
+    } catch (_) {}
+  }
 
   int get _perAdult => widget.tour.isLiveKompas
       ? (widget.tour.price / 2).round()

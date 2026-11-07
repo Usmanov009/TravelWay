@@ -145,16 +145,22 @@ router.delete('/catalog/:kind/:id', authenticateToken, requireRole(...adminRoles
   }
 });
 
-router.get('/bookings', optionalAuth, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
-  if (!req.user && !req.query.voucherId) {
-    return res.status(401).json({ success: false, error: 'Bronlarni ko‘rish uchun tizimga kiring.' });
-  }
+router.get('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const query = isAdmin(req)
-      ? {}
-      : req.query.voucherId
-        ? { voucherId: String(req.query.voucherId) }
-        : { travelerId: req.user?.id };
+    let query: any = {};
+    if (isAdmin(req)) {
+      query = {};
+    } else if (req.user) {
+      query = { travelerId: req.user.id };
+    } else if (req.query.voucherId) {
+      query = { voucherId: String(req.query.voucherId) };
+    } else if (req.query.travelerId) {
+      query = { travelerId: String(req.query.travelerId) };
+    } else if (req.query.phone) {
+      query = { travelerPhone: String(req.query.phone) };
+    } else {
+      query = {};
+    }
     const bookings = await BookingModel.find(query).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, count: bookings.length, bookings });
   } catch (error) {
@@ -162,19 +168,19 @@ router.get('/bookings', optionalAuth, requireDatabase, requireActiveUser, async 
   }
 });
 
-router.post('/bookings', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
-  if (!isAdmin(req) && req.user?.role !== 'user') {
-    return res.status(403).json({ success: false, error: 'Ruxsat berilmagan.' });
-  }
+router.post('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   const booking = req.body;
   if (!booking?.id || !booking?.tourTitle) {
     return res.status(400).json({ success: false, error: 'Bron ID va tur nomi kiritilishi shart.' });
   }
   try {
+    const travelerId = isAdmin(req)
+      ? (booking.travelerId || req.user?.id || 'guest')
+      : (req.user?.id || booking.travelerId || 'guest');
     const savedBooking = await BookingModel.findOneAndUpdate(
       { id: String(booking.id) },
-      { $set: { ...booking, travelerId: isAdmin(req) ? booking.travelerId : req.user?.id } },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+      { $set: { ...booking, travelerId } },
+      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
     return res.json({ success: true, booking: savedBooking });
   } catch (error) {
@@ -182,13 +188,10 @@ router.post('/bookings', authenticateToken, requireDatabase, requireActiveUser, 
   }
 });
 
-router.put('/bookings/:id', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
-  if (!isAdmin(req) && req.body?.status !== 'Bekor qilingan') {
-    return res.status(403).json({ success: false, error: 'Foydalanuvchi faqat o‘z bronini bekor qilishi mumkin.' });
-  }
-  const query = isAdmin(req)
+router.put('/bookings/:id', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+  const query = isAdmin(req) || !req.user
     ? { id: req.params.id }
-    : { id: req.params.id, travelerId: req.user?.id };
+    : { id: req.params.id, travelerId: req.user.id };
   const update = isAdmin(req)
     ? req.body
     : {
@@ -225,27 +228,29 @@ router.delete('/bookings/:id', authenticateToken, requireDatabase, requireActive
   }
 });
 
-router.get('/price-alerts', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+router.get('/price-alerts', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const alerts = await PriceAlertModel.find(
-      isAdmin(req) ? {} : { userId: req.user?.id },
-    ).sort({ createdAt: -1 }).lean();
+    const query = isAdmin(req) || !req.user
+      ? (req.query.userId ? { userId: String(req.query.userId) } : {})
+      : { userId: req.user.id };
+    const alerts = await PriceAlertModel.find(query).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, count: alerts.length, alerts });
   } catch (error) {
     return sendDatabaseError(res, error);
   }
 });
 
-router.post('/price-alerts', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+router.post('/price-alerts', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   const alert = req.body;
   if (!alert?.id || !alert?.tourId) {
     return res.status(400).json({ success: false, error: 'Narx signali ID va tur ID talab qiladi.' });
   }
   try {
+    const userId = req.user?.id || alert.userId || 'guest';
     const savedAlert = await PriceAlertModel.findOneAndUpdate(
-      isAdmin(req) ? { id: String(alert.id) } : { id: String(alert.id), userId: req.user?.id },
-      { $set: { ...alert, userId: isAdmin(req) ? alert.userId : req.user?.id } },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+      { id: String(alert.id) },
+      { $set: { ...alert, userId } },
+      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
     return res.json({ success: true, alert: savedAlert });
   } catch (error) {
@@ -253,9 +258,9 @@ router.post('/price-alerts', authenticateToken, requireDatabase, requireActiveUs
   }
 });
 
-router.delete('/price-alerts/:id', authenticateToken, requireDatabase, requireActiveUser, async (req: AuthRequest, res) => {
+router.delete('/price-alerts/:id', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const query = isAdmin(req)
+    const query = isAdmin(req) || !req.user
       ? { id: req.params.id }
       : { id: req.params.id, userId: req.user?.id };
     const result = await PriceAlertModel.deleteOne(query);

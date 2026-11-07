@@ -241,12 +241,13 @@ class ApiService {
   }
 
   // 8. Bookings (DB)
-  Future<List<Booking>> getBookings({String? voucherId}) async {
+  Future<List<Booking>> getBookings({String? travelerId, String? phone, String? voucherId}) async {
     try {
       final qParams = <String, String>{};
-      if (voucherId != null && voucherId.isNotEmpty) {
-        qParams['voucherId'] = voucherId;
-      }
+      if (travelerId != null && travelerId.isNotEmpty) qParams['travelerId'] = travelerId;
+      if (phone != null && phone.isNotEmpty) qParams['phone'] = phone;
+      if (voucherId != null && voucherId.isNotEmpty) qParams['voucherId'] = voucherId;
+
       final uri = Uri.parse('$_baseUrl/api/db/bookings')
           .replace(queryParameters: qParams.isEmpty ? null : qParams);
       final res = await _client
@@ -305,9 +306,13 @@ class ApiService {
   }
 
   // 9. Price Alerts (DB)
-  Future<List<PriceAlert>> getPriceAlerts() async {
+  Future<List<PriceAlert>> getPriceAlerts({String? userId}) async {
     try {
-      final uri = Uri.parse('$_baseUrl/api/db/price-alerts');
+      final qParams = <String, String>{};
+      if (userId != null && userId.isNotEmpty) qParams['userId'] = userId;
+
+      final uri = Uri.parse('$_baseUrl/api/db/price-alerts')
+          .replace(queryParameters: qParams.isEmpty ? null : qParams);
       final res = await _client
           .get(uri, headers: _headers())
           .timeout(const Duration(seconds: 6));
@@ -329,7 +334,7 @@ class ApiService {
       final uri = Uri.parse('$_baseUrl/api/db/price-alerts');
       final res = await _client.post(
         uri,
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers(json: true),
         body: jsonEncode(alert.toJson()),
       ).timeout(const Duration(seconds: 6));
 
@@ -442,6 +447,20 @@ class ApiService {
       debugPrint('saveUserProfile failed: ${res.statusCode} ${res.body}');
     } catch (e) {
       debugPrint('Error saving user profile: $e');
+    }
+    return false;
+  }
+
+  Future<bool> deletePriceAlert(String alertId) async {
+    try {
+      final uri = Uri.parse('$_baseUrl/api/db/price-alerts/$alertId');
+      final res = await _client.delete(uri, headers: _headers()).timeout(const Duration(seconds: 6));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        return data['success'] == true;
+      }
+    } catch (e) {
+      debugPrint('Error deleting price alert: $e');
     }
     return false;
   }

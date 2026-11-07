@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { TourPackage } from '../types';
 import { AdminRole, AdminUser } from './adminTypes';
 import { PriceMarkupModal } from './PriceMarkupModal';
-import { KOMPAS_COUNTRIES, KOMPAS_DEPARTURE_CITIES } from '../components/SearchScreen';
+import { KOMPAS_COUNTRIES, KOMPAS_DEPARTURE_CITIES, getCountryFlag } from '../components/SearchScreen';
 import { CountrySelectCombobox } from '../components/CountrySelectCombobox';
 import {
   Baby,
@@ -482,6 +482,53 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
           </button>
         </div>
 
+        {/* Quick Horizontal Country Filter with Flags (Kompas barcha davlatlari) */}
+        <div className="pt-1 pb-1">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300 flex items-center gap-1.5">
+              <span>Kompas bo'yicha davlatlar (Bayroq bilan):</span>
+              <span className="text-[10px] text-zinc-400 font-normal">({KOMPAS_COUNTRIES.length} ta yo'nalish)</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar scroll-smooth">
+            {KOMPAS_COUNTRIES.map((c) => {
+              const isSelected = selectedCountry === c.code;
+              const count = c.code === 'ALL'
+                ? tours.length
+                : tours.filter((t) =>
+                    t.country === c.code ||
+                    t.country?.toLowerCase() === c.name.toLowerCase() ||
+                    t.location?.toLowerCase().includes(c.name.toLowerCase())
+                  ).length;
+              return (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => handleCountrySelect(c.code)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400/30'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  }`}
+                  title={`${c.name} (${count} ta tur)`}
+                >
+                  <span className="text-sm select-none leading-none" role="img">{c.flag || getCountryFlag(c.code)}</span>
+                  <span>{c.name}</span>
+                  {count > 0 && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                      isSelected
+                        ? 'bg-white/25 text-white'
+                        : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* 1. Davlat (Select va Type), Tur Toifasi (Type), Kurort, va Uchish shahri */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           {/* Davlat Combobox (Select ham, Type ham) */}
@@ -826,8 +873,13 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                       </div>
                     </td>
                     <td className="py-3.5 px-3">
-                      <p className="font-bold text-zinc-900 dark:text-white text-xs">{tour.country}</p>
-                      <p className="text-[11px] text-zinc-400">{tour.resort || tour.location}</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-base select-none leading-none shrink-0" role="img" title={tour.country}>
+                          {getCountryFlag(tour.country)}
+                        </span>
+                        <p className="font-bold text-zinc-900 dark:text-white text-xs truncate max-w-[120px]">{tour.country}</p>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-0.5 truncate max-w-[140px]">{tour.resort || tour.location}</p>
                     </td>
                     <td className="py-3.5 px-3">
                       <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200/70 dark:border-indigo-800/60">
@@ -955,13 +1007,11 @@ export const AdminToursManager: React.FC<AdminToursManagerProps> = ({
                     className="w-full bg-zinc-100/90 dark:bg-zinc-800/80 text-zinc-900 dark:text-white rounded-xl px-3 py-2 text-xs border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none"
                   >
                     <option value="">Davlatni tanlang</option>
-                    <option value="Turkiya">Turkiya</option>
-                    <option value="BAA">BAA (Dubay)</option>
-                    <option value="Misr">Misr</option>
-                    <option value="Tailand">Tailand</option>
-                    <option value="Maldiv">Maldiv</option>
-                    <option value="Vyetnam">Vyetnam</option>
-                    <option value="Xitoy">Xitoy</option>
+                    {KOMPAS_COUNTRIES.filter((c) => c.code !== 'ALL').map((c) => (
+                      <option key={c.code} value={c.name}>
+                        {c.flag || getCountryFlag(c.code)} {c.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

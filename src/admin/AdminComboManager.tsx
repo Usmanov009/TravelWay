@@ -29,6 +29,7 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCombo, setEditingCombo] = useState<ComboTour | null>(null);
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
 
   // Form
   const [formTitle, setFormTitle] = useState('');
@@ -157,6 +158,28 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
     }
   };
 
+  
+  const handleLiveKompasSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const params = new URLSearchParams();
+      if (search.trim()) params.set('q', search.trim());
+
+      const res = await fetch(`/api/kompas/combo?${params.toString()}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.comboTours) && data.comboTours.length > 0) {
+        await Promise.all(data.comboTours.map((newC: ComboTour) => onUpdateComboTour(newC)));
+        onShowToast(`Kompas Tour tizimidan ${data.comboTours.length} ta combo tur admin katalogiga olib kirildi!`, 'success');
+      } else {
+        onShowToast("Kompas Tour tizimidan combo turlar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Kompas Tour bilan aloqa xatosi: " + (e?.message || 'Tarmoq xatosi'), 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
   const handleDelete = async (id: string, title: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Combo turlarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -193,14 +216,29 @@ export const AdminComboManager: React.FC<AdminComboManagerProps> = ({
             Bir nechta shaharlarni o'z ichiga olgan kombinatsiyalashgan turpaketlar
           </p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handleLiveKompasSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour tizimidan kombinatsiyalashgan (combo) turlarni yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Kompasdan yuklanmoqda...' : 'Kompasdan Jonli Yuklash'}</span>
+          </button>
+          
 
         <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>Yangi Combo Tur</span>
-        </button>
+            onClick={openAddModal}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Yangi Combo Tur</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Search */}

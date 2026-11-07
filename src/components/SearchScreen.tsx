@@ -67,144 +67,147 @@ export interface KompasCountry {
   code: string;
   name: string;
   resorts: string[];
+  flag: string;
+}
+
+export const COUNTRY_FLAG_MAP: Record<string, string> = {
+  ALL: '🌐',
+  TR: '🇹🇷',
+  TURKIYA: '🇹🇷',
+  TURKEY: '🇹🇷',
+  EG: '🇪🇬',
+  MISR: '🇪🇬',
+  EGYPT: '🇪🇬',
+  AE: '🇦🇪',
+  BAA: '🇦🇪',
+  UAE: '🇦🇪',
+  DUBAY: '🇦🇪',
+  DUBAI: '🇦🇪',
+  TH: '🇹🇭',
+  TAILAND: '🇹🇭',
+  THAILAND: '🇹🇭',
+  PHUKET: '🇹🇭',
+  PATTAYA: '🇹🇭',
+  VN: '🇻🇳',
+  VETNAM: '🇻🇳',
+  VYETNAM: '🇻🇳',
+  VIETNAM: '🇻🇳',
+  CN: '🇨🇳',
+  XITOY: '🇨🇳',
+  CHINA: '🇨🇳',
+  HAINAN: '🇨🇳',
+  MV: '🇲🇻',
+  MALDIV: '🇲🇻',
+  MALDIVES: '🇲🇻',
+  MALE: '🇲🇻',
+  ID: '🇮🇩',
+  INDONEZIYA: '🇮🇩',
+  INDONESIA: '🇮🇩',
+  BALI: '🇮🇩',
+  GE: '🇬🇪',
+  GRUZIYA: '🇬🇪',
+  GEORGIA: '🇬🇪',
+  LK: '🇱🇰',
+  'SHRI-LANKA': '🇱🇰',
+  'SRI LANKA': '🇱🇰',
+  MY: '🇲🇾',
+  MALAYZIYA: '🇲🇾',
+  MALAYSIA: '🇲🇾',
+  QA: '🇶🇦',
+  QATAR: '🇶🇦',
+  SA: '🇸🇦',
+  SAUDIYA: '🇸🇦',
+  'SAUDIYA ARABISTONI': '🇸🇦',
+  'SAUDI ARABIA': '🇸🇦',
+  OM: '🇴🇲',
+  UMMON: '🇴🇲',
+  OMAN: '🇴🇲',
+  AZ: '🇦🇿',
+  OZARBAYJON: '🇦🇿',
+  AZERBAIJAN: '🇦🇿',
+  CY: '🇨🇾',
+  KIPR: '🇨🇾',
+  CYPRUS: '🇨🇾',
+  ME: '🇲🇪',
+  CHERNOGORIYA: '🇲🇪',
+  MONTENEGRO: '🇲🇪',
+  IT: '🇮🇹',
+  ITALIYA: '🇮🇹',
+  ITALY: '🇮🇹',
+  ES: '🇪🇸',
+  ISPANIYA: '🇪🇸',
+  SPAIN: '🇪🇸',
+  FR: '🇫🇷',
+  FRANSIYA: '🇫🇷',
+  FRANCE: '🇫🇷',
+  CZ: '🇨🇿',
+  CHEXIYA: '🇨🇿',
+  CZECH: '🇨🇿',
+  JP: '🇯🇵',
+  YAPONIYA: '🇯🇵',
+  JAPAN: '🇯🇵',
+  KR: '🇰🇷',
+  'JANUBIY KOREYA': '🇰🇷',
+  KOREYA: '🇰🇷',
+  KOREA: '🇰🇷',
+  SC: '🇸🇨',
+  SEYSHEL: '🇸🇨',
+  SEYCHELLES: '🇸🇨',
+  MU: '🇲🇺',
+  MAVRIKIY: '🇲🇺',
+  MAURITIUS: '🇲🇺',
+  IN: '🇮🇳',
+  HINDISTON: '🇮🇳',
+  INDIA: '🇮🇳',
+  GOA: '🇮🇳',
+  GR: '🇬🇷',
+  GRETSIYA: '🇬🇷',
+  GREECE: '🇬🇷',
+  UZ: '🇺🇿',
+  "O'ZBEKISTON": '🇺🇿',
+  UZBEKISTAN: '🇺🇿',
+};
+
+export function getCountryFlag(codeOrName?: string): string {
+  if (!codeOrName) return '🌐';
+  const clean = codeOrName.trim().toUpperCase();
+  if (COUNTRY_FLAG_MAP[clean]) return COUNTRY_FLAG_MAP[clean];
+  for (const [key, flag] of Object.entries(COUNTRY_FLAG_MAP)) {
+    if (clean.includes(key) || key.includes(clean)) return flag;
+  }
+  return '🌍';
 }
 
 export const KOMPAS_COUNTRIES: KompasCountry[] = [
-  {
-    code: 'ALL',
-    name: 'Barcha mamlakatlar',
-    resorts: ['Barcha kurortlar']
-  },
-  {
-    code: 'TR',
-    name: 'Turkiya',
-    resorts: ['Barcha kurortlar', 'Antalya', 'Belek', 'Kemer', 'Alanya', 'Bodrum', 'Istanbul']
-  },
-  {
-    code: 'EG',
-    name: 'Misr',
-    resorts: ['Barcha kurortlar', 'Sharm El-Sheikh', 'Hurghada']
-  },
-  {
-    code: 'AE',
-    name: 'BAA',
-    resorts: ['Barcha kurortlar', 'Dubay (Palm)', 'Dubay (JBR/Marina)', 'Ras Al Khaimah']
-  },
-  {
-    code: 'TH',
-    name: 'Tailand',
-    resorts: ['Barcha kurortlar', 'Phuket', 'Pattaya']
-  },
-  {
-    code: 'VN',
-    name: 'Vetnam',
-    resorts: ['Barcha kurortlar', 'Phu Quoc', 'Nha Trang']
-  },
-  {
-    code: 'CN',
-    name: 'Xitoy',
-    resorts: ['Barcha kurortlar', 'Sanya (Hainan)']
-  },
-  {
-    code: 'MV',
-    name: 'Maldiv',
-    resorts: ['Barcha kurortlar', 'Male / Kaafu Atoll']
-  },
-  {
-    code: 'ID',
-    name: 'Indoneziya',
-    resorts: ['Barcha kurortlar', 'Bali']
-  },
-  {
-    code: 'GE',
-    name: 'Gruziya',
-    resorts: ['Barcha kurortlar', 'Batumi', 'Tbilisi']
-  },
-  {
-    code: 'LK',
-    name: 'Shri-Lanka',
-    resorts: ['Barcha kurortlar', 'Kolombo', 'Bentota']
-  },
-  {
-    code: 'MY',
-    name: 'Malayziya',
-    resorts: ['Barcha kurortlar', 'Kuala Lumpur', 'Langkawi']
-  },
-  {
-    code: 'QA',
-    name: 'Qatar',
-    resorts: ['Barcha kurortlar', 'Doha']
-  },
-  {
-    code: 'SA',
-    name: 'Saudiya Arabistoni',
-    resorts: ['Barcha kurortlar', 'Jidda', 'Makka', 'Madina', 'Riyoz']
-  },
-  {
-    code: 'OM',
-    name: 'Ummon (Oman)',
-    resorts: ['Barcha kurortlar', 'Maskat', 'Salala']
-  },
-  {
-    code: 'AZ',
-    name: 'Ozarbayjon',
-    resorts: ['Barcha kurortlar', 'Boku', 'Shahdag']
-  },
-  {
-    code: 'CY',
-    name: 'Kipr',
-    resorts: ['Barcha kurortlar', 'Ayia Napa', 'Larnaka', 'Limassol']
-  },
-  {
-    code: 'ME',
-    name: 'Chernogoriya',
-    resorts: ['Barcha kurortlar', 'Budva', 'Kotor', 'Tivat']
-  },
-  {
-    code: 'IT',
-    name: 'Italiya',
-    resorts: ['Barcha kurortlar', 'Rim', 'Venetsiya', 'Milan']
-  },
-  {
-    code: 'ES',
-    name: 'Ispaniya',
-    resorts: ['Barcha kurortlar', 'Barselona', 'Madrid', 'Mayorka']
-  },
-  {
-    code: 'FR',
-    name: 'Fransiya',
-    resorts: ['Barcha kurortlar', 'Parij', 'Nitsa']
-  },
-  {
-    code: 'CZ',
-    name: 'Chexiya',
-    resorts: ['Barcha kurortlar', 'Praga', 'Karlovi Vari']
-  },
-  {
-    code: 'JP',
-    name: 'Yaponiya',
-    resorts: ['Barcha kurortlar', 'Tokio', 'Kioto', 'Osaka']
-  },
-  {
-    code: 'KR',
-    name: 'Janubiy Koreya',
-    resorts: ['Barcha kurortlar', 'Seul', 'Jeju']
-  },
-  {
-    code: 'SC',
-    name: 'Seyshel',
-    resorts: ['Barcha kurortlar', 'Mae', 'Praslin']
-  },
-  {
-    code: 'MU',
-    name: 'Mavrikiy',
-    resorts: ['Barcha kurortlar', 'Port-Lui']
-  },
-  {
-    code: 'IN',
-    name: 'Hindiston (Goa)',
-    resorts: ['Barcha kurortlar', 'Shimoliy Goa', 'Janubiy Goa']
-  }
+  { code: 'ALL', name: 'Barcha mamlakatlar', flag: '🌐', resorts: ['Barcha kurortlar'] },
+  { code: 'TR', name: 'Turkiya', flag: '🇹🇷', resorts: ['Barcha kurortlar', 'Antalya', 'Belek', 'Kemer', 'Alanya', 'Bodrum', 'Istanbul'] },
+  { code: 'EG', name: 'Misr', flag: '🇪🇬', resorts: ['Barcha kurortlar', 'Sharm El-Sheikh', 'Hurghada'] },
+  { code: 'AE', name: 'BAA', flag: '🇦🇪', resorts: ['Barcha kurortlar', 'Dubay (Palm)', 'Dubay (JBR/Marina)', 'Ras Al Khaimah'] },
+  { code: 'TH', name: 'Tailand', flag: '🇹🇭', resorts: ['Barcha kurortlar', 'Phuket', 'Pattaya'] },
+  { code: 'VN', name: 'Vetnam', flag: '🇻🇳', resorts: ['Barcha kurortlar', 'Phu Quoc', 'Nha Trang'] },
+  { code: 'CN', name: 'Xitoy', flag: '🇨🇳', resorts: ['Barcha kurortlar', 'Sanya (Hainan)'] },
+  { code: 'MV', name: 'Maldiv', flag: '🇲🇻', resorts: ['Barcha kurortlar', 'Male / Kaafu Atoll'] },
+  { code: 'ID', name: 'Indoneziya', flag: '🇮🇩', resorts: ['Barcha kurortlar', 'Bali'] },
+  { code: 'GE', name: 'Gruziya', flag: '🇬🇪', resorts: ['Barcha kurortlar', 'Batumi', 'Tbilisi'] },
+  { code: 'LK', name: 'Shri-Lanka', flag: '🇱🇰', resorts: ['Barcha kurortlar', 'Kolombo', 'Bentota'] },
+  { code: 'MY', name: 'Malayziya', flag: '🇲🇾', resorts: ['Barcha kurortlar', 'Kuala Lumpur', 'Langkawi'] },
+  { code: 'QA', name: 'Qatar', flag: '🇶🇦', resorts: ['Barcha kurortlar', 'Doha'] },
+  { code: 'SA', name: 'Saudiya Arabistoni', flag: '🇸🇦', resorts: ['Barcha kurortlar', 'Jidda', 'Makka', 'Madina', 'Riyoz'] },
+  { code: 'OM', name: 'Ummon (Oman)', flag: '🇴🇲', resorts: ['Barcha kurortlar', 'Maskat', 'Salala'] },
+  { code: 'AZ', name: 'Ozarbayjon', flag: '🇦🇿', resorts: ['Barcha kurortlar', 'Boku', 'Shahdag'] },
+  { code: 'CY', name: 'Kipr', flag: '🇨🇾', resorts: ['Barcha kurortlar', 'Ayia Napa', 'Larnaka', 'Limassol'] },
+  { code: 'ME', name: 'Chernogoriya', flag: '🇲🇪', resorts: ['Barcha kurortlar', 'Budva', 'Kotor', 'Tivat'] },
+  { code: 'IT', name: 'Italiya', flag: '🇮🇹', resorts: ['Barcha kurortlar', 'Rim', 'Venetsiya', 'Milan'] },
+  { code: 'ES', name: 'Ispaniya', flag: '🇪🇸', resorts: ['Barcha kurortlar', 'Barselona', 'Madrid', 'Mayorka'] },
+  { code: 'FR', name: 'Fransiya', flag: '🇫🇷', resorts: ['Barcha kurortlar', 'Parij', 'Nitsa'] },
+  { code: 'CZ', name: 'Chexiya', flag: '🇨🇿', resorts: ['Barcha kurortlar', 'Praga', 'Karlovi Vari'] },
+  { code: 'JP', name: 'Yaponiya', flag: '🇯🇵', resorts: ['Barcha kurortlar', 'Tokio', 'Kioto', 'Osaka'] },
+  { code: 'KR', name: 'Janubiy Koreya', flag: '🇰🇷', resorts: ['Barcha kurortlar', 'Seul', 'Jeju'] },
+  { code: 'SC', name: 'Seyshel', flag: '🇸🇨', resorts: ['Barcha kurortlar', 'Mae', 'Praslin'] },
+  { code: 'MU', name: 'Mavrikiy', flag: '🇲🇺', resorts: ['Barcha kurortlar', 'Port-Lui'] },
+  { code: 'IN', name: 'Hindiston (Goa)', flag: '🇮🇳', resorts: ['Barcha kurortlar', 'Shimoliy Goa', 'Janubiy Goa'] },
+  { code: 'GR', name: 'Gretsiya', flag: '🇬🇷', resorts: ['Barcha kurortlar', 'Afina', 'Krit', 'Rodos', 'Santorini'] },
+  { code: 'UZ', name: "O'zbekiston", flag: '🇺🇿', resorts: ['Barcha kurortlar', 'Toshkent', 'Samarqand', 'Buxoro', 'Xiva', 'Zomin'] }
 ];
 
 export const KOMPAS_MEAL_TYPES = [

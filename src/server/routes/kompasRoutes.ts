@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { queryKompasTour, DEPARTURE_MAP, COUNTRY_TO_STATEINC } from '../services/kompasService.js';
+import {
+  queryKompasTour,
+  fetchKompasFlights,
+  fetchKompasHotels,
+  fetchKompasComboTours,
+  DEPARTURE_MAP,
+  COUNTRY_TO_STATEINC,
+} from '../services/kompasService.js';
 
 const router = Router();
 
@@ -102,6 +109,110 @@ router.get('/hot', async (req, res) => {
     });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message, hotDeals: [] });
+  }
+});
+
+// 3. LIVE FLIGHTS (CHARTERS & TICKETS): /api/kompas/flights
+router.get('/flights', async (req, res) => {
+  try {
+    const from = String(req.query.from || '');
+    const to = String(req.query.to || '');
+    const airline = String(req.query.airline || '');
+    const departure = String(req.query.departure || '');
+
+    const flights = await fetchKompasFlights({ from, to, airline, departure });
+
+    let filtered = flights;
+    if (from) {
+      filtered = filtered.filter(f =>
+        f.departureCity.toLowerCase().includes(from.toLowerCase()) ||
+        f.departureAirportCode.toLowerCase().includes(from.toLowerCase())
+      );
+    }
+    if (to) {
+      filtered = filtered.filter(f =>
+        f.arrivalCity.toLowerCase().includes(to.toLowerCase()) ||
+        f.arrivalAirportCode.toLowerCase().includes(to.toLowerCase())
+      );
+    }
+    if (airline && airline !== 'Barcha aviakompaniyalar') {
+      filtered = filtered.filter(f => f.airline.toLowerCase().includes(airline.toLowerCase()));
+    }
+
+    res.json({
+      success: true,
+      source: 'online.uz.kompastour.com',
+      live: true,
+      count: filtered.length,
+      flights: filtered
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, live: false, flights: [] });
+  }
+});
+
+// 4. LIVE HOTELS (HOTEL ONLY): /api/kompas/hotels
+router.get('/hotels', async (req, res) => {
+  try {
+    const country = String(req.query.country || 'TR');
+    const resort = String(req.query.resort || '');
+    const query = String(req.query.q || '').trim().toLowerCase();
+
+    const hotels = await fetchKompasHotels({ country, resort, query });
+
+    let filtered = hotels;
+    if (resort && resort !== 'Barcha kurortlar') {
+      filtered = filtered.filter(h => h.resort.toLowerCase().includes(resort.toLowerCase()));
+    }
+    if (query) {
+      filtered = filtered.filter(h =>
+        h.name.toLowerCase().includes(query) ||
+        h.resort.toLowerCase().includes(query) ||
+        h.country.toLowerCase().includes(query)
+      );
+    }
+
+    res.json({
+      success: true,
+      source: 'online.uz.kompastour.com',
+      live: true,
+      count: filtered.length,
+      hotels: filtered
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, live: false, hotels: [] });
+  }
+});
+
+// 5. LIVE COMBO TOURS: /api/kompas/combo
+router.get('/combo', async (req, res) => {
+  try {
+    const city = String(req.query.city || '');
+    const query = String(req.query.q || '').trim().toLowerCase();
+
+    const comboTours = await fetchKompasComboTours({ city, query });
+
+    let filtered = comboTours;
+    if (city && city !== 'Barchasi') {
+      filtered = filtered.filter(c => c.cities?.some((name: string) => name.toLowerCase().includes(city.toLowerCase())));
+    }
+    if (query) {
+      filtered = filtered.filter(c =>
+        c.title.toLowerCase().includes(query) ||
+        c.routeSummary?.toLowerCase().includes(query) ||
+        c.cities?.some((name: string) => name.toLowerCase().includes(query))
+      );
+    }
+
+    res.json({
+      success: true,
+      source: 'online.uz.kompastour.com',
+      live: true,
+      count: filtered.length,
+      comboTours: filtered
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, live: false, comboTours: [] });
   }
 });
 

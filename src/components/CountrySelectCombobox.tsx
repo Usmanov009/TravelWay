@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Globe2, X } from '@/lib/flaticon-icons';
-import { KompasCountry } from './SearchScreen';
+import { KompasCountry, getCountryFlag } from './SearchScreen';
 
 interface CountrySelectComboboxProps {
   countries: KompasCountry[];
@@ -37,7 +37,8 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
     if (!q) return countries;
     return countries.filter((c) =>
       c.name.toLowerCase().includes(q) ||
-      c.code.toLowerCase().includes(q)
+      c.code.toLowerCase().includes(q) ||
+      (c.flag && c.flag.includes(q))
     );
   }, [countries, query]);
 
@@ -173,7 +174,9 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
             inputRef.current?.focus();
           }}
         >
-          <Globe2 className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm select-none shrink-0 leading-none" role="img" aria-label={selectedCountry?.name}>
+            {selectedCountry?.flag || getCountryFlag(selectedCountry?.code || selectedCountry?.name)}
+          </span>
         </span>
 
         {/* Typeable Input */}
@@ -273,7 +276,9 @@ export const CountrySelectCombobox: React.FC<CountrySelectComboboxProps> = ({
                     }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Globe2 className="w-4 h-4 shrink-0 text-muted-foreground" />
+                      <span className="text-sm select-none shrink-0 leading-none" role="img" aria-label={c.name}>
+                        {c.flag || getCountryFlag(c.code || c.name)}
+                      </span>
                       <span
                         className={`truncate ${
                           isSelected ? 'font-black' : 'font-semibold'

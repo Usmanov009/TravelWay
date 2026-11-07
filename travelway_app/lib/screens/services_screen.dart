@@ -1,3 +1,4 @@
+import '../utils/country_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,7 +6,7 @@ import '../providers/app_provider.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
 import '../utils/flaticon_icons.dart';
-import '../widgets/booking_dialog.dart';
+import 'tour_booking_screen.dart';
 
 class ServicesScreen extends StatefulWidget {
   const ServicesScreen({super.key});
@@ -353,13 +354,14 @@ class _ServicesScreenState extends State<ServicesScreen>
                                               : 'Combo',
                                           resort: combo.cities.join(' - '),
                                         );
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) =>
-                                              BookingDialog(tour: tempTour),
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => TourBookingScreen(tour: tempTour),
+                                          ),
                                         );
                                       },
-                                      child: const Text('Band qilish'),
+                                      child: const Text('Bron qilish'),
                                     ),
                                   ],
                                 ),
@@ -410,9 +412,11 @@ class _ServicesScreenState extends State<ServicesScreen>
       return const Center(child: Text('Reyslar topilmadi'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: provider.flights.length,
+    return RefreshIndicator(
+      onRefresh: () => provider.loadServices(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: provider.flights.length,
       itemBuilder: (context, idx) {
         final f = provider.flights[idx];
         return Card(
@@ -480,7 +484,7 @@ class _ServicesScreenState extends State<ServicesScreen>
                           ),
                         ),
                         Text(
-                          f.departureCity,
+                          '${getCountryFlag(f.departureCity)} ${f.departureCity}',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppTheme.textMuted,
@@ -527,7 +531,7 @@ class _ServicesScreenState extends State<ServicesScreen>
                           ),
                         ),
                         Text(
-                          f.arrivalCity,
+                          '${getCountryFlag(f.arrivalCity)} ${f.arrivalCity}',
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppTheme.textMuted,
@@ -548,13 +552,46 @@ class _ServicesScreenState extends State<ServicesScreen>
                         color: AppTheme.textMuted,
                       ),
                     ),
-                    Text(
-                      '\$${f.price}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '\${f.price}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            final tempTour = TourPackage(
+                              id: f.id,
+                              title: '${f.airline} ${f.departureCity} - ${f.arrivalCity}',
+                              location: '${f.departureCity} ➔ ${f.arrivalCity}',
+                              tag: 'Aviabilet',
+                              nights: '1 kun',
+                              flight: '${f.airline} ${f.flightNumber}',
+                              price: f.price,
+                              img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=500&auto=format&fit=crop&q=60',
+                              country: f.arrivalCity,
+                              resort: f.arrivalCity,
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TourBookingScreen(tour: tempTour),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text('Bron qilish', style: TextStyle(fontSize: 11, color: Colors.white)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -563,6 +600,7 @@ class _ServicesScreenState extends State<ServicesScreen>
           ),
         );
       },
+      ),
     );
   }
 
@@ -576,9 +614,11 @@ class _ServicesScreenState extends State<ServicesScreen>
       return const Center(child: Text('Mehmonxonalar topilmadi'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: provider.hotels.length,
+    return RefreshIndicator(
+      onRefresh: () => provider.loadServices(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: provider.hotels.length,
       itemBuilder: (context, idx) {
         final h = provider.hotels[idx];
         return Card(
@@ -617,7 +657,7 @@ class _ServicesScreenState extends State<ServicesScreen>
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${h.resort}, ${h.country}',
+                        '${getCountryFlag(h.country)} ${h.resort}, ${h.country}',
                         style: const TextStyle(
                           color: AppTheme.textMuted,
                           fontSize: 11,
@@ -636,28 +676,61 @@ class _ServicesScreenState extends State<ServicesScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '\$${h.pricePerNight}/kecha',
+                            '\${h.pricePerNight}/kecha',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: AppTheme.primary,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black45,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              h.stars,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.amber,
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black45,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  h.stars,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.amber,
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final tempTour = TourPackage(
+                                    id: h.id,
+                                    title: h.name,
+                                    location: '${h.resort}, ${h.country}',
+                                    tag: h.mealType,
+                                    nights: '7 kecha',
+                                    flight: 'Parvozsiz (faqat mehmonxona)',
+                                    price: h.total7Nights,
+                                    img: h.img,
+                                    country: h.country,
+                                    resort: h.resort,
+                                  );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => TourBookingScreen(tour: tempTour),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: const Text('Bron qilish', style: TextStyle(fontSize: 10, color: Colors.white)),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -669,6 +742,7 @@ class _ServicesScreenState extends State<ServicesScreen>
           ),
         );
       },
+      ),
     );
   }
 }

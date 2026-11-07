@@ -8,6 +8,7 @@ coverage/
 .env*
 !.env.example
 *.apk
+*.zip
 
 # Flutter & Dart artifacts
 **/.dart_tool/

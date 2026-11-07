@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/tour_package.dart';
 import '../models/price_alert.dart';
@@ -18,7 +19,7 @@ class PriceAlertDialog extends StatefulWidget {
 
 class _PriceAlertDialogState extends State<PriceAlertDialog> {
   late final TextEditingController _targetPriceController;
-  final _phoneController = TextEditingController(text: '+998 90 123 45 67');
+  final _phoneController = TextEditingController(text: '+998 ');
   bool _isSubmitting = false;
 
   @override
@@ -26,6 +27,17 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
     super.initState();
     final suggested = (widget.tour.price * 0.85).round();
     _targetPriceController = TextEditingController(text: suggested.toString());
+    _loadUserPhone();
+  }
+
+  Future<void> _loadUserPhone() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString('sayrhub_user_phone');
+      if (phone != null && phone.isNotEmpty && mounted) {
+        _phoneController.text = phone;
+      }
+    } catch (_) {}
   }
 
   @override

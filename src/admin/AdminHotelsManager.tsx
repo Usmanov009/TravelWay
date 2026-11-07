@@ -40,6 +40,7 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
   const [markupModalHotel, setMarkupModalHotel] = useState<HotelOnly | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHotel, setEditingHotel] = useState<HotelOnly | null>(null);
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
 
   // Form
   const [formName, setFormName] = useState('');
@@ -188,6 +189,29 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
     }
   };
 
+  
+  const handleLiveKompasSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedCountry !== 'ALL') params.set('country', selectedCountry);
+      if (search.trim()) params.set('q', search.trim());
+
+      const res = await fetch(`/api/kompas/hotels?${params.toString()}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
+        await Promise.all(data.hotels.map((newH: HotelOnly) => onUpdateHotel(newH)));
+        onShowToast(`Kompas Tour tizimidan ${data.hotels.length} ta mehmonxona admin katalogiga olib kirildi!`, 'success');
+      } else {
+        onShowToast("Kompas Tour tizimidan mehmonxonalar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Kompas Tour bilan aloqa xatosi: " + (e?.message || 'Tarmoq xatosi'), 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Mehmonxonalarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -280,6 +304,19 @@ export const AdminHotelsManager: React.FC<AdminHotelsManagerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handleLiveKompasSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour onlayn tizimidan jonli mehmonxona takliflarini yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Kompasdan yuklanmoqda...' : 'Kompasdan Jonli Yuklash'}</span>
+          </button>
+          
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"

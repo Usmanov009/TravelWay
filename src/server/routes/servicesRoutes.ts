@@ -1,5 +1,10 @@
 import { Router } from 'express';
 import { CatalogItemModel, getDBStatus } from '../../../db.js';
+import {
+  fetchKompasFlights,
+  fetchKompasHotels,
+  fetchKompasComboTours,
+} from '../services/kompasService.js';
 
 export const comboRouter = Router();
 export const flightsRouter = Router();
@@ -31,6 +36,11 @@ comboRouter.get('/tours', async (req, res) => {
     const query = String(req.query.q || '').trim();
     const city = String(req.query.city || '');
     let results = await loadCatalog('combo-tours');
+    let source = 'MongoDB';
+    if (results.length === 0) {
+      results = await fetchKompasComboTours({ city, query });
+      source = 'Kompas Live';
+    }
     if (query) {
       results = results.filter((item) =>
         matches(item.title, query) ||
@@ -43,7 +53,7 @@ comboRouter.get('/tours', async (req, res) => {
         item.cities?.some((name: string) => matches(name, city)),
       );
     }
-    return res.json({ success: true, source: 'MongoDB', count: results.length, comboTours: results });
+    return res.json({ success: true, source, count: results.length, comboTours: results });
   } catch (error) {
     console.error('Combo catalog query failed:', error);
     return res.status(500).json({ success: false, error: 'Combo turlar bazasini o‘qib bo‘lmadi.' });
@@ -58,6 +68,11 @@ flightsRouter.get('/search', async (req, res) => {
     const airline = String(req.query.airline || '');
     const directOnly = req.query.directOnly === 'true';
     let results = await loadCatalog('flights');
+    let source = 'MongoDB';
+    if (results.length === 0) {
+      results = await fetchKompasFlights({ from, to, airline });
+      source = 'Kompas Live';
+    }
     if (from) {
       results = results.filter((item) =>
         matches(item.departureCity, from) || matches(item.departureAirportCode, from),
@@ -72,7 +87,7 @@ flightsRouter.get('/search', async (req, res) => {
       results = results.filter((item) => matches(item.airline, airline));
     }
     if (directOnly) results = results.filter((item) => item.flightType === 'direct');
-    return res.json({ success: true, source: 'MongoDB', count: results.length, flights: results });
+    return res.json({ success: true, source, count: results.length, flights: results });
   } catch (error) {
     console.error('Flight catalog query failed:', error);
     return res.status(500).json({ success: false, error: 'Aviabiletlar bazasini o‘qib bo‘lmadi.' });
@@ -87,6 +102,11 @@ hotelsRouter.get('/search', async (req, res) => {
     const meal = String(req.query.meal || '');
     const query = String(req.query.q || '');
     let results = await loadCatalog('hotels');
+    let source = 'MongoDB';
+    if (results.length === 0) {
+      results = await fetchKompasHotels({ country, resort, query });
+      source = 'Kompas Live';
+    }
     if (country && country !== 'Barchasi') {
       results = results.filter((item) => matches(item.country, country));
     }
@@ -97,7 +117,7 @@ hotelsRouter.get('/search', async (req, res) => {
     if (query) {
       results = results.filter((item) => matches(item.name, query) || matches(item.resort, query));
     }
-    return res.json({ success: true, source: 'MongoDB', count: results.length, hotels: results });
+    return res.json({ success: true, source, count: results.length, hotels: results });
   } catch (error) {
     console.error('Hotel catalog query failed:', error);
     return res.status(500).json({ success: false, error: 'Mehmonxonalar bazasini o‘qib bo‘lmadi.' });

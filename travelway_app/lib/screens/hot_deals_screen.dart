@@ -1,3 +1,4 @@
+import '../utils/country_utils.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,7 +9,8 @@ import '../models/hot_deal.dart';
 import '../models/tour_package.dart';
 import '../utils/app_theme.dart';
 import '../utils/flaticon_icons.dart';
-import '../widgets/booking_dialog.dart';
+import 'tour_detail_screen.dart';
+import 'tour_booking_screen.dart';
 
 class HotDealsScreen extends StatefulWidget {
   const HotDealsScreen({super.key});
@@ -443,12 +445,11 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(
-                                FlaticonIcons.locationOn,
-                                size: 12,
-                                color: AppTheme.primary,
+                              Text(
+                                getCountryFlag(deal.location),
+                                style: const TextStyle(fontSize: 12),
                               ),
-                              const SizedBox(width: 3),
+                              const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   deal.location,
@@ -603,6 +604,47 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                 Row(
                   children: [
                     Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          final tour = TourPackage(
+                            id: deal.id,
+                            title: deal.title,
+                            location: deal.location,
+                            tag: 'Qaynoq Taklif',
+                            nights: '5-7 kecha',
+                            flight: deal.flight,
+                            price: deal.priceNumeric,
+                            oldPrice:
+                                int.tryParse(
+                                  deal.oldPrice.replaceAll(RegExp(r'\D'), ''),
+                                ) ??
+                                (deal.priceNumeric + 150),
+                            img: deal.img,
+                            country: deal.location,
+                            resort: deal.location,
+                            kompasOnlineUrl: deal.kompasOnlineUrl,
+                          );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TourDetailScreen(tour: tour),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Batafsil',
+                          style: TextStyle(fontSize: 11),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
                       child: ElevatedButton(
                         onPressed: () {
                           final tour = TourPackage(
@@ -623,9 +665,11 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                             resort: deal.location,
                             kompasOnlineUrl: deal.kompasOnlineUrl,
                           );
-                          showDialog(
-                            context: context,
-                            builder: (_) => BookingDialog(tour: tour),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TourBookingScreen(tour: tour),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -635,7 +679,7 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           ),
                         ),
                         child: const Text(
-                          'Band qilish',
+                          'Bron qilish',
                           style: TextStyle(fontSize: 11),
                         ),
                       ),

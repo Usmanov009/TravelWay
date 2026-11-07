@@ -469,8 +469,15 @@ class _TripsScreenState extends State<TripsScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+      body: RefreshIndicator(
+        color: AppTheme.primary,
+        backgroundColor: AppTheme.surfaceDark,
+        onRefresh: () async {
+          await provider.loadBookings();
+          await provider.loadPriceAlerts();
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -588,9 +595,48 @@ class _TripsScreenState extends State<TripsScreen> {
                               Text(
                                 'Saqlangan (${savedTours.length})',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: _subTab == 'saved'
+                                      ? Colors.white
+                                      : AppTheme.textSub,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _subTab = 'alerts'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: _subTab == 'alerts'
+                              ? AppTheme.primary
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                FlaticonIcons.notificationsActive,
+                                size: 12,
+                                color: _subTab == 'alerts'
+                                    ? Colors.white
+                                    : AppTheme.textSub,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                'Signallar (${provider.alerts.length})',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: _subTab == 'alerts'
                                       ? Colors.white
                                       : AppTheme.textSub,
                                 ),
@@ -611,11 +657,133 @@ class _TripsScreenState extends State<TripsScreen> {
               _buildActiveBookingsList(context, provider, activeBookings)
             else if (_subTab == 'cancelled')
               _buildCancelledBookingsList(context, provider, cancelledBookings)
+            else if (_subTab == 'alerts')
+              _buildPriceAlertsList(context, provider)
             else
               _buildSavedList(context, provider, savedTours),
           ],
         ),
       ),
+    ),
+    );
+  }
+
+
+  Widget _buildPriceAlertsList(BuildContext context, AppProvider provider) {
+    if (provider.alerts.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.borderDark),
+        ),
+        alignment: Alignment.center,
+        child: const Column(
+          children: [
+            Icon(
+              FlaticonIcons.notificationsActiveOutlined,
+              size: 48,
+              color: Colors.amber,
+            ),
+            SizedBox(height: 12),
+            Text(
+              "Faol narx signallari yo'q",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textMain,
+              ),
+            ),
+            SizedBox(height: 6),
+            Text(
+              "Turpaketlar sahifasida qo'ng'iroqcha belgisini bosib, narx tushganda bildirishnoma oling.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 11, color: AppTheme.textSub),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: provider.alerts.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, idx) {
+        final alert = provider.alerts[idx];
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceDark,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.borderDark),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  FlaticonIcons.notificationsActive,
+                  size: 20,
+                  color: Colors.amber,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      alert.destination,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textMain,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Kutilayotgan narx: \${alert.targetPrice} (hozir: \${alert.currentPrice})',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Tel: ${alert.phone}',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.textSub,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(FlaticonIcons.deleteOutline, size: 18, color: Colors.redAccent),
+                onPressed: () async {
+                  await provider.deletePriceAlert(alert.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Narx signali o'chirildi")),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

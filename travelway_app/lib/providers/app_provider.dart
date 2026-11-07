@@ -51,6 +51,9 @@ class AppProvider extends ChangeNotifier {
   String _selectedCountry = 'TR'; // Turkiya
   String get selectedCountry => _selectedCountry;
 
+  String _selectedResort = 'Barcha kurortlar';
+  String get selectedResort => _selectedResort;
+
   int? _nightsCount = 7;
   int? get nightsCount => _nightsCount;
 
@@ -86,7 +89,7 @@ class AppProvider extends ChangeNotifier {
   bool get isLoadingBookings => _isLoadingBookings;
 
   // Price Alerts
-  final List<PriceAlert> _alerts = [];
+  List<PriceAlert> _alerts = [];
   List<PriceAlert> get alerts => _alerts;
 
   // Saved / Favorites
@@ -106,10 +109,8 @@ class AppProvider extends ChangeNotifier {
     loadTours();
     loadHotDeals();
     loadServices();
-    if (isAuthenticated) {
-      await loadBookings();
-      await loadPriceAlerts();
-    }
+    await loadBookings();
+    await loadPriceAlerts();
   }
 
   // ---- Session / auth ----
@@ -258,6 +259,15 @@ class AppProvider extends ChangeNotifier {
   void setCountry(String country) {
     if (_selectedCountry != country) {
       _selectedCountry = country;
+      _selectedResort = 'Barcha kurortlar';
+      notifyListeners();
+      loadTours();
+    }
+  }
+
+  void setResort(String resort) {
+    if (_selectedResort != resort) {
+      _selectedResort = resort;
       notifyListeners();
       loadTours();
     }
@@ -320,6 +330,7 @@ class AppProvider extends ChangeNotifier {
       _tours = await apiService.searchTours(
         departure: _selectedDeparture,
         country: _selectedCountry,
+        resort: _selectedResort == 'Barcha kurortlar' ? '' : _selectedResort,
         query: _searchQuery,
         nightsFrom: _nightsCount ?? 5,
         nightsTill: _nightsCount ?? 14,
@@ -442,6 +453,12 @@ class AppProvider extends ChangeNotifier {
     _alerts.insert(0, alert);
     notifyListeners();
     return success;
+  }
+
+  Future<bool> deletePriceAlert(String alertId) async {
+    _alerts.removeWhere((a) => a.id == alertId);
+    notifyListeners();
+    return await apiService.deletePriceAlert(alertId);
   }
 
   void toggleFavorite(String id) {

@@ -40,6 +40,7 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
   const [markupModalFlight, setMarkupModalFlight] = useState<FlightTicket | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFlight, setEditingFlight] = useState<FlightTicket | null>(null);
+  const [isLiveSyncing, setIsLiveSyncing] = useState(false);
 
   // Form
   const [formAirline, setFormAirline] = useState('');
@@ -197,6 +198,30 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
     }
   };
 
+  
+  const handleLiveKompasSync = async () => {
+    setIsLiveSyncing(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedDepCity !== 'ALL') params.set('from', selectedDepCity);
+      if (selectedArrCity !== 'ALL') params.set('to', selectedArrCity);
+      if (selectedAirline !== 'ALL') params.set('airline', selectedAirline);
+
+      const res = await fetch(`/api/kompas/flights?${params.toString()}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.flights) && data.flights.length > 0) {
+        await Promise.all(data.flights.map((newF: FlightTicket) => onUpdateFlight(newF)));
+        onShowToast(`Kompas Tour tizimidan ${data.flights.length} ta reys va chipta admin katalogiga olib kirildi!`, 'success');
+      } else {
+        onShowToast("Kompas Tour tizimidan aviachiptalar topilmadi", 'info');
+      }
+    } catch (e: any) {
+      onShowToast("Kompas Tour bilan aloqa xatosi: " + (e?.message || 'Tarmoq xatosi'), 'error');
+    } finally {
+      setIsLiveSyncing(false);
+    }
+  };
+
   const handleDelete = async (id: string, flightNumber: string) => {
     if (!isMainAdmin && !currentAdmin.canDeleteTours) {
       onShowToast("Reyslarni o'chirish faqat Bosh Admin huquqida!", 'error');
@@ -291,6 +316,19 @@ export const AdminFlightsManager: React.FC<AdminFlightsManagerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={handleLiveKompasSync}
+            disabled={isLiveSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 dark:bg-zinc-800 hover:bg-zinc-800 text-white font-bold text-xs shadow-2xs transition-all cursor-pointer"
+            title="Kompas Tour onlayn tizimidan jonli charter va reyslarni yuklash"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${isLiveSyncing ? 'animate-spin' : ''}`}>
+              sync
+            </span>
+            <span>{isLiveSyncing ? 'Kompasdan yuklanmoqda...' : 'Kompasdan Jonli Yuklash'}</span>
+          </button>
+          
           <button
             onClick={openAddModal}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-2xs transition-all shrink-0 tap-bounce cursor-pointer"
