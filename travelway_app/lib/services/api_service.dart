@@ -29,7 +29,13 @@ class ApiService {
       final prefs = await SharedPreferences.getInstance();
       final saved = prefs.getString(_defaultUrlKey) ?? prefs.getString('travelway_backend_url');
       if (saved != null && saved.isNotEmpty) {
-        _baseUrl = saved;
+        if (!kIsWeb &&
+            (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) &&
+            (saved.contains('localhost') || saved.contains('127.0.0.1'))) {
+          _baseUrl = defaultBaseUrl;
+        } else {
+          _baseUrl = saved;
+        }
       }
     } catch (_) {}
   }
@@ -231,7 +237,7 @@ class ApiService {
       final uri = Uri.parse('$_baseUrl/api/db/bookings').replace(
         queryParameters: qParams.isNotEmpty ? qParams : null,
       );
-      final res = await http.get(uri).timeout(const Duration(seconds: 8));
+      final res = await http.get(uri).timeout(const Duration(seconds: 15));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -246,22 +252,28 @@ class ApiService {
   }
 
   Future<bool> createBooking(Booking booking) async {
-    try {
-      final uri = Uri.parse('$_baseUrl/api/db/bookings');
-      final res = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(booking.toJson()),
-      ).timeout(const Duration(seconds: 10));
+    for (int attempt = 1; attempt <= 2; attempt++) {
+      try {
+        final uri = Uri.parse('$_baseUrl/api/db/bookings');
+        final res = await http.post(
+          uri,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(booking.toJson()),
+        ).timeout(const Duration(seconds: 35));
 
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        return data['success'] == true;
-      } else {
-        debugPrint('createBooking error: status ${res.statusCode}, body: ${res.body}');
+        if (res.statusCode == 200) {
+          final data = jsonDecode(res.body);
+          if (data['success'] == true) {
+            return true;
+          }
+        }
+        debugPrint('createBooking warning (attempt $attempt): status ${res.statusCode}, body: ${res.body}');
+      } catch (e) {
+        debugPrint('Error creating booking (attempt $attempt): $e');
+        if (attempt < 2) {
+          await Future.delayed(const Duration(seconds: 2));
+        }
       }
-    } catch (e) {
-      debugPrint('Error creating booking: $e');
     }
     return false;
   }

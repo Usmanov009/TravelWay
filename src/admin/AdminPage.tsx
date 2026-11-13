@@ -56,6 +56,8 @@ interface AdminPageProps {
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   agencyCommissionRate?: number;
   onUpdateCommissionRate?: (rate: number) => Promise<void>;
+  onRefreshBookings?: () => Promise<void> | void;
+  isRefreshingBookings?: boolean;
 }
 
 const pageTitles: Record<AdminTab, string> = {
@@ -103,12 +105,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onRemoveStaff,
   onShowToast,
   agencyCommissionRate = 0,
-  onUpdateCommissionRate
+  onUpdateCommissionRate,
+  onRefreshBookings,
+  isRefreshingBookings = false
 }) => {
   const [currentTab, setCurrentTab] = useState<AdminTab>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFocusToken, setSearchFocusToken] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
+
+  // Polling for live bookings & auto-refreshing in Admin Panel (every 12 seconds)
+  useEffect(() => {
+    if (!onRefreshBookings) return;
+    onRefreshBookings();
+    const interval = setInterval(() => {
+      onRefreshBookings();
+    }, 12000);
+    return () => clearInterval(interval);
+  }, [onRefreshBookings]);
+
+  // When switching to bookings or dashboard tab, immediately reload bookings
+  useEffect(() => {
+    if (currentTab === 'bookings' || currentTab === 'dashboard') {
+      onRefreshBookings?.();
+    }
+  }, [currentTab, onRefreshBookings]);
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('sayrhub_admin_theme') || localStorage.getItem('travelway_admin_theme');
@@ -232,6 +253,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   </Button>
                 )}
               </div>
+              {onRefreshBookings && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onRefreshBookings()}
+                  disabled={isRefreshingBookings}
+                  className="h-8 gap-1.5 text-xs font-semibold"
+                  title="Buyurtmalar va ma'lumotlarni yangilash"
+                  type="button"
+                >
+                  <span className={`material-symbols-outlined text-[16px] text-indigo-600 dark:text-indigo-400 ${isRefreshingBookings ? 'animate-spin' : ''}`}>
+                    refresh
+                  </span>
+                  <span className="hidden sm:inline">{isRefreshingBookings ? 'Yangilanmoqda...' : 'Yangilash'}</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="icon"
@@ -334,6 +371,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       onCancelBooking={onCancelBooking}
                       onShowToast={onShowToast}
                       globalSearch={searchTerm}
+                      onRefreshBookings={onRefreshBookings}
+                      isRefreshing={isRefreshingBookings}
                     />
                   )}
 

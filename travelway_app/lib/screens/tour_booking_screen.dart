@@ -247,6 +247,15 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
         ? '\$$_totalPrice ($_totalGuests kishi: $_adultsCount katta, $_childrenCount bola)'
         : '\$$_totalPrice ($_totalGuests kishi: $_adultsCount katta)';
 
+    String travelerId = '';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      travelerId = prefs.getString('sayrhub_user_id') ?? '';
+      await prefs.setString('sayrhub_user_name', name);
+      await prefs.setString('sayrhub_user_phone', phone);
+      await prefs.setString('sayrhub_user_passport', passport);
+    } catch (_) {}
+
     final newBooking = Booking(
       id: bookingId,
       tourTitle: widget.tour.title,
@@ -259,6 +268,7 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
       price: priceStr,
       totalNumeric: _totalPrice,
       travelerName: name,
+      travelerId: travelerId,
       type: 'active',
       hotelImg: widget.tour.img,
       flight: widget.tour.flight,
@@ -270,14 +280,6 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
       adultsCount: _adultsCount,
       childrenCount: _childrenCount,
     );
-
-    // Save traveler profile updates to SharedPreferences
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('sayrhub_user_name', name);
-      await prefs.setString('sayrhub_user_phone', phone);
-      await prefs.setString('sayrhub_user_passport', passport);
-    } catch (_) {}
 
     await provider.createBooking(newBooking);
 

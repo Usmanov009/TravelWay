@@ -109,14 +109,23 @@ export default function App() {
   });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     try {
-      return Boolean(sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token'));
+      return Boolean(
+        sessionStorage.getItem('sayrhub_admin_token') ||
+        sessionStorage.getItem('travelway_admin_token') ||
+        localStorage.getItem('sayrhub_admin_token') ||
+        localStorage.getItem('travelway_admin_token')
+      );
     } catch (e) {
       return false;
     }
   });
   const [currentAdminRole, setCurrentAdminRole] = useState<AdminRole>(() => {
     try {
-      const saved = sessionStorage.getItem('sayrhub_active_admin_user') || sessionStorage.getItem('travelway_active_admin_user');
+      const saved =
+        sessionStorage.getItem('sayrhub_active_admin_user') ||
+        sessionStorage.getItem('travelway_active_admin_user') ||
+        localStorage.getItem('sayrhub_active_admin_user') ||
+        localStorage.getItem('travelway_active_admin_user');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed?.role === 'tour_admin' || parsed?.role === 'main_admin') return parsed.role;
@@ -126,12 +135,70 @@ export default function App() {
   });
   const [currentAdminUser, setCurrentAdminUser] = useState<AdminUser | null>(() => {
     try {
-      const saved = sessionStorage.getItem('sayrhub_active_admin_user') || sessionStorage.getItem('travelway_active_admin_user');
+      const saved =
+        sessionStorage.getItem('sayrhub_active_admin_user') ||
+        sessionStorage.getItem('travelway_active_admin_user') ||
+        localStorage.getItem('sayrhub_active_admin_user') ||
+        localStorage.getItem('travelway_active_admin_user');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return null;
   });
   const [adminStaffList, setAdminStaffList] = useState<AdminUser[]>([]);
+  const [isRefreshingBookings, setIsRefreshingBookings] = useState<boolean>(false);
+
+  const getAdminToken = useCallback(() => {
+    try {
+      return (
+        sessionStorage.getItem('sayrhub_admin_token') ||
+        sessionStorage.getItem('travelway_admin_token') ||
+        localStorage.getItem('sayrhub_admin_token') ||
+        localStorage.getItem('travelway_admin_token') ||
+        ''
+      );
+    } catch {
+      return '';
+    }
+  }, []);
+
+  const getUserToken = useCallback(() => {
+    try {
+      return (
+        sessionStorage.getItem('sayrhub_user_token') ||
+        sessionStorage.getItem('travelway_user_token') ||
+        localStorage.getItem('sayrhub_user_token') ||
+        localStorage.getItem('travelway_user_token') ||
+        ''
+      );
+    } catch {
+      return '';
+    }
+  }, []);
+
+  const fetchBookings = useCallback(async () => {
+    const adminToken = getAdminToken();
+    const userToken = getUserToken();
+    const token = adminToken || userToken;
+    if (!token) {
+      setBookings([]);
+      return;
+    }
+    setIsRefreshingBookings(true);
+    try {
+      const response = await fetch('/api/db/bookings', {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Bronlarni olib bo‘lmadi.');
+      }
+      setBookings(Array.isArray(data.bookings) ? data.bookings : []);
+    } catch (error) {
+      console.error('Bookings load failed:', error);
+    } finally {
+      setIsRefreshingBookings(false);
+    }
+  }, [getAdminToken, getUserToken]);
 
   // Sync staff list from backend / MongoDB only when admin is authenticated
   useEffect(() => {
@@ -223,14 +290,14 @@ export default function App() {
   useEffect(() => {
     let active = true;
     void fetchLiveHotDeals();
-    const adminToken = sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token');
-    const userToken = sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token');
+    const adminToken = getAdminToken();
+    const userToken = getUserToken();
     const token = adminToken || userToken;
     const headers = token ? { Authorization: 'Bearer ' + token } : undefined;
     const load = async <T,>(url: string, key: string): Promise<T[]> => {
       const response = await fetch(url, { headers });
       const data = await response.json();
-      if (!response.ok || !data.success) throw new Error(data.error || key + ' ?????????????? ???? ???????.');
+      if (!response.ok || !data.success) throw new Error(data.error || key + ' yuklab bo‘lmadi.');
       return Array.isArray(data[key]) ? data[key] as T[] : [];
     };
 
@@ -255,17 +322,11 @@ export default function App() {
     });
 
     if (token) {
-      fetch('/api/db/bookings', { headers })
-        .then(async (response) => {
-          const data = await response.json();
-          if (!response.ok || !data.success) throw new Error(data.error || 'Bronlarni olib bo?lmadi.');
-          if (active) setBookings(Array.isArray(data.bookings) ? data.bookings : []);
-        })
-        .catch((error) => { if (active) { setBookings([]); console.error('Bookings load failed:', error); } });
+      void fetchBookings();
       fetch('/api/db/price-alerts', { headers })
         .then(async (response) => {
           const data = await response.json();
-          if (!response.ok || !data.success) throw new Error(data.error || 'Narx signallarini olib bo?lmadi.');
+          if (!response.ok || !data.success) throw new Error(data.error || 'Narx signallarini olib bo‘lmadi.');
           if (active) setPriceAlerts(Array.isArray(data.alerts) ? data.alerts : []);
         })
         .catch((error) => { if (active) { setPriceAlerts([]); console.error('Price alerts load failed:', error); } });
@@ -658,8 +719,6 @@ export default function App() {
     showToast(`"${hotel.name}" bron so‘rovi bazaga saqlandi.`, 'success');
   };
 
-  const getAdminToken = () => sessionStorage.getItem('sayrhub_admin_token') || sessionStorage.getItem('travelway_admin_token') || '';
-  const getUserToken = () => sessionStorage.getItem('sayrhub_user_token') || sessionStorage.getItem('travelway_user_token') || '';
   const getAuthHeaders = (token = getAdminToken()): Record<string, string> => ({
     'Content-Type': 'application/json',
     ...(token ? { Authorization: 'Bearer ' + token } : {}),
@@ -947,9 +1006,13 @@ export default function App() {
             try {
               sessionStorage.setItem('sayrhub_admin_auth', 'true');
               sessionStorage.setItem('travelway_admin_auth', 'true');
+              localStorage.setItem('sayrhub_admin_auth', 'true');
+              localStorage.setItem('travelway_admin_auth', 'true');
               if (adminData) {
                 sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(adminData));
                 sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(adminData));
+                localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(adminData));
+                localStorage.setItem('travelway_active_admin_user', JSON.stringify(adminData));
                 setCurrentAdminUser(adminData);
               }
             } catch (e) {}
@@ -957,6 +1020,7 @@ export default function App() {
             if (role === 'tour_admin' || role === 'main_admin') {
               setCurrentAdminRole(role as AdminRole);
             }
+            void fetchBookings();
           }}
           onExitToApp={handleExitAdmin}
           onShowToast={showToast}
@@ -1003,6 +1067,8 @@ export default function App() {
         onShowToast={showToast}
         agencyCommissionRate={agencyCommissionRate}
         onUpdateCommissionRate={handleUpdateCommissionRate}
+        onRefreshBookings={fetchBookings}
+        isRefreshingBookings={isRefreshingBookings}
       />
       </Suspense>
     );
@@ -1037,7 +1103,13 @@ export default function App() {
             'info'
           );
         }}
-        onOpenAdmin={() => setIsAdminMode(true)}
+        onOpenAdmin={() => {
+          if (typeof window !== 'undefined') {
+            window.history.pushState({}, '', '/admin');
+          }
+          setIsAdminMode(true);
+          void fetchBookings();
+        }}
         onAvatarClick={() => {
           if (currentTab !== 'profile') {
             setCurrentTab('profile');

@@ -469,11 +469,16 @@ class _TripsScreenState extends State<TripsScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: RefreshIndicator(
+        color: AppTheme.primary,
+        backgroundColor: AppTheme.surfaceDark,
+        onRefresh: () => provider.loadBookings(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Trips Subheader Toggle Tabs (Faol, Bekor qilingan, Saqlangan)
             Container(
               padding: const EdgeInsets.all(4),
@@ -615,6 +620,7 @@ class _TripsScreenState extends State<TripsScreen> {
               _buildSavedList(context, provider, savedTours),
           ],
         ),
+      ),
       ),
     );
   }

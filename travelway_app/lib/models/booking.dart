@@ -8,6 +8,7 @@ class Booking {
   final String price;
   final int totalNumeric;
   final String travelerName;
+  final String travelerId;
   final String type; // 'active' | 'completed' | 'cancelled'
   final String startDate;
   final String endDate;
@@ -32,6 +33,7 @@ class Booking {
     required this.price,
     required this.totalNumeric,
     required this.travelerName,
+    this.travelerId = '',
     this.type = 'active',
     this.startDate = '',
     this.endDate = '',
@@ -58,6 +60,7 @@ class Booking {
       price: json['price']?.toString() ?? '\$0',
       totalNumeric: (json['totalNumeric'] is num) ? (json['totalNumeric'] as num).toInt() : 0,
       travelerName: json['travelerName']?.toString() ?? 'Mijoz',
+      travelerId: json['travelerId']?.toString() ?? '',
       type: json['type']?.toString() ?? 'active',
       startDate: json['startDate']?.toString() ?? '',
       endDate: json['endDate']?.toString() ?? '',
@@ -85,6 +88,7 @@ class Booking {
       'price': price,
       'totalNumeric': totalNumeric,
       'travelerName': travelerName,
+      'travelerId': travelerId,
       'type': type,
       'startDate': startDate,
       'endDate': endDate,

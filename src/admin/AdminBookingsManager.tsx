@@ -11,6 +11,8 @@ interface AdminBookingsManagerProps {
   onCancelBooking: (bookingId: string) => void;
   onShowToast: (text: string, type?: 'success' | 'error' | 'info') => void;
   globalSearch?: string;
+  onRefreshBookings?: () => Promise<void> | void;
+  isRefreshing?: boolean;
 }
 
 export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
@@ -20,7 +22,9 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
   onUpdateBookingStatus,
   onCancelBooking,
   onShowToast,
-  globalSearch = ''
+  globalSearch = '',
+  onRefreshBookings,
+  isRefreshing = false
 }) => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -114,6 +118,21 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5">
+          {onRefreshBookings && (
+            <button
+              onClick={() => onRefreshBookings()}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-background dark:bg-muted hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 border border-zinc-200/90 dark:border-zinc-700 font-semibold text-xs shadow-2xs transition-all tap-bounce disabled:opacity-60"
+              type="button"
+              title="Buyurtmalar ro'yxatini yangilash"
+            >
+              <span className={`material-symbols-outlined text-[17px] text-indigo-600 dark:text-indigo-400 ${isRefreshing ? 'animate-spin' : ''}`}>
+                refresh
+              </span>
+              <span>{isRefreshing ? 'Yuklanmoqda...' : 'Yangilash'}</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-background dark:bg-muted hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 border border-zinc-200/90 dark:border-zinc-700 font-semibold text-xs shadow-2xs transition-all tap-bounce"

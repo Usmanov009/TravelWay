@@ -170,6 +170,14 @@ router.get('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, 
         query.$or = [{ travelerPhone: ph }, { phone: ph }];
       }
     } else {
+      // If Authorization header was provided, but token was invalid/expired:
+      const authHeader = req.headers['authorization'];
+      if (authHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({
+          success: false,
+          error: "Sessiya muddati tugagan yoki token yaroqsiz. Qaytadan tizimga kiring."
+        });
+      }
       // Anonymous request without identifier: empty result to prevent customer data leakage
       return res.json({ success: true, count: 0, bookings: [] });
     }
@@ -207,7 +215,7 @@ router.post('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest,
     const savedBooking = await BookingModel.findOneAndUpdate(
       { id: String(booking.id) },
       { $set: bookingPayload },
-      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: 'after', new: true, runValidators: true, setDefaultsOnInsert: true },
     ).lean();
 
     // Asynchronously notify traveler & admin via Telegram

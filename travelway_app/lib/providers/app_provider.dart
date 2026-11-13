@@ -274,14 +274,23 @@ class AppProvider extends ChangeNotifier {
 
       // Auto-sync local bookings to the backend so existing app bookings appear in the admin panel
       for (final local in localOnly) {
-        apiService.createBooking(local).then((synced) {
+        try {
+          final synced = await apiService.createBooking(local);
           if (synced) {
             debugPrint('Local booking ${local.id} successfully synced to backend');
           }
-        }).catchError((_) {});
+        } catch (_) {}
       }
 
-      _bookings = [...apiBookings, ...localOnly];
+      final refreshed = await apiService.getBookings(
+        phone: phone,
+        travelerId: travelerId,
+      );
+      final refreshedIds = refreshed.map((b) => b.id).toSet();
+      final stillLocalOnly = _bookings.where((b) => !refreshedIds.contains(b.id)).toList();
+
+      _bookings = [...refreshed, ...stillLocalOnly];
+      await _saveLocalBookings();
     } catch (_) {
       // Keep local bookings if API fails
     }
@@ -291,13 +300,23 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<bool> createBooking(Booking booking) async {
-    _bookings.insert(0, booking);
-    await _saveLocalBookings();
-    notifyListeners();
+    if (!_bookings.any((b) => b.id == booking.id)) {
+      _bookings.insert(0, booking);
+      await _saveLocalBookings();
+      notifyListeners();
+    }
 
     final success = await apiService.createBooking(booking);
     if (!success) {
       debugPrint('Warning: createBooking did not reach backend; saved locally for retry.');
+      // Background retry after 4 seconds
+      Future.delayed(const Duration(seconds: 4), () {
+        apiService.createBooking(booking).then((retrySuccess) {
+          if (retrySuccess) {
+            debugPrint('Delayed sync for booking ${booking.id} succeeded!');
+          }
+        }).catchError((_) {});
+      });
     }
     return success;
   }

@@ -49,9 +49,15 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
       sessionStorage.setItem('travelway_admin_token', data.token);
       sessionStorage.setItem('sayrhub_admin_auth', 'true');
       sessionStorage.setItem('travelway_admin_auth', 'true');
+      localStorage.setItem('sayrhub_admin_token', data.token);
+      localStorage.setItem('travelway_admin_token', data.token);
+      localStorage.setItem('sayrhub_admin_auth', 'true');
+      localStorage.setItem('travelway_admin_auth', 'true');
       if (data.adminUser) {
         sessionStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
         sessionStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
+        localStorage.setItem('sayrhub_active_admin_user', JSON.stringify(data.adminUser));
+        localStorage.setItem('travelway_active_admin_user', JSON.stringify(data.adminUser));
       }
       const isMainAdmin = data.role === 'main_admin';
       onShowToast(
