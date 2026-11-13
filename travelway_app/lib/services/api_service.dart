@@ -222,10 +222,16 @@ class ApiService {
   }
 
   // 8. Bookings (DB)
-  Future<List<Booking>> getBookings() async {
+  Future<List<Booking>> getBookings({String? phone, String? travelerId}) async {
     try {
-      final uri = Uri.parse('$_baseUrl/api/db/bookings');
-      final res = await http.get(uri).timeout(const Duration(seconds: 6));
+      final qParams = <String, String>{};
+      if (phone != null && phone.trim().isNotEmpty) qParams['phone'] = phone.trim();
+      if (travelerId != null && travelerId.trim().isNotEmpty) qParams['travelerId'] = travelerId.trim();
+
+      final uri = Uri.parse('$_baseUrl/api/db/bookings').replace(
+        queryParameters: qParams.isNotEmpty ? qParams : null,
+      );
+      final res = await http.get(uri).timeout(const Duration(seconds: 8));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -246,11 +252,13 @@ class ApiService {
         uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(booking.toJson()),
-      ).timeout(const Duration(seconds: 8));
+      ).timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         return data['success'] == true;
+      } else {
+        debugPrint('createBooking error: status ${res.statusCode}, body: ${res.body}');
       }
     } catch (e) {
       debugPrint('Error creating booking: $e');

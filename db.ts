@@ -62,6 +62,8 @@ const BookingSchema = new mongoose.Schema({
   travelerName: String,
   travelerPhone: String,
   travelerPassport: String,
+  phone: String,
+  passport: String,
   travelerId: String, // Links booking to a registered user (tcId / JWT sub)
   type: { type: String, default: 'active' },
   startDate: String,
@@ -76,7 +78,7 @@ const BookingSchema = new mongoose.Schema({
   cancellationReason: String,
   cancelledAt: String,
   paymentType: String,
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 // Price Alert Schema
 const PriceAlertSchema = new mongoose.Schema({

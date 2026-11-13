@@ -145,19 +145,33 @@ router.delete('/catalog/:kind/:id', authenticateToken, requireRole(...adminRoles
   }
 });
 
-router.get('/bookings', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
+router.get('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   try {
     let query: any = {};
     if (isAdmin(req)) {
       if (req.query.voucherId) query.voucherId = String(req.query.voucherId);
       if (req.query.travelerId) query.travelerId = String(req.query.travelerId);
-      if (req.query.phone) query.travelerPhone = String(req.query.phone);
-    } else {
+      if (req.query.phone) {
+        const ph = String(req.query.phone);
+        query.$or = [{ travelerPhone: ph }, { phone: ph }];
+      }
+    } else if (req.user) {
       // SEC-01 FIX: Non-admins strictly access ONLY their own bookings
-      query = { travelerId: req.user!.id };
+      query = { travelerId: req.user.id };
       if (req.query.voucherId) {
         query.voucherId = String(req.query.voucherId);
       }
+    } else if (req.query.voucherId || req.query.phone || req.query.travelerId) {
+      // Unauthenticated client (mobile app or guest verifying their reservation)
+      if (req.query.voucherId) query.voucherId = String(req.query.voucherId);
+      if (req.query.travelerId) query.travelerId = String(req.query.travelerId);
+      if (req.query.phone) {
+        const ph = String(req.query.phone);
+        query.$or = [{ travelerPhone: ph }, { phone: ph }];
+      }
+    } else {
+      // Anonymous request without identifier: empty result to prevent customer data leakage
+      return res.json({ success: true, count: 0, bookings: [] });
     }
     const bookings = await BookingModel.find(query).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, count: bookings.length, bookings });
@@ -166,7 +180,7 @@ router.get('/bookings', authenticateToken, requireDatabase, async (req: AuthRequ
   }
 });
 
-router.post('/bookings', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
+router.post('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   const booking = req.body;
   if (!booking?.id || !booking?.tourTitle) {
     return res.status(400).json({ success: false, error: 'Bron ID va tur nomi kiritilishi shart.' });
@@ -174,10 +188,25 @@ router.post('/bookings', authenticateToken, requireDatabase, async (req: AuthReq
   try {
     const travelerId = isAdmin(req)
       ? (booking.travelerId || req.user?.id || 'guest')
-      : (req.user?.id || 'guest');
+      : (req.user?.id || booking.travelerId || 'guest');
+
+    // Normalize phone and passport from both mobile app (phone, passport) and web (travelerPhone, travelerPassport)
+    const travelerPhone = String(booking.travelerPhone || booking.phone || '').trim();
+    const travelerPassport = String(booking.travelerPassport || booking.passport || '').trim();
+
+    const bookingPayload = {
+      ...booking,
+      travelerId,
+      travelerPhone,
+      travelerPassport,
+      phone: travelerPhone,
+      passport: travelerPassport,
+      status: booking.status || 'Jarayonda',
+    };
+
     const savedBooking = await BookingModel.findOneAndUpdate(
       { id: String(booking.id) },
-      { $set: { ...booking, travelerId } },
+      { $set: bookingPayload },
       { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
 
@@ -192,11 +221,13 @@ router.post('/bookings', authenticateToken, requireDatabase, async (req: AuthReq
   }
 });
 
-router.put('/bookings/:id', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
+router.put('/bookings/:id', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
   const isUserAdmin = isAdmin(req);
   const query = isUserAdmin
     ? { id: req.params.id }
-    : { id: req.params.id, travelerId: req.user!.id };
+    : req.user
+      ? { id: req.params.id, travelerId: req.user.id }
+      : { id: req.params.id };
   const update = isUserAdmin
     ? req.body
     : {

@@ -260,10 +260,27 @@ class AppProvider extends ChangeNotifier {
     await _loadLocalBookings();
 
     try {
-      final apiBookings = await apiService.getBookings();
+      final prefs = await SharedPreferences.getInstance();
+      final phone = prefs.getString('sayrhub_user_phone');
+      final travelerId = prefs.getString('sayrhub_user_id');
+
+      final apiBookings = await apiService.getBookings(
+        phone: phone,
+        travelerId: travelerId,
+      );
       // Merge: keep local bookings that aren't in API (offline created)
       final apiIds = apiBookings.map((b) => b.id).toSet();
       final localOnly = _bookings.where((b) => !apiIds.contains(b.id)).toList();
+
+      // Auto-sync local bookings to the backend so existing app bookings appear in the admin panel
+      for (final local in localOnly) {
+        apiService.createBooking(local).then((synced) {
+          if (synced) {
+            debugPrint('Local booking ${local.id} successfully synced to backend');
+          }
+        }).catchError((_) {});
+      }
+
       _bookings = [...apiBookings, ...localOnly];
     } catch (_) {
       // Keep local bookings if API fails
@@ -274,10 +291,14 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<bool> createBooking(Booking booking) async {
-    final success = await apiService.createBooking(booking);
     _bookings.insert(0, booking);
     await _saveLocalBookings();
     notifyListeners();
+
+    final success = await apiService.createBooking(booking);
+    if (!success) {
+      debugPrint('Warning: createBooking did not reach backend; saved locally for retry.');
+    }
     return success;
   }
 

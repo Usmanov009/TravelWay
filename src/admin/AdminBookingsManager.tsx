@@ -29,12 +29,16 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
   const effectiveSearch = (search || globalSearch).trim().toLowerCase();
 
   const filteredBookings = bookings.filter((b) => {
+    const phone = (b.travelerPhone || (b as any).phone || '').toLowerCase();
+    const passport = (b.travelerPassport || (b as any).passport || '').toLowerCase();
     const matchSearch =
       !effectiveSearch ||
       (b.tourTitle && b.tourTitle.toLowerCase().includes(effectiveSearch)) ||
       (b.travelerName && b.travelerName.toLowerCase().includes(effectiveSearch)) ||
       (b.voucherId && b.voucherId.toLowerCase().includes(effectiveSearch)) ||
-      (b.dest && b.dest.toLowerCase().includes(effectiveSearch));
+      (b.dest && b.dest.toLowerCase().includes(effectiveSearch)) ||
+      phone.includes(effectiveSearch) ||
+      passport.includes(effectiveSearch);
 
     const matchStatus = statusFilter === 'ALL' || b.status === statusFilter;
     return matchSearch && matchStatus;
@@ -63,10 +67,12 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
       return;
     }
 
-    const headers = ['Bron ID', 'Sayohatchi', 'Tur Nomi', 'Yo\'nalish', 'Sana', 'Summa', 'Status'];
+    const headers = ['Bron ID', 'Sayohatchi', 'Telefon', 'Pasport', 'Tur Nomi', 'Yo\'nalish', 'Sana', 'Summa', 'Status'];
     const rows = filteredBookings.map(b => [
       `"${b.voucherId || ''}"`,
       `"${b.travelerName || ''}"`,
+      `"${b.travelerPhone || (b as any).phone || ''}"`,
+      `"${b.travelerPassport || (b as any).passport || ''}"`,
       `"${b.tourTitle || ''}"`,
       `"${b.dest || ''}"`,
       `"${b.dates || ''}"`,
@@ -261,7 +267,13 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
                       </td>
                       <td className="py-3.5 px-3">
                         <p className="font-bold text-zinc-900 dark:text-white text-xs">{b.travelerName}</p>
-                        <p className="text-[11px] text-zinc-400">{b.flight || 'Charter reys kiritilgan'}</p>
+                        <p className="text-[11px] text-zinc-500 font-mono">
+                          {b.travelerPhone || (b as any).phone ? (
+                            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{b.travelerPhone || (b as any).phone}</span>
+                          ) : (
+                            b.flight || 'Charter reys'
+                          )}
+                        </p>
                       </td>
                       <td className="py-3.5 px-3">
                         <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">{b.dest}</p>
@@ -349,6 +361,24 @@ export const AdminBookingsManager: React.FC<AdminBookingsManagerProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Asosiy Sayohatchi:</span>
                 <span className="text-xs font-bold text-zinc-900 dark:text-white">{selectedBooking.travelerName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Telefon raqami:</span>
+                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                  {selectedBooking.travelerPhone || (selectedBooking as any).phone || '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Pasport ma'lumotlari:</span>
+                <span className="text-xs font-mono font-semibold text-zinc-800 dark:text-zinc-200">
+                  {selectedBooking.travelerPassport || (selectedBooking as any).passport || '—'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Sayyohlar:</span>
+                <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                  {selectedBooking.guestsCount || 1} kishi {selectedBooking.adultsCount ? `(${selectedBooking.adultsCount} katta${selectedBooking.childrenCount ? `, ${selectedBooking.childrenCount} bola` : ''})` : ''}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Yo'nalish & Manzil:</span>
