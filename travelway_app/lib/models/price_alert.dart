@@ -6,9 +6,6 @@ class PriceAlert {
   final String phone;
   final String status;
   final String createdAt;
-  final String tourId;
-  final String tourImg;
-  final String tourLocation;
 
   PriceAlert({
     required this.id,
@@ -18,9 +15,6 @@ class PriceAlert {
     required this.phone,
     this.status = 'active',
     required this.createdAt,
-    this.tourId = '',
-    this.tourImg = '',
-    this.tourLocation = '',
   });
 
   factory PriceAlert.fromJson(Map<String, dynamic> json) {
@@ -32,26 +26,18 @@ class PriceAlert {
       phone: json['phone']?.toString() ?? '',
       status: json['status']?.toString() ?? 'active',
       createdAt: json['createdAt']?.toString() ?? DateTime.now().toString(),
-      tourId: json['tourId']?.toString() ?? '',
-      tourImg: json['tourImg']?.toString() ?? '',
-      tourLocation: json['tourLocation']?.toString() ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      // Server `tourId`ni majburiy tekshiradi
-      'tourId': tourId.isNotEmpty ? tourId : 'alert-$id',
-      'tourTitle': destination,
-      'tourLocation': tourLocation.isNotEmpty ? tourLocation : destination,
-      'tourImg': tourImg,
-      'currentPrice': currentPrice,
-      'targetPrice': targetPrice,
-      'createdAt': createdAt,
-      'status': status,
       'destination': destination,
+      'targetPrice': targetPrice,
+      'currentPrice': currentPrice,
       'phone': phone,
+      'status': status,
+      'createdAt': createdAt,
     };
   }
 }

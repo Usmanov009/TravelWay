@@ -175,6 +175,19 @@ const CatalogItemSchema = new mongoose.Schema({
 CatalogItemSchema.index({ kind: 1, id: 1 }, { unique: true });
 export const CatalogItemModel = mongoose.models.CatalogItem || mongoose.model('CatalogItem', CatalogItemSchema);
 
+// Telegram Auth Session Schema (TTL 15 minutes)
+const TelegramSessionSchema = new mongoose.Schema({
+  sessionToken: { type: String, required: true, unique: true, index: true },
+  chatId: { type: String, index: true },
+  code: String,
+  authenticated: { type: Boolean, default: false },
+  attempts: { type: Number, default: 0 },
+  user: { type: mongoose.Schema.Types.Mixed },
+  token: String,
+  createdAt: { type: Date, default: Date.now, expires: 900 },
+}, { timestamps: true });
+export const TelegramSessionModel = mongoose.models.TelegramSession || mongoose.model('TelegramSession', TelegramSessionSchema);
+
 let isConnected = false;
 let reconnectTimer: NodeJS.Timeout | null = null;
 let lastConnectionError: string | null = null;

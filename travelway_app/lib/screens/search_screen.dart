@@ -1,4 +1,3 @@
-import '../utils/country_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -32,7 +31,35 @@ class _SearchScreenState extends State<SearchScreen> {
   String _comboSelectedCity = 'ALL';
   String _comboPriceFilter = 'ALL'; // 'ALL', 'CHEAP', 'LUXURY'
 
-  final List<KompasCountry> _countries = kompasCountries;
+  final List<Map<String, String>> _countries = const [
+    {'code': 'ALL', 'name': 'Barcha mamlakatlar'},
+    {'code': 'TR', 'name': 'Turkiya'},
+    {'code': 'EG', 'name': 'Misr'},
+    {'code': 'AE', 'name': 'BAA'},
+    {'code': 'TH', 'name': 'Tailand'},
+    {'code': 'VN', 'name': 'Vetnam'},
+    {'code': 'CN', 'name': 'Xitoy'},
+    {'code': 'MV', 'name': 'Maldiv'},
+    {'code': 'ID', 'name': 'Indoneziya'},
+    {'code': 'GE', 'name': 'Gruziya'},
+    {'code': 'LK', 'name': 'Shri-Lanka'},
+    {'code': 'MY', 'name': 'Malayziya'},
+    {'code': 'QA', 'name': 'Qatar'},
+    {'code': 'SA', 'name': 'Saudiya Arabistoni'},
+    {'code': 'OM', 'name': 'Ummon'},
+    {'code': 'AZ', 'name': 'Ozarbayjon'},
+    {'code': 'CY', 'name': 'Kipr'},
+    {'code': 'ME', 'name': 'Chernogoriya'},
+    {'code': 'IT', 'name': 'Italiya'},
+    {'code': 'ES', 'name': 'Ispaniya'},
+    {'code': 'FR', 'name': 'Fransiya'},
+    {'code': 'CZ', 'name': 'Chexiya'},
+    {'code': 'JP', 'name': 'Yaponiya'},
+    {'code': 'KR', 'name': 'Janubiy Koreya'},
+    {'code': 'SC', 'name': 'Seyshel'},
+    {'code': 'MU', 'name': 'Mavrikiy'},
+    {'code': 'IN', 'name': 'Hindiston (Goa)'},
+  ];
 
   @override
   void dispose() {
@@ -59,10 +86,8 @@ class _SearchScreenState extends State<SearchScreen> {
           builder: (context, setModalState) {
             final filtered = _countries.where((c) {
               if (query.isEmpty) return true;
-              final q = query.toLowerCase();
-              return c.name.toLowerCase().contains(q) ||
-                  c.code.toLowerCase().contains(q) ||
-                  c.flag.contains(q);
+              return c['name']!.toLowerCase().contains(query.toLowerCase()) ||
+                  c['code']!.toLowerCase().contains(query.toLowerCase());
             }).toList();
 
             return Padding(
@@ -162,18 +187,19 @@ class _SearchScreenState extends State<SearchScreen> {
                           const Divider(color: AppTheme.borderDark, height: 1),
                       itemBuilder: (context, idx) {
                         final c = filtered[idx];
-                        final isSel = provider.selectedCountry == c.code;
+                        final isSel = provider.selectedCountry == c['code'];
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 2,
                           ),
-                          leading: Text(
-                            c.flag,
-                            style: const TextStyle(fontSize: 22),
+                          leading: const Icon(
+                            FlaticonIcons.public,
+                            size: 22,
+                            color: AppTheme.primary,
                           ),
                           title: Text(
-                            c.name,
+                            c['name']!,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: isSel
@@ -192,7 +218,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 )
                               : null,
                           onTap: () {
-                            provider.setCountry(c.code);
+                            provider.setCountry(c['code']!);
                             Navigator.pop(ctx);
                           },
                         );
@@ -633,30 +659,25 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   child: Row(
                     children: [
-                      Builder(
-                        builder: (context) {
-                          final cur = _countries.firstWhere(
-                            (c) => c.code == provider.selectedCountry,
-                            orElse: () => _countries[1],
-                          );
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(cur.flag, style: const TextStyle(fontSize: 18)),
-                              const SizedBox(width: 8),
-                              Text(
-                                cur.name,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textMain,
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                      const Icon(
+                        FlaticonIcons.public,
+                        size: 18,
+                        color: AppTheme.primary,
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _countries.firstWhere(
+                            (c) => c['code'] == provider.selectedCountry,
+                            orElse: () => _countries[1],
+                          )['name']!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textMain,
+                          ),
+                        ),
+                      ),
                       const Icon(
                         FlaticonIcons.search,
                         size: 16,
@@ -683,10 +704,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, idx) {
                     final c = _countries[idx];
-                    final isSel = provider.selectedCountry == c.code;
+                    final isSel = provider.selectedCountry == c['code'];
 
                     return GestureDetector(
-                      onTap: () => provider.setCountry(c.code),
+                      onTap: () => provider.setCountry(c['code']!),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -703,10 +724,14 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                         child: Row(
                           children: [
-                            Text(c.flag, style: const TextStyle(fontSize: 14)),
+                            const Icon(
+                              FlaticonIcons.public,
+                              size: 14,
+                              color: AppTheme.primary,
+                            ),
                             const SizedBox(width: 6),
                             Text(
-                              c.name,
+                              c['name']!,
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -1075,11 +1100,12 @@ class _SearchScreenState extends State<SearchScreen> {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Text(
-                                getCountryFlag(tour.country.isNotEmpty ? tour.country : tour.location),
-                                style: const TextStyle(fontSize: 12),
+                              const Icon(
+                                FlaticonIcons.locationOn,
+                                size: 12,
+                                color: AppTheme.primary,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               Expanded(
                                 child: Text(
                                   tour.location,

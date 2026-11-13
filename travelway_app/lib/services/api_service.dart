@@ -12,9 +12,7 @@ import '../models/price_alert.dart';
 
 class ApiService {
   static const String _defaultUrlKey = 'sayrhub_backend_url';
-
-  final http.Client _client;
-
+  
   // Default base URL:
   // Points to live Render backend for mobile app and web
   static String defaultBaseUrl = 'https://travelway-9x8l.onrender.com';
@@ -22,46 +20,9 @@ class ApiService {
 
   String get baseUrl => _baseUrl;
 
-  /// JWT — `/api/db/*` endpointlari uchun majburiy (Telegram login orqali olinadi).
-  static const String _authTokenKey = 'sayrhub_auth_token';
-  String? _authToken;
-  String? get authToken => _authToken;
-  bool get isAuthenticated => (_authToken ?? '').isNotEmpty;
-
-  Map<String, String> _headers({bool json = false}) {
-    final headers = <String, String>{};
-    if (json) headers['Content-Type'] = 'application/json';
-    final token = _authToken;
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    return headers;
+  ApiService() {
+    _initUrl();
   }
-
-  Future<void> setAuthToken(String? token) async {
-    final clean = (token ?? '').trim();
-    _authToken = clean.isEmpty ? null : clean;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      if (_authToken == null) {
-        await prefs.remove(_authTokenKey);
-        await prefs.remove('travelway_auth_token');
-      } else {
-        await prefs.setString(_authTokenKey, _authToken!);
-      }
-    } catch (_) {}
-  }
-
-  Future<void> clearAuthToken() => setAuthToken(null);
-
-  ApiService({http.Client? client}) : _client = client ?? http.Client() {
-    _initFuture = _initUrl();
-  }
-
-  Future<void>? _initFuture;
-
-  /// Prefs (base URL + JWT) yuklanishini kutish uchun.
-  Future<void> get ready => _initFuture ??= _initUrl();
 
   Future<void> _initUrl() async {
     try {
@@ -69,10 +30,6 @@ class ApiService {
       final saved = prefs.getString(_defaultUrlKey) ?? prefs.getString('travelway_backend_url');
       if (saved != null && saved.isNotEmpty) {
         _baseUrl = saved;
-      }
-      final token = prefs.getString(_authTokenKey) ?? prefs.getString('travelway_auth_token');
-      if (token != null && token.isNotEmpty) {
-        _authToken = token;
       }
     } catch (_) {}
   }
@@ -88,7 +45,7 @@ class ApiService {
   // 1. Health & Server Status Check
   Future<Map<String, dynamic>> checkHealth() async {
     try {
-      final res = await _client.get(Uri.parse('$_baseUrl/api/health')).timeout(const Duration(seconds: 4));
+      final res = await http.get(Uri.parse('$_baseUrl/api/health')).timeout(const Duration(seconds: 4));
       if (res.statusCode == 200) {
         return {'online': true, ...jsonDecode(res.body)};
       }
@@ -101,7 +58,7 @@ class ApiService {
   // 2. Kompas Live Status
   Future<bool> checkKompasStatus() async {
     try {
-      final res = await _client.get(Uri.parse('$_baseUrl/api/kompas/status')).timeout(const Duration(seconds: 4));
+      final res = await http.get(Uri.parse('$_baseUrl/api/kompas/status')).timeout(const Duration(seconds: 4));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         return data['connected'] == true;
@@ -138,7 +95,7 @@ class ApiService {
       if (checkinEnd != null) qParams['checkin_end'] = checkinEnd;
 
       final uri = Uri.parse('$_baseUrl/api/kompas/search').replace(queryParameters: qParams);
-      final res = await _client.get(uri).timeout(const Duration(seconds: 12));
+      final res = await http.get(uri).timeout(const Duration(seconds: 12));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -158,7 +115,7 @@ class ApiService {
   Future<List<HotDeal>> getHotDeals() async {
     try {
       final uri = Uri.parse('$_baseUrl/api/kompas/hot');
-      final res = await _client.get(uri).timeout(const Duration(seconds: 10));
+      final res = await http.get(uri).timeout(const Duration(seconds: 10));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -180,7 +137,7 @@ class ApiService {
       if (city.isNotEmpty) qParams['city'] = city;
 
       final uri = Uri.parse('$_baseUrl/api/combo/tours').replace(queryParameters: qParams);
-      final res = await _client.get(uri).timeout(const Duration(seconds: 6));
+      final res = await http.get(uri).timeout(const Duration(seconds: 6));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -194,7 +151,7 @@ class ApiService {
     return [];
   }
 
-  // 6. Flights (DB katalogi)
+  // 6. Flights (Live Kompas & DB)
   Future<List<FlightTicket>> getFlights({String from = '', String to = '', String airline = ''}) async {
     try {
       final qParams = <String, String>{};
@@ -202,9 +159,21 @@ class ApiService {
       if (to.isNotEmpty) qParams['to'] = to;
       if (airline.isNotEmpty) qParams['airline'] = airline;
 
-      final uri = Uri.parse('$_baseUrl/api/flights/search')
-          .replace(queryParameters: qParams.isEmpty ? null : qParams);
-      final res = await _client.get(uri).timeout(const Duration(seconds: 6));
+      // Try live Kompas charter allocations first
+      final kompasUri = Uri.parse('$_baseUrl/api/kompas/flights').replace(queryParameters: qParams);
+      final res = await http.get(kompasUri).timeout(const Duration(seconds: 8));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        if (data['success'] == true && data['flights'] is List && (data['flights'] as List).isNotEmpty) {
+          return (data['flights'] as List).map((f) => FlightTicket.fromJson(f)).toList();
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/flights/search');
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         if (data['success'] == true && data['flights'] is List) {
@@ -217,7 +186,7 @@ class ApiService {
     return [];
   }
 
-  // 7. Hotels Only (DB katalogi)
+  // 7. Hotels Only (Live Kompas & DB)
   Future<List<HotelOnly>> getHotelsOnly({String country = '', String resort = '', String query = ''}) async {
     try {
       final qParams = <String, String>{};
@@ -225,9 +194,21 @@ class ApiService {
       if (resort.isNotEmpty) qParams['resort'] = resort;
       if (query.isNotEmpty) qParams['q'] = query;
 
-      final uri = Uri.parse('$_baseUrl/api/hotels/search')
-          .replace(queryParameters: qParams.isEmpty ? null : qParams);
-      final res = await _client.get(uri).timeout(const Duration(seconds: 6));
+      // Try live Kompas hotel offerings first
+      final kompasUri = Uri.parse('$_baseUrl/api/kompas/hotels').replace(queryParameters: qParams);
+      final res = await http.get(kompasUri).timeout(const Duration(seconds: 8));
+
+      if (res.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(res.bodyBytes));
+        if (data['success'] == true && data['hotels'] is List && (data['hotels'] as List).isNotEmpty) {
+          return (data['hotels'] as List).map((h) => HotelOnly.fromJson(h)).toList();
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final uri = Uri.parse('$_baseUrl/api/hotels/search');
+      final res = await http.get(uri).timeout(const Duration(seconds: 5));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
         if (data['success'] == true && data['hotels'] is List) {
@@ -241,18 +222,10 @@ class ApiService {
   }
 
   // 8. Bookings (DB)
-  Future<List<Booking>> getBookings({String? travelerId, String? phone, String? voucherId}) async {
+  Future<List<Booking>> getBookings() async {
     try {
-      final qParams = <String, String>{};
-      if (travelerId != null && travelerId.isNotEmpty) qParams['travelerId'] = travelerId;
-      if (phone != null && phone.isNotEmpty) qParams['phone'] = phone;
-      if (voucherId != null && voucherId.isNotEmpty) qParams['voucherId'] = voucherId;
-
-      final uri = Uri.parse('$_baseUrl/api/db/bookings')
-          .replace(queryParameters: qParams.isEmpty ? null : qParams);
-      final res = await _client
-          .get(uri, headers: _headers())
-          .timeout(const Duration(seconds: 6));
+      final uri = Uri.parse('$_baseUrl/api/db/bookings');
+      final res = await http.get(uri).timeout(const Duration(seconds: 6));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -269,9 +242,9 @@ class ApiService {
   Future<bool> createBooking(Booking booking) async {
     try {
       final uri = Uri.parse('$_baseUrl/api/db/bookings');
-      final res = await _client.post(
+      final res = await http.post(
         uri,
-        headers: _headers(json: true),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(booking.toJson()),
       ).timeout(const Duration(seconds: 8));
 
@@ -288,9 +261,9 @@ class ApiService {
   Future<bool> cancelBooking(String bookingId, {String reason = "Mijoz tomonidan bekor qilindi"}) async {
     try {
       final uri = Uri.parse('$_baseUrl/api/db/bookings/$bookingId');
-      final res = await _client.put(
+      final res = await http.put(
         uri,
-        headers: _headers(json: true),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'status': 'Bekor qilingan',
           'type': 'cancelled',
@@ -306,16 +279,10 @@ class ApiService {
   }
 
   // 9. Price Alerts (DB)
-  Future<List<PriceAlert>> getPriceAlerts({String? userId}) async {
+  Future<List<PriceAlert>> getPriceAlerts() async {
     try {
-      final qParams = <String, String>{};
-      if (userId != null && userId.isNotEmpty) qParams['userId'] = userId;
-
-      final uri = Uri.parse('$_baseUrl/api/db/price-alerts')
-          .replace(queryParameters: qParams.isEmpty ? null : qParams);
-      final res = await _client
-          .get(uri, headers: _headers())
-          .timeout(const Duration(seconds: 6));
+      final uri = Uri.parse('$_baseUrl/api/db/price-alerts');
+      final res = await http.get(uri).timeout(const Duration(seconds: 6));
 
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes));
@@ -332,9 +299,9 @@ class ApiService {
   Future<bool> createPriceAlert(PriceAlert alert) async {
     try {
       final uri = Uri.parse('$_baseUrl/api/db/price-alerts');
-      final res = await _client.post(
+      final res = await http.post(
         uri,
-        headers: _headers(json: true),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(alert.toJson()),
       ).timeout(const Duration(seconds: 6));
 
@@ -344,123 +311,6 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('Error saving price alert: $e');
-    }
-    return false;
-  }
-
-  // 10. Telegram autentifikatsiyasi va foydalanuvchi profili (DB)
-  Future<String?> createTelegramSession() async {
-    try {
-      final res = await _client
-          .post(Uri.parse('$_baseUrl/api/auth/telegram/create-session'))
-          .timeout(const Duration(seconds: 6));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        if (data['success'] == true) return data['sessionToken']?.toString();
-      }
-    } catch (e) {
-      debugPrint('Error creating Telegram session: $e');
-    }
-    return null;
-  }
-
-  Future<Map<String, dynamic>> checkTelegramSession(String sessionToken) async {
-    try {
-      final uri = Uri.parse('$_baseUrl/api/auth/telegram/check-session')
-          .replace(queryParameters: {'sessionToken': sessionToken});
-      final res = await _client.get(uri).timeout(const Duration(seconds: 6));
-      if (res.statusCode == 200) {
-        return jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-      }
-    } catch (e) {
-      debugPrint('Error checking Telegram session: $e');
-    }
-    return {'success': false, 'authenticated': false};
-  }
-
-  /// 4 xonali kodni tasdiqlaydi va JWT'ni saqlaydi.
-  Future<AuthResult> verifyTelegramCode({
-    required String code,
-    required String sessionToken,
-  }) async {
-    try {
-      final res = await _client
-          .post(
-            Uri.parse('$_baseUrl/api/auth/telegram/verify-code'),
-            headers: _headers(json: true),
-            body: jsonEncode({'code': code, 'sessionToken': sessionToken}),
-          )
-          .timeout(const Duration(seconds: 8));
-
-      final data = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
-      final token = data['token']?.toString();
-      if (data['success'] == true && token != null && token.isNotEmpty) {
-        await setAuthToken(token);
-      }
-      return AuthResult(
-        success: data['success'] == true,
-        error: data['error']?.toString(),
-        user: data['user'] is Map
-            ? Map<String, dynamic>.from(data['user'] as Map)
-            : null,
-        token: token,
-      );
-    } catch (e) {
-      return AuthResult(success: false, error: 'Tarmoq xatosi: $e');
-    }
-  }
-
-  /// JWT egasining profilini DB'dan oladi.
-  Future<Map<String, dynamic>?> fetchCurrentUser() async {
-    if (!isAuthenticated) return null;
-    try {
-      final res = await _client
-          .get(Uri.parse('$_baseUrl/api/db/users/me'), headers: _headers())
-          .timeout(const Duration(seconds: 6));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        if (data['success'] == true && data['user'] is Map) {
-          return Map<String, dynamic>.from(data['user'] as Map);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error fetching current user: $e');
-    }
-    return null;
-  }
-
-  /// Profilni DB'ga yozadi (server faqat JWT egasi profilini qabul qiladi).
-  Future<bool> saveUserProfile(Map<String, dynamic> profile) async {
-    if (!isAuthenticated) return false;
-    try {
-      final res = await _client
-          .post(
-            Uri.parse('$_baseUrl/api/db/users'),
-            headers: _headers(json: true),
-            body: jsonEncode(profile),
-          )
-          .timeout(const Duration(seconds: 8));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(res.bodyBytes));
-        return data['success'] == true;
-      }
-      debugPrint('saveUserProfile failed: ${res.statusCode} ${res.body}');
-    } catch (e) {
-      debugPrint('Error saving user profile: $e');
-    }
-    return false;
-  }
-
-  Future<bool> deletePriceAlert(String alertId) async {
-    try {
-      final uri = Uri.parse('$_baseUrl/api/db/price-alerts/$alertId');
-      final res = await _client.delete(uri, headers: _headers()).timeout(const Duration(seconds: 6));
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        return data['success'] == true;
-      }
-    } catch (e) {
-      debugPrint('Error deleting price alert: $e');
     }
     return false;
   }
@@ -499,7 +349,7 @@ class ApiService {
     });
 
     try {
-      final res = await _client.get(uri, headers: {
+      final res = await http.get(uri, headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://online.uz.kompastour.com/search_tour',
       }).timeout(const Duration(seconds: 12));
@@ -568,19 +418,3 @@ class ApiService {
     }
   }
 }
-
-/// Telegram OTP tasdiqlash natijasi.
-class AuthResult {
-  final bool success;
-  final String? error;
-  final Map<String, dynamic>? user;
-  final String? token;
-
-  const AuthResult({
-    required this.success,
-    this.error,
-    this.user,
-    this.token,
-  });
-}
-

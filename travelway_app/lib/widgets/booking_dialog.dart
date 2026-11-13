@@ -111,24 +111,7 @@ class _BookingDialogState extends State<BookingDialog> {
       childrenCount: _childrenCount,
     );
 
-    final saved = await provider.createBooking(newBooking);
-
-    if (!saved) {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.red.shade700,
-            content: Text(
-              provider.isAuthenticated
-                  ? 'Bronni saqlashda xatolik yuz berdi. Internet aloqasini tekshirib, qayta urinib ko\'ring.'
-                  : 'Bronni bazaga saqlash uchun Telegram orqali tizimga kiring.',
-            ),
-          ),
-        );
-      }
-      return;
-    }
+    await provider.createBooking(newBooking);
 
     if (mounted) {
       setState(() => _isSubmitting = false);

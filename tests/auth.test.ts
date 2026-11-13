@@ -58,7 +58,7 @@ describe('Authentication & Security Utilities', () => {
 
   it('should not leak OTP code in createTelegramAuthSession', async () => {
     const { createTelegramAuthSession } = await import('../telegramBot.js');
-    const session = createTelegramAuthSession();
+    const session = await createTelegramAuthSession();
     expect(session.sessionToken).toBeDefined();
     expect(session.sessionToken.startsWith('reg_')).toBe(true);
     // CRITICAL: Ensure code is NOT in returned payload
@@ -70,7 +70,7 @@ describe('Authentication & Security Utilities', () => {
     const token = 'reg_test_' + Math.random().toString(36).substring(2, 8);
     pendingSessions.set(token, {
       sessionToken: token,
-      code: '8492',
+      code: '849201',
       authenticated: false,
       createdAt: Date.now(),
       attempts: 0,
@@ -78,17 +78,17 @@ describe('Authentication & Security Utilities', () => {
       token: 'mock-jwt-token'
     });
 
-    // 1. Wrong code
-    const wrong = verifyTelegramCode('1111', token);
+    // 1. Wrong code (6-digit)
+    const wrong = await verifyTelegramCode('111111', token);
     expect(wrong.success).toBe(false);
 
-    // 2. Correct code
-    const success = verifyTelegramCode('8492', token);
+    // 2. Correct code (6-digit)
+    const success = await verifyTelegramCode('849201', token);
     expect(success.success).toBe(true);
     expect(success.user?.name).toBe('Test User');
 
     // 3. Replay attack: cannot verify again with same code
-    const replay = verifyTelegramCode('8492', token);
+    const replay = await verifyTelegramCode('849201', token);
     expect(replay.success).toBe(false);
   });
 });

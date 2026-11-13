@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = 'Alisher Yusupov';
   String _userPhone = '+998 90 123 45 67';
   String _userId = 'TC-882109';
+  String _userPassport = 'AA 1234567';
   bool _notifications = true;
   int _savedCardsCount = 0;
   bool _isLoading = true;
@@ -38,21 +40,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (!mounted) return;
-      final provider = Provider.of<AppProvider>(context, listen: false);
-      await provider.apiService.ready;
-
-      final authenticated = provider.isAuthenticated;
-      final loggedIn = authenticated || (prefs.getBool('sayrhub_is_logged_in') ?? false);
-      final name = (authenticated && provider.userName.isNotEmpty)
-          ? provider.userName
-          : (prefs.getString('sayrhub_user_name') ?? 'Alisher Yusupov');
-      final phone = (authenticated && provider.userPhone.isNotEmpty)
-          ? provider.userPhone
-          : (prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67');
-      final tcId = (authenticated && provider.userTcId.isNotEmpty)
-          ? provider.userTcId
-          : (prefs.getString('sayrhub_user_id') ?? 'TC-882109');
+      final loggedIn = prefs.getBool('sayrhub_is_logged_in') ?? false;
+      final name = prefs.getString('sayrhub_user_name') ?? 'Alisher Yusupov';
+      final phone =
+          prefs.getString('sayrhub_user_phone') ?? '+998 90 123 45 67';
+      final tcId = prefs.getString('sayrhub_user_id') ?? 'TC-882109';
+      final passport =
+          prefs.getString('sayrhub_user_passport') ?? 'AA 1234567';
 
       final cardsRaw = prefs.getString('sayrhub_user_payment_cards');
       int cardsCount = 0;
@@ -60,16 +54,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         cardsCount = PaymentCard.decodeList(cardsRaw).length;
       }
 
-      if (mounted) {
-        setState(() {
-          _isLoggedIn = loggedIn;
-          _userName = name;
-          _userPhone = phone;
-          _userId = tcId;
-          _savedCardsCount = cardsCount;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isLoggedIn = loggedIn;
+        _userName = name;
+        _userPhone = phone;
+        _userId = tcId;
+        _userPassport = passport;
+        _savedCardsCount = cardsCount;
+        _isLoading = false;
+      });
     } catch (_) {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -78,10 +72,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
-    try {
-      final provider = Provider.of<AppProvider>(context, listen: false);
-      await provider.logout();
-    } catch (_) {}
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('sayrhub_is_logged_in', false);
@@ -619,7 +609,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildSettingItem(
                 icon: FlaticonIcons.badgeOutlined,
                 title: 'Pasport ma\'lumotlari',
-                subtitle: 'AA 1234567 • O\'zbekiston',
+                subtitle: '$_userPassport • O\'zbekiston',
                 onTap: () {
                   _showPassportDialog();
                 },
@@ -790,101 +780,241 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showPersonalInfoDialog() {
+    final nameController = TextEditingController(text: _userName);
+    final phoneController = TextEditingController(text: _userPhone);
+    final formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
-          'Shaxsiy Ma\'lumotlar',
+          'Shaxsiy Ma\'lumotlarni Tahrirlash',
           style: TextStyle(
             color: AppTheme.textMain,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDialogRow('Ism:', _userName),
-            const SizedBox(height: 8),
-            _buildDialogRow('Telefon:', _userPhone),
-            const SizedBox(height: 8),
-            _buildDialogRow('ID:', '#$_userId'),
-            const SizedBox(height: 8),
-            _buildDialogRow('Holat:', 'Tasdiqlangan'),
-          ],
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Name field - only letters
+                TextFormField(
+                  controller: nameController,
+                  textCapitalization: TextCapitalization.words,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r"[a-zA-Z\u00C0-\u024F\u2019'`ʻʼ\- ]"),
+                    ),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Ism va Familiya',
+                    hintText: 'Masalan: Alisher Yusupov',
+                    prefixIcon: Icon(Icons.person_outline, size: 20),
+                  ),
+                  validator: (value) {
+                    final v = value?.trim() ?? '';
+                    if (v.isEmpty) {
+                      return 'Ism va familiyani kiriting';
+                    }
+                    if (v.length < 3) {
+                      return 'Kamida 3 ta belgi';
+                    }
+                    if (!RegExp(r"^[a-zA-Z\u00C0-\u024F\u2019'`ʻʼ\- ]+$")
+                        .hasMatch(v)) {
+                      return "Faqat harflar, bo'sh joy va - belgilari";
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 14),
+                // Phone field - format +998 XX XXX XX XX
+                TextFormField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(12), // 998 + 9 digits
+                    _PhoneNumberFormatter(),
+                  ],
+                  decoration: const InputDecoration(
+                    labelText: 'Telefon raqam',
+                    hintText: '+998 XX XXX XX XX',
+                    prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                    prefixText: '+998 ',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Telefon raqamini kiriting';
+                    }
+                    final digits = value.replaceAll(RegExp(r'\D'), '');
+                    if (digits.length < 9) {
+                      return 'To\'liq raqam kiriting (9 ta raqam)';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text(
-              'Yopish',
-              style: TextStyle(color: AppTheme.primary),
+              'Bekor qilish',
+              style: TextStyle(color: AppTheme.textMuted),
             ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                await _savePersonalInfo(nameController.text.trim(), phoneController.text.trim());
+                if (mounted) Navigator.of(context).pop();
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+            child: const Text('Saqlash', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _savePersonalInfo(String name, String phone) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('sayrhub_user_name', name);
+      await prefs.setString('sayrhub_user_phone', phone);
+      if (!mounted) return;
+      setState(() {
+        _userName = name;
+        _userPhone = phone;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ma\'lumotlar saqlandi'),
+          backgroundColor: AppTheme.accentGreen,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Xatolik yuz berdi'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+    }
   }
 
   void _showPassportDialog() {
+    final passportController = TextEditingController(text: _userPassport);
+    final formKey = GlobalKey<FormState>();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppTheme.surfaceDark,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
-          'Pasport Ma\'lumotlari',
+          'Pasport Ma\'lumotlarini Tahrirlash',
           style: TextStyle(
             color: AppTheme.textMain,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDialogRow('Seriya & Raqam:', 'AA 1234567'),
-            const SizedBox(height: 8),
-            _buildDialogRow('Fuqarolik:', 'O\'zbekiston'),
-            const SizedBox(height: 8),
-            _buildDialogRow('Amal qilish muddati:', '2032-10-15'),
-          ],
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: passportController,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9\s]')),
+                  LengthLimitingTextInputFormatter(10), // AA 1234567 = 10 chars with space
+                  _PassportFormatter(),
+                ],
+                decoration: const InputDecoration(
+                  labelText: 'Pasport seriya va raqam',
+                  hintText: 'AA 1234567',
+                  prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Pasport ma\'lumotlarini kiriting';
+                  }
+                  // Format: 2 letters + 7 digits (with optional space)
+                  final cleaned = value.replaceAll(' ', '').toUpperCase();
+                  if (!RegExp(r'^[A-Z]{2}\d{7}$').hasMatch(cleaned)) {
+                    return 'Format: 2 harf + 7 raqam (masalan: AA1234567)';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Format: 2 ta katta harf (avtomatik) + 7 ta raqam\nMisol: AA 1234567',
+                style: TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Yopish',
-              style: TextStyle(color: AppTheme.primary),
-            ),
+            child: const Text('Bekor qilish', style: TextStyle(color: AppTheme.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                await _savePassportInfo(passportController.text.trim());
+                if (mounted) Navigator.of(context).pop();
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+            child: const Text('Saqlash', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDialogRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: AppTheme.textSub, fontSize: 12),
+  Future<void> _savePassportInfo(String passport) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Save formatted: AA 1234567
+      final cleaned = passport.replaceAll(' ', '').toUpperCase();
+      final formatted = '${cleaned.substring(0, 2)} ${cleaned.substring(2)}';
+      await prefs.setString('sayrhub_user_passport', formatted);
+      if (!mounted) return;
+      setState(() => _userPassport = formatted);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pasport ma\'lumotlari saqlandi'),
+          backgroundColor: AppTheme.accentGreen,
+          duration: Duration(seconds: 2),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            color: AppTheme.textMain,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Xatolik yuz berdi'),
+          backgroundColor: AppTheme.accentRed,
         ),
-      ],
-    );
+      );
+    }
   }
 
   Widget _buildStatTile(String value, String label, IconData icon) {
@@ -976,6 +1106,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
         onTap: onTap,
       ),
+    );
+  }
+}
+
+class _PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return newValue;
+    
+    String formatted = '';
+    if (digits.length <= 2) {
+      formatted = digits;
+    } else if (digits.length <= 5) {
+      formatted = '${digits.substring(0, 2)} ${digits.substring(2)}';
+    } else if (digits.length <= 7) {
+      formatted = '${digits.substring(0, 2)} ${digits.substring(2, 5)} ${digits.substring(5)}';
+    } else {
+      formatted = '${digits.substring(0, 2)} ${digits.substring(2, 5)} ${digits.substring(5, 7)} ${digits.substring(7, digits.length > 9 ? 9 : digits.length)}';
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class _PassportFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final raw = newValue.text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (raw.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final buffer = StringBuffer();
+    for (final ch in raw.split('')) {
+      if (buffer.length < 2) {
+        if (RegExp(r'[A-Z]').hasMatch(ch)) buffer.write(ch);
+      } else if (buffer.length < 9) {
+        if (RegExp(r'[0-9]').hasMatch(ch)) buffer.write(ch);
+      } else {
+        break;
+      }
+    }
+
+    final cleaned = buffer.toString();
+    String formatted;
+    if (cleaned.length <= 2) {
+      formatted = cleaned;
+    } else {
+      formatted = '${cleaned.substring(0, 2)} ${cleaned.substring(2)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

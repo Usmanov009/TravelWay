@@ -71,7 +71,7 @@ router.post('/tours', authenticateToken, requireRole(...adminRoles), requireData
     const savedTour = await TourModel.findOneAndUpdate(
       { id: String(tour.id) },
       { $set: tourData },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
     return res.json({ success: true, tour: savedTour });
   } catch (error) {
@@ -122,7 +122,7 @@ router.post('/catalog/:kind', authenticateToken, requireRole(...adminRoles), req
     await CatalogItemModel.findOneAndUpdate(
       { kind, id: String(item.id) },
       { $set: { data: item } },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     );
     return res.json({ success: true, item });
   } catch (error) {
@@ -145,21 +145,19 @@ router.delete('/catalog/:kind/:id', authenticateToken, requireRole(...adminRoles
   }
 });
 
-router.get('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+router.get('/bookings', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
   try {
     let query: any = {};
     if (isAdmin(req)) {
-      query = {};
-    } else if (req.user) {
-      query = { travelerId: req.user.id };
-    } else if (req.query.voucherId) {
-      query = { voucherId: String(req.query.voucherId) };
-    } else if (req.query.travelerId) {
-      query = { travelerId: String(req.query.travelerId) };
-    } else if (req.query.phone) {
-      query = { travelerPhone: String(req.query.phone) };
+      if (req.query.voucherId) query.voucherId = String(req.query.voucherId);
+      if (req.query.travelerId) query.travelerId = String(req.query.travelerId);
+      if (req.query.phone) query.travelerPhone = String(req.query.phone);
     } else {
-      query = {};
+      // SEC-01 FIX: Non-admins strictly access ONLY their own bookings
+      query = { travelerId: req.user!.id };
+      if (req.query.voucherId) {
+        query.voucherId = String(req.query.voucherId);
+      }
     }
     const bookings = await BookingModel.find(query).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, count: bookings.length, bookings });
@@ -168,7 +166,7 @@ router.get('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, 
   }
 });
 
-router.post('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+router.post('/bookings', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
   const booking = req.body;
   if (!booking?.id || !booking?.tourTitle) {
     return res.status(400).json({ success: false, error: 'Bron ID va tur nomi kiritilishi shart.' });
@@ -176,35 +174,42 @@ router.post('/bookings', optionalAuth, requireDatabase, async (req: AuthRequest,
   try {
     const travelerId = isAdmin(req)
       ? (booking.travelerId || req.user?.id || 'guest')
-      : (req.user?.id || booking.travelerId || 'guest');
+      : (req.user?.id || 'guest');
     const savedBooking = await BookingModel.findOneAndUpdate(
       { id: String(booking.id) },
       { $set: { ...booking, travelerId } },
       { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
+
+    // Asynchronously notify traveler & admin via Telegram
+    import('../../../telegramBot.js')
+      .then(({ notifyBookingCreated }) => notifyBookingCreated(savedBooking))
+      .catch(() => {});
+
     return res.json({ success: true, booking: savedBooking });
   } catch (error) {
     return sendDatabaseError(res, error);
   }
 });
 
-router.put('/bookings/:id', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
-  const query = isAdmin(req) || !req.user
+router.put('/bookings/:id', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
+  const isUserAdmin = isAdmin(req);
+  const query = isUserAdmin
     ? { id: req.params.id }
-    : { id: req.params.id, travelerId: req.user.id };
-  const update = isAdmin(req)
+    : { id: req.params.id, travelerId: req.user!.id };
+  const update = isUserAdmin
     ? req.body
     : {
       status: 'Bekor qilingan',
       type: 'cancelled',
-      cancellationReason: String(req.body.cancellationReason || ''),
+      cancellationReason: String(req.body.cancellationReason || 'Mijoz tomonidan bekor qilindi'),
       cancelledAt: String(req.body.cancelledAt || new Date().toISOString()),
     };
   try {
     const booking = await BookingModel.findOneAndUpdate(
       query,
       { $set: update },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     ).lean();
     return booking
       ? res.json({ success: true, booking })
@@ -228,11 +233,11 @@ router.delete('/bookings/:id', authenticateToken, requireDatabase, requireActive
   }
 });
 
-router.get('/price-alerts', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+router.get('/price-alerts', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const query = isAdmin(req) || !req.user
+    const query = isAdmin(req)
       ? (req.query.userId ? { userId: String(req.query.userId) } : {})
-      : { userId: req.user.id };
+      : { userId: req.user!.id };
     const alerts = await PriceAlertModel.find(query).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, count: alerts.length, alerts });
   } catch (error) {
@@ -240,13 +245,13 @@ router.get('/price-alerts', optionalAuth, requireDatabase, async (req: AuthReque
   }
 });
 
-router.post('/price-alerts', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+router.post('/price-alerts', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
   const alert = req.body;
   if (!alert?.id || !alert?.tourId) {
     return res.status(400).json({ success: false, error: 'Narx signali ID va tur ID talab qiladi.' });
   }
   try {
-    const userId = req.user?.id || alert.userId || 'guest';
+    const userId = isAdmin(req) ? (alert.userId || req.user!.id) : req.user!.id;
     const savedAlert = await PriceAlertModel.findOneAndUpdate(
       { id: String(alert.id) },
       { $set: { ...alert, userId } },
@@ -258,11 +263,11 @@ router.post('/price-alerts', optionalAuth, requireDatabase, async (req: AuthRequ
   }
 });
 
-router.delete('/price-alerts/:id', optionalAuth, requireDatabase, async (req: AuthRequest, res) => {
+router.delete('/price-alerts/:id', authenticateToken, requireDatabase, async (req: AuthRequest, res) => {
   try {
-    const query = isAdmin(req) || !req.user
+    const query = isAdmin(req)
       ? { id: req.params.id }
-      : { id: req.params.id, userId: req.user?.id };
+      : { id: req.params.id, userId: req.user!.id };
     const result = await PriceAlertModel.deleteOne(query);
     return result.deletedCount
       ? res.json({ success: true })
@@ -325,6 +330,7 @@ router.post('/users', authenticateToken, requireDatabase, requireActiveUser, asy
   if (!user?.tcId || req.user?.role !== 'user' || req.user.id !== user.tcId) {
     return res.status(403).json({ success: false, error: 'Faqat o‘z profilingizni saqlashingiz mumkin.' });
   }
+  // SEC-03 FIX: Exclude cashbackBalance and isVerified from client update to prevent fraud
   const profile = {
     tcId: String(user.tcId),
     name: String(user.name || ''),
@@ -335,16 +341,14 @@ router.post('/users', authenticateToken, requireDatabase, requireActiveUser, asy
     passportNumber: String(user.passportNumber || ''),
     passportExpiry: String(user.passportExpiry || ''),
     dob: String(user.dob || ''),
-    cashbackBalance: Number(user.cashbackBalance ?? user.cashback ?? 0),
-    isVerified: Boolean(user.isVerified),
     favoriteTourIds: Array.isArray(user.favoriteTourIds) ? user.favoriteTourIds.map(String) : [],
     paymentCards: Array.isArray(user.paymentCards) ? user.paymentCards : [],
   };
   try {
     const savedUser = await UserModel.findOneAndUpdate(
       { tcId: profile.tcId },
-      { $set: profile, $setOnInsert: { status: 'active' } },
-      { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+      { $set: profile, $setOnInsert: { status: 'active', cashbackBalance: 0, isVerified: false } },
+      { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
     ).lean();
     return res.json({ success: true, user: savedUser });
   } catch (error) {
@@ -361,7 +365,7 @@ router.patch('/users/:tcId/status', authenticateToken, requireRole('main_admin')
     const user = await UserModel.findOneAndUpdate(
       { tcId: req.params.tcId },
       { $set: { status } },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     ).lean();
     return user
       ? res.json({ success: true, user })

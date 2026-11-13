@@ -14,6 +14,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Qidiruv'), findsWidgets);
+    // Splash screen shows "SayrHub" initially
+    expect(find.text('SayrHub'), findsWidgets);
   });
 }

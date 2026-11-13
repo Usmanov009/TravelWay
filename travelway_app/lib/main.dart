@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
 import 'utils/app_theme.dart';
-import 'screens/main_navigation_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +38,7 @@ class SayrHubApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
-      home: const MainNavigationScreen(),
+      home: const SplashScreen(),
     );
   }
 }

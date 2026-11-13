@@ -65,8 +65,8 @@ class Booking {
       flight: json['flight']?.toString() ?? 'Uzbekistan Airways',
       airline: json['airline']?.toString() ?? 'Uzbekistan Airways',
       nightsCount: (json['nightsCount'] is num) ? (json['nightsCount'] as num).toInt() : 7,
-      passport: json['travelerPassport']?.toString() ?? json['passport']?.toString() ?? '',
-      phone: json['travelerPhone']?.toString() ?? json['phone']?.toString() ?? '',
+      passport: json['passport']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
       guestsCount: (json['guestsCount'] is num) ? (json['guestsCount'] as num).toInt() : 2,
       adultsCount: (json['adultsCount'] is num) ? (json['adultsCount'] as num).toInt() : 2,
       childrenCount: (json['childrenCount'] is num) ? (json['childrenCount'] as num).toInt() : 0,
@@ -92,10 +92,6 @@ class Booking {
       'flight': flight,
       'airline': airline,
       'nightsCount': nightsCount,
-      // Backend `Booking` sxemasi maydonlari
-      'travelerPassport': passport,
-      'travelerPhone': phone,
-      // Eski mijozlar uchun mos maydonlar
       'passport': passport,
       'phone': phone,
       'guestsCount': guestsCount,

@@ -90,29 +90,29 @@ app.use('/api/db', dbRouter);
 app.use('/api/admin', adminRouter);
 
 // Telegram Authentication & Deep Link Webhook
-app.post('/api/auth/telegram/create-session', (req, res) => {
+app.post('/api/auth/telegram/create-session', async (req, res) => {
   try {
-    const session = createTelegramAuthSession();
+    const session = await createTelegramAuthSession();
     res.json({ success: true, ...session });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-app.get('/api/auth/telegram/check-session', (req, res) => {
+app.get('/api/auth/telegram/check-session', async (req, res) => {
   try {
     const sessionToken = (req.query.sessionToken as string) || '';
-    const result = checkTelegramAuthSession(sessionToken);
+    const result = await checkTelegramAuthSession(sessionToken);
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-app.post('/api/auth/telegram/verify-code', (req, res) => {
+app.post('/api/auth/telegram/verify-code', async (req, res) => {
   try {
     const { code, sessionToken } = req.body;
-    const result = verifyTelegramCode(code, sessionToken);
+    const result = await verifyTelegramCode(code, sessionToken);
     res.json(result);
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });

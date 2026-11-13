@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from 'crypto';
-import { getDBStatus, UserModel } from './db.js';
+import { getDBStatus, UserModel, TelegramSessionModel } from './db.js';
 import { generateToken } from './src/server/auth.js';
 
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -15,67 +15,133 @@ export interface PendingTelegramSession {
   attempts: number;
 }
 
-// In-memory session tracking and active verification codes
+// Resilient memory cache (synchronized with MongoDB TTL collection)
 export const pendingSessions = new Map<string, PendingTelegramSession>();
 export const userChatSessions = new Map<number | string, string>(); // chatId -> sessionToken
 
 /**
  * Creates a unique registration/login session linked to Telegram deep linking
+ * Persisted in MongoDB with a 15-minute TTL index
  */
-export function createTelegramAuthSession() {
+export async function createTelegramAuthSession() {
   const sessionToken = 'reg_' + randomBytes(16).toString('hex');
-  const session: PendingTelegramSession = {
+  const now = Date.now();
+
+  try {
+    if (getDBStatus().connected) {
+      await TelegramSessionModel.create({
+        sessionToken,
+        authenticated: false,
+        attempts: 0,
+        createdAt: new Date(),
+      });
+    }
+  } catch (err: any) {
+    console.warn('MongoDB session create failed, using memory fallback:', err?.message || err);
+  }
+
+  // Dual-write to in-memory map for instantaneous latency & fallback
+  pendingSessions.set(sessionToken, {
     sessionToken,
     authenticated: false,
-    createdAt: Date.now(),
-    attempts: 0
-  };
-  pendingSessions.set(sessionToken, session);
+    createdAt: now,
+    attempts: 0,
+  });
 
-  // Clean old sessions (> 30 mins)
-  const now = Date.now();
+  // Clean old in-memory sessions (> 15 mins)
   for (const [key, s] of pendingSessions.entries()) {
-    if (now - s.createdAt > 30 * 60 * 1000) {
+    if (now - s.createdAt > 15 * 60 * 1000) {
       pendingSessions.delete(key);
     }
   }
 
-  // NOTE: 'code' is NEVER returned here to prevent OTP leakage.
-  // The OTP code is securely delivered strictly to the user's Telegram chat.
   return {
     sessionToken,
     botUsername: TELEGRAM_BOT_USERNAME,
-    deepLink: `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${sessionToken}`
+    deepLink: `https://t.me/${TELEGRAM_BOT_USERNAME}?start=${sessionToken}`,
   };
 }
 
 /**
  * Checks if a session was authenticated by the Telegram bot
  */
-export function checkTelegramAuthSession(sessionToken: string) {
+export async function checkTelegramAuthSession(sessionToken: string) {
+  if (!sessionToken) {
+    return { success: false, authenticated: false, error: 'Sessiya belgilanmadi' };
+  }
+
+  try {
+    if (getDBStatus().connected) {
+      const dbSession = await TelegramSessionModel.findOne({ sessionToken }).lean();
+      if (dbSession) {
+        return {
+          success: true,
+          authenticated: (dbSession as any).authenticated,
+          user: (dbSession as any).user || null,
+          token: (dbSession as any).token || null,
+        };
+      }
+    }
+  } catch (err: any) {
+    console.warn('MongoDB check session failed, checking memory fallback:', err?.message || err);
+  }
+
   const session = pendingSessions.get(sessionToken);
   if (!session) {
-    return { success: false, authenticated: false, error: 'Sessiya topilmadi' };
+    return { success: false, authenticated: false, error: 'Sessiya topilmadi yoki muddati tugagan' };
   }
   return {
     success: true,
     authenticated: session.authenticated,
     user: session.user || null,
-    token: session.token || null
+    token: session.token || null,
   };
 }
 
 /**
- * Verifies 4-digit code entered manually by the user
+ * Verifies 6-digit code entered manually by the user
  */
-export function verifyTelegramCode(code: string, sessionToken?: string) {
+export async function verifyTelegramCode(code: string, sessionToken?: string) {
   const cleanCode = (code || '').trim();
-  if (!cleanCode || cleanCode.length < 4) {
-    return { success: false, error: "Tasdiqlash kodi 4 xonali bo'lishi kerak" };
+  if (!cleanCode || cleanCode.length < 6) {
+    return { success: false, error: "Tasdiqlash kodi 6 xonali bo'lishi kerak" };
   }
 
   if (!sessionToken) {
     return { success: false, error: "Sessiya identifikatori (sessionToken) ko'rsatilmadi" };
+  }
+
+  try {
+    if (getDBStatus().connected) {
+      const dbSession = await TelegramSessionModel.findOne({ sessionToken });
+      if (dbSession) {
+        if (dbSession.attempts >= 5) {
+          await TelegramSessionModel.deleteOne({ sessionToken });
+          pendingSessions.delete(sessionToken);
+          return { success: false, error: "Ko'p marotaba noto'g'ri kod kiritildi. Iltimos, yangi sessiya oching." };
+        }
+
+        if (dbSession.code && dbSession.code === cleanCode) {
+          dbSession.authenticated = true;
+          const user = dbSession.user;
+          const token = dbSession.token;
+          dbSession.code = undefined; // Prevent replay attacks
+          await dbSession.save();
+          pendingSessions.delete(sessionToken);
+          return { success: true, user, token };
+        }
+
+        dbSession.attempts = (dbSession.attempts || 0) + 1;
+        await dbSession.save();
+        const remaining = Math.max(0, 5 - dbSession.attempts);
+        return {
+          success: false,
+          error: `Tasdiqlash kodi noto'g'ri! Qolgan urinishlar: ${remaining}`,
+        };
+      }
+    }
+  } catch (err: any) {
+    console.warn('MongoDB verifyTelegramCode failed, checking memory fallback:', err?.message || err);
   }
 
   const session = pendingSessions.get(sessionToken);
@@ -98,9 +164,9 @@ export function verifyTelegramCode(code: string, sessionToken?: string) {
 
   session.attempts = (session.attempts || 0) + 1;
   const remaining = Math.max(0, 5 - session.attempts);
-  return { 
-    success: false, 
-    error: `Tasdiqlash kodi noto'g'ri! Qolgan urinishlar: ${remaining}` 
+  return {
+    success: false,
+    error: `Tasdiqlash kodi noto'g'ri! Qolgan urinishlar: ${remaining}`,
   };
 }
 
@@ -131,6 +197,58 @@ export async function sendTelegramMessage(chatId: number | string, text: string,
 }
 
 /**
+ * Notifies customer and admin on Telegram when a booking is placed
+ */
+export async function notifyBookingCreated(booking: any) {
+  if (!TELEGRAM_BOT_TOKEN || !booking) return;
+  try {
+    const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+    const travelerId = booking.travelerId;
+    let userChatId: string | null = null;
+    if (travelerId && travelerId !== 'guest') {
+      const u = await UserModel.findOne({ tcId: travelerId }).select('telegramId').lean() as any;
+      if (u?.telegramId) {
+        userChatId = String(u.telegramId);
+      }
+    }
+
+    const bookingText =
+      `🎉 <b>Yangi sayohat buyurtmasi qabul qilindi!</b>\n\n` +
+      `🎫 <b>Tur:</b> ${booking.tourTitle || 'Noma\'lum tur'}\n` +
+      `📍 <b>Manzil:</b> ${booking.dest || '-'}\n` +
+      `📅 <b>Sana:</b> ${booking.dates || '-'}\n` +
+      `👤 <b>Mijoz:</b> ${booking.travelerName || 'Hurmatli mijoz'}\n` +
+      `📞 <b>Telefon:</b> ${booking.travelerPhone || '-'}\n` +
+      `💰 <b>Narxi:</b> ${booking.price || '-'}\n` +
+      `🧾 <b>Vaucher ID:</b> <code>${booking.voucherId || booking.id}</code>\n` +
+      `⚡ <b>Holati:</b> ${booking.status || 'Jarayonda'}\n\n` +
+      `<i>SayrHub jamoasi tez orada siz bilan bog'lanadi!</i>`;
+
+    if (userChatId) {
+      await sendTelegramMessage(userChatId, bookingText, {
+        inline_keyboard: [
+          [{ text: "📱 SayrHub ilovasiga o'tish", url: "https://sayrhub.uz" }]
+        ]
+      });
+    }
+
+    if (adminChatId) {
+      const adminText =
+        `🔔 <b>[ADMIN XABARNOMA] Yangi buyurtma kelib tushdi!</b>\n\n` +
+        `🎫 <b>Tur:</b> ${booking.tourTitle || '-'}\n` +
+        `👤 <b>Mijoz:</b> ${booking.travelerName || '-'} (${booking.travelerPhone || '-'})\n` +
+        `💰 <b>Summa:</b> ${booking.price || '-'}\n` +
+        `🧾 <b>Vaucher:</b> <code>${booking.voucherId || booking.id}</code>\n` +
+        `📅 <b>Sanalar:</b> ${booking.dates || '-'}\n\n` +
+        `<i>Admin panel orqali tasdiqlashingiz mumkin.</i>`;
+      await sendTelegramMessage(adminChatId, adminText);
+    }
+  } catch (err: any) {
+    console.warn('Booking Telegram notification warning:', err?.message || err);
+  }
+}
+
+/**
  * Processes incoming webhook or polling updates from Telegram
  */
 export async function processTelegramUpdate(update: any) {
@@ -147,6 +265,12 @@ export async function processTelegramUpdate(update: any) {
     const sessionParam = parts[1];
     if (sessionParam) {
       userChatSessions.set(chatId, sessionParam);
+      if (getDBStatus().connected) {
+        TelegramSessionModel.updateOne(
+          { sessionToken: sessionParam },
+          { $set: { chatId: String(chatId) } }
+        ).catch(() => {});
+      }
     }
 
     const firstName = user.first_name || 'Hurmatli foydalanuvchi';
@@ -178,7 +302,8 @@ export async function processTelegramUpdate(update: any) {
 
     const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'SayrHub Mijoz';
     const tgUsername = user.username ? `@${user.username}` : '';
-    const otpCode = String(randomInt(1000, 10000));
+    // SEC-06 FIX: Upgrade OTP from 4 to 6 digits (100000 - 999999)
+    const otpCode = String(randomInt(100000, 1000000));
 
     if (!getDBStatus().connected) {
       await sendTelegramMessage(chatId, 'Hozircha baza bilan aloqa yo‘q. Iltimos, keyinroq qayta urinib ko‘ring.');
@@ -208,7 +333,7 @@ export async function processTelegramUpdate(update: any) {
             citizenship: "O'zbekiston"
           }
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       );
     } catch (error) {
       console.error('MongoDB save telegram user failed:', error);
@@ -223,20 +348,40 @@ export async function processTelegramUpdate(update: any) {
       name: dbUser.name
     }, '30d');
 
-    // Attach to pending session if exists
+    // Attach to pending session in MongoDB and memory
     const sessionToken = userChatSessions.get(chatId);
-    if (sessionToken && pendingSessions.has(sessionToken)) {
-      const sess = pendingSessions.get(sessionToken)!;
-      sess.authenticated = true;
-      sess.user = dbUser;
-      sess.token = userToken;
-      sess.code = otpCode;
+    if (sessionToken) {
+      if (getDBStatus().connected) {
+        try {
+          await TelegramSessionModel.updateOne(
+            { sessionToken },
+            {
+              $set: {
+                chatId: String(chatId),
+                authenticated: true,
+                user: dbUser,
+                token: userToken,
+                code: otpCode,
+              }
+            }
+          );
+        } catch (e) {
+          console.error('Failed to sync session with MongoDB:', e);
+        }
+      }
+      if (pendingSessions.has(sessionToken)) {
+        const sess = pendingSessions.get(sessionToken)!;
+        sess.authenticated = true;
+        sess.user = dbUser;
+        sess.token = userToken;
+        sess.code = otpCode;
+      }
     }
 
     const successText = `✅ <b>Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!</b>\n\n` +
       `👤 <b>Ism:</b> ${fullName}\n` +
       `📱 <b>Telefon:</b> ${rawPhone}\n\n` +
-      `🔑 <b>Sizning tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
+      `🔑 <b>Sizning 6 xonali tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
       `<i>SayrHub mobil ilovasida ushbu kodni kiriting:</i>`;
 
     await sendTelegramMessage(chatId, successText, {
@@ -254,7 +399,8 @@ export async function processTelegramUpdate(update: any) {
       const formattedPhone = '+' + (digitsOnly.startsWith('998') ? digitsOnly : '998' + digitsOnly);
       const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'SayrHub Mijoz';
       const tgUsername = user.username ? `@${user.username}` : '';
-      const otpCode = String(randomInt(1000, 10000));
+      // SEC-06 FIX: Upgrade OTP from 4 to 6 digits (100000 - 999999)
+      const otpCode = String(randomInt(100000, 1000000));
 
       if (!getDBStatus().connected) {
         await sendTelegramMessage(chatId, 'Hozircha baza bilan aloqa yo‘q. Iltimos, keyinroq qayta urinib ko‘ring.');
@@ -284,7 +430,7 @@ export async function processTelegramUpdate(update: any) {
               citizenship: "O'zbekiston"
             }
           },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         );
       } catch (error) {
         console.error('MongoDB save Telegram user failed:', error);
@@ -300,16 +446,36 @@ export async function processTelegramUpdate(update: any) {
       }, '30d');
 
       const sessionToken = userChatSessions.get(chatId);
-      if (sessionToken && pendingSessions.has(sessionToken)) {
-        const sess = pendingSessions.get(sessionToken)!;
-        sess.authenticated = true;
-        sess.user = dbUser;
-        sess.token = userToken;
-        sess.code = otpCode;
+      if (sessionToken) {
+        if (getDBStatus().connected) {
+          try {
+            await TelegramSessionModel.updateOne(
+              { sessionToken },
+              {
+                $set: {
+                  chatId: String(chatId),
+                  authenticated: true,
+                  user: dbUser,
+                  token: userToken,
+                  code: otpCode,
+                }
+              }
+            );
+          } catch (e) {
+            console.error('Failed to sync session with MongoDB:', e);
+          }
+        }
+        if (pendingSessions.has(sessionToken)) {
+          const sess = pendingSessions.get(sessionToken)!;
+          sess.authenticated = true;
+          sess.user = dbUser;
+          sess.token = userToken;
+          sess.code = otpCode;
+        }
       }
 
       const reply = `✅ <b>Telefon raqamingiz qabul qilindi!</b>\n\n` +
-        `🔑 <b>Tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
+        `🔑 <b>Sizning 6 xonali tasdiqlash kodingiz:</b> <code>${otpCode}</code>\n\n` +
         `<i>Ilovada ushbu kodni kiriting.</i>`;
 
       await sendTelegramMessage(chatId, reply, {

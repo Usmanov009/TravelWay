@@ -9,7 +9,7 @@ export async function initAgencySettings(): Promise<void> {
   const doc = await AgencySettingsModel.findOneAndUpdate(
     { key: 'global_settings' },
     { $setOnInsert: { agencyCommissionRate: 0 } },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
   ).lean() as { agencyCommissionRate?: number } | null;
   if (!doc || typeof doc.agencyCommissionRate !== 'number') {
     throw new Error('Agency commission settings are missing or invalid');
@@ -34,7 +34,7 @@ export async function setAgencyCommissionRate(rate: number, updatedBy?: string):
       updatedBy: updatedBy || 'admin',
       updatedAt: new Date()
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+    { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
   ).lean() as { agencyCommissionRate?: number } | null;
   if (!doc || typeof doc.agencyCommissionRate !== 'number') {
     throw new Error('Failed to persist agency commission settings');

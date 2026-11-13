@@ -1,4 +1,3 @@
-import '../utils/country_utils.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -445,11 +444,12 @@ class _HotDealsScreenState extends State<HotDealsScreen> {
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              Text(
-                                getCountryFlag(deal.location),
-                                style: const TextStyle(fontSize: 12),
+                              const Icon(
+                                FlaticonIcons.locationOn,
+                                size: 12,
+                                color: AppTheme.primary,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 3),
                               Expanded(
                                 child: Text(
                                   deal.location,

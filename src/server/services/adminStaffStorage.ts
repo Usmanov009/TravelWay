@@ -113,7 +113,7 @@ export async function saveStaff(
   const saved = await AdminStaffModel.findOneAndUpdate(
     { id },
     { $set: record },
-    { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
+    { upsert: true, returnDocument: 'after', runValidators: true, setDefaultsOnInsert: true },
   );
   return { success: true, staff: sanitizeStaff(saved) };
 }

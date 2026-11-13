@@ -6,9 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:provider/provider.dart';
-
-import '../providers/app_provider.dart';
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/flaticon_icons.dart';
@@ -131,32 +128,32 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
         'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
     String verifiedPassport = '';
 
-    if (_sessionToken == null) {
-      await _initSession();
-    }
+    try {
+      final baseUrl = ApiService().baseUrl;
+      final res = await http
+          .post(
+            Uri.parse('$baseUrl/api/auth/telegram/verify-code'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'code': code,
+              'sessionToken': _sessionToken ?? 'session_default',
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
 
-    if (!mounted) return;
-    final provider = Provider.of<AppProvider>(context, listen: false);
-    final result = await provider.verifyTelegramLogin(
-      code: code,
-      sessionToken: _sessionToken ?? '',
-    );
-
-    if (result.success && result.user != null) {
-      final u = result.user!;
-      verifiedName = u['name']?.toString() ?? verifiedName;
-      verifiedPhone = u['phone']?.toString() ?? verifiedPhone;
-      verifiedTcId = u['tcId']?.toString() ?? verifiedTcId;
-      verifiedPassport = u['passportNumber']?.toString() ?? '';
-    } else if (result.error != null) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result.error!), backgroundColor: Colors.red.shade700),
-        );
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (data['success'] == true && data['user'] != null) {
+          final u = data['user'];
+          verifiedName = u['name'] ?? 'Mijoz';
+          verifiedPhone = u['phone'] ?? '+998 90 000 00 00';
+          verifiedTcId =
+              u['tcId'] ??
+              'TC-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+          verifiedPassport = u['passportNumber'] ?? '';
+        }
       }
-      return;
-    }
+    } catch (_) {}
 
     String fn = '';
     String ln = '';
@@ -230,16 +227,6 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('sayrhub_user_passport', pass);
     } catch (_) {}
-
-    if (mounted) {
-      final provider = Provider.of<AppProvider>(context, listen: false);
-      await provider.updateProfile(
-        name: fullName,
-        phone: _verifiedPhone,
-        passport: pass,
-        tcId: _verifiedTcId,
-      );
-    }
 
     _completeLogin(fullName, _verifiedPhone, _verifiedTcId);
   }
@@ -542,6 +529,11 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
                     TextField(
                       controller: _passportController,
                       textCapitalization: TextCapitalization.characters,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
+                        LengthLimitingTextInputFormatter(10),
+                        _TelegramPassportFormatter(),
+                      ],
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -889,6 +881,46 @@ class _TelegramLoginSheetState extends State<TelegramLoginSheet>
           ],
         ),
       ),
+    );
+  }
+}
+
+class _TelegramPassportFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final raw = newValue.text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (raw.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final buffer = StringBuffer();
+    for (final ch in raw.split('')) {
+      if (buffer.length < 2) {
+        if (RegExp(r'[A-Z]').hasMatch(ch)) buffer.write(ch);
+      } else if (buffer.length < 9) {
+        if (RegExp(r'[0-9]').hasMatch(ch)) buffer.write(ch);
+      } else {
+        break;
+      }
+    }
+
+    final cleaned = buffer.toString();
+    String formatted;
+    if (cleaned.length <= 2) {
+      formatted = cleaned;
+    } else {
+      formatted = '${cleaned.substring(0, 2)} ${cleaned.substring(2)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

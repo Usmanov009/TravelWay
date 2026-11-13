@@ -28,6 +28,18 @@ class TourBookingScreen extends StatefulWidget {
 }
 
 class _TourBookingScreenState extends State<TourBookingScreen> {
+  static final RegExp _nameCharRegExp =
+      RegExp(r"[a-zA-Z\u00C0-\u024F\u2019'`?'\- ]");
+
+  static String _normalizePassport(String input) {
+    final cleaned = input.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (cleaned.length < 2) return cleaned;
+    final letters = cleaned.substring(0, 2).replaceAll(RegExp(r'[^A-Z]'), '');
+    final digits = cleaned.substring(2).replaceAll(RegExp(r'[^0-9]'), '');
+    final combined = '$letters$digits';
+    if (combined.length <= 2) return combined;
+    return '${combined.substring(0, 2)} ${combined.substring(2, combined.length > 9 ? 9 : combined.length)}';
+  }
   // Stepper state
   late int _adultsCount;
   late int _childrenCount;
@@ -178,12 +190,21 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
   Future<void> _submitBooking() async {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
-    final passport = _passportController.text.trim().toUpperCase();
+    final passport = _normalizePassport(_passportController.text);
 
     if (name.isEmpty || name.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Iltimos, ism va familiyangizni to\'liq kiriting'),
+          backgroundColor: AppTheme.accentRed,
+        ),
+      );
+      return;
+    }
+    if (!RegExp(r"^[a-zA-Z\u00C0-\u024F\u2019'`?'\- ]+$").hasMatch(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ism va familiyada faqat harflar bo\'lishi kerak'),
           backgroundColor: AppTheme.accentRed,
         ),
       );
@@ -201,17 +222,19 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
       return;
     }
 
-    if (passport.isEmpty || passport.length < 6) {
+    final passportClean = passport.replaceAll(' ', '');
+    if (!RegExp(r'^[A-Z]{2}\d{7}$').hasMatch(passportClean)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Iltimos, xorijiy pasport seriya va raqamini kiriting (masalan: FA 1234567)',
+            'Pasport formati: 2 ta harf va 7 ta raqam (masalan: AA 1234567)',
           ),
           backgroundColor: AppTheme.accentRed,
         ),
       );
       return;
     }
+    _passportController.text = passport;
 
     setState(() => _isSubmitting = true);
 
@@ -258,6 +281,10 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
 
     await provider.createBooking(newBooking);
 
+    // Add to favorites and cart for persistence across app restarts
+    await provider.toggleFavorite(widget.tour.id);
+    await provider.addToCart(widget.tour.id, quantity: _totalGuests);
+
     if (mounted) {
       setState(() {
         _isSubmitting = false;
@@ -301,7 +328,16 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
   @override
   Widget build(BuildContext context) {
     if (_completedBooking != null) {
-      return _buildSuccessScreen(_completedBooking!);
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          final provider = Provider.of<AppProvider>(context, listen: false);
+          provider.setTabIndex(3);
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        },
+        child: _buildSuccessScreen(_completedBooking!),
+      );
     }
 
     final formattedUzs = (_totalPrice * 12850).toString().replaceAllMapped(
@@ -931,6 +967,9 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
           TextFormField(
             controller: _nameController,
             textCapitalization: TextCapitalization.words,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(_nameCharRegExp),
+            ],
             decoration: const InputDecoration(
               labelText: 'Ism va Familiya (pasport bo\'yicha)',
               hintText: 'Masalan: Alisher Yusupov',
@@ -959,6 +998,11 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
                 child: TextFormField(
                   controller: _passportController,
                   textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
+                    LengthLimitingTextInputFormatter(10),
+                    _BookingPassportFormatter(),
+                  ],
                   decoration: const InputDecoration(
                     labelText: 'Pasport seriya / raqam',
                     hintText: 'AA 1234567',
@@ -1078,6 +1122,9 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
                     TextFormField(
                       controller: _extraNameControllers[index],
                       textCapitalization: TextCapitalization.words,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(_nameCharRegExp),
+                      ],
                       decoration: InputDecoration(
                         isDense: true,
                         labelText: 'Ism va Familiya',
@@ -1092,6 +1139,11 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
                     TextFormField(
                       controller: _extraPassportControllers[index],
                       textCapitalization: TextCapitalization.characters,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
+                        LengthLimitingTextInputFormatter(10),
+                        _BookingPassportFormatter(),
+                      ],
                       decoration: InputDecoration(
                         isDense: true,
                         labelText: 'Pasport seriya / raqam',
@@ -1683,7 +1735,7 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
                       listen: false,
                     );
                     provider.setTabIndex(3); // Switch to "Turlarim" tab
-                    Navigator.of(context).pop();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   icon: const Icon(FlaticonIcons.luggage, size: 18),
                   label: const Text('Turlarim bo\'limiga o\'tish'),
@@ -1712,7 +1764,10 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
               const SizedBox(height: 10),
 
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Provider.of<AppProvider>(context, listen: false).setTabIndex(0);
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
                 child: const Text('Bosh sahifaga qaytish'),
               ),
             ],
@@ -1748,6 +1803,46 @@ class _TourBookingScreenState extends State<TourBookingScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _BookingPassportFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final raw = newValue.text.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+    if (raw.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    final buffer = StringBuffer();
+    for (final ch in raw.split('')) {
+      if (buffer.length < 2) {
+        if (RegExp(r'[A-Z]').hasMatch(ch)) buffer.write(ch);
+      } else if (buffer.length < 9) {
+        if (RegExp(r'[0-9]').hasMatch(ch)) buffer.write(ch);
+      } else {
+        break;
+      }
+    }
+
+    final cleaned = buffer.toString();
+    String formatted;
+    if (cleaned.length <= 2) {
+      formatted = cleaned;
+    } else {
+      formatted = '${cleaned.substring(0, 2)} ${cleaned.substring(2)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

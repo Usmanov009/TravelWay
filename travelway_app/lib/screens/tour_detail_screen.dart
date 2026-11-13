@@ -1,19 +1,26 @@
-import '../utils/country_utils.dart';
 import 'package:flutter/material.dart';
 
 import '../models/tour_package.dart';
+import '../services/auth_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/flaticon_icons.dart';
 import '../widgets/price_alert_dialog.dart';
+import 'profile_screen.dart';
 import 'tour_booking_screen.dart';
 
-class TourDetailScreen extends StatelessWidget {
+class TourDetailScreen extends StatefulWidget {
   final TourPackage tour;
 
   const TourDetailScreen({super.key, required this.tour});
 
   @override
+  State<TourDetailScreen> createState() => _TourDetailScreenState();
+}
+
+class _TourDetailScreenState extends State<TourDetailScreen> {
+  @override
   Widget build(BuildContext context) {
+    final tour = widget.tour;
     return Scaffold(
       backgroundColor: AppTheme.bgDark,
       body: CustomScrollView(
@@ -206,11 +213,12 @@ class TourDetailScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Text(
-                        getCountryFlag(tour.country.isNotEmpty ? tour.country : tour.location),
-                        style: const TextStyle(fontSize: 16),
+                      const Icon(
+                        FlaticonIcons.locationOn,
+                        color: AppTheme.primary,
+                        size: 16,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       Text(
                         tour.location,
                         style: const TextStyle(
@@ -621,7 +629,13 @@ class TourDetailScreen extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  final loggedIn = await AuthService.isLoggedIn();
+                  if (!context.mounted) return;
+                  if (!loggedIn) {
+                    _showLoginRequiredDialog(context);
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -644,6 +658,69 @@ class TourDetailScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showLoginRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.surfaceDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(
+              FlaticonIcons.security,
+              color: AppTheme.primary,
+              size: 28,
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'Kirish talab etiladi',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Tur paketini bron qilish uchun avval tizimga kiring.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Telegram orqali 1 ta bosish bilan xavfsiz va tezkor kirishingiz mumkin.',
+              style: TextStyle(fontSize: 12, color: AppTheme.textSub),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Keyinroq',
+              style: TextStyle(color: AppTheme.textMuted),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
+            icon: const Icon(FlaticonIcons.sendRounded, size: 18),
+            label: const Text('Telegram orqali kirish'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF229ED9),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
